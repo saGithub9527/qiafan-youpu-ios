@@ -1,0 +1,95 @@
+name: QiafanYoupu
+options:
+  bundleIdPrefix: com.talka
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "26.3"
+settings:
+  base:
+    CLANG_ENABLE_OBJC_ARC: YES
+    DEVELOPMENT_TEAM: B654WGMW63
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    GCC_WARN_UNDECLARED_SELECTOR: YES
+    CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF: YES
+  configs:
+    Debug:
+      GCC_PREPROCESSOR_DEFINITIONS: ["$(inherited)", "DEBUG=1", "QF_UI_ONLY=1"]
+    Release:
+      GCC_PREPROCESSOR_DEFINITIONS: ["$(inherited)", "QF_UI_ONLY=1"]
+targets:
+  QiafanYoupu:
+    type: application
+    platform: iOS
+    sources:
+      - path: QiafanYoupu
+        excludes: ["**/*.md", "Info.plist"]
+    info:
+      path: QiafanYoupu/Info.plist
+      properties:
+        CFBundleDisplayName: 恰饭有谱
+        CFBundleDevelopmentRegion: zh_CN
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIApplicationSupportsIndirectInputEvents: YES
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: NO
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default
+                UISceneDelegateClassName: QFSceneDelegate
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.talka.qiafanyoupu
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+        HEADER_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/QiafanYoupu/**"]
+  QiafanYoupuTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [QiafanYoupuTests]
+    dependencies:
+      - target: QiafanYoupu
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.talka.qiafanyoupu.tests
+        GENERATE_INFOPLIST_FILE: YES
+        HEADER_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/QiafanYoupu/App"]
+  QiafanYoupuUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [QiafanYoupuUITests]
+    dependencies:
+      - target: QiafanYoupu
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.talka.qiafanyoupu.uitests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  QiafanYoupu:
+    build:
+      targets:
+        QiafanYoupu: all
+    test:
+      config: Debug
+      targets:
+        - QiafanYoupuTests
+        - QiafanYoupuUITests
+    run:
+      config: Debug
+    archive:
+      config: Release
+  QiafanYoupu-ReleaseUI:
+    build:
+      targets:
+        QiafanYoupu: all
+    test:
+      config: Release
+      targets:
+        - QiafanYoupuUITests
+    run:
+      config: Release

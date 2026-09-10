@@ -1,0 +1,16 @@
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcresult
+*.log
+.env
+.env.*
+*.p8
+*.pem
+*.key
+*.p12
+*.mobileprovision
+secrets/
+/预览/
