@@ -2,6 +2,8 @@ import SwiftUI
 
 struct QFProfileView: View {
   let previewSignedIn: Bool
+  let user: QFUserProfile?
+  private var signedIn: Bool { user != nil || previewSignedIn }
   let onLogin: () -> Void
   @State private var unavailableFeature: QFProfileUnavailableFeature?
 
@@ -9,8 +11,10 @@ struct QFProfileView: View {
     ScrollView(showsIndicators: false) {
       VStack(alignment: .leading, spacing: 20) {
         header
-        QFProfileIdentityView(previewSignedIn: previewSignedIn, onAction: identityTapped)
-          .padding(.top, 2)
+        QFProfileIdentityView(
+          previewSignedIn: previewSignedIn, user: user, onAction: identityTapped
+        )
+        .padding(.top, 2)
         QFProfileStatsView(previewSignedIn: previewSignedIn)
         featureCards
         Text("我的内容")
@@ -21,7 +25,7 @@ struct QFProfileView: View {
         QFProfileMenuRow(
           title: "兴趣偏好",
           symbol: "slider.horizontal.3",
-          detail: previewSignedIn ? "" : "登录后设置",
+          detail: signedIn ? "" : "登录后设置",
           onAction: { openProtected("兴趣偏好") }
         )
         .padding(.horizontal, 16)
@@ -91,7 +95,7 @@ struct QFProfileView: View {
         QFProfileMenuRow(
           title: item.title,
           symbol: item.symbol,
-          detail: previewSignedIn ? "" : "登录后查看",
+          detail: signedIn ? "" : "登录后查看",
           onAction: { openProtected(item.title) }
         )
         if index < QFProfileMenuItem.items.count - 1 {
@@ -105,7 +109,7 @@ struct QFProfileView: View {
   }
 
   private func identityTapped() {
-    if previewSignedIn {
+    if signedIn {
       showUnavailable("编辑资料")
     } else {
       onLogin()
@@ -113,7 +117,7 @@ struct QFProfileView: View {
   }
 
   private func openProtected(_ title: String) {
-    if previewSignedIn {
+    if signedIn {
       showUnavailable(title)
     } else {
       onLogin()
@@ -132,24 +136,31 @@ private struct QFProfileUnavailableFeature: Identifiable {
 
 private struct QFProfileIdentityView: View {
   let previewSignedIn: Bool
+  let user: QFUserProfile?
+  private var signedIn: Bool { user != nil || previewSignedIn }
+  private var regionText: String {
+    guard let user else { return previewSignedIn ? "中国 · 上海" : "收藏菜谱，记录下厨日常" }
+    let parts = [user.countryCode, user.regionCode].compactMap { $0 }.filter { !$0.isEmpty }
+    return parts.isEmpty ? "地区未设置" : parts.joined(separator: " · ")
+  }
   let onAction: () -> Void
 
   var body: some View {
     HStack(spacing: 14) {
       avatar
       VStack(alignment: .leading, spacing: 6) {
-        Text(previewSignedIn ? "小满的厨房" : "登录恰饭有谱")
+        Text(user?.nickname ?? (previewSignedIn ? "小满的厨房" : "登录恰饭有谱"))
           .font(.system(size: 20, weight: .semibold))
           .foregroundColor(QFTheme.text)
           .lineLimit(1)
           .minimumScaleFactor(0.8)
-        Text(previewSignedIn ? "中国 · 上海" : "收藏菜谱，记录下厨日常")
+        Text(regionText)
           .font(.system(size: 12))
           .foregroundColor(QFTheme.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
       .frame(maxWidth: .infinity, alignment: .leading)
-      Button(previewSignedIn ? "编辑资料" : "去登录", action: onAction)
+      Button(signedIn ? "编辑资料" : "去登录", action: onAction)
         .font(.system(size: 14, weight: .medium))
         .foregroundColor(.white)
         .frame(width: 80, height: 38)
@@ -162,7 +173,14 @@ private struct QFProfileIdentityView: View {
   private var avatar: some View {
     ZStack {
       Circle().fill(QFTheme.paleGreen)
-      if previewSignedIn {
+      if let avatar = user?.avatarUrl, let url = URL(string: avatar), url.scheme == "https" {
+        AsyncImage(url: url) { image in
+          image.resizable().scaledToFill()
+        } placeholder: {
+          Image("default-avatar").resizable().scaledToFit()
+        }
+        .frame(width: 72, height: 72).clipShape(Circle())
+      } else if signedIn {
         Image("default-avatar")
           .resizable()
           .scaledToFit()

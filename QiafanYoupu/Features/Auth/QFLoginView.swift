@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 struct QFLoginView: View {
   let onClose: () -> Void
 
@@ -8,10 +9,16 @@ struct QFLoginView: View {
   }
 
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
-  @State private var agreementChecked = QFAuthConsentStore.isAgreementChecked()
+  @State private var agreementChecked = false
   @State private var showsNotice = false
   @State private var pendingMethod: LoginMethod?
-  @State private var showsUnavailable = false
+  @EnvironmentObject private var app: QFAppSession
+  @State private var showsError = false
+  @State private var errorMessage = ""
+  @State private var authorizingApple = false
+  @State private var performingLogin = false
+  @State private var appleAuthorization = QFAppleAuthorization()
+  @State private var loginTask: Task<Void, Never>?
   @State private var document: QFAuthDocument?
 
   private enum LoginMethod {
@@ -39,13 +46,18 @@ struct QFLoginView: View {
       }
     }
     .background(Color(hex: 0xF8F8F2).ignoresSafeArea())
-    .interactiveDismissDisabled(showsNotice)
+    .interactiveDismissDisabled(showsNotice || performingLogin)
     .fullScreenCover(item: $document) { document in
       QFAuthAgreementDocument(document: document)
     }
-    .alert("登录暂未开放", isPresented: $showsUnavailable) {
+    .alert("登录提示", isPresented: $showsError) {
       Button("知道了", role: .cancel) {}
+    } message: {
+      Text(errorMessage)
     }
+    .onAppear { reloadAgreement() }
+    .onChange(of: app.configuration?.consentRevision) { _ in reloadAgreement() }
+
   }
 
   private func content(width: CGFloat) -> some View {
@@ -53,6 +65,7 @@ struct QFLoginView: View {
       HStack {
         Button {
           pendingMethod = nil
+          loginTask?.cancel()
           onClose()
         } label: {
           Image(systemName: "xmark")
@@ -62,6 +75,7 @@ struct QFLoginView: View {
             .background(Circle().fill(Color.white))
         }
         .buttonStyle(.plain)
+        .disabled(performingLogin)
         .accessibilityLabel("关闭登录")
         .accessibilityIdentifier("login.close")
         Spacer()
@@ -82,6 +96,13 @@ struct QFLoginView: View {
             .foregroundColor(QFTheme.secondary)
             .padding(.top, 12)
           loginButtons.padding(.top, 70)
+          if app.isLoggingIn || authorizingApple {
+            ProgressView(authorizingApple ? "正在等待 Apple 授权…" : "正在登录…")
+              .font(.footnote).padding(.top, 12)
+          } else if app.configurationError != nil {
+            Button("重试加载启动配置") { Task { await app.loadConfiguration() } }
+              .font(.footnote).foregroundColor(QFTheme.green).padding(.top, 12)
+          }
           QFAuthAgreementRow(
             checked: persistedAgreement,
             noticeStyle: false,
@@ -109,6 +130,9 @@ struct QFLoginView: View {
       }
       .buttonStyle(QFAuthPrimaryButtonStyle())
       .accessibilityIdentifier("login.quick")
+      .accessibilityValue(
+        app.loadingConfiguration
+          ? "配置加载中" : (app.loginAvailability(apple: false) == nil ? "可用" : "暂不可用"))
 
       Button {
         requestLogin(.apple)
@@ -129,6 +153,7 @@ struct QFLoginView: View {
       .buttonStyle(.plain)
       .accessibilityIdentifier("login.apple")
     }
+    .disabled(performingLogin)
   }
 
   private var persistedAgreement: Binding<Bool> {
@@ -136,15 +161,18 @@ struct QFLoginView: View {
       get: { agreementChecked },
       set: { checked in
         agreementChecked = checked
-        QFAuthConsentStore.setAgreementChecked(checked)
+        QFAuthConsentStore.setAgreementChecked(
+          checked, revision: app.configuration?.consentRevision ?? "ui-placeholder-v1")
       }
     )
   }
 
   private func requestLogin(_ method: LoginMethod) {
-    guard !showsNotice, !showsUnavailable, document == nil else { return }
+    guard !showsNotice, !showsError, !app.isLoggingIn, !authorizingApple, document == nil else {
+      return
+    }
     if agreementChecked {
-      showsUnavailable = true
+      beginLogin(method)
     } else {
       pendingMethod = method
       withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
@@ -155,14 +183,12 @@ struct QFLoginView: View {
 
   private func continueAfterNotice() {
     guard showsNotice, agreementChecked else { return }
-    let hasPendingMethod = pendingMethod != nil
+    let method = pendingMethod
     pendingMethod = nil
     withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
       showsNotice = false
     }
-    if hasPendingMethod {
-      showsUnavailable = true
-    }
+    if let method { beginLogin(method) }
   }
 
   private func declineNotice() {
@@ -172,4 +198,45 @@ struct QFLoginView: View {
       showsNotice = false
     }
   }
+  private func reloadAgreement() {
+    guard let revision = app.configuration?.consentRevision else {
+      agreementChecked = false
+      return
+    }
+    agreementChecked = QFAuthConsentStore.isAgreementChecked(revision: revision)
+  }
+
+  private func beginLogin(_ method: LoginMethod) {
+    guard agreementChecked, !performingLogin else { return }
+    if let reason = app.loginAvailability(apple: method == .apple) {
+      errorMessage = reason
+      showsError = true
+      return
+    }
+    performingLogin = true
+    loginTask = Task {
+      defer { performingLogin = false }
+      do {
+        var code: String?
+        if method == .apple {
+          authorizingApple = true
+          defer { authorizingApple = false }
+          code = try await appleAuthorization.authorize()
+        }
+        guard !Task.isCancelled else { return }
+        try await app.login(authorizationCode: code, agreementAccepted: agreementChecked)
+        onClose()
+      } catch is CancellationError {
+      } catch {
+        if (error as NSError).domain == "com.apple.AuthenticationServices.AuthorizationError",
+          (error as NSError).code == 1001
+        {
+          return
+        }
+        errorMessage = error.localizedDescription
+        showsError = true
+      }
+    }
+  }
+
 }

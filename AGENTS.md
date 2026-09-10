@@ -7,7 +7,7 @@
 - Java 沿用 Spring Boot / Spring Security / MyBatis / Flyway，依赖尽量由 Boot BOM 管理；不另建同功能认证或持久化框架。
 - 框架接入不改变已确认的请求头、请求体、返回信息、一次绑定账号或会话规则；不会因为加入运维组件就自动开放其接口。
 - 每次依赖变化更新锁文件和许可证记录，完成对应构建与受影响页面/功能检查。未运行的检查不能写成通过。
-- 当前客户端处于本地 UI 阶段：欢迎、登录和四个一级 Tab；没有接口、真实认证或 Token。Debug 每次启动展示欢迎，Release 完成首次引导后不重复。
+- 当前客户端已接入启动配置与真实登录/会话，四个一级 Tab 的业务数据仍以本地样例为主。Debug 每次启动展示欢迎，Release 完成首次引导后不重复。
 
 
-当前页面采用 SwiftUI 原生布局和分页，未引入外部包。后续按实际能力核查成熟 Swift/SPM 框架；不叠加 CocoaPods。修改 project.yml 后执行 xcodegen generate，同步工程与共享 scheme。历史 OC/CocoaPods 实现保存在 Git 标签 oc-uikit-baseline。
+当前页面采用 SwiftUI 原生布局和分页；崩溃采集通过 SPM 引入 PLCrashReporter 1.12.2。后续按实际能力核查成熟 Swift/SPM 框架；不叠加 CocoaPods。修改 project.yml 后执行 xcodegen generate，同步工程与共享 scheme。历史 OC/CocoaPods 实现保存在 Git 标签 oc-uikit-baseline。

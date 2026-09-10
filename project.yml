@@ -4,6 +4,10 @@ options:
   deploymentTarget:
     iOS: "15.0"
   xcodeVersion: "26.3"
+packages:
+  PLCrashReporter:
+    url: https://github.com/microsoft/plcrashreporter.git
+    exactVersion: 1.12.2
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -15,20 +19,36 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: YES
   configs:
     Debug:
-      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG QF_UI_ONLY"
+      QF_API_BASE_URL: "https://test-api.yzsalingo.com/api/v1"
+      QF_API_ENVIRONMENT: test
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG"
     Release:
-      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) QF_UI_ONLY"
+      QF_API_BASE_URL: ""
+      QF_API_ENVIRONMENT: production
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
 targets:
   QiafanYoupu:
     type: application
     platform: iOS
     sources:
       - path: QiafanYoupu
-        excludes: ["**/*.md", "Info.plist"]
+        excludes: ["**/*.md", "Info.plist", "*.entitlements"]
+    dependencies:
+      - package: PLCrashReporter
+        product: CrashReporter
+    entitlements:
+      path: QiafanYoupu/QiafanYoupu.entitlements
+      properties:
+        com.apple.developer.applesignin: [Default]
     info:
       path: QiafanYoupu/Info.plist
       properties:
+        QFAPIBaseURL: $(QF_API_BASE_URL)
+        QFAPIEnvironment: $(QF_API_ENVIRONMENT)
         CFBundleDisplayName: 恰饭有谱
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: zh_CN
         UILaunchScreen:
           UIColorName: LaunchBackground
@@ -87,3 +107,17 @@ schemes:
         - QiafanYoupuUITests
     run:
       config: Release
+
+  QiafanYoupu-LiveTests:
+    build:
+      targets:
+        QiafanYoupu: all
+    test:
+      config: Debug
+      environmentVariables:
+        QF_RUN_LIVE_AUTH_TEST: "1"
+      targets:
+        - name: QiafanYoupuUITests
+          selectedTests:
+            - QFConnectedUITests/testRealQuickLoginAndSessionRestore()
+            - QFConnectedUITests/testStartupRequestAppearsInPaginatedDebugLog()

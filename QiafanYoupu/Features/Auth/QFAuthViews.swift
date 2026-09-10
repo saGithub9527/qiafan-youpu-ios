@@ -5,9 +5,10 @@ import SwiftUI
 /// The same local UI choice used by the previous Objective-C screens, never an authentication record.
 enum QFAuthConsentStore {
   private static let key = "qfyp.login.consent"
-  private static let documentRevision = "ui-placeholder-v1"
 
-  static func isAgreementChecked(defaults: UserDefaults = .standard) -> Bool {
+  static func isAgreementChecked(
+    revision: String = "ui-placeholder-v1", defaults: UserDefaults = .standard
+  ) -> Bool {
     guard let record = defaults.object(forKey: key) as? [String: Any] else {
       return false
     }
@@ -16,20 +17,22 @@ enum QFAuthConsentStore {
       CFGetTypeID(value) == CFBooleanGetTypeID(),
       let timestamp = record["updatedAt"] as? String,
       ISO8601DateFormatter().date(from: timestamp) != nil,
-      record["uiDocumentRevision"] as? String == documentRevision
+      record["uiDocumentRevision"] as? String == revision
     else {
-      setAgreementChecked(false, defaults: defaults)
+      setAgreementChecked(false, revision: revision, defaults: defaults)
       return false
     }
     return value.boolValue
   }
 
-  static func setAgreementChecked(_ checked: Bool, defaults: UserDefaults = .standard) {
+  static func setAgreementChecked(
+    _ checked: Bool, revision: String = "ui-placeholder-v1", defaults: UserDefaults = .standard
+  ) {
     let record: [String: Any] = [
       "schemaVersion": 1,
       "loginAgreementChecked": checked,
       "updatedAt": ISO8601DateFormatter().string(from: Date()),
-      "uiDocumentRevision": documentRevision,
+      "uiDocumentRevision": revision,
       "uiOnly": true,
     ]
     // Formal document versions remain absent: no real agreement text has been supplied.
@@ -47,6 +50,7 @@ enum QFAuthDocument: String, Identifiable {
 
 struct QFAuthAgreementDocument: View {
   let document: QFAuthDocument
+  @EnvironmentObject private var app: QFAppSession
   @Environment(\.dismiss) private var dismiss
 
   var body: some View {
@@ -74,11 +78,16 @@ struct QFAuthAgreementDocument: View {
           Text(document.title)
             .font(.system(size: 26, weight: .bold))
             .accessibilityAddTraits(.isHeader)
-          Text("当前版本为界面展示阶段")
-            .font(.system(size: 18, weight: .semibold))
-          Text("完整正式《\(document.title)》尚未提供。此页仅用于展示协议入口、阅读及返回流程，不构成正式协议文本。")
-          Text("当前勾选仅记录本机界面选择，不代表服务端协议签署或身份认证。")
-          Text("点击“返回”可回到原页面，阅读不会改变勾选状态。")
+          if let text = document == .privacy
+            ? app.configuration?.agreements.privacyPolicy
+            : app.configuration?.agreements.userAgreement,
+            !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+          {
+            Text(text)
+          } else {
+            Text("协议暂未配置，请稍后重试。")
+          }
+
         }
         .font(.system(size: 17))
         .lineSpacing(7)

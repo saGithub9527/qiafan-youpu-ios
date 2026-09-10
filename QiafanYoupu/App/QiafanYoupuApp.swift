@@ -1,12 +1,21 @@
 import SwiftUI
 
 @main
+@MainActor
 struct QiafanYoupuApp: App {
   private let options = QFLaunchOptions()
+  @StateObject private var session = QFAppSession()
+
+  init() {
+    if !QFRuntime.isUnitTest { _ = QFCrashRecorder.shared.start() }
+  }
 
   var body: some Scene {
     WindowGroup {
       QFRootView(options: options)
+        .task { if !QFRuntime.isUnitTest { await session.start() } }
+        .modifier(QFDiagnosticsAccess())
+        .environmentObject(session)
         .preferredColorScheme(.light)
         .tint(QFTheme.orange)
     }
@@ -63,6 +72,7 @@ private struct QFRootView: View {
 
 private struct QFMainTabsView: View {
   let options: QFLaunchOptions
+  @EnvironmentObject private var session: QFAppSession
   @State private var selected: QFTab
   @State private var showLogin = false
 
@@ -78,13 +88,16 @@ private struct QFMainTabsView: View {
       page(.plan) { QFPlanView() }
       page(.ingredient) { QFIngredientView(isActive: selected == .ingredient) }
       page(.profile) {
-        QFProfileView(previewSignedIn: options.previewSignedIn) { showLogin = true }
+        QFProfileView(previewSignedIn: options.previewSignedIn, user: session.user) {
+          showLogin = true
+        }
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
     .fullScreenCover(isPresented: $showLogin) {
       QFLoginView { showLogin = false }
+        .modifier(QFDiagnosticsAccess())
         .preferredColorScheme(.light)
     }
   }
@@ -119,5 +132,16 @@ private struct QFMainTabsView: View {
     }
     .background(Color.white.ignoresSafeArea(edges: .bottom))
     .overlay(alignment: .top) { QFTheme.border.frame(height: 0.5) }
+  }
+}
+
+private enum QFRuntime {
+  static var isUnitTest: Bool {
+    #if DEBUG
+      return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        || NSClassFromString("XCTestCase") != nil
+    #else
+      return false
+    #endif
   }
 }

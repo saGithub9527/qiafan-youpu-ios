@@ -6,9 +6,9 @@ final class QFMainUITests: XCTestCase {
   override func setUpWithError() throws {
     continueAfterFailure = false
     #if DEBUG
-    app = XCUIApplication()
+      app = XCUIApplication()
     #else
-    throw XCTSkip("Debug UI flow; use QFReleaseWelcomeUITests for Release.")
+      throw XCTSkip("Debug UI flow; use QFReleaseWelcomeUITests for Release.")
     #endif
   }
 
@@ -26,6 +26,9 @@ final class QFMainUITests: XCTestCase {
     XCTAssertTrue(app.buttons["profile.login"].waitForExistence(timeout: 10))
     app.buttons["profile.login"].tap()
     XCTAssertTrue(app.buttons["login.quick"].waitForExistence(timeout: 5))
+    let ready = NSPredicate(format: "value == %@", "可用")
+    expectation(for: ready, evaluatedWith: app.buttons["login.quick"])
+    waitForExpectations(timeout: 30)
   }
 
   func testAllFourPrimaryTabs() {
@@ -77,9 +80,8 @@ final class QFMainUITests: XCTestCase {
     app.terminate()
     openLogin(reset: false)
     XCTAssertEqual(app.buttons["login.agreement"].value as? String, "已勾选")
-    app.buttons["login.apple"].tap()
-    XCTAssertTrue(app.alerts["登录暂未开放"].waitForExistence(timeout: 5))
-    app.alerts.buttons["知道了"].tap()
+    // Toggling consent must not start real Apple authorization or create an account.
+    XCTAssertTrue(app.buttons["login.quick"].exists)
     app.buttons["login.agreement"].tap()
     app.terminate()
     openLogin(reset: false)

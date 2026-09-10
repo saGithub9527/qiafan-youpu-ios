@@ -7,22 +7,39 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		047BD8CE6166C88B2D8114E1 /* QFRequestLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61CED4CB0133C7A8282D7614 /* QFRequestLogView.swift */; };
+		0798100BF07C4857C31FEA31 /* QFAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D88D7814793C72C44352488 /* QFAPIModels.swift */; };
+		0E2D05DE9C97040E34B0CD4C /* QFRequestLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A81C3A50329A1006B2D640A /* QFRequestLogStore.swift */; };
 		10286284B2287A5A8A7B9162 /* QFLaunchPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F95076D71B2459485C5050 /* QFLaunchPolicy.swift */; };
 		1746AB969A207E4B06DA1032 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */; };
+		190860C7E3EC79826769E137 /* QFNetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */; };
 		25280A190A864957073D3749 /* QFReleaseWelcomeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B779EEA2A659A455A888F0B7 /* QFReleaseWelcomeUITests.swift */; };
 		27FEC33ECA7DA0AD090773B0 /* QiafanYoupuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2704CD4D9654FCDDD9522E01 /* QiafanYoupuApp.swift */; };
 		3C4D8D6BAFC066581A5EC061 /* QFConsentStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */; };
+		3FC5C187F731499628ABC900 /* QFCrashRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5427871774578C1A4CF899 /* QFCrashRecorder.swift */; };
 		426E070AD835618AA12FDDC3 /* QFIngredientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */; };
+		46E510128376CFA7F0F9A3FD /* QFAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44CDD7B36BCEE536A5E616BA /* QFAPIClient.swift */; };
 		5A9C80BAD0667CFDB3FAC2AB /* QFLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF04B819F01D1047ACCD0101 /* QFLoginView.swift */; };
 		5C49A52219D019B6FD7A8B6E /* QFAuthViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5E67E8173DABB4E7CCE324 /* QFAuthViews.swift */; };
 		63F52E6D2B2510A93788BE05 /* QFLaunchPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371B893915D16815276BBA05 /* QFLaunchPolicyTests.swift */; };
+		66B25D2418BF4B3BF594CCA1 /* QFRequestLogStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4295B6824E289E6EB699E87F /* QFRequestLogStoreTests.swift */; };
+		6A9CEBE3D5A2CE9A59105F8F /* QFDiagnosticsAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436ABDE7A489EBB541FD4113 /* QFDiagnosticsAccess.swift */; };
+		777DF14878B1EAEE4DFEF4F6 /* QFKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67CD54E8017A32326BC8B625 /* QFKeychainStore.swift */; };
+		845B02DF15278CE0C8D3E813 /* QFSessionRaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456B618222AA4AB66EF8D10D /* QFSessionRaceTests.swift */; };
 		85DEAF56C1931564F3B950AC /* QFTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C3F810CC0A4EF9665DE310 /* QFTheme.swift */; };
+		86FD9CD7883CE7A479601E89 /* QFAppleAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6857C70B6A060023C897EFCB /* QFAppleAuthorization.swift */; };
+		90F3119FC6F1393D79B0FE5F /* QFCrashArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D9B04F6A950FD38F9E104A /* QFCrashArchive.swift */; };
 		B9D58A9FE7CDE87FF61B44EF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6435C5055C7DA34536D0E2C1 /* Assets.xcassets */; };
 		BB1E359D01A2D6BC299DB6BA /* QFWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1444A52A62F4605865A1986A /* QFWelcomeView.swift */; };
 		BB9FAD3856EE4977E760CAB0 /* QFRecipeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611149DF9B1649DD0E1C33E6 /* QFRecipeView.swift */; };
+		BBE7DF8121D88EDE52497D47 /* CrashReporter in Frameworks */ = {isa = PBXBuildFile; productRef = AEB76EFB73E676435E37C3E6 /* CrashReporter */; };
 		CEE1FD50DE79F703A054A80E /* QFProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */; };
 		D60173D33583682B528DC893 /* QFMainUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D5B35D1107913F7F4F86C0 /* QFMainUITests.swift */; };
 		D6E0DB1046A459E6196766D9 /* QFPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1909E468D9C1F14FC5EEF336 /* QFPlanView.swift */; };
+		DF90DB8725C1B99614316846 /* ThirdPartyAcknowledgements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4F5E0C443399E9282FF9F67C /* ThirdPartyAcknowledgements.txt */; };
+		E08F8E4279EECC1439711D8F /* QFConnectedUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76EB9EBEFD9A3AB0514A26D3 /* QFConnectedUITests.swift */; };
+		EF8BC0D76558038020F192A8 /* QFCrashArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */; };
+		F5B645F979984C45DC28D463 /* QFAppSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,15 +60,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0D88D7814793C72C44352488 /* QFAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAPIModels.swift; sourceTree = "<group>"; };
 		1444A52A62F4605865A1986A /* QFWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFWelcomeView.swift; sourceTree = "<group>"; };
 		1909E468D9C1F14FC5EEF336 /* QFPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFPlanView.swift; sourceTree = "<group>"; };
 		199372BB33EFE37BE8139659 /* QiafanYoupuUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QiafanYoupuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2704CD4D9654FCDDD9522E01 /* QiafanYoupuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiafanYoupuApp.swift; sourceTree = "<group>"; };
 		371B893915D16815276BBA05 /* QFLaunchPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLaunchPolicyTests.swift; sourceTree = "<group>"; };
+		4295B6824E289E6EB699E87F /* QFRequestLogStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogStoreTests.swift; sourceTree = "<group>"; };
+		436ABDE7A489EBB541FD4113 /* QFDiagnosticsAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFDiagnosticsAccess.swift; sourceTree = "<group>"; };
+		44CDD7B36BCEE536A5E616BA /* QFAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAPIClient.swift; sourceTree = "<group>"; };
+		456B618222AA4AB66EF8D10D /* QFSessionRaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSessionRaceTests.swift; sourceTree = "<group>"; };
+		4A81C3A50329A1006B2D640A /* QFRequestLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogStore.swift; sourceTree = "<group>"; };
+		4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCrashArchiveTests.swift; sourceTree = "<group>"; };
+		4F5E0C443399E9282FF9F67C /* ThirdPartyAcknowledgements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ThirdPartyAcknowledgements.txt; sourceTree = "<group>"; };
 		59D5B35D1107913F7F4F86C0 /* QFMainUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMainUITests.swift; sourceTree = "<group>"; };
 		5E39877223896ABADF96DB8D /* QiafanYoupuTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QiafanYoupuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		611149DF9B1649DD0E1C33E6 /* QFRecipeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRecipeView.swift; sourceTree = "<group>"; };
+		61CED4CB0133C7A8282D7614 /* QFRequestLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogView.swift; sourceTree = "<group>"; };
 		6435C5055C7DA34536D0E2C1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		67CD54E8017A32326BC8B625 /* QFKeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFKeychainStore.swift; sourceTree = "<group>"; };
+		6857C70B6A060023C897EFCB /* QFAppleAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAppleAuthorization.swift; sourceTree = "<group>"; };
+		75D9B04F6A950FD38F9E104A /* QFCrashArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCrashArchive.swift; sourceTree = "<group>"; };
+		76EB9EBEFD9A3AB0514A26D3 /* QFConnectedUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFConnectedUITests.swift; sourceTree = "<group>"; };
 		7A5E67E8173DABB4E7CCE324 /* QFAuthViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAuthViews.swift; sourceTree = "<group>"; };
 		82F95076D71B2459485C5050 /* QFLaunchPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLaunchPolicy.swift; sourceTree = "<group>"; };
 		8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -59,10 +89,24 @@
 		A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFProfileView.swift; sourceTree = "<group>"; };
 		AF04B819F01D1047ACCD0101 /* QFLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLoginView.swift; sourceTree = "<group>"; };
 		B3C3F810CC0A4EF9665DE310 /* QFTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFTheme.swift; sourceTree = "<group>"; };
+		B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFNetworkingTests.swift; sourceTree = "<group>"; };
 		B779EEA2A659A455A888F0B7 /* QFReleaseWelcomeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFReleaseWelcomeUITests.swift; sourceTree = "<group>"; };
+		BC5427871774578C1A4CF899 /* QFCrashRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCrashRecorder.swift; sourceTree = "<group>"; };
+		DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAppSession.swift; sourceTree = "<group>"; };
 		FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientView.swift; sourceTree = "<group>"; };
 		FDB9DD4AACAF3E281942FDFA /* QiafanYoupu.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = QiafanYoupu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0AD1DF7248F205F5D9A21195 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BBE7DF8121D88EDE52497D47 /* CrashReporter in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		108FD7AD20C9E5D61C0A67BF = {
@@ -86,6 +130,7 @@
 		1D23D37D8FE4125D6C7B1A33 /* QiafanYoupuUITests */ = {
 			isa = PBXGroup;
 			children = (
+				76EB9EBEFD9A3AB0514A26D3 /* QFConnectedUITests.swift */,
 				59D5B35D1107913F7F4F86C0 /* QFMainUITests.swift */,
 				B779EEA2A659A455A888F0B7 /* QFReleaseWelcomeUITests.swift */,
 			);
@@ -108,10 +153,21 @@
 			path = Ingredient;
 			sourceTree = "<group>";
 		};
+		7788A82F318C8D275132D66A /* Diagnostics */ = {
+			isa = PBXGroup;
+			children = (
+				75D9B04F6A950FD38F9E104A /* QFCrashArchive.swift */,
+				BC5427871774578C1A4CF899 /* QFCrashRecorder.swift */,
+				4A81C3A50329A1006B2D640A /* QFRequestLogStore.swift */,
+			);
+			path = Diagnostics;
+			sourceTree = "<group>";
+		};
 		78A676AC817763AB04A997D4 /* QiafanYoupu */ = {
 			isa = PBXGroup;
 			children = (
 				BEA77AEDE62DF8D271317997 /* App */,
+				E8A19137EFA3184B8DDA2EB0 /* Core */,
 				CABB81F38859A7CF457CBB62 /* DesignSystem */,
 				C5E30E67D0723F4B2A1B0DA9 /* Features */,
 				7C1BBA922B4E11242A821184 /* Resources */,
@@ -124,6 +180,7 @@
 			children = (
 				6435C5055C7DA34536D0E2C1 /* Assets.xcassets */,
 				8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */,
+				4F5E0C443399E9282FF9F67C /* ThirdPartyAcknowledgements.txt */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -132,9 +189,22 @@
 			isa = PBXGroup;
 			children = (
 				9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */,
+				4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */,
 				371B893915D16815276BBA05 /* QFLaunchPolicyTests.swift */,
+				B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */,
+				4295B6824E289E6EB699E87F /* QFRequestLogStoreTests.swift */,
+				456B618222AA4AB66EF8D10D /* QFSessionRaceTests.swift */,
 			);
 			path = QiafanYoupuTests;
+			sourceTree = "<group>";
+		};
+		B7120518CEF1AD6C5AF71546 /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */,
+				67CD54E8017A32326BC8B625 /* QFKeychainStore.swift */,
+			);
+			path = Session;
 			sourceTree = "<group>";
 		};
 		BEA77AEDE62DF8D271317997 /* App */ = {
@@ -146,10 +216,20 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		C5E225976E92F83D1729BF9F /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				44CDD7B36BCEE536A5E616BA /* QFAPIClient.swift */,
+				0D88D7814793C72C44352488 /* QFAPIModels.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
 		C5E30E67D0723F4B2A1B0DA9 /* Features */ = {
 			isa = PBXGroup;
 			children = (
 				CA2EA0E8838F0563B4B3E329 /* Auth */,
+				FE8ECA1FBD00F8204167AE0A /* Diagnostics */,
 				614717420C0F5EB5BBE68388 /* Ingredient */,
 				4AC17CBD2D043AE4815BD7A7 /* Plan */,
 				D5F349EFA18583A713B5666A /* Profile */,
@@ -161,6 +241,7 @@
 		CA2EA0E8838F0563B4B3E329 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				6857C70B6A060023C897EFCB /* QFAppleAuthorization.swift */,
 				7A5E67E8173DABB4E7CCE324 /* QFAuthViews.swift */,
 				AF04B819F01D1047ACCD0101 /* QFLoginView.swift */,
 				1444A52A62F4605865A1986A /* QFWelcomeView.swift */,
@@ -194,6 +275,25 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		E8A19137EFA3184B8DDA2EB0 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				7788A82F318C8D275132D66A /* Diagnostics */,
+				C5E225976E92F83D1729BF9F /* Networking */,
+				B7120518CEF1AD6C5AF71546 /* Session */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		FE8ECA1FBD00F8204167AE0A /* Diagnostics */ = {
+			isa = PBXGroup;
+			children = (
+				436ABDE7A489EBB541FD4113 /* QFDiagnosticsAccess.swift */,
+				61CED4CB0133C7A8282D7614 /* QFRequestLogView.swift */,
+			);
+			path = Diagnostics;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -221,6 +321,7 @@
 			buildPhases = (
 				794C60BA58B40BEC8C5E2EA8 /* Sources */,
 				2AD4CC2A1540F1F8BCEFF9F5 /* Resources */,
+				0AD1DF7248F205F5D9A21195 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -228,6 +329,7 @@
 			);
 			name = QiafanYoupu;
 			packageProductDependencies = (
+				AEB76EFB73E676435E37C3E6 /* CrashReporter */,
 			);
 			productName = QiafanYoupu;
 			productReference = FDB9DD4AACAF3E281942FDFA /* QiafanYoupu.app */;
@@ -284,6 +386,9 @@
 			);
 			mainGroup = 108FD7AD20C9E5D61C0A67BF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AEC36B42A418575351F73159 /* XCRemoteSwiftPackageReference "plcrashreporter" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DD9BDF1E28281EFCDAE31C9C /* Products */;
 			projectDirPath = "";
@@ -303,6 +408,7 @@
 			files = (
 				B9D58A9FE7CDE87FF61B44EF /* Assets.xcassets in Resources */,
 				1746AB969A207E4B06DA1032 /* PrivacyInfo.xcprivacy in Resources */,
+				DF90DB8725C1B99614316846 /* ThirdPartyAcknowledgements.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,6 +419,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E08F8E4279EECC1439711D8F /* QFConnectedUITests.swift in Sources */,
 				D60173D33583682B528DC893 /* QFMainUITests.swift in Sources */,
 				25280A190A864957073D3749 /* QFReleaseWelcomeUITests.swift in Sources */,
 			);
@@ -323,7 +430,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C4D8D6BAFC066581A5EC061 /* QFConsentStoreTests.swift in Sources */,
+				EF8BC0D76558038020F192A8 /* QFCrashArchiveTests.swift in Sources */,
 				63F52E6D2B2510A93788BE05 /* QFLaunchPolicyTests.swift in Sources */,
+				190860C7E3EC79826769E137 /* QFNetworkingTests.swift in Sources */,
+				66B25D2418BF4B3BF594CCA1 /* QFRequestLogStoreTests.swift in Sources */,
+				845B02DF15278CE0C8D3E813 /* QFSessionRaceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -331,13 +442,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46E510128376CFA7F0F9A3FD /* QFAPIClient.swift in Sources */,
+				0798100BF07C4857C31FEA31 /* QFAPIModels.swift in Sources */,
+				F5B645F979984C45DC28D463 /* QFAppSession.swift in Sources */,
+				86FD9CD7883CE7A479601E89 /* QFAppleAuthorization.swift in Sources */,
 				5C49A52219D019B6FD7A8B6E /* QFAuthViews.swift in Sources */,
+				90F3119FC6F1393D79B0FE5F /* QFCrashArchive.swift in Sources */,
+				3FC5C187F731499628ABC900 /* QFCrashRecorder.swift in Sources */,
+				6A9CEBE3D5A2CE9A59105F8F /* QFDiagnosticsAccess.swift in Sources */,
 				426E070AD835618AA12FDDC3 /* QFIngredientView.swift in Sources */,
+				777DF14878B1EAEE4DFEF4F6 /* QFKeychainStore.swift in Sources */,
 				10286284B2287A5A8A7B9162 /* QFLaunchPolicy.swift in Sources */,
 				5A9C80BAD0667CFDB3FAC2AB /* QFLoginView.swift in Sources */,
 				D6E0DB1046A459E6196766D9 /* QFPlanView.swift in Sources */,
 				CEE1FD50DE79F703A054A80E /* QFProfileView.swift in Sources */,
 				BB9FAD3856EE4977E760CAB0 /* QFRecipeView.swift in Sources */,
+				0E2D05DE9C97040E34B0CD4C /* QFRequestLogStore.swift in Sources */,
+				047BD8CE6166C88B2D8114E1 /* QFRequestLogView.swift in Sources */,
 				85DEAF56C1931564F3B950AC /* QFTheme.swift in Sources */,
 				BB1E359D01A2D6BC299DB6BA /* QFWelcomeView.swift in Sources */,
 				27FEC33ECA7DA0AD090773B0 /* QiafanYoupuApp.swift in Sources */,
@@ -364,6 +485,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QiafanYoupu/Info.plist;
@@ -431,8 +553,10 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				QF_API_BASE_URL = "";
+				QF_API_ENVIRONMENT = production;
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) QF_UI_ONLY";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -495,6 +619,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QiafanYoupu/Info.plist;
@@ -569,8 +694,10 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				QF_API_BASE_URL = "https://test-api.yzsalingo.com/api/v1";
+				QF_API_ENVIRONMENT = test;
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG QF_UI_ONLY";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -634,6 +761,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AEC36B42A418575351F73159 /* XCRemoteSwiftPackageReference "plcrashreporter" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/microsoft/plcrashreporter.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.12.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AEB76EFB73E676435E37C3E6 /* CrashReporter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEC36B42A418575351F73159 /* XCRemoteSwiftPackageReference "plcrashreporter" */;
+			productName = CrashReporter;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 535D2801515DE3BF2846CB83 /* Project object */;
 }
