@@ -10,3 +10,5 @@
 - 当前客户端处于本地 UI 阶段：欢迎、登录和四个一级 Tab；没有接口、真实认证或 Token。Debug 每次启动展示欢迎，Release 完成首次引导后不重复。
 
 当前已使用 Masonry；SDWebImage、MJRefresh 是后续候选，接入前重新核对版本。更改 project.yml 后先 xcodegen generate，再 pod install --deployment 恢复 CocoaPods 集成。
+
+现有页面约束已统一 Masonry，新增布局采用同一风格。UIScrollView 的 content/frame LayoutGuide 通过 QFLayoutGuideAttribute 桥接 Masonry，不能混淆内容大小与可视范围。QMUI/JX/YY 等候选的范围和维护记录见 docs/UI组件选型.md；它们尚未全部接入。

@@ -85,15 +85,23 @@
     UIStackView *items = QFStack(UILayoutConstraintAxisHorizontal, 24);
     items.translatesAutoresizingMaskIntoConstraints = NO;
     [self.categoryScroll addSubview:items];
-    [NSLayoutConstraint activateConstraints:@[
-        [items.leadingAnchor constraintEqualToAnchor:self.categoryScroll.contentLayoutGuide.leadingAnchor],
-        [items.trailingAnchor constraintEqualToAnchor:self.categoryScroll.contentLayoutGuide.trailingAnchor
-                                             constant:-8],
-        [items.topAnchor constraintEqualToAnchor:self.categoryScroll.contentLayoutGuide.topAnchor],
-        [items.bottomAnchor constraintEqualToAnchor:self.categoryScroll.contentLayoutGuide.bottomAnchor],
-        [items.heightAnchor constraintEqualToAnchor:self.categoryScroll.frameLayoutGuide.heightAnchor],
-        [self.categoryScroll.heightAnchor constraintEqualToConstant:40]
-    ]];
+    [items mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(
+            QFLayoutGuideAttribute(self.categoryScroll.contentLayoutGuide, NSLayoutAttributeLeading));
+        make.trailing
+            .equalTo(
+                QFLayoutGuideAttribute(self.categoryScroll.contentLayoutGuide, NSLayoutAttributeTrailing))
+            .offset(-8);
+        make.top.equalTo(
+            QFLayoutGuideAttribute(self.categoryScroll.contentLayoutGuide, NSLayoutAttributeTop));
+        make.bottom.equalTo(
+            QFLayoutGuideAttribute(self.categoryScroll.contentLayoutGuide, NSLayoutAttributeBottom));
+        make.height.equalTo(
+            QFLayoutGuideAttribute(self.categoryScroll.frameLayoutGuide, NSLayoutAttributeHeight));
+    }];
+    [self.categoryScroll mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(40);
+    }];
     __weak typeof(self) weakSelf = self;
     [self.categories enumerateObjectsUsingBlock:^(NSString *name, NSUInteger index, BOOL *stop) {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -104,7 +112,9 @@
         configuration.contentInsets = NSDirectionalEdgeInsetsMake(0, 0, 9, 0);
         configuration.title = name;
         button.configuration = configuration;
-        [button.widthAnchor constraintGreaterThanOrEqualToConstant:42].active = YES;
+        [button mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_greaterThanOrEqualTo(42);
+        }];
         UIView *line = [[UIView alloc] init];
         line.translatesAutoresizingMaskIntoConstraints = NO;
         line.backgroundColor = QFOrange();
@@ -112,11 +122,12 @@
         line.tag = 110;
         line.userInteractionEnabled = NO;
         [button addSubview:line];
-        [NSLayoutConstraint activateConstraints:@[
-            [line.centerXAnchor constraintEqualToAnchor:button.centerXAnchor],
-            [line.bottomAnchor constraintEqualToAnchor:button.bottomAnchor constant:-8],
-            [line.widthAnchor constraintEqualToConstant:32], [line.heightAnchor constraintEqualToConstant:3]
-        ]];
+        [line mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(button.mas_centerX);
+            make.bottom.equalTo(button.mas_bottom).offset(-8);
+            make.width.mas_equalTo(32);
+            make.height.mas_equalTo(3);
+        }];
         QFOnTap(button, ^{
             [weakSelf selectCategory:(NSInteger)index];
         });
@@ -128,15 +139,18 @@
     more.translatesAutoresizingMaskIntoConstraints = NO;
     more.tintColor = QFSecondary();
     more.contentMode = UIViewContentModeScaleAspectFit;
-    [more.widthAnchor constraintEqualToConstant:10].active = YES;
-    [more.heightAnchor constraintEqualToConstant:15].active = YES;
+    [more mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(10);
+        make.height.mas_equalTo(15);
+    }];
     more.accessibilityElementsHidden = YES;
     [header addArrangedSubview:more];
     UIButton *search = QFIconButton(@"magnifyingglass", QFText());
     search.accessibilityLabel = @"搜索菜谱";
     search.accessibilityIdentifier = @"recipe.search";
-    [search.widthAnchor constraintEqualToConstant:40].active = YES;
-    [search.heightAnchor constraintEqualToConstant:40].active = YES;
+    [search mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.mas_equalTo(40);
+    }];
     QFOnTap(search, ^{
         QFShowUnavailable(weakSelf, @"搜索菜谱");
     });
@@ -171,15 +185,19 @@
         arrow.contentMode = UIViewContentModeScaleAspectFit;
         arrow.userInteractionEnabled = NO;
         [button addSubview:arrow];
-        [NSLayoutConstraint activateConstraints:@[
-            [button.heightAnchor constraintEqualToConstant:48],
-            [labels.leadingAnchor constraintEqualToAnchor:button.leadingAnchor constant:11],
-            [labels.centerYAnchor constraintEqualToAnchor:button.centerYAnchor],
-            [labels.trailingAnchor constraintLessThanOrEqualToAnchor:arrow.leadingAnchor constant:-3],
-            [arrow.trailingAnchor constraintEqualToAnchor:button.trailingAnchor constant:-10],
-            [arrow.bottomAnchor constraintEqualToAnchor:button.bottomAnchor constant:-12],
-            [arrow.widthAnchor constraintEqualToConstant:9], [arrow.heightAnchor constraintEqualToConstant:9]
-        ]];
+        [button mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(48);
+        }];
+        [labels mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.leading.equalTo(button.mas_leading).offset(11);
+            make.centerY.equalTo(button.mas_centerY);
+            make.trailing.lessThanOrEqualTo(arrow.mas_leading).offset(-3);
+        }];
+        [arrow mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.trailing.equalTo(button.mas_trailing).offset(-10);
+            make.bottom.equalTo(button.mas_bottom).offset(-12);
+            make.width.height.mas_equalTo(9);
+        }];
         QFOnTap(button, ^{
             QFShowUnavailable(weakSelf, [name stringByAppendingString:@"筛选"]);
         });
@@ -203,7 +221,9 @@
                                         forAxis:UILayoutConstraintAxisHorizontal];
     UIButton *clear = QFButton(@"清空筛选", 12, QFSecondary());
     clear.accessibilityIdentifier = @"recipe.clearFilters";
-    [clear.heightAnchor constraintGreaterThanOrEqualToConstant:28].active = YES;
+    [clear mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_greaterThanOrEqualTo(28);
+    }];
     __weak typeof(self) weakSelf = self;
     QFOnTap(clear, ^{
         [weakSelf selectCategory:0];
@@ -278,9 +298,9 @@
     art.backgroundColor = QFHex(0xFCF6EB);
     art.layer.cornerRadius = 12;
     art.clipsToBounds = YES;
-    [NSLayoutConstraint activateConstraints:@[
-        [art.widthAnchor constraintEqualToConstant:108], [art.heightAnchor constraintEqualToConstant:108]
-    ]];
+    [art mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.mas_equalTo(108);
+    }];
     [row addArrangedSubview:art];
     UIStackView *details = QFStack(UILayoutConstraintAxisVertical, 7);
     UIStackView *titleRow = QFStack(UILayoutConstraintAxisHorizontal, 0);
@@ -290,7 +310,9 @@
     title.minimumScaleFactor = 0.8;
     [titleRow addArrangedSubview:title];
     UIView *bookmarkSpace = [[UIView alloc] init];
-    [bookmarkSpace.widthAnchor constraintEqualToConstant:22].active = YES;
+    [bookmarkSpace mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(22);
+    }];
     [titleRow addArrangedSubview:bookmarkSpace];
     [details addArrangedSubview:titleRow];
     [details addArrangedSubview:QFLabel(recipe[@"origin"], 12, UIFontWeightRegular, QFSecondary())];
@@ -312,12 +334,11 @@
     bookmark.translatesAutoresizingMaskIntoConstraints = NO;
     bookmark.accessibilityLabel = [@"收藏" stringByAppendingString:recipe[@"name"]];
     [card addSubview:bookmark];
-    [NSLayoutConstraint activateConstraints:@[
-        [bookmark.trailingAnchor constraintEqualToAnchor:card.trailingAnchor constant:-6],
-        [bookmark.topAnchor constraintEqualToAnchor:card.topAnchor constant:6],
-        [bookmark.widthAnchor constraintEqualToConstant:40],
-        [bookmark.heightAnchor constraintEqualToConstant:40]
-    ]];
+    [bookmark mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.trailing.equalTo(card.mas_trailing).offset(-6);
+        make.top.equalTo(card.mas_top).offset(6);
+        make.width.height.mas_equalTo(40);
+    }];
     card.accessibilityElements = @[ open, bookmark ];
     __weak typeof(self) weakSelf = self;
     QFOnTap(open, ^{

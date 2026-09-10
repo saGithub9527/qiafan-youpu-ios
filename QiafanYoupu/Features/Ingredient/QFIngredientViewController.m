@@ -192,7 +192,9 @@
         NSForegroundColorAttributeName : QFText()
     }
                                 forState:UIControlStateSelected];
-    [self.segment.heightAnchor constraintEqualToConstant:44].active = YES;
+    [self.segment mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(44);
+    }];
     [self.segment addTarget:self
                      action:@selector(segmentChanged:)
            forControlEvents:UIControlEventValueChanged];
@@ -221,14 +223,18 @@
     scan.layer.cornerRadius = 14;
     scan.layer.borderWidth = 1;
     scan.layer.borderColor = QFBorder().CGColor;
-    [scan.widthAnchor constraintEqualToConstant:44].active = YES;
-    [scan.heightAnchor constraintEqualToConstant:40].active = YES;
+    [scan mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(44);
+        make.height.mas_equalTo(40);
+    }];
     UIButton *add = QFButton(@"＋ 添加", 14, UIColor.whiteColor);
     add.backgroundColor = QFOrange();
     add.layer.cornerRadius = 14;
     add.accessibilityIdentifier = @"ingredient.add";
-    [add.widthAnchor constraintEqualToConstant:72].active = YES;
-    [add.heightAnchor constraintEqualToConstant:40].active = YES;
+    [add mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(72);
+        make.height.mas_equalTo(40);
+    }];
     __weak typeof(self) weakSelf = self;
     QFOnTap(scan, ^{
         QFShowUnavailable(weakSelf, @"扫描小票二维码");
@@ -267,16 +273,20 @@
                          action:@selector(searchChanged:)
                forControlEvents:UIControlEventEditingChanged];
     [card addSubview:self.searchField];
-    [NSLayoutConstraint activateConstraints:@[
-        [card.heightAnchor constraintEqualToConstant:44],
-        [icon.leadingAnchor constraintEqualToAnchor:card.leadingAnchor constant:14],
-        [icon.centerYAnchor constraintEqualToAnchor:card.centerYAnchor],
-        [icon.widthAnchor constraintEqualToConstant:19], [icon.heightAnchor constraintEqualToConstant:19],
-        [self.searchField.leadingAnchor constraintEqualToAnchor:icon.trailingAnchor constant:12],
-        [self.searchField.trailingAnchor constraintEqualToAnchor:card.trailingAnchor constant:-12],
-        [self.searchField.topAnchor constraintEqualToAnchor:card.topAnchor],
-        [self.searchField.bottomAnchor constraintEqualToAnchor:card.bottomAnchor]
-    ]];
+    [card mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(44);
+    }];
+    [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(card.mas_leading).offset(14);
+        make.centerY.equalTo(card.mas_centerY);
+        make.width.height.mas_equalTo(19);
+    }];
+    [self.searchField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(icon.mas_trailing).offset(12);
+        make.trailing.equalTo(card.mas_trailing).offset(-12);
+        make.top.equalTo(card.mas_top);
+        make.bottom.equalTo(card.mas_bottom);
+    }];
     return card;
 }
 
@@ -324,30 +334,36 @@
         overlap.contentMode = UIViewContentModeScaleAspectFit;
         overlap.tintColor = accent;
         [icon addSubview:overlap];
-        [NSLayoutConstraint activateConstraints:@[
-            [overlap.leadingAnchor constraintEqualToAnchor:icon.leadingAnchor constant:7],
-            [overlap.topAnchor constraintEqualToAnchor:icon.topAnchor constant:9],
-            [overlap.widthAnchor constraintEqualToConstant:19],
-            [overlap.heightAnchor constraintEqualToConstant:19]
-        ]];
+        [overlap mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.leading.equalTo(icon.mas_leading).offset(7);
+            make.top.equalTo(icon.mas_top).offset(9);
+            make.width.height.mas_equalTo(19);
+        }];
     }
     for (UIView *view in @[ heading, caption, icon ]) {
         view.translatesAutoresizingMaskIntoConstraints = NO;
         view.userInteractionEnabled = NO;
         [button addSubview:view];
     }
-    [NSLayoutConstraint activateConstraints:@[
-        [button.heightAnchor constraintEqualToConstant:74],
-        [heading.leadingAnchor constraintEqualToAnchor:button.leadingAnchor constant:14],
-        [heading.topAnchor constraintEqualToAnchor:button.topAnchor constant:13],
-        [heading.trailingAnchor constraintLessThanOrEqualToAnchor:icon.leadingAnchor constant:-4],
-        [icon.trailingAnchor constraintEqualToAnchor:button.trailingAnchor constant:-13],
-        [icon.topAnchor constraintEqualToAnchor:button.topAnchor constant:17],
-        [icon.widthAnchor constraintEqualToConstant:21], [icon.heightAnchor constraintEqualToConstant:23],
-        [caption.leadingAnchor constraintEqualToAnchor:heading.leadingAnchor],
-        [caption.trailingAnchor constraintEqualToAnchor:button.trailingAnchor constant:-12],
-        [caption.bottomAnchor constraintEqualToAnchor:button.bottomAnchor constant:-13]
-    ]];
+    [button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(74);
+    }];
+    [heading mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(button.mas_leading).offset(14);
+        make.top.equalTo(button.mas_top).offset(13);
+        make.trailing.lessThanOrEqualTo(icon.mas_leading).offset(-4);
+    }];
+    [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.trailing.equalTo(button.mas_trailing).offset(-13);
+        make.top.equalTo(button.mas_top).offset(17);
+        make.width.mas_equalTo(21);
+        make.height.mas_equalTo(23);
+    }];
+    [caption mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(heading.mas_leading);
+        make.trailing.equalTo(button.mas_trailing).offset(-12);
+        make.bottom.equalTo(button.mas_bottom).offset(-13);
+    }];
     __weak typeof(self) weakSelf = self;
     QFOnTap(button, ^{
         QFShowUnavailable(weakSelf, title);
@@ -367,8 +383,9 @@
     clock.translatesAutoresizingMaskIntoConstraints = NO;
     clock.tintColor = QFHex(0xA16A17);
     clock.contentMode = UIViewContentModeScaleAspectFit;
-    [clock.widthAnchor constraintEqualToConstant:17].active = YES;
-    [clock.heightAnchor constraintEqualToConstant:17].active = YES;
+    [clock mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.mas_equalTo(17);
+    }];
     [row addArrangedSubview:clock];
     [row addArrangedSubview:QFLabel(@"2 种食材临近标注日期", 12, UIFontWeightRegular, QFHex(0xA16A17))];
     [row addArrangedSubview:[[UIView alloc] init]];
@@ -387,17 +404,19 @@
     scroll.translatesAutoresizingMaskIntoConstraints = NO;
     scroll.showsHorizontalScrollIndicator = NO;
     scroll.accessibilityIdentifier = @"ingredient.categories";
-    [scroll.heightAnchor constraintEqualToConstant:32].active = YES;
+    [scroll mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(32);
+    }];
     UIStackView *row = QFStack(UILayoutConstraintAxisHorizontal, 8);
     row.translatesAutoresizingMaskIntoConstraints = NO;
     [scroll addSubview:row];
-    [NSLayoutConstraint activateConstraints:@[
-        [row.leadingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor],
-        [row.trailingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.trailingAnchor],
-        [row.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor],
-        [row.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor],
-        [row.heightAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.heightAnchor]
-    ]];
+    [row mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeLeading));
+        make.trailing.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTrailing));
+        make.top.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTop));
+        make.bottom.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeBottom));
+        make.height.equalTo(QFLayoutGuideAttribute(scroll.frameLayoutGuide, NSLayoutAttributeHeight));
+    }];
     __weak typeof(self) weakSelf = self;
     [self.categories enumerateObjectsUsingBlock:^(NSString *name, NSUInteger index, BOOL *stop) {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -431,7 +450,9 @@
     [row addArrangedSubview:[[UIView alloc] init]];
     self.sortButton = QFButton(@"临期优先  ﹀", 12, QFSecondary());
     self.sortButton.accessibilityLabel = @"食材排序，临期优先";
-    [self.sortButton.heightAnchor constraintGreaterThanOrEqualToConstant:24].active = YES;
+    [self.sortButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_greaterThanOrEqualTo(24);
+    }];
     [row addArrangedSubview:self.sortButton];
     __weak typeof(self) weakSelf = self;
     QFOnTap(self.sortButton, ^{
@@ -529,8 +550,9 @@
     emoji.layer.cornerRadius = 12;
     emoji.clipsToBounds = YES;
     emoji.accessibilityElementsHidden = YES;
-    [emoji.widthAnchor constraintEqualToConstant:48].active = YES;
-    [emoji.heightAnchor constraintEqualToConstant:48].active = YES;
+    [emoji mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.mas_equalTo(48);
+    }];
     NSString *identifier = item[@"id"] ?: @"";
     UIImage *ingredientImage = [UIImage imageNamed:[@"ingredient-" stringByAppendingString:identifier]];
     if (!ingredientImage) {
@@ -555,11 +577,11 @@
     art.translatesAutoresizingMaskIntoConstraints = NO;
     art.contentMode = UIViewContentModeScaleAspectFit;
     [emoji addSubview:art];
-    [NSLayoutConstraint activateConstraints:@[
-        [art.centerXAnchor constraintEqualToAnchor:emoji.centerXAnchor],
-        [art.centerYAnchor constraintEqualToAnchor:emoji.centerYAnchor],
-        [art.widthAnchor constraintEqualToConstant:36], [art.heightAnchor constraintEqualToConstant:36]
-    ]];
+    [art mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(emoji.mas_centerX);
+        make.centerY.equalTo(emoji.mas_centerY);
+        make.width.height.mas_equalTo(36);
+    }];
     [row addArrangedSubview:emoji];
     UIStackView *labels = QFStack(UILayoutConstraintAxisVertical, 9);
     UILabel *name = QFLabel(item[@"name"], 17, UIFontWeightSemibold, QFText());
@@ -583,14 +605,17 @@
         storage.backgroundColor = QFPaleGreen();
         storage.layer.cornerRadius = 11;
         storage.clipsToBounds = YES;
-        [storage.widthAnchor constraintEqualToConstant:42].active = YES;
-        [storage.heightAnchor constraintEqualToConstant:22].active = YES;
+        [storage mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_equalTo(42);
+            make.height.mas_equalTo(22);
+        }];
         [actions addArrangedSubview:storage];
     }
     UIButton *more = QFIconButton(@"ellipsis", QFSecondary());
     more.accessibilityLabel = [item[@"name"] stringByAppendingString:@"，更多操作"];
-    [more.widthAnchor constraintEqualToConstant:40].active = YES;
-    [more.heightAnchor constraintEqualToConstant:40].active = YES;
+    [more mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.mas_equalTo(40);
+    }];
     __weak typeof(self) weakSelf = self;
     QFOnTap(more, ^{
         QFShowUnavailable(weakSelf, [item[@"name"] stringByAppendingString:@"管理"]);
@@ -602,7 +627,9 @@
                 shopping ? QFOrange() : ([item[@"near"] boolValue] ? QFHex(0xA66C1E) : QFSecondary()));
     date.numberOfLines = 1;
     [right addArrangedSubview:date];
-    [right.widthAnchor constraintEqualToConstant:92].active = YES;
+    [right mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(92);
+    }];
     [row addArrangedSubview:right];
     return card;
 }

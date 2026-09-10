@@ -90,4 +90,6 @@ Logo、App 图标、默认菜谱插画、头像与食材图片复制自用户已
 
 ## 第三方框架原则
 
-通用能力优先使用 Apple SDK 或成熟开源库，页面仅保留业务与必要适配。公共布局已使用 Masonry，滚动布局的 LayoutGuide 保留 UIKit 原生约束。后续图片缓存优先 SDWebImage、列表刷新优先 MJRefresh，按功能接入；不因星数高就引入已归档框架。第三方许可证随 `Resources/ThirdPartyAcknowledgements.plist` 打包，变更依赖时同步更新。
+通用能力优先使用 Apple SDK 或成熟开源库，页面仅保留业务与必要适配。所有现有页面及公共组件的约束创建已使用 Masonry；滚动 LayoutGuide 通过 Masonry 的 MASViewAttribute 公开接口保持 content/frame 语义。后续图片缓存优先 SDWebImage、列表刷新优先 MJRefresh，按功能接入；不因星数高就引入已归档框架。第三方许可证随 `Resources/ThirdPartyAcknowledgements.plist` 打包，变更依赖时同步更新。
+
+组件层选型与 QMUI、JX、YY 系列对比见 [UI 组件选型](docs/UI组件选型.md)。除 Masonry 外，表中候选尚未安装，按具体功能和兼容结果接入。

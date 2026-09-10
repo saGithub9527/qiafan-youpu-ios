@@ -104,6 +104,10 @@ void QFPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
         make.bottom.equalTo(parent.mas_bottom).offset(-insets.bottom);
     }];
 }
+MASViewAttribute *QFLayoutGuideAttribute(UILayoutGuide *guide, NSLayoutAttribute attribute) {
+    // Masonry exposes guide-backed attributes; preserve the scroll view's content/frame distinction.
+    return [[MASViewAttribute alloc] initWithView:guide.owningView item:guide layoutAttribute:attribute];
+}
 UIImageView *QFImage(NSString *asset, UIViewContentMode mode) {
     UIImageView *v = [[UIImageView alloc] initWithImage:[UIImage imageNamed:asset]];
     v.translatesAutoresizingMaskIntoConstraints = NO;
@@ -140,22 +144,21 @@ void QFShowUnavailable(UIViewController *controller, NSString *title) {
     self.contentStack = QFStack(UILayoutConstraintAxisVertical, 16);
     self.contentStack.translatesAutoresizingMaskIntoConstraints = NO;
     [self.scrollView addSubview:self.contentStack];
-    // Masonry 1.1.0 does not accept scroll layout guides directly; retain their sizing semantics.
-    [NSLayoutConstraint activateConstraints:@[
-        [self.contentStack.topAnchor constraintEqualToAnchor:self.scrollView.contentLayoutGuide.topAnchor
-                                                    constant:14],
-        [self.contentStack.leadingAnchor
-            constraintEqualToAnchor:self.scrollView.contentLayoutGuide.leadingAnchor
-                           constant:20],
-        [self.contentStack.trailingAnchor
-            constraintEqualToAnchor:self.scrollView.contentLayoutGuide.trailingAnchor
-                           constant:-20],
-        [self.contentStack.bottomAnchor
-            constraintEqualToAnchor:self.scrollView.contentLayoutGuide.bottomAnchor
-                           constant:-24],
-        [self.contentStack.widthAnchor constraintEqualToAnchor:self.scrollView.frameLayoutGuide.widthAnchor
-                                                      constant:-40]
-    ]];
+    [self.contentStack mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(QFLayoutGuideAttribute(self.scrollView.contentLayoutGuide, NSLayoutAttributeTop))
+            .offset(14);
+        make.leading
+            .equalTo(QFLayoutGuideAttribute(self.scrollView.contentLayoutGuide, NSLayoutAttributeLeading))
+            .offset(20);
+        make.trailing
+            .equalTo(QFLayoutGuideAttribute(self.scrollView.contentLayoutGuide, NSLayoutAttributeTrailing))
+            .offset(-20);
+        make.bottom
+            .equalTo(QFLayoutGuideAttribute(self.scrollView.contentLayoutGuide, NSLayoutAttributeBottom))
+            .offset(-24);
+        make.width.equalTo(QFLayoutGuideAttribute(self.scrollView.frameLayoutGuide, NSLayoutAttributeWidth))
+            .offset(-40);
+    }];
 }
 - (UIStatusBarStyle)preferredStatusBarStyle {
     return UIStatusBarStyleDarkContent;

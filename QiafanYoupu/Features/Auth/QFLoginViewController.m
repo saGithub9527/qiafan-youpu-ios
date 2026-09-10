@@ -33,17 +33,19 @@
     [hero addSubview:_heroCircle];
     UIImageView *chef = QFImage(@"chef-logo", UIViewContentModeScaleAspectFit);
     [_heroCircle addSubview:chef];
-    [NSLayoutConstraint activateConstraints:@[
-        [_heroCircle.centerXAnchor constraintEqualToAnchor:hero.centerXAnchor],
-        [_heroCircle.topAnchor constraintEqualToAnchor:hero.topAnchor],
-        [_heroCircle.bottomAnchor constraintEqualToAnchor:hero.bottomAnchor],
-        [_heroCircle.widthAnchor constraintEqualToAnchor:hero.widthAnchor multiplier:0.69],
-        [_heroCircle.heightAnchor constraintEqualToAnchor:_heroCircle.widthAnchor],
-        [chef.leadingAnchor constraintEqualToAnchor:_heroCircle.leadingAnchor constant:17],
-        [chef.trailingAnchor constraintEqualToAnchor:_heroCircle.trailingAnchor constant:-17],
-        [chef.topAnchor constraintEqualToAnchor:_heroCircle.topAnchor constant:10],
-        [chef.bottomAnchor constraintEqualToAnchor:_heroCircle.bottomAnchor constant:-18]
-    ]];
+    [_heroCircle mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(hero.mas_centerX);
+        make.top.equalTo(hero.mas_top);
+        make.bottom.equalTo(hero.mas_bottom);
+        make.width.equalTo(hero.mas_width).multipliedBy(0.69);
+        make.height.equalTo(_heroCircle.mas_width);
+    }];
+    [chef mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(_heroCircle.mas_leading).offset(17);
+        make.trailing.equalTo(_heroCircle.mas_trailing).offset(-17);
+        make.top.equalTo(_heroCircle.mas_top).offset(10);
+        make.bottom.equalTo(_heroCircle.mas_bottom).offset(-18);
+    }];
     [stack addArrangedSubview:hero];
     [stack addArrangedSubview:QFSpacer(19)];
     UILabel *brand = QFLabel(@"恰饭有谱", 32, UIFontWeightBold, QFText());
@@ -59,7 +61,9 @@
     quick.backgroundColor = QFOrange();
     quick.layer.cornerRadius = 16;
     quick.accessibilityIdentifier = @"login.quick";
-    [quick.heightAnchor constraintEqualToConstant:55].active = YES;
+    [quick mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(55);
+    }];
     [quick addTarget:self action:@selector(quickTapped) forControlEvents:UIControlEventTouchUpInside];
     [stack addArrangedSubview:quick];
     [stack addArrangedSubview:QFSpacer(16)];
@@ -79,15 +83,17 @@
     appleConfiguration.baseForegroundColor = UIColor.whiteColor;
     apple.configuration = appleConfiguration;
     apple.accessibilityIdentifier = @"login.apple";
-    [apple.heightAnchor constraintEqualToConstant:55].active = YES;
+    [apple mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(55);
+    }];
     [apple addTarget:self action:@selector(appleTapped) forControlEvents:UIControlEventTouchUpInside];
     [stack addArrangedSubview:apple];
     UIView *bottomSpace = [UIView new];
     bottomSpace.translatesAutoresizingMaskIntoConstraints = NO;
-    [bottomSpace.heightAnchor constraintGreaterThanOrEqualToConstant:50].active = YES;
-    NSLayoutConstraint *preferredSpace = [bottomSpace.heightAnchor constraintEqualToConstant:88];
-    preferredSpace.priority = UILayoutPriorityDefaultLow;
-    preferredSpace.active = YES;
+    [bottomSpace mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_greaterThanOrEqualTo(50);
+        make.height.mas_equalTo(88).priority(250);
+    }];
     [stack addArrangedSubview:bottomSpace];
     _agreementView = [[QFAgreementView alloc] initWithNoticeStyle:NO identifier:@"login.agreement"];
     _agreementView.checked = [QFLoginConsentStore isAgreementChecked];
@@ -99,20 +105,31 @@
         QFPresentAgreementDocument(weakSelf, title);
     };
     [stack addArrangedSubview:_agreementView];
-    [NSLayoutConstraint activateConstraints:@[
-        [close.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:10],
-        [close.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:20],
-        [close.widthAnchor constraintEqualToConstant:40], [close.heightAnchor constraintEqualToConstant:40],
-        [scroll.topAnchor constraintEqualToAnchor:close.bottomAnchor constant:12],
-        [scroll.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [scroll.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [scroll.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-12],
-        [stack.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor constant:23],
-        [stack.leadingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor constant:30],
-        [stack.trailingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.trailingAnchor constant:-30],
-        [stack.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor constant:-12],
-        [stack.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor constant:-60]
-    ]];
+    [close mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(QFLayoutGuideAttribute(self.view.safeAreaLayoutGuide, NSLayoutAttributeTop))
+            .offset(10);
+        make.leading.equalTo(self.view.mas_leading).offset(20);
+        make.width.mas_equalTo(40);
+        make.height.mas_equalTo(40);
+    }];
+    [scroll mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(close.mas_bottom).offset(12);
+        make.leading.equalTo(self.view.mas_leading);
+        make.trailing.equalTo(self.view.mas_trailing);
+        make.bottom.equalTo(QFLayoutGuideAttribute(self.view.safeAreaLayoutGuide, NSLayoutAttributeBottom))
+            .offset(-12);
+    }];
+    [stack mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTop)).offset(23);
+        make.leading.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeLeading))
+            .offset(30);
+        make.trailing.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTrailing))
+            .offset(-30);
+        make.bottom.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeBottom))
+            .offset(-12);
+        make.width.equalTo(QFLayoutGuideAttribute(scroll.frameLayoutGuide, NSLayoutAttributeWidth))
+            .offset(-60);
+    }];
 }
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];

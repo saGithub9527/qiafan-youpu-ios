@@ -1,3 +1,4 @@
+#import <Masonry/Masonry.h>
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -17,6 +18,7 @@ UIButton *QFButton(NSString *title, CGFloat size, UIColor *color);
 UIButton *QFIconButton(NSString *symbol, UIColor *color);
 void QFOnTap(UIButton *button, void (^handler)(void));
 void QFPin(UIView *child, UIView *parent, UIEdgeInsets insets);
+MASViewAttribute *QFLayoutGuideAttribute(UILayoutGuide *guide, NSLayoutAttribute attribute);
 UIImageView *QFImage(NSString *asset, UIViewContentMode mode);
 void QFShowUnavailable(UIViewController *controller, NSString *title);
 

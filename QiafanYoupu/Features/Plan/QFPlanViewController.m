@@ -111,12 +111,12 @@
     bar.backgroundColor = QFBackground();
     bar.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:bar];
-    [NSLayoutConstraint activateConstraints:@[
-        [bar.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [bar.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [bar.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
-        [bar.heightAnchor constraintEqualToConstant:62]
-    ]];
+    [bar mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(self.view.mas_leading);
+        make.trailing.equalTo(self.view.mas_trailing);
+        make.bottom.equalTo(self.view.mas_bottom);
+        make.height.mas_equalTo(62);
+    }];
     UIStackView *row = QFStack(UILayoutConstraintAxisHorizontal, 10);
     row.distribution = UIStackViewDistributionFillEqually;
     QFPin(row, bar, UIEdgeInsetsMake(6, 20, 7, 20));
@@ -168,7 +168,9 @@
     for (NSInteger r = 0; r < rows; r++) {
         UIStackView *row = QFStack(UILayoutConstraintAxisHorizontal, 0);
         row.distribution = UIStackViewDistributionFillEqually;
-        [row.heightAnchor constraintEqualToConstant:32].active = YES;
+        [row mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(32);
+        }];
         for (NSInteger col = 0; col < 7; col++) {
             NSInteger d = r * 7 + col - offset + 1;
             UIView *cell = [UIView new];
@@ -246,7 +248,9 @@
     detailLabel.textAlignment = NSTextAlignmentRight;
     [header addArrangedSubview:detailLabel];
     UIButton *more = QFButton(@"···", 18, QFSecondary());
-    [more.widthAnchor constraintEqualToConstant:24].active = YES;
+    [more mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(24);
+    }];
     [header addArrangedSubview:more];
     __weak typeof(self) weakSelf = self;
     QFOnTap(more, ^{
@@ -258,8 +262,10 @@
         row.alignment = UIStackViewAlignmentCenter;
         UIImageView *image = QFImage(dish[1], UIViewContentModeScaleAspectFill);
         image.layer.cornerRadius = 12;
-        [image.widthAnchor constraintEqualToConstant:48].active = YES;
-        [image.heightAnchor constraintEqualToConstant:48].active = YES;
+        [image mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_equalTo(48);
+            make.height.mas_equalTo(48);
+        }];
         [row addArrangedSubview:image];
         UIStackView *text = QFStack(UILayoutConstraintAxisVertical, 5);
         [text addArrangedSubview:QFLabel(dish[0], 16, UIFontWeightSemibold, QFText())];
@@ -269,8 +275,10 @@
         UIButton *check = QFButton(done ? @"✓ 已做" : @"做菜打卡", 12, done ? QFGreen() : QFOrange());
         check.backgroundColor = done ? QFPaleGreen() : QFHex(0xFFF0E7);
         check.layer.cornerRadius = 15;
-        [check.widthAnchor constraintEqualToConstant:64].active = YES;
-        [check.heightAnchor constraintEqualToConstant:30].active = YES;
+        [check mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_equalTo(64);
+            make.height.mas_equalTo(30);
+        }];
         QFOnTap(check, ^{
             QFShowUnavailable(weakSelf, @"做菜打卡");
         });

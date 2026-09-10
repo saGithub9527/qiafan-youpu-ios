@@ -69,12 +69,12 @@ static NSString *const QFConsentUIRevision = @"ui-placeholder-v1";
             self.documentTitle, self.documentTitle];
     body.accessibilityIdentifier = @"agreement.document";
     [self.view addSubview:body];
-    [NSLayoutConstraint activateConstraints:@[
-        [body.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [body.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [body.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [body.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]
-    ]];
+    [body mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop);
+        make.leading.equalTo(self.view.mas_leading);
+        make.trailing.equalTo(self.view.mas_trailing);
+        make.bottom.equalTo(self.view.mas_safeAreaLayoutGuideBottom);
+    }];
 }
 - (void)closeDocument {
     [self dismissViewControllerAnimated:!UIAccessibilityIsReduceMotionEnabled() completion:nil];
@@ -135,17 +135,21 @@ void QFPresentAgreementDocument(UIViewController *presenter, NSString *title) {
         text.linkTextAttributes =
             @{NSForegroundColorAttributeName : noticeStyle ? QFHex(0xA83212) : QFGreen()};
         [self addSubview:text];
-        [NSLayoutConstraint activateConstraints:@[
-            [_checkButton.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:-5],
-            [_checkButton.topAnchor constraintEqualToAnchor:self.topAnchor],
-            [_checkButton.widthAnchor constraintEqualToConstant:36],
-            [_checkButton.heightAnchor constraintEqualToConstant:44],
-            [text.leadingAnchor constraintEqualToAnchor:_checkButton.trailingAnchor constant:3],
-            [text.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
-            [text.topAnchor constraintEqualToAnchor:self.topAnchor],
-            [text.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
-            [self.heightAnchor constraintGreaterThanOrEqualToConstant:55]
-        ]];
+        [_checkButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.leading.equalTo(self.mas_leading).offset(-5);
+            make.top.equalTo(self.mas_top);
+            make.width.mas_equalTo(36);
+            make.height.mas_equalTo(44);
+        }];
+        [text mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.leading.equalTo(_checkButton.mas_trailing).offset(3);
+            make.trailing.equalTo(self.mas_trailing);
+            make.top.equalTo(self.mas_top);
+            make.bottom.equalTo(self.mas_bottom);
+        }];
+        [self mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_greaterThanOrEqualTo(55);
+        }];
         self.checked = NO;
     }
     return self;
@@ -202,26 +206,24 @@ void QFPresentAgreementDocument(UIViewController *presenter, NSString *title) {
     sheet.layer.cornerRadius = 28;
     sheet.layer.maskedCorners = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
     [self.view addSubview:sheet];
-    NSLayoutConstraint *preferredHeight = [sheet.heightAnchor constraintEqualToConstant:650];
-    preferredHeight.priority = UILayoutPriorityDefaultHigh;
-    [NSLayoutConstraint activateConstraints:@[
-        [sheet.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [sheet.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [sheet.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
-        [sheet.topAnchor constraintGreaterThanOrEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor
-                                                     constant:12],
-        preferredHeight
-    ]];
+    [sheet mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(self.view.mas_leading);
+        make.trailing.equalTo(self.view.mas_trailing);
+        make.bottom.equalTo(self.view.mas_bottom);
+        make.top.greaterThanOrEqualTo(self.view.mas_safeAreaLayoutGuideTop).offset(12);
+        make.height.mas_equalTo(650).priority(UILayoutPriorityDefaultHigh);
+    }];
     UIView *handle = [UIView new];
     handle.translatesAutoresizingMaskIntoConstraints = NO;
     handle.backgroundColor = QFHex(0xD5DACF);
     handle.layer.cornerRadius = 2;
     [sheet addSubview:handle];
-    [NSLayoutConstraint activateConstraints:@[
-        [handle.topAnchor constraintEqualToAnchor:sheet.topAnchor constant:13],
-        [handle.centerXAnchor constraintEqualToAnchor:sheet.centerXAnchor],
-        [handle.widthAnchor constraintEqualToConstant:42], [handle.heightAnchor constraintEqualToConstant:4]
-    ]];
+    [handle mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(sheet.mas_top).offset(13);
+        make.centerX.equalTo(sheet.mas_centerX);
+        make.width.mas_equalTo(42);
+        make.height.mas_equalTo(4);
+    }];
     UIButton *decline = QFButton(@"暂不同意", 15, QFSecondary());
     decline.accessibilityIdentifier = @"notice.decline";
     [decline addTarget:self action:@selector(declineTapped) forControlEvents:UIControlEventTouchUpInside];
@@ -261,8 +263,10 @@ void QFPresentAgreementDocument(UIViewController *presenter, NSString *title) {
     UIImageView *icon = QFImage(@"chef-icon", UIViewContentModeScaleAspectFit);
     icon.layer.cornerRadius = 12;
     icon.clipsToBounds = YES;
-    [icon.widthAnchor constraintEqualToConstant:40].active = YES;
-    [icon.heightAnchor constraintEqualToConstant:40].active = YES;
+    [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(40);
+        make.height.mas_equalTo(40);
+    }];
     [heading addArrangedSubview:icon];
     [heading addArrangedSubview:QFLabel(@"安全与使用须知", 22, UIFontWeightBold, QFText())];
     [body addArrangedSubview:heading];
@@ -283,8 +287,10 @@ void QFPresentAgreementDocument(UIViewController *presenter, NSString *title) {
         number.textAlignment = NSTextAlignmentCenter;
         number.layer.cornerRadius = 9;
         number.clipsToBounds = YES;
-        [number.widthAnchor constraintEqualToConstant:18].active = YES;
-        [number.heightAnchor constraintEqualToConstant:18].active = YES;
+        [number mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_equalTo(18);
+            make.height.mas_equalTo(18);
+        }];
         UIStackView *copy = QFStack(UILayoutConstraintAxisVertical, 5);
         [copy addArrangedSubview:QFLabel(item[0], 15, UIFontWeightSemibold, QFText())];
         UILabel *detail = QFLabel(item[1], 13, UIFontWeightRegular, QFSecondary());
@@ -294,33 +300,43 @@ void QFPresentAgreementDocument(UIViewController *presenter, NSString *title) {
         [row addArrangedSubview:copy];
         [body addArrangedSubview:row];
     }];
-    [NSLayoutConstraint activateConstraints:@[
-        [decline.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor
-                                             constant:-11],
-        [decline.centerXAnchor constraintEqualToAnchor:sheet.centerXAnchor],
-        [decline.heightAnchor constraintEqualToConstant:44],
-        [decline.widthAnchor constraintEqualToConstant:150],
-        [_continueButton.bottomAnchor constraintEqualToAnchor:decline.topAnchor constant:-12],
-        [_continueButton.leadingAnchor constraintEqualToAnchor:sheet.leadingAnchor constant:24],
-        [_continueButton.trailingAnchor constraintEqualToAnchor:sheet.trailingAnchor constant:-24],
-        [_continueButton.heightAnchor constraintEqualToConstant:53],
-        [_agreementView.leadingAnchor constraintEqualToAnchor:sheet.leadingAnchor constant:25],
-        [_agreementView.trailingAnchor constraintEqualToAnchor:sheet.trailingAnchor constant:-24],
-        [_agreementView.bottomAnchor constraintEqualToAnchor:_continueButton.topAnchor constant:-15],
-        [separator.leadingAnchor constraintEqualToAnchor:sheet.leadingAnchor constant:24],
-        [separator.trailingAnchor constraintEqualToAnchor:sheet.trailingAnchor constant:-24],
-        [separator.bottomAnchor constraintEqualToAnchor:_agreementView.topAnchor constant:-7],
-        [separator.heightAnchor constraintEqualToConstant:1],
-        [scroll.topAnchor constraintEqualToAnchor:handle.bottomAnchor constant:22],
-        [scroll.leadingAnchor constraintEqualToAnchor:sheet.leadingAnchor constant:24],
-        [scroll.trailingAnchor constraintEqualToAnchor:sheet.trailingAnchor constant:-24],
-        [scroll.bottomAnchor constraintEqualToAnchor:separator.topAnchor constant:-17],
-        [body.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor],
-        [body.leadingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor],
-        [body.trailingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.trailingAnchor],
-        [body.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor constant:-2],
-        [body.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor]
-    ]];
+    [decline mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.view.mas_safeAreaLayoutGuideBottom).offset(-11);
+        make.centerX.equalTo(sheet.mas_centerX);
+        make.height.mas_equalTo(44);
+        make.width.mas_equalTo(150);
+    }];
+    [_continueButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(decline.mas_top).offset(-12);
+        make.leading.equalTo(sheet.mas_leading).offset(24);
+        make.trailing.equalTo(sheet.mas_trailing).offset(-24);
+        make.height.mas_equalTo(53);
+    }];
+    [_agreementView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(sheet.mas_leading).offset(25);
+        make.trailing.equalTo(sheet.mas_trailing).offset(-24);
+        make.bottom.equalTo(_continueButton.mas_top).offset(-15);
+    }];
+    [separator mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(sheet.mas_leading).offset(24);
+        make.trailing.equalTo(sheet.mas_trailing).offset(-24);
+        make.bottom.equalTo(_agreementView.mas_top).offset(-7);
+        make.height.mas_equalTo(1);
+    }];
+    [scroll mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(handle.mas_bottom).offset(22);
+        make.leading.equalTo(sheet.mas_leading).offset(24);
+        make.trailing.equalTo(sheet.mas_trailing).offset(-24);
+        make.bottom.equalTo(separator.mas_top).offset(-17);
+    }];
+    [body mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTop));
+        make.leading.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeLeading));
+        make.trailing.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTrailing));
+        make.bottom.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeBottom))
+            .offset(-2);
+        make.width.equalTo(QFLayoutGuideAttribute(scroll.frameLayoutGuide, NSLayoutAttributeWidth));
+    }];
     [self updateContinueButton];
 }
 - (void)setAgreementChecked:(BOOL)agreementChecked {

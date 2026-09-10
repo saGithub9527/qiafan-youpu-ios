@@ -8,12 +8,12 @@
 static void QFArtPlace(UIView *view, UIView *parent, CGFloat x, CGFloat y, CGFloat width, CGFloat height) {
     view.translatesAutoresizingMaskIntoConstraints = NO;
     [parent addSubview:view];
-    [NSLayoutConstraint activateConstraints:@[
-        [view.leadingAnchor constraintEqualToAnchor:parent.leadingAnchor constant:x],
-        [view.topAnchor constraintEqualToAnchor:parent.topAnchor constant:y],
-        [view.widthAnchor constraintEqualToConstant:width],
-        [view.heightAnchor constraintEqualToConstant:height]
-    ]];
+    [view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(parent.mas_leading).offset(x);
+        make.top.equalTo(parent.mas_top).offset(y);
+        make.width.mas_equalTo(width);
+        make.height.mas_equalTo(height);
+    }];
 }
 
 static UIView *QFArtShape(UIColor *color, CGFloat radius) {
@@ -95,12 +95,12 @@ static void QFArtChip(UIView *canvas, NSString *copy, UIColor *background, UICol
         _canvas.translatesAutoresizingMaskIntoConstraints = NO;
         _canvas.accessibilityElementsHidden = YES;
         [self addSubview:_canvas];
-        [NSLayoutConstraint activateConstraints:@[
-            [_canvas.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
-            [_canvas.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-            [_canvas.widthAnchor constraintEqualToConstant:342],
-            [_canvas.heightAnchor constraintEqualToConstant:342]
-        ]];
+        [_canvas mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.mas_centerX);
+            make.centerY.equalTo(self.mas_centerY);
+            make.width.mas_equalTo(342);
+            make.height.mas_equalTo(342);
+        }];
         self.isAccessibilityElement = YES;
         self.accessibilityTraits = UIAccessibilityTraitImage;
         if (page == 0 || page == 4)
@@ -293,41 +293,54 @@ static void QFArtChip(UIView *canvas, NSString *copy, UIColor *background, UICol
     _pager.accessibilityLabel = @"欢迎介绍";
     _pager.accessibilityValue = @"第 1 页，共 5 页";
     [self.view addSubview:_pager];
-    [NSLayoutConstraint activateConstraints:@[
-        [header.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8],
-        [header.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:24],
-        [header.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-24],
-        [header.heightAnchor constraintEqualToConstant:44],
-        [icon.leadingAnchor constraintEqualToAnchor:header.leadingAnchor],
-        [icon.centerYAnchor constraintEqualToAnchor:header.centerYAnchor],
-        [icon.widthAnchor constraintEqualToConstant:30], [icon.heightAnchor constraintEqualToConstant:30],
-        [intro.leadingAnchor constraintEqualToAnchor:icon.trailingAnchor constant:10],
-        [intro.centerYAnchor constraintEqualToAnchor:header.centerYAnchor],
-        [skip.trailingAnchor constraintEqualToAnchor:header.trailingAnchor],
-        [skip.centerYAnchor constraintEqualToAnchor:header.centerYAnchor],
-        [skip.heightAnchor constraintEqualToConstant:44], [skip.widthAnchor constraintEqualToConstant:62],
-        [intro.trailingAnchor constraintLessThanOrEqualToAnchor:skip.leadingAnchor constant:-8],
-        [_pager.topAnchor constraintEqualToAnchor:header.bottomAnchor constant:9],
-        [_pager.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [_pager.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [_pager.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]
-    ]];
+    [header mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(QFLayoutGuideAttribute(self.view.safeAreaLayoutGuide, NSLayoutAttributeTop))
+            .offset(8);
+        make.leading.equalTo(self.view.mas_leading).offset(24);
+        make.trailing.equalTo(self.view.mas_trailing).offset(-24);
+        make.height.mas_equalTo(44);
+    }];
+    [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(header.mas_leading);
+        make.centerY.equalTo(header.mas_centerY);
+        make.width.mas_equalTo(30);
+        make.height.mas_equalTo(30);
+    }];
+    [intro mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.equalTo(icon.mas_trailing).offset(10);
+        make.centerY.equalTo(header.mas_centerY);
+        make.trailing.lessThanOrEqualTo(skip.mas_leading).offset(-8);
+    }];
+    [skip mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.trailing.equalTo(header.mas_trailing);
+        make.centerY.equalTo(header.mas_centerY);
+        make.height.mas_equalTo(44);
+        make.width.mas_equalTo(62);
+    }];
+    [_pager mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(header.mas_bottom).offset(9);
+        make.leading.equalTo(self.view.mas_leading);
+        make.trailing.equalTo(self.view.mas_trailing);
+        make.bottom.equalTo(QFLayoutGuideAttribute(self.view.safeAreaLayoutGuide, NSLayoutAttributeBottom));
+    }];
     UIView *previous = nil;
     for (NSInteger page = 0; page < 5; page++) {
         UIScrollView *pageScroll = [self makePage:page];
         [_pager addSubview:pageScroll];
-        [NSLayoutConstraint activateConstraints:@[
-            [pageScroll.topAnchor constraintEqualToAnchor:_pager.contentLayoutGuide.topAnchor],
-            [pageScroll.bottomAnchor constraintEqualToAnchor:_pager.contentLayoutGuide.bottomAnchor],
-            [pageScroll.widthAnchor constraintEqualToAnchor:_pager.frameLayoutGuide.widthAnchor],
-            [pageScroll.heightAnchor constraintEqualToAnchor:_pager.frameLayoutGuide.heightAnchor],
-            [pageScroll.leadingAnchor constraintEqualToAnchor:previous
-                                                                  ? previous.trailingAnchor
-                                                                  : _pager.contentLayoutGuide.leadingAnchor]
-        ]];
+        [pageScroll mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(QFLayoutGuideAttribute(_pager.contentLayoutGuide, NSLayoutAttributeTop));
+            make.bottom.equalTo(QFLayoutGuideAttribute(_pager.contentLayoutGuide, NSLayoutAttributeBottom));
+            make.width.equalTo(QFLayoutGuideAttribute(_pager.frameLayoutGuide, NSLayoutAttributeWidth));
+            make.height.equalTo(QFLayoutGuideAttribute(_pager.frameLayoutGuide, NSLayoutAttributeHeight));
+            make.leading.equalTo(
+                previous ? previous.mas_trailing
+                         : QFLayoutGuideAttribute(_pager.contentLayoutGuide, NSLayoutAttributeLeading));
+        }];
         previous = pageScroll;
     }
-    [previous.trailingAnchor constraintEqualToAnchor:_pager.contentLayoutGuide.trailingAnchor].active = YES;
+    [previous mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.trailing.equalTo(QFLayoutGuideAttribute(_pager.contentLayoutGuide, NSLayoutAttributeTrailing));
+    }];
 }
 - (UIScrollView *)makePage:(NSInteger)page {
     NSArray<NSString *> *titles = @[
@@ -350,7 +363,9 @@ static void QFArtChip(UIView *canvas, NSString *copy, UIColor *background, UICol
     [scroll addSubview:stack];
     QFWelcomeArtView *art = [[QFWelcomeArtView alloc] initWithPage:page];
     [stack addArrangedSubview:art];
-    [art.heightAnchor constraintEqualToAnchor:art.widthAnchor].active = YES;
+    [art mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(art.mas_width);
+    }];
     [stack addArrangedSubview:QFSpacer(24)];
     UILabel *title = QFLabel(titles[page], page == 4 ? 28 : 29, UIFontWeightBold, QFText());
     title.textAlignment = NSTextAlignmentCenter;
@@ -375,14 +390,16 @@ static void QFArtChip(UIView *canvas, NSString *copy, UIColor *background, UICol
     [stack addArrangedSubview:QFSpacer(26)];
     UIView *indicators = [UIView new];
     indicators.translatesAutoresizingMaskIntoConstraints = NO;
-    [indicators.heightAnchor constraintEqualToConstant:28].active = YES;
+    [indicators mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(28);
+    }];
     UIStackView *dots = QFStack(UILayoutConstraintAxisHorizontal, 5);
     [indicators addSubview:dots];
-    [NSLayoutConstraint activateConstraints:@[
-        [dots.centerXAnchor constraintEqualToAnchor:indicators.centerXAnchor],
-        [dots.topAnchor constraintEqualToAnchor:indicators.topAnchor],
-        [dots.bottomAnchor constraintEqualToAnchor:indicators.bottomAnchor]
-    ]];
+    [dots mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(indicators.mas_centerX);
+        make.top.equalTo(indicators.mas_top);
+        make.bottom.equalTo(indicators.mas_bottom);
+    }];
     for (NSInteger index = 0; index < 5; index++) {
         UIButton *dot = [UIButton buttonWithType:UIButtonTypeCustom];
         dot.translatesAutoresizingMaskIntoConstraints = NO;
@@ -390,17 +407,19 @@ static void QFArtChip(UIView *canvas, NSString *copy, UIColor *background, UICol
         dot.accessibilityLabel = [NSString stringWithFormat:@"第 %ld 页，共 5 页", (long)index + 1];
         dot.accessibilityTraits = UIAccessibilityTraitButton |
                                   (index == page ? UIAccessibilityTraitSelected : UIAccessibilityTraitNone);
-        [dot.widthAnchor constraintEqualToConstant:31].active = YES;
+        [dot mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_equalTo(31);
+        }];
         UIView *pill = QFArtShape(index == page ? QFOrange() : QFHex(0xD8DDD2), 3);
         pill.translatesAutoresizingMaskIntoConstraints = NO;
         pill.userInteractionEnabled = NO;
         [dot addSubview:pill];
-        [NSLayoutConstraint activateConstraints:@[
-            [pill.centerXAnchor constraintEqualToAnchor:dot.centerXAnchor],
-            [pill.centerYAnchor constraintEqualToAnchor:dot.centerYAnchor],
-            [pill.widthAnchor constraintEqualToConstant:index == page ? 24 : 6],
-            [pill.heightAnchor constraintEqualToConstant:6]
-        ]];
+        [pill mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(dot.mas_centerX);
+            make.centerY.equalTo(dot.mas_centerY);
+            make.width.mas_equalTo(index == page ? 24 : 6);
+            make.height.mas_equalTo(6);
+        }];
         [dot addTarget:self action:@selector(pageDotTapped:) forControlEvents:UIControlEventTouchUpInside];
         [dots addArrangedSubview:dot];
     }
@@ -416,17 +435,23 @@ static void QFArtChip(UIView *canvas, NSString *copy, UIColor *background, UICol
         enter.backgroundColor = QFOrange();
         enter.layer.cornerRadius = 17;
         enter.accessibilityIdentifier = @"welcome.enter";
-        [enter.heightAnchor constraintEqualToConstant:55].active = YES;
+        [enter mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(55);
+        }];
         [enter addTarget:self action:@selector(requestEntry) forControlEvents:UIControlEventTouchUpInside];
         [stack addArrangedSubview:enter];
     }
-    [NSLayoutConstraint activateConstraints:@[
-        [stack.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor constant:17],
-        [stack.leadingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor constant:24],
-        [stack.trailingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.trailingAnchor constant:-24],
-        [stack.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor constant:-30],
-        [stack.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor constant:-48]
-    ]];
+    [stack mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTop)).offset(17);
+        make.leading.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeLeading))
+            .offset(24);
+        make.trailing.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeTrailing))
+            .offset(-24);
+        make.bottom.equalTo(QFLayoutGuideAttribute(scroll.contentLayoutGuide, NSLayoutAttributeBottom))
+            .offset(-30);
+        make.width.equalTo(QFLayoutGuideAttribute(scroll.frameLayoutGuide, NSLayoutAttributeWidth))
+            .offset(-48);
+    }];
     return scroll;
 }
 - (void)viewDidLayoutSubviews {

@@ -70,27 +70,22 @@
     self.tabBar.backgroundColor = UIColor.whiteColor;
     self.tabBar.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:self.tabBar];
-    [NSLayoutConstraint activateConstraints:@[
-        [self.host.topAnchor constraintEqualToAnchor:self.view.topAnchor],
-        [self.host.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [self.host.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [self.host.bottomAnchor constraintEqualToAnchor:self.tabBar.topAnchor],
-        [self.tabBar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor
-                                              constant:-56],
-        [self.tabBar.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [self.tabBar.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [self.tabBar.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor]
-    ]];
+    [self.host mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.leading.trailing.equalTo(self.view);
+        make.bottom.equalTo(self.tabBar.mas_top);
+    }];
+    [self.tabBar mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.view.mas_safeAreaLayoutGuideBottom).offset(-56);
+        make.leading.trailing.bottom.equalTo(self.view);
+    }];
     UIView *line = [UIView new];
     line.backgroundColor = QFBorder();
     line.translatesAutoresizingMaskIntoConstraints = NO;
     [self.tabBar addSubview:line];
-    [NSLayoutConstraint activateConstraints:@[
-        [line.heightAnchor constraintEqualToConstant:0.5],
-        [line.topAnchor constraintEqualToAnchor:self.tabBar.topAnchor],
-        [line.leadingAnchor constraintEqualToAnchor:self.tabBar.leadingAnchor],
-        [line.trailingAnchor constraintEqualToAnchor:self.tabBar.trailingAnchor]
-    ]];
+    [line mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(0.5);
+        make.top.leading.trailing.equalTo(self.tabBar);
+    }];
     self.tabs = @[
         [QFRecipeViewController new], [QFPlanViewController new], [QFIngredientViewController new],
         [QFProfileViewController new]
@@ -102,12 +97,11 @@
     stack.distribution = UIStackViewDistributionFillEqually;
     stack.translatesAutoresizingMaskIntoConstraints = NO;
     [self.tabBar addSubview:stack];
-    [NSLayoutConstraint activateConstraints:@[
-        [stack.topAnchor constraintEqualToAnchor:self.tabBar.topAnchor constant:3],
-        [stack.leadingAnchor constraintEqualToAnchor:self.tabBar.leadingAnchor],
-        [stack.trailingAnchor constraintEqualToAnchor:self.tabBar.trailingAnchor],
-        [stack.heightAnchor constraintEqualToConstant:52]
-    ]];
+    [stack mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.tabBar.mas_top).offset(3);
+        make.leading.trailing.equalTo(self.tabBar);
+        make.height.mas_equalTo(52);
+    }];
     NSMutableArray *buttons = [NSMutableArray array];
     for (NSUInteger i = 0; i < titles.count; i++) {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];

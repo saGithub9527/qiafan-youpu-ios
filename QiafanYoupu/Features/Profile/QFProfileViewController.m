@@ -28,8 +28,10 @@
     UIView *avatar = QFCard();
     avatar.backgroundColor = QFPaleGreen();
     avatar.layer.cornerRadius = 36;
-    [avatar.widthAnchor constraintEqualToConstant:72].active = YES;
-    [avatar.heightAnchor constraintEqualToConstant:72].active = YES;
+    [avatar mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(72);
+        make.height.mas_equalTo(72);
+    }];
     UIImageView *image = self.signedInPreview
                              ? QFImage(@"default-avatar", UIViewContentModeScaleAspectFill)
                              : [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"person.fill"]];
@@ -45,8 +47,10 @@
     login.backgroundColor = QFOrange();
     login.layer.cornerRadius = 19;
     login.accessibilityIdentifier = @"profile.login";
-    [login.widthAnchor constraintEqualToConstant:80].active = YES;
-    [login.heightAnchor constraintEqualToConstant:38].active = YES;
+    [login mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(80);
+        make.height.mas_equalTo(38);
+    }];
     QFOnTap(login, ^{
         if (weakSelf.signedInPreview)
             QFShowUnavailable(weakSelf, @"编辑资料");
@@ -99,7 +103,9 @@
         if (i < names.count - 1) {
             UIView *line = [UIView new];
             line.backgroundColor = QFBorder();
-            [line.heightAnchor constraintEqualToConstant:0.5].active = YES;
+            [line mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.height.mas_equalTo(0.5);
+            }];
             [rows addArrangedSubview:line];
         }
     }
@@ -124,8 +130,10 @@
     UIImageView *icon = [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:symbol]];
     icon.tintColor = color;
     icon.contentMode = UIViewContentModeScaleAspectFit;
-    [icon.widthAnchor constraintEqualToConstant:23].active = YES;
-    [icon.heightAnchor constraintEqualToConstant:23].active = YES;
+    [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(23);
+        make.height.mas_equalTo(23);
+    }];
     [top addArrangedSubview:icon];
     [top addArrangedSubview:[UIView new]];
     [top addArrangedSubview:QFLabel(@"›", 22, UIFontWeightRegular, color)];
@@ -144,14 +152,18 @@
 }
 - (UIView *)menuRow:(NSString *)title symbol:(NSString *)symbol subtitle:(NSString *)subtitle {
     UIView *row = [UIView new];
-    [row.heightAnchor constraintEqualToConstant:51].active = YES;
+    [row mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(51);
+    }];
     UIStackView *stack = QFStack(UILayoutConstraintAxisHorizontal, 12);
     stack.alignment = UIStackViewAlignmentCenter;
     QFPin(stack, row, UIEdgeInsetsZero);
     UIImageView *icon = [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:symbol]];
     icon.tintColor = QFGreen();
     icon.contentMode = UIViewContentModeScaleAspectFit;
-    [icon.widthAnchor constraintEqualToConstant:22].active = YES;
+    [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(22);
+    }];
     UILabel *name = QFLabel(title, 16, UIFontWeightMedium, QFText());
     UILabel *detail = QFLabel(subtitle, 12, UIFontWeightRegular, QFSecondary());
     [detail setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
