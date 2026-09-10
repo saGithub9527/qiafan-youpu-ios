@@ -1,26 +1,25 @@
 # 恰饭有谱 · iOS 客户端
 
-Objective-C + UIKit 原生 iPhone 工程，使用 Auto Layout 和本地素材。本轮只实现五页欢迎、协议通知、登录页面，以及底部「菜谱 / 计划 / 食材 / 我的」四个一级主页面 UI。
+Swift + SwiftUI 为主、UIKit 按需补充的原生 iPhone 工程，采用 SwiftUI App 生命周期。本轮保留五页欢迎、协议通知、登录，以及「菜谱 / 计划 / 食材 / 我的」四个一级主页面 UI。
 
-所有列表和数值均为本地展示样例；没有 API、真实登录、Apple 授权、Token 或服务端连接。快速登录和 Apple 登录按钮完成协议 UI 流程后只显示“登录暂未开放”。具体范围见 [实现范围](docs/实现范围.md)。
+页面使用本地展示样例，没有 API、真实登录、Apple 授权或 Token。具体边界见 [实现范围](docs/实现范围.md)。原 OC/UIKit 实现保存在 Git 标签 `oc-uikit-baseline`。
 
 ## 打开与构建
 
-工程配置为 iOS 15.0 起、iPhone 竖屏、ARC，`project.yml` 的 Xcode 版本为 26.3。客户端依赖统一用 CocoaPods 管理，已接入 Masonry 1.1.0。当前验证工具版本为 CocoaPods 1.16.2；提交 Podfile.lock 固定依赖，不提交 Pods 目录。
+工程配置为 iOS 15.0 起、iPhone 竖屏。使用 Xcode 26.3 的 Swift 6 编译器，当前 `SWIFT_VERSION = 5.0`，即 Swift 5 语言模式。
 
 ```bash
 cd '/Users/talka/Documents/恰饭有谱/客户端/qiafan-youpu-ios'
-pod install --deployment
-open QiafanYoupu.xcworkspace
+open QiafanYoupu.xcodeproj
 ```
 
-在 Xcode 中选择 `QiafanYoupu` scheme 和一个已安装的 iPhone 模拟器，然后运行。真机运行需要在 Signing & Capabilities 中配置可用的开发团队和签名。
+选择 `QiafanYoupu` scheme 和已安装的 iPhone 模拟器，然后运行。真机运行需配置可用开发团队与签名。
 
 命令行构建模拟器版本：
 
 ```bash
 xcodebuild \
-  -workspace QiafanYoupu.xcworkspace \
+  -project QiafanYoupu.xcodeproj \
   -scheme QiafanYoupu \
   -configuration Debug \
   -destination 'generic/platform=iOS Simulator' \
@@ -29,67 +28,57 @@ xcodebuild \
   build
 ```
 
-将 `Debug` 改为 `Release` 可构建 Release 配置。`project.yml` 是 XcodeGen 工程配置；修改 target 或构建设置后，先用 `xcodegen generate --spec project.yml` 同步 `.xcodeproj`，再运行 `pod install --deployment` 恢复依赖集成；日常使用 `.xcworkspace` 打开工程。只打开现有工程不需要 XcodeGen。
+将 `Debug` 改为 `Release` 可构建 Release 配置。`project.yml` 是 XcodeGen 配置；修改 target 或构建设置后执行 `xcodegen generate --spec project.yml` 同步工程。日常打开现有 `.xcodeproj` 不需要 XcodeGen。
 
-## 欢迎与 Debug 预览
+## 启动与 Debug 预览
 
-- Debug 默认每次启动都显示欢迎，不受本地完成标记影响。
-- Release 只在 `qfyp.onboarding.completed` 尚未完成时显示欢迎；勾选安全通知并点击“同意并继续”后写入完成标记，后续启动进入主页面。暂不同意不会完成引导。
-- “我的”默认显示未登录界面，点击“去登录”打开登录页。关闭后回到“我的”。
+Debug 默认每次显示欢迎；Release 仅在本地引导尚未完成时显示。勾选安全通知并点击“同意并继续”后才写入 `qfyp.onboarding.completed`。暂不同意不会完成引导。“我的”默认未登录，登录页由根容器展示和关闭。
 
-以下参数只在 Debug 生效，可在 Xcode 的 Edit Scheme → Run → Arguments 中设置：
+以下参数仅在 Debug 生效，在 Edit Scheme → Run → Arguments 中设置：
 
-| 启动参数 | 用途 |
+| 参数 | 用途 |
 | --- | --- |
-| `-QFResetUIState` | 清除本 App 的持久化 UserDefaults，重新检查引导和协议默认状态 |
-| `-QFSkipWelcome` | 本次启动直接进入四个 Tab，不写入引导完成标记 |
-| `-QFStartTab recipe` | 初始页设为菜谱；可改为 `plan`、`ingredient`、`profile`，通常配合跳过欢迎使用 |
-| `-QFPreviewSignedIn` | 仅展示“我的”登录态样式；不会登录、生成凭证或开放业务功能 |
+| `-QFResetUIState` | 清除本 App 的持久化 UserDefaults |
+| `-QFSkipWelcome` | 本次启动跳过欢迎，不写引导完成标记 |
+| `-QFStartTab recipe` | 指定初始页；可选 `recipe`、`plan`、`ingredient`、`profile` |
+| `-QFPreviewSignedIn` | 仅预览“我的”登录态样式，不创建真实身份 |
 
-应用已安装到并正在使用某个模拟器时，可先停止 App，再用以下命令查看“我的”登录态样式：
+应用已安装且停止运行时，可在已启动的模拟器中预览：
 
 ```bash
 xcrun simctl launch booted com.talka.qiafanyoupu \
   -QFSkipWelcome -QFStartTab profile -QFPreviewSignedIn
 ```
 
-参数实现位于 `App/QFRootViewController.m` 和 `Features/Profile/QFProfileViewController.m`，欢迎策略集中在 `App/QFLaunchPolicy.m`。
+规则和参数在 `QiafanYoupu/App/QFLaunchPolicy.swift`，App 入口、Tab 容器和登录展示在 `QiafanYoupu/App/QiafanYoupuApp.swift`。
 
 ## 目录与素材
 
 ```text
-QiafanYoupu.xcworkspace/        日常打开与编译入口（包含 Pods）
-QiafanYoupu.xcodeproj/          App 工程与共享 scheme
-Podfile / Podfile.lock          CocoaPods 声明与固定版本
+QiafanYoupu.xcodeproj/          工程入口与共享 scheme
 project.yml                    XcodeGen 配置
 QiafanYoupu/
-  App/                         启动、欢迎策略、自定义底部 Tab 容器
-  DesignSystem/                颜色、字体、布局、卡片和公共提示
-  Features/Auth/               五页欢迎、登录、协议通知与本地选择缓存
+  App/                         SwiftUI App、根视图、Tab、启动规则
+  DesignSystem/QFTheme.swift    语义颜色与 Color(hex:)
+  Features/Auth/               欢迎、登录、协议通知与 UI 选择缓存
   Features/Recipe/             菜谱一级页
   Features/Plan/               计划一级页
   Features/Ingredient/         食材一级页
   Features/Profile/            我的一级页
-  Resources/                   Assets、素材来源、隐私清单
-QiafanYoupuTests/               欢迎启动策略测试
-QiafanYoupuUITests/             欢迎、协议、Tab 与登录 UI 流程测试
-docs/实现范围.md                 本轮范围与后续接入边界
+  Resources/                   本地 Assets、素材来源、隐私清单
+QiafanYoupuTests/               启动策略测试
+QiafanYoupuUITests/             欢迎、协议、Tab、登录及 Release 流程测试
+docs/                          实现范围、组件选型和验证记录
 ```
 
-Logo、App 图标、默认菜谱插画、头像与食材图片复制自用户已确认的本地设计档案，映射见 [素材来源](QiafanYoupu/Resources/ASSET-SOURCES.md)。界面还使用系统 SF Symbols 和 UIKit 绘制的装饰元素；食材使用已确认的 Emoji PNG，缺少精确图时按食材分类使用通用图。图片随 App 打包，不在线下载。
+图片复制自用户已确认的设计档案，映射见 [素材来源](QiafanYoupu/Resources/ASSET-SOURCES.md)。页面使用本地 Assets、SF Symbols 和 SwiftUI 图形；食材使用已确认的 Emoji PNG，并按分类回退到通用图。图片随 App 打包。
 
-测试入口为 Xcode 的 Product → Test。默认 `QiafanYoupu` scheme 运行 Debug 单元与 UI 测试；`QiafanYoupu-ReleaseUI` 专供真实 Release 启动验收，不启用 Debug 绕过或符号导出。Release 用例需先卸载所选模拟器中的本 App，再只执行 `QFReleaseWelcomeUITests`，否则不是全新安装。运行结果见 [验证记录](docs/验证记录.md)。
+## 依赖与后续开发
 
-## 后续开发边界
+第三方依赖统一使用 Xcode 内置 Swift Package Manager（SPM）。当前页面由原生 SwiftUI 完成，尚无外部包，因此没有 `Package.resolved`。CocoaPods、Pods 与 Masonry 已移除。
 
-后续按已确认页面逐项加入详情、编辑、真实数据与账号功能。网络层、Repository、Session、Keychain、Apple 授权和业务缓存均尚未接入；正式协议内容及版本也需另行提供。欢迎完成标记和协议 UI 勾选不能用作认证状态或正式签署记录。
+将来新增包时，先核查 SPM 支持、维护状态、平台兼容与许可证，固定版本并提交 Xcode 生成的 `Package.resolved`，同步更新许可证记录。UIKit 仅在具体系统能力或组件确有需要时通过薄适配层补充。现行依据见 [UI 组件选型](docs/UI组件选型.md)。
 
-后台是独立工程，位于 `../../后台/qiafan-youpu-admin/`，当前只有品牌空白壳，其运行方式见后台 README。客户端无需启动后台或 Java 服务。
+真实协议、认证、会话、网络和业务缓存按后续确认范围接入。后台是独立 Vue 工程；当前客户端无需启动后台或 Java 服务。
 
-`.gitignore` 已排除构建产物、用户 Xcode 状态、日志、环境文件和常见签名密钥；不要将凭证或私钥加入仓库。
-
-## 第三方框架原则
-
-通用能力优先使用 Apple SDK 或成熟开源库，页面仅保留业务与必要适配。所有现有页面及公共组件的约束创建已使用 Masonry；滚动 LayoutGuide 通过 Masonry 的 MASViewAttribute 公开接口保持 content/frame 语义。后续图片缓存优先 SDWebImage、列表刷新优先 MJRefresh，按功能接入；不因星数高就引入已归档框架。第三方许可证随 `Resources/ThirdPartyAcknowledgements.plist` 打包，变更依赖时同步更新。
-
-组件层选型与 QMUI、JX、YY 系列对比见 [UI 组件选型](docs/UI组件选型.md)。除 Masonry 外，表中候选尚未安装，按具体功能和兼容结果接入。
+测试入口为 Product → Test。`QiafanYoupu` scheme 使用 Debug；`QiafanYoupu-ReleaseUI` 用于真实 Release 启动流程，首次安装场景需先卸载所选模拟器中的 App，再仅运行 `QFReleaseWelcomeUITests`。实际执行结果单独写入 [验证记录](docs/验证记录.md)，历史 OC 记录不代表 SwiftUI 版本已通过相同检查。

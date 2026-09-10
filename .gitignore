@@ -15,6 +15,6 @@ xcuserdata/
 secrets/
 /预览/
 
-# CocoaPods: dependencies are reproducible from the committed lockfile.
-/Pods/
-!Podfile.lock
+# Swift Package Manager: commit Package.resolved once external packages are used.
+.build/
+!Package.resolved

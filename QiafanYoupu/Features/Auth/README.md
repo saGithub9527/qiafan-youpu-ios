@@ -1,29 +1,26 @@
 # 欢迎、登录及安全通知 UI
 
-此目录只包含 Objective-C/UIKit 本地界面，不使用网络、身份认证 SDK、账号接口或 Token。完整正式协议尚未提供；协议入口打开可关闭的只读展示说明，不生成正式协议文本。Apple 按钮仅展示本地 UI，未调用 Apple 授权。
+本目录采用原生 SwiftUI，包含 `QFWelcomeView.swift`、`QFLoginView.swift` 和 `QFAuthViews.swift`。没有网络、认证 SDK、真实账号或 Token；Apple 按钮仅为本地 UI。
 
-## 集成
+## 集成接口
 
-- 将本目录三个 `.m` 加入 App target，引用 `QFWelcomeViewController.h`、`QFLoginViewController.h`。
-- 依赖 `../../DesignSystem/QFDesign.h` 中公共函数。需提供图片资产 `chef-icon`、`chef-logo`、`dish-dimsum`、`dish-noodles`、`dish-rice`、`dish-vegetables`。
-- 欢迎页 `onCompleted` 只在安全通知已勾选并点击“同意并继续”后调用一次。App 启动逻辑负责决定 Debug 每次显示、Release 仅首次安装显示，以及保存首次引导完成标记；欢迎页内部不读写该标记。
-- `QFLoginViewController.onClose` 交给宿主关闭；未设置时默认 dismiss。
+- `QFWelcomeView(onCompleted:)`：完成协议通知门禁后回调一次。根视图保存引导完成标记，并进入四个主页面。
+- `QFLoginView(onClose:)`：关闭登录时回调；登录页由 `QiafanYoupuApp.swift` 中的根容器通过 `fullScreenCover` 展示。
+- `QFAuthViews.swift`：共享协议选择行、安全通知、协议说明页、按钮样式及 `QFAuthConsentStore`。
+- 依赖 `DesignSystem/QFTheme.swift` 和本地 Assets：`chef-icon`、`chef-logo`、`dish-dimsum`、`dish-noodles`、`dish-rice`、`dish-vegetables`。无需外部包。
 
-## 交互与状态
+启动策略在 `App/QFLaunchPolicy.swift`：Debug 默认每次显示欢迎，Release 仅在引导尚未完成时显示。页面内不自行决定 Debug/Release 行为。
 
-- 欢迎共 5 页，可左右滑动或点击圆点；每页纵向空间不足时可滚动。前 4 页没有底部进入按钮，末页显示“进入 APP”。顶部“跳过介绍”和末页按钮都打开安全通知。此行为按最新实现要求覆盖旧 H5“首次立即弹窗、跳过先跳到第五页”说明。
-- 通知勾选默认 false。正文可滚动，勾选、继续和暂不同意保持可操作；点击背景不会确认或关闭。阅读协议返回保留暂选状态。“暂不同意”返回原页并保持欢迎未完成。
-- 登录页仅含快速登录、Apple 登录。已勾选后点击任一按钮仅弹出“登录暂未开放”。未勾选时先弹安全通知，暂存所选方法于内存；只有勾选且点击“同意并继续”才消费一次。选择通知中的复选框本身不会触发登录。
-- 登录页与通知内的勾选/取消同步更新 `NSUserDefaults` 的 `qfyp.login.consent` 字典。取消通知会保存 false 并清空待执行动作；进程重启仅恢复选择，不恢复动作。欢迎暂选状态与登录选择独立。
-- 缓存包含 `schemaVersion: 1`、`loginAgreementChecked`、`updatedAt`、`uiOnly: true` 和 `uiDocumentRevision: ui-placeholder-v1`。缺失、损坏或 UI 文档修订不匹配时按未勾选处理。正式协议版本未知，两个正式版本字段省略，因为 NSUserDefaults 不接受 NSNull。当前数据仅代表 UI 选择，不是认证凭证或正式签署记录；正式文档接入时须更新修订并要求重新选择。
-- 所有导航与协议阅读都在本机进行，通知不通过手势下拉关闭，减少动态效果设置会取消页面和主要模态过渡。
+## 交互与状态边界
 
-## 自动化标识
+欢迎使用原生分页 `TabView` 展示五页，可滑动或点击圆点。顶部“跳过介绍”和末页“进入 APP”都先打开安全通知；前四页没有进入按钮。通知以 SwiftUI 叠层显示，背景点击不会确认或关闭；选择“暂不同意”返回原页，保持引导未完成。
 
-`welcome.skip`、`welcome.enter`、`welcome.pages`、`welcome.page.1` 到 `welcome.page.5`、`login.quick`、`login.apple`、`login.agreement`、`login.close`、`notice.agreement`、`notice.continue`、`notice.decline`、`agreement.back`、`agreement.document`。
+协议默认未勾选。阅读页通过 `fullScreenCover` 展示并保留暂选状态；正式正文尚未提供，页面只展示说明，不生成正式协议。通知的继续按钮只在勾选后可用。
 
-欢迎的横向滚动视图预先建立所有页面；检查末页按钮是否可见时应使用 `isHittable`，因为未滚到末页时该按钮仍存在于视图树中。勾选按钮 accessibilityValue 为“已勾选”或“未勾选”。
+登录页与通知通过 `Binding` 同步选择，并写入 `qfyp.login.consent`。缓存包含 schema、更新时间、UI 文档修订及 `uiOnly` 标记；缺失、损坏或修订不匹配时按未勾选处理。欢迎通知的暂选状态与登录选择独立。
 
-## 已做验证
+未勾选时，所选登录方式只暂存在内存；勾选并点击“同意并继续”后消费一次，显示“登录暂未开放”。暂不同意会保存 false 并清空动作，关闭或重启不会恢复待执行登录。当前选择不是正式签署记录或身份凭证；正式协议接入时需更新修订并重新要求选择。
 
-已使用本机 iPhone Simulator SDK 对三个实现文件运行 ARC / iOS 15 target 的 Objective-C 语法检查。宿主工程负责完整构建及模拟器视觉、交互验收。建议验收路径：首次未勾选 → 继续禁用 → 查看协议并返回 → 勾选 → 同意继续；登录取消后再次进入和 App 重启均恢复 false；登录同意后重启仅恢复勾选，绝不自动执行待登录动作。
+`accessibilityReduceMotion` 用于欢迎切页与通知过渡。无障碍标识保留：`welcome.skip`、`welcome.enter`、`welcome.pages`、`welcome.page.1` 至 `welcome.page.5`、`login.quick`、`login.apple`、`login.agreement`、`login.close`、`notice.agreement`、`notice.continue`、`notice.decline`、`agreement.back`、`agreement.document`。勾选控件的值为“已勾选”或“未勾选”。
+
+测试运行方式见 [项目 README](../../../README.md)，实际执行结果单独记录。历史 OC 语法检查不作为当前 SwiftUI 页面验收结果。

@@ -6,20 +6,18 @@ options:
   xcodeVersion: "26.3"
 settings:
   base:
-    CLANG_ENABLE_OBJC_ARC: YES
+    SWIFT_VERSION: "5.0"
     DEVELOPMENT_TEAM: B654WGMW63
     CODE_SIGN_STYLE: Automatic
     TARGETED_DEVICE_FAMILY: "1"
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     ENABLE_USER_SCRIPT_SANDBOXING: YES
-    GCC_WARN_UNDECLARED_SELECTOR: YES
-    CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF: YES
   configs:
     Debug:
-      GCC_PREPROCESSOR_DEFINITIONS: ["$(inherited)", "DEBUG=1", "QF_UI_ONLY=1"]
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG QF_UI_ONLY"
     Release:
-      GCC_PREPROCESSOR_DEFINITIONS: ["$(inherited)", "QF_UI_ONLY=1"]
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) QF_UI_ONLY"
 targets:
   QiafanYoupu:
     type: application
@@ -38,31 +36,27 @@ targets:
         UIApplicationSupportsIndirectInputEvents: YES
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: NO
-          UISceneConfigurations:
-            UIWindowSceneSessionRoleApplication:
-              - UISceneConfigurationName: Default
-                UISceneDelegateClassName: QFSceneDelegate
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.talka.qiafanyoupu
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
-        HEADER_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/QiafanYoupu/**"]
   QiafanYoupuTests:
     type: bundle.unit-test
     platform: iOS
-    sources: [QiafanYoupuTests]
+    sources:
+      - path: QiafanYoupuTests
     dependencies:
       - target: QiafanYoupu
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.talka.qiafanyoupu.tests
         GENERATE_INFOPLIST_FILE: YES
-        HEADER_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/QiafanYoupu/App"]
   QiafanYoupuUITests:
     type: bundle.ui-testing
     platform: iOS
-    sources: [QiafanYoupuUITests]
+    sources:
+      - path: QiafanYoupuUITests
     dependencies:
       - target: QiafanYoupu
     settings:

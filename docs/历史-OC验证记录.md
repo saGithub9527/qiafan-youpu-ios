@@ -1,0 +1,50 @@
+# 历史验证：OC / UIKit
+
+以下记录来自 SwiftUI 迁移前的提交，不能作为当前 Swift 实现的测试证据。原实现保存在 `oc-uikit-baseline`。
+
+# UI 工程验证记录
+
+日期：2026-09-10。工具：Xcode 26.3；模拟器运行时：iOS 26.3；最低部署版本：iOS 15.0。尚未在 iOS 15 真机上验收，也未做签名归档或上传。
+
+## 结果
+
+- Debug / Release 模拟器构建通过；最终构建日志未出现编译警告或错误。
+- Debug：2 个启动策略单元测试、3 个 UI 流程测试通过。Release 专用用例在 Debug 中按配置跳过。
+- Release：独立 `QiafanYoupu-ReleaseUI` scheme 的首次安装与再次启动测试通过。
+- 首轮 UI 流程使用 iPhone 16e，最终显示修正后的 Debug 流程使用 iPhone 17 Pro；Release 首次启动流程使用 iPhone 16e。
+- 管理后台 `npm run build`（包含 vue-tsc）通过；仅有工程壳，无业务请求。
+
+## 已覆盖
+
+1. Debug 即使保存了引导完成状态，关闭并重新启动仍展示欢迎页。
+2. 欢迎可左右滑动五页，仅末页显示进入按钮；安全通知默认不勾选，勾选才可继续。
+3. Release 全新安装显示欢迎；完成后重启直接进入四个 Tab；Release 忽略 Debug 的跳过、重置和登录态预览参数。
+4. 四个 Tab 均可切换并显示对应一级 UI；“我的”可打开、关闭登录页。
+5. 登录协议勾选和取消均可跨进程重启保存；未勾选点击登录出现通知；暂不同意回到未勾选状态。
+6. 快速登录与 Apple 按钮只展示“登录暂未开放”，没有网络、用户创建或 Token。
+7. 人工查看模拟器截图：欢迎、末页、安全通知、登录与四个一级页。食材已改用已确认的 Emoji PNG，避免运行时字体裁切；食材/菜谱分类按钮已统一使用 configuration。
+
+## 本地结果文件
+
+- `build/UIAcceptanceFinal.xcresult`：Debug 最终结果。
+- `build/ReleaseWelcomeFinal.xcresult`：Release 启动结果。
+- `预览/`：从最终 UI 测试导出的原始截图。截图、构建产物不纳入源码提交。
+
+UI 展示样例不代表真实账号、库存、计划或费用。接口、二级业务和正式协议文本均不属于本次验收。
+
+## CocoaPods 接入（2026-09-10）
+
+- CocoaPods 1.16.2；Masonry 1.1.0；pod install --deployment 校验锁定版本成功。
+- 构建入口改为 QiafanYoupu.xcworkspace；Debug / Release 模拟器构建通过。
+- Masonry 上游源码存在旧 API 弃用、noescape 标注和诊断字典重复键警告；未全局关闭编译警告。应用代码本次未出现编译错误。
+- 本次将公共约束转换为 Masonry，保留其不支持的滚动 LayoutGuide 原生约束。欢迎策略、协议缓存和 API 范围未变。
+- 受影响 UI 回归通过：四个 Tab 切换及登录页打开/关闭；五页欢迎、协议通知、完成后 Debug 重启。两项 UI 用例均通过，结果：build/CocoaPodsUI.xcresult。
+
+## 现有页面全量 Masonry 迁移（2026-09-10）
+
+- 登录、欢迎、安全/协议组件、菜谱、计划、食材、我的、根容器及公共滚动区，共245条原生约束创建迁移到Masonry。扫描应用.h/.m，原生constraintEqualTo/GreaterThan/LessThan、activateConstraints与constraintWithItem创建均为0。
+- QFLayoutGuideAttribute仅用Masonry公开的MASViewAttribute初始化器桥接UIKit LayoutGuide，保留contentLayoutGuide和frameLayoutGuide各自语义，未另写布局引擎。
+- Debug测试构建和Release模拟器构建通过。本次增量编译日志没有应用源码警告或错误。
+- iPhone16e首次完整回归：2项启动单元测试、四Tab/登录展示、登录协议缓存测试通过。欢迎流程的测试进程被signal TERM终止，该次整体结果为失败；没有修改测试断言或业务代码，转至iPhone17Pro单独复测欢迎流程通过。
+- 原始结果：build/MasonryAllPages.xcresult（保留初次中断记录）、build/MasonryWelcomeRetry.xcresult（欢迎流程复测通过）。已查看迁移后登录页截图，样式与预定页面一致；四个一级页及登录截图更新在预览目录。
+- 除Masonry外，QMUI/JX/YY等框架本次仅研究选型，未改Podfile或安装到应用。详情见UI组件选型.md。
