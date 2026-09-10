@@ -1,4 +1,5 @@
 #import "QFDesign.h"
+#import <Masonry/Masonry.h>
 
 UIColor *QFHex(unsigned int v) {
     return [UIColor colorWithRed:((v >> 16) & 255) / 255.0
@@ -54,7 +55,9 @@ UIView *QFCard(void) {
 UIView *QFSpacer(CGFloat height) {
     UIView *v = [UIView new];
     v.translatesAutoresizingMaskIntoConstraints = NO;
-    [v.heightAnchor constraintEqualToConstant:height].active = YES;
+    [v mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(height);
+    }];
     return v;
 }
 UIButton *QFButton(NSString *title, CGFloat size, UIColor *color) {
@@ -75,13 +78,13 @@ UIButton *QFIconButton(NSString *symbol, UIColor *color) {
     icon.contentMode = UIViewContentModeScaleAspectFit;
     icon.accessibilityElementsHidden = YES;
     [v addSubview:icon];
-    [NSLayoutConstraint activateConstraints:@[
-        [icon.widthAnchor constraintEqualToConstant:22], [icon.heightAnchor constraintEqualToConstant:22],
-        [icon.centerXAnchor constraintEqualToAnchor:v.centerXAnchor],
-        [icon.centerYAnchor constraintEqualToAnchor:v.centerYAnchor]
-    ]];
-    [v.widthAnchor constraintGreaterThanOrEqualToConstant:40].active = YES;
-    [v.heightAnchor constraintGreaterThanOrEqualToConstant:40].active = YES;
+    [icon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(22, 22));
+        make.center.equalTo(v);
+    }];
+    [v mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.mas_greaterThanOrEqualTo(40);
+    }];
     return v;
 }
 void QFOnTap(UIButton *button, void (^handler)(void)) {
@@ -94,12 +97,12 @@ void QFOnTap(UIButton *button, void (^handler)(void)) {
 void QFPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
     [parent addSubview:child];
     child.translatesAutoresizingMaskIntoConstraints = NO;
-    [NSLayoutConstraint activateConstraints:@[
-        [child.topAnchor constraintEqualToAnchor:parent.topAnchor constant:insets.top],
-        [child.leadingAnchor constraintEqualToAnchor:parent.leadingAnchor constant:insets.left],
-        [child.trailingAnchor constraintEqualToAnchor:parent.trailingAnchor constant:-insets.right],
-        [child.bottomAnchor constraintEqualToAnchor:parent.bottomAnchor constant:-insets.bottom]
-    ]];
+    [child mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(parent.mas_top).offset(insets.top);
+        make.leading.equalTo(parent.mas_leading).offset(insets.left);
+        make.trailing.equalTo(parent.mas_trailing).offset(-insets.right);
+        make.bottom.equalTo(parent.mas_bottom).offset(-insets.bottom);
+    }];
 }
 UIImageView *QFImage(NSString *asset, UIViewContentMode mode) {
     UIImageView *v = [[UIImageView alloc] initWithImage:[UIImage imageNamed:asset]];
@@ -130,15 +133,14 @@ void QFShowUnavailable(UIViewController *controller, NSString *title) {
     self.scrollView.showsVerticalScrollIndicator = NO;
     self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:self.scrollView];
-    [NSLayoutConstraint activateConstraints:@[
-        [self.scrollView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [self.scrollView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [self.scrollView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [self.scrollView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor]
-    ]];
+    [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop);
+        make.leading.trailing.bottom.equalTo(self.view);
+    }];
     self.contentStack = QFStack(UILayoutConstraintAxisVertical, 16);
     self.contentStack.translatesAutoresizingMaskIntoConstraints = NO;
     [self.scrollView addSubview:self.contentStack];
+    // Masonry 1.1.0 does not accept scroll layout guides directly; retain their sizing semantics.
     [NSLayoutConstraint activateConstraints:@[
         [self.contentStack.topAnchor constraintEqualToAnchor:self.scrollView.contentLayoutGuide.topAnchor
                                                     constant:14],

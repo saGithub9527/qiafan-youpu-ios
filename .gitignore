@@ -14,3 +14,7 @@ xcuserdata/
 *.mobileprovision
 secrets/
 /预览/
+
+# CocoaPods: dependencies are reproducible from the committed lockfile.
+/Pods/
+!Podfile.lock

@@ -6,11 +6,12 @@ Objective-C + UIKit 原生 iPhone 工程，使用 Auto Layout 和本地素材。
 
 ## 打开与构建
 
-工程配置为 iOS 15.0 起、iPhone 竖屏、ARC，`project.yml` 的 Xcode 版本为 26.3。当前没有第三方客户端依赖，无需安装 CocoaPods 或下载 Swift Package。
+工程配置为 iOS 15.0 起、iPhone 竖屏、ARC，`project.yml` 的 Xcode 版本为 26.3。客户端依赖统一用 CocoaPods 管理，已接入 Masonry 1.1.0。当前验证工具版本为 CocoaPods 1.16.2；提交 Podfile.lock 固定依赖，不提交 Pods 目录。
 
 ```bash
 cd '/Users/talka/Documents/恰饭有谱/客户端/qiafan-youpu-ios'
-open QiafanYoupu.xcodeproj
+pod install --deployment
+open QiafanYoupu.xcworkspace
 ```
 
 在 Xcode 中选择 `QiafanYoupu` scheme 和一个已安装的 iPhone 模拟器，然后运行。真机运行需要在 Signing & Capabilities 中配置可用的开发团队和签名。
@@ -19,7 +20,7 @@ open QiafanYoupu.xcodeproj
 
 ```bash
 xcodebuild \
-  -project QiafanYoupu.xcodeproj \
+  -workspace QiafanYoupu.xcworkspace \
   -scheme QiafanYoupu \
   -configuration Debug \
   -destination 'generic/platform=iOS Simulator' \
@@ -28,7 +29,7 @@ xcodebuild \
   build
 ```
 
-将 `Debug` 改为 `Release` 可构建 Release 配置。`project.yml` 是 XcodeGen 工程配置；修改 target 或构建设置后，使用 `xcodegen generate --spec project.yml` 同步 `.xcodeproj`。只打开现有工程不需要 XcodeGen。
+将 `Debug` 改为 `Release` 可构建 Release 配置。`project.yml` 是 XcodeGen 工程配置；修改 target 或构建设置后，先用 `xcodegen generate --spec project.yml` 同步 `.xcodeproj`，再运行 `pod install --deployment` 恢复依赖集成；日常使用 `.xcworkspace` 打开工程。只打开现有工程不需要 XcodeGen。
 
 ## 欢迎与 Debug 预览
 
@@ -57,7 +58,9 @@ xcrun simctl launch booted com.talka.qiafanyoupu \
 ## 目录与素材
 
 ```text
-QiafanYoupu.xcodeproj/          可直接打开的 Xcode 工程与共享 scheme
+QiafanYoupu.xcworkspace/        日常打开与编译入口（包含 Pods）
+QiafanYoupu.xcodeproj/          App 工程与共享 scheme
+Podfile / Podfile.lock          CocoaPods 声明与固定版本
 project.yml                    XcodeGen 配置
 QiafanYoupu/
   App/                         启动、欢迎策略、自定义底部 Tab 容器
@@ -84,3 +87,7 @@ Logo、App 图标、默认菜谱插画、头像与食材图片复制自用户已
 后台是独立工程，位于 `../../后台/qiafan-youpu-admin/`，当前只有品牌空白壳，其运行方式见后台 README。客户端无需启动后台或 Java 服务。
 
 `.gitignore` 已排除构建产物、用户 Xcode 状态、日志、环境文件和常见签名密钥；不要将凭证或私钥加入仓库。
+
+## 第三方框架原则
+
+通用能力优先使用 Apple SDK 或成熟开源库，页面仅保留业务与必要适配。公共布局已使用 Masonry，滚动布局的 LayoutGuide 保留 UIKit 原生约束。后续图片缓存优先 SDWebImage、列表刷新优先 MJRefresh，按功能接入；不因星数高就引入已归档框架。第三方许可证随 `Resources/ThirdPartyAcknowledgements.plist` 打包，变更依赖时同步更新。
