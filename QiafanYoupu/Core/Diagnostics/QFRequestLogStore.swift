@@ -8,7 +8,7 @@
     case failed
   }
 
-  /// Only sanitized, bounded previews are represented by this model or persisted to disk.
+  /// Debug-only raw request values, with bounded previews and disk retention.
   struct QFRequestLogEntry: Codable, Identifiable {
     let id: UUID
     let startedAt: Date
@@ -106,12 +106,12 @@
         id: id,
         startedAt: now,
         finishedAt: nil,
-        method: QFRequestLogRedactor.text(request.httpMethod ?? "GET"),
-        url: QFRequestLogRedactor.url(request.url),
-        requestHeaders: QFRequestLogRedactor.headers(request.allHTTPHeaderFields ?? [:]),
+        method: request.httpMethod ?? "GET",
+        url: request.url?.absoluteString ?? "[URL 不可用]",
+        requestHeaders: request.allHTTPHeaderFields ?? [:],
         requestBody: request.httpBodyStream != nil
-          ? QFRequestLogRedactor.bounded("[流式请求体未读取]", limit: maxBodyBytes)
-          : QFRequestLogRedactor.body(
+          ? QFRequestLogPreview.bounded("[流式请求体未读取]", limit: maxBodyBytes)
+          : QFRequestLogPreview.body(
             request.httpBody,
             contentType: request.value(forHTTPHeaderField: "Content-Type"),
             limit: maxBodyBytes
@@ -142,16 +142,17 @@
           result, item in
           result[String(describing: item.key)] = String(describing: item.value)
         } ?? [:]
-      entry.responseHeaders = QFRequestLogRedactor.headers(responseHeaders)
-      entry.responseBody = QFRequestLogRedactor.body(
+      entry.responseHeaders = responseHeaders
+      entry.responseBody = QFRequestLogPreview.body(
         data,
         contentType: response?.value(forHTTPHeaderField: "Content-Type"),
         limit: maxBodyBytes
       )
       if let error {
-        // localizedDescription/userInfo can contain a raw URL, credentials, or server text.
-        entry.errorDescription =
-          "\(String(reflecting: type(of: error)))，错误码 \((error as NSError).code)"
+        let failure = error as NSError
+        entry.errorDescription = QFRequestLogPreview.bounded(
+          "\(failure.domain)，错误码 \(failure.code)：\(failure.localizedDescription)",
+          limit: maxBodyBytes)
       }
       persist(entry, file: file)
     }
@@ -253,140 +254,29 @@
     }
   }
 
-  private enum QFRequestLogRedactor {
-    static let redacted = "[REDACTED]"
+  private enum QFRequestLogPreview {
     private static let truncation = "\n[内容已截断]"
-    private static let assignmentRegex = try? NSRegularExpression(
-      pattern: #"\b([\w.-]{1,128})[\"']?\s*[:=]\s*(?:\"([^\"]*)\"|'([^']*)'|([^&,;}\]\r\n]+))"#
-    )
-    private static let credentialRegex = try? NSRegularExpression(
-      pattern: #"(?i)\b(Bearer|Basic)\s+[A-Za-z0-9+/_=.\-]+"#
-    )
-
-    private static func isSensitive(_ key: String) -> Bool {
-      let normalized = key.lowercased().filter { $0.isLetter || $0.isNumber }
-      let fragments = [
-        "token", "password", "passwd", "passphrase", "secret", "authorization", "cookie",
-        "credential", "apikey", "accesskey", "privatekey", "sessionid", "sessionkey",
-        "verificationcode", "verifycode", "smscode",
-      ]
-      return fragments.contains { normalized.contains($0) }
-        || ["pwd", "otp", "pin"].contains(normalized)
-    }
-
-    static func headers(_ headers: [String: String]) -> [String: String] {
-      headers.mapValues { text($0) }.reduce(into: [:]) { result, item in
-        result[item.key] = isSensitive(item.key) ? redacted : item.value
-      }
-    }
-
-    static func url(_ url: URL?) -> String {
-      guard let url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-        return "[URL 不可用]"
-      }
-      components.user = nil
-      components.password = nil
-      // Fragments are never transmitted to the server and can contain OAuth credentials.
-      components.fragment = nil
-      components.queryItems = components.queryItems?.map {
-        URLQueryItem(name: $0.name, value: isSensitive($0.name) ? redacted : $0.value.map(text))
-      }
-      return components.string ?? "[URL 不可用]"
-    }
 
     static func body(_ data: Data?, contentType: String?, limit: Int) -> String {
       guard let data, !data.isEmpty else { return "" }
-      // A diagnostic preview does not justify parsing an arbitrarily large payload on the UI actor.
+      // Size limits protect the debug view; field names and values are never redacted.
       guard data.count <= 2 * 1024 * 1024 else {
         return bounded("[内容过大，已省略；\(data.count) 字节]", limit: limit)
       }
-      let sanitized: String
+      let preview: String
       if let object = try? JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed]),
-        let safeData = try? JSONSerialization.data(
-          withJSONObject: json(object), options: [.prettyPrinted, .sortedKeys, .fragmentsAllowed]
-        ), let safeString = String(data: safeData, encoding: .utf8)
+        let formatted = try? JSONSerialization.data(
+          withJSONObject: object,
+          options: [.prettyPrinted, .sortedKeys, .fragmentsAllowed, .withoutEscapingSlashes]),
+        let text = String(data: formatted, encoding: .utf8)
       {
-        sanitized = safeString
-      } else if contentType?.lowercased().contains("application/x-www-form-urlencoded") == true,
-        let string = String(data: data, encoding: .utf8)
-      {
-        sanitized = form(string)
+        preview = text
+      } else if let text = String(data: data, encoding: .utf8) {
+        preview = text
       } else {
-        // Multipart, malformed JSON, and arbitrary text have no reliable field boundaries.
-        sanitized = "[非 JSON / 表单内容已省略；\(data.count) 字节]"
+        preview = "[二进制 Base64；\(data.count) 字节]\n" + data.base64EncodedString()
       }
-      return bounded(sanitized, limit: limit)
-    }
-
-    private static func json(_ value: Any) -> Any {
-      if let dictionary = value as? [String: Any] {
-        return dictionary.reduce(into: [String: Any]()) { result, item in
-          result[item.key] = isSensitive(item.key) ? redacted : json(item.value)
-        }
-      }
-      if let array = value as? [Any] { return array.map(json) }
-      if let string = value as? String {
-        // JSON strings sometimes contain an encoded JSON object rather than an object node.
-        if let data = string.data(using: .utf8),
-          let nested = try? JSONSerialization.jsonObject(with: data),
-          let safeData = try? JSONSerialization.data(
-            withJSONObject: json(nested), options: [.sortedKeys]),
-          let safeString = String(data: safeData, encoding: .utf8)
-        {
-          return safeString
-        }
-        return text(string)
-      }
-      return value
-    }
-
-    private static func form(_ string: String) -> String {
-      guard var components = URLComponents(string: "https://request-log.invalid/?" + string),
-        let queryItems = components.queryItems
-      else { return "[无法安全解析的表单内容已省略]" }
-      components.queryItems = queryItems.map {
-        URLQueryItem(name: $0.name, value: isSensitive($0.name) ? redacted : $0.value.map(text))
-      }
-      return components.percentEncodedQuery ?? ""
-    }
-
-    static func text(_ string: String) -> String {
-      let lowercased = string.lowercased()
-      if lowercased.hasPrefix("http://") || lowercased.hasPrefix("https://"),
-        let nestedURL = URL(string: string), nestedURL.host != nil
-      {
-        return url(nestedURL)
-      }
-      // Also cover common credentials inside JSON string fields and header values.
-      guard
-        isSensitive(lowercased)
-          || ["bearer", "basic", "pwd", "otp", "pin"].contains(where: lowercased.contains)
-      else {
-        return string
-      }
-      let result = replacing(credentialRegex, in: string, with: "$1 " + redacted)
-      guard let assignmentRegex else { return "[内容已省略]" }
-      let redactedString = NSMutableString(string: result)
-      let matches = assignmentRegex.matches(
-        in: result, range: NSRange(result.startIndex..., in: result))
-      for match in matches.reversed() {
-        guard let keyRange = Range(match.range(at: 1), in: result),
-          isSensitive(String(result[keyRange]))
-        else { continue }
-        for group in 2...4 where match.range(at: group).location != NSNotFound {
-          redactedString.replaceCharacters(in: match.range(at: group), with: redacted)
-        }
-      }
-      return redactedString as String
-    }
-
-    private static func replacing(
-      _ regex: NSRegularExpression?, in string: String, with replacement: String
-    ) -> String {
-      guard let regex else { return "[内容已省略]" }
-      return regex.stringByReplacingMatches(
-        in: string, range: NSRange(string.startIndex..., in: string), withTemplate: replacement
-      )
+      return bounded(preview, limit: limit)
     }
 
     static func bounded(_ string: String, limit: Int) -> String {

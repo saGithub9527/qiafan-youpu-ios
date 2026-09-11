@@ -51,7 +51,7 @@ xcodebuild -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 沙盒路径：`Library/Application Support/Diagnostics/Requests`。
 
 - 仅 Debug 编译和记录，Release 无入口和请求日志实现。
-- Authorization、Token、密码、设备秘密凭证、Apple 授权码等递归脱敏；设备号可用于排查。
+- 按用户要求保留原始请求头、参数与响应值，包括 Authorization、Token、设备凭证、有效期和密码配置状态；仅在本机 Debug 日志中展示，不再按字段名脱敏。
 - 最多 500 条或 10 MiB，单段正文最多 16 KiB；超过限制会截断或省略，不无限写盘。
 - 请求开始/结束各更新一次文件，不使用高频后台轮询；日志排除系统备份并采用受限权限和文件保护。
 - 列表分页是本地日志分页，不新增服务端日志 API。
@@ -107,8 +107,10 @@ xcodebuild test -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
   CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-
 ```
 
-`QiafanYoupu-LiveTests` 是显式运行的真实快速登录测试，只选择快速登录恢复及日志界面两个联调用例，会在测试服务创建或复用该模拟器设备的账号；不要用于正式环境。普通 UI 用例涉及登录协议时需测试配置可用且模拟器处于未登录状态。`QiafanYoupu-ReleaseUI` 保留 Release 引导回归入口，首次安装测试需准备干净应用容器。
+`QiafanYoupu-LiveTests` 是显式运行的真实快速登录测试，只选择快速登录恢复及日志界面两个联调用例，会在测试服务创建或复用该模拟器设备的账号；不要用于正式环境。普通 UI 用例涉及登录协议时需测试配置可用；协议回归会先退出指定测试模拟器的当前会话，保留设备凭证。`QiafanYoupu-ReleaseUI` 保留 Release 引导回归入口，首次安装测试需准备干净应用容器。
 
 实际 Apple 账号授权、真机硬件文件保护和发布签名应在真机验收；未执行项目不会写成已通过。后台仍为独立 Vue 基础壳，本轮不扩展业务页面。
 
 隐私清单已对应当前 Device-Id、账号标识、服务诊断及本 App 文件时间戳访问同步声明；本地崩溃未上传。发布归档时仍需核对 Xcode 聚合报告，并在 App Store Connect 按最终数据流填写。声明依据见 [Apple 数据类型定义](https://developer.apple.com/app-store/app-privacy-details/)和[Required Reason API](https://developer.apple.com/documentation/bundleresources/app-privacy-configuration/nsprivacyaccessedapitypes/nsprivacyaccessedapitype)。
+
+2026-09-11 调整：协议复选框与整段文字垂直居中；快速/Apple 登录、配置重试、调试菜单的网络动作均显示对应按钮内 Loading，结束后恢复并防止重复点击。旧日志已保存的 `[REDACTED]` 不会自动还原，需使用更新后的 App 重新发起请求。

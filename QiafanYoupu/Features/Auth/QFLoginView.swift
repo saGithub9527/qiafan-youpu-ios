@@ -16,7 +16,8 @@ struct QFLoginView: View {
   @State private var showsError = false
   @State private var errorMessage = ""
   @State private var authorizingApple = false
-  @State private var performingLogin = false
+  @State private var activeMethod: LoginMethod?
+  @State private var retryingConfiguration = false
   @State private var appleAuthorization = QFAppleAuthorization()
   @State private var loginTask: Task<Void, Never>?
   @State private var document: QFAuthDocument?
@@ -24,6 +25,12 @@ struct QFLoginView: View {
   private enum LoginMethod {
     case quick
     case apple
+  }
+
+  private var performingLogin: Bool { activeMethod != nil }
+
+  private var loginInteractionBlocked: Bool {
+    performingLogin || app.isLoggingIn || retryingConfiguration || app.loadingConfiguration
   }
 
   var body: some View {
@@ -96,12 +103,8 @@ struct QFLoginView: View {
             .foregroundColor(QFTheme.secondary)
             .padding(.top, 12)
           loginButtons.padding(.top, 70)
-          if app.isLoggingIn || authorizingApple {
-            ProgressView(authorizingApple ? "正在等待 Apple 授权…" : "正在登录…")
-              .font(.footnote).padding(.top, 12)
-          } else if app.configurationError != nil {
-            Button("重试加载启动配置") { Task { await app.loadConfiguration() } }
-              .font(.footnote).foregroundColor(QFTheme.green).padding(.top, 12)
+          if app.configurationError != nil || retryingConfiguration {
+            configurationRetryButton.padding(.top, 12)
           }
           QFAuthAgreementRow(
             checked: persistedAgreement,
@@ -109,6 +112,7 @@ struct QFLoginView: View {
             identifier: "login.agreement",
             onReadDocument: { document = $0 }
           )
+          .disabled(loginInteractionBlocked)
           .padding(.top, 88)
         }
         .frame(maxWidth: .infinity)
@@ -125,24 +129,25 @@ struct QFLoginView: View {
       Button {
         requestLogin(.quick)
       } label: {
-        Text("快速登录")
+        QFAuthLoadingButtonLabel(title: "快速登录", isLoading: activeMethod == .quick)
           .font(.system(size: 20, weight: .semibold))
       }
-      .buttonStyle(QFAuthPrimaryButtonStyle())
+      .buttonStyle(QFAuthPrimaryButtonStyle(isLoading: activeMethod == .quick))
+      .accessibilityLabel("快速登录")
       .accessibilityIdentifier("login.quick")
       .accessibilityValue(
-        app.loadingConfiguration
-          ? "配置加载中" : (app.loginAvailability(apple: false) == nil ? "可用" : "暂不可用"))
+        activeMethod == .quick
+          ? "正在登录"
+          : (app.loadingConfiguration || retryingConfiguration
+            ? "配置加载中" : (app.loginAvailability(apple: false) == nil ? "可用" : "暂不可用")))
 
       Button {
         requestLogin(.apple)
       } label: {
-        HStack(spacing: 9) {
-          Image(systemName: "apple.logo")
-            .font(.system(size: 24, weight: .medium))
-          Text("通过 Apple 登录")
-            .font(.system(size: 22, weight: .medium))
-        }
+        QFAuthLoadingButtonLabel(
+          title: "通过 Apple 登录", isLoading: activeMethod == .apple, systemImage: "apple.logo"
+        )
+        .font(.system(size: 22, weight: .medium))
         .foregroundColor(.white)
         .frame(maxWidth: .infinity)
         .frame(height: 55)
@@ -151,9 +156,39 @@ struct QFLoginView: View {
         .contentShape(Rectangle())
       }
       .buttonStyle(.plain)
+      .opacity(loginInteractionBlocked && activeMethod != .apple ? 0.55 : 1)
+      .accessibilityLabel("通过 Apple 登录")
       .accessibilityIdentifier("login.apple")
+      .accessibilityValue(
+        activeMethod == .apple
+          ? (authorizingApple ? "正在等待 Apple 授权" : "正在登录")
+          : (app.loadingConfiguration || retryingConfiguration
+            ? "配置加载中" : (app.loginAvailability(apple: true) == nil ? "可用" : "暂不可用")))
     }
-    .disabled(performingLogin)
+    .disabled(loginInteractionBlocked)
+  }
+
+  private var configurationRetryButton: some View {
+    Button {
+      guard !loginInteractionBlocked else { return }
+      // Lock immediately, before the task begins or the session publishes its loading state.
+      retryingConfiguration = true
+      Task {
+        defer { retryingConfiguration = false }
+        await app.loadConfiguration()
+      }
+    } label: {
+      QFAuthLoadingButtonLabel(
+        title: "重试加载启动配置", isLoading: retryingConfiguration, tint: QFTheme.green
+      )
+      .font(.footnote)
+      .foregroundColor(QFTheme.green)
+      .frame(minHeight: 44)
+    }
+    .disabled(loginInteractionBlocked)
+    .accessibilityLabel("重试加载启动配置")
+    .accessibilityValue(retryingConfiguration ? "正在加载" : "可重试")
+    .accessibilityIdentifier("login.configuration.retry")
   }
 
   private var persistedAgreement: Binding<Bool> {
@@ -168,7 +203,7 @@ struct QFLoginView: View {
   }
 
   private func requestLogin(_ method: LoginMethod) {
-    guard !showsNotice, !showsError, !app.isLoggingIn, !authorizingApple, document == nil else {
+    guard !showsNotice, !showsError, !loginInteractionBlocked, document == nil else {
       return
     }
     if agreementChecked {
@@ -207,15 +242,18 @@ struct QFLoginView: View {
   }
 
   private func beginLogin(_ method: LoginMethod) {
-    guard agreementChecked, !performingLogin else { return }
+    guard agreementChecked, !loginInteractionBlocked else { return }
     if let reason = app.loginAvailability(apple: method == .apple) {
       errorMessage = reason
       showsError = true
       return
     }
-    performingLogin = true
+    activeMethod = method
     loginTask = Task {
-      defer { performingLogin = false }
+      defer {
+        activeMethod = nil
+        loginTask = nil
+      }
       do {
         var code: String?
         if method == .apple {

@@ -19,12 +19,42 @@ final class QFMainUITests: XCTestCase {
     add(attachment)
   }
 
+  private func assertAgreementIsVerticallyCentered(_ identifier: String) {
+    let checkbox = app.buttons[identifier]
+    let copy = app.descendants(matching: .any).matching(identifier: "\(identifier).text").firstMatch
+    XCTAssertTrue(checkbox.waitForExistence(timeout: 5))
+    XCTAssertTrue(copy.waitForExistence(timeout: 5))
+    XCTAssertGreaterThan(copy.frame.height, 0)
+    XCTAssertEqual(checkbox.frame.midY, copy.frame.midY, accuracy: 2)
+  }
+
   private func openLogin(reset: Bool) {
     app.launchArguments = ["-QFSkipWelcome", "-QFStartTab", "profile"]
     if reset { app.launchArguments += ["-QFResetUIState"] }
     app.launch()
     XCTAssertTrue(app.buttons["profile.login"].waitForExistence(timeout: 10))
     app.buttons["profile.login"].tap()
+    if !app.buttons["login.quick"].waitForExistence(timeout: 5) {
+      // Session restoration can finish between reading the profile label and tapping it.
+      // Check the actual destination, then revoke only this simulator's test session.
+      XCTAssertTrue(app.alerts["编辑资料"].waitForExistence(timeout: 5))
+      app.alerts["编辑资料"].buttons["知道了"].tap()
+      app.buttons["diagnostics.open"].tap()
+      let menu = app.buttons["diagnostics.menu"]
+      XCTAssertTrue(menu.waitForExistence(timeout: 5))
+      expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: menu)
+      waitForExpectations(timeout: 30)
+      menu.tap()
+      app.buttons["退出当前测试会话"].tap()
+      expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: menu)
+      waitForExpectations(timeout: 30)
+      app.buttons["diagnostics.requests.close"].tap()
+      expectation(
+        for: NSPredicate(format: "label == %@", "去登录"),
+        evaluatedWith: app.buttons["profile.login"])
+      waitForExpectations(timeout: 10)
+      app.buttons["profile.login"].tap()
+    }
     XCTAssertTrue(app.buttons["login.quick"].waitForExistence(timeout: 5))
     let ready = NSPredicate(format: "value == %@", "可用")
     expectation(for: ready, evaluatedWith: app.buttons["login.quick"])
@@ -69,9 +99,17 @@ final class QFMainUITests: XCTestCase {
 
   func testLoginConsentPersistsBothDirectionsAndDoesNotAuthenticate() {
     openLogin(reset: true)
+    assertAgreementIsVerticallyCentered("login.agreement")
+    capture("login-centered-agreement")
+    XCTAssertTrue(app.buttons["login.quick"].isEnabled)
+    XCTAssertTrue(app.buttons["login.apple"].isEnabled)
+    XCTAssertNotEqual(app.buttons["login.apple"].value as? String, "正在等待 Apple 授权")
+    XCTAssertNotEqual(app.buttons["login.apple"].value as? String, "正在登录")
     XCTAssertEqual(app.buttons["login.agreement"].value as? String, "未勾选")
     app.buttons["login.quick"].tap()
     XCTAssertTrue(app.buttons["notice.continue"].waitForExistence(timeout: 5))
+    assertAgreementIsVerticallyCentered("notice.agreement")
+    capture("notice-centered-agreement")
     XCTAssertFalse(app.buttons["notice.continue"].isEnabled)
     app.buttons["notice.agreement"].tap()
     app.buttons["notice.decline"].tap()

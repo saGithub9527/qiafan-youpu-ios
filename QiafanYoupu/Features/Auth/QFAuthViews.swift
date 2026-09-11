@@ -111,7 +111,7 @@ struct QFAuthAgreementRow: View {
   let onReadDocument: (QFAuthDocument) -> Void
 
   var body: some View {
-    HStack(alignment: .top, spacing: 3) {
+    HStack(alignment: .center, spacing: 3) {
       Button {
         checked.toggle()
       } label: {
@@ -133,7 +133,7 @@ struct QFAuthAgreementRow: View {
         .lineSpacing(4)
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 11)
+        .accessibilityIdentifier("\(identifier).text")
         .environment(
           \.openURL,
           OpenURLAction { url in
@@ -145,7 +145,7 @@ struct QFAuthAgreementRow: View {
             return .handled
           })
     }
-    .frame(minHeight: 55, alignment: .topLeading)
+    .frame(minHeight: 55, alignment: .leading)
   }
 
   private var agreementText: AttributedString {
@@ -164,16 +164,39 @@ struct QFAuthAgreementRow: View {
   }
 }
 
+struct QFAuthLoadingButtonLabel: View {
+  let title: String
+  var isLoading = false
+  var systemImage: String?
+  var tint: Color = .white
+
+  var body: some View {
+    HStack(spacing: 9) {
+      if isLoading {
+        ProgressView()
+          .progressViewStyle(CircularProgressViewStyle(tint: tint))
+          .accessibilityHidden(true)
+      }
+      if let systemImage {
+        Image(systemName: systemImage)
+          .font(.system(size: 24, weight: .medium))
+      }
+      Text(title)
+    }
+  }
+}
+
 struct QFAuthPrimaryButtonStyle: ButtonStyle {
+  var isLoading = false
   @Environment(\.isEnabled) private var isEnabled
 
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
       .font(.system(size: 17, weight: .semibold))
-      .foregroundColor(isEnabled ? .white : Color(hex: 0x6F795F))
+      .foregroundColor(isEnabled || isLoading ? .white : Color(hex: 0x6F795F))
       .frame(maxWidth: .infinity)
       .frame(height: 55)
-      .background(isEnabled ? QFTheme.orange : Color(hex: 0xE7EBDD))
+      .background(isEnabled || isLoading ? QFTheme.orange : Color(hex: 0xE7EBDD))
       .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
       .opacity(configuration.isPressed ? 0.82 : 1)
   }

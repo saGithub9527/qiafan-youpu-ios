@@ -75,7 +75,7 @@
     }
 
     @MainActor
-    func testSensitiveHeadersQueryAndNestedJSONNeverPersistOriginalSecrets() throws {
+    func testRawHeadersURLAndNestedJSONPersistWithoutRedaction() throws {
       let secrets = [
         "url-user-secret-01", "url-password-secret-02", "query-token-secret-03",
         "query-password-secret-04", "authorization-secret-05", "cookie-secret-06",
@@ -125,8 +125,9 @@
         String(decoding: try Data(contentsOf: $0), as: UTF8.self)
       }.joined(separator: "\n")
       for secret in secrets {
-        XCTAssertFalse(displayedEntry.contains(secret), "Secret remained in an entry: \(secret)")
-        XCTAssertFalse(persistedText.contains(secret), "Secret remained on disk: \(secret)")
+        XCTAssertTrue(displayedEntry.contains(secret), "Debug value was removed: \(secret)")
+        XCTAssertTrue(
+          persistedText.contains(secret), "Persisted debug value was removed: \(secret)")
       }
       XCTAssertTrue(entry.url.contains("page=2"))
       XCTAssertTrue(entry.requestBody.contains("visible-nested-value"))
@@ -139,6 +140,37 @@
       let restoredEntry = try XCTUnwrap(restored.entry(id: id))
       XCTAssertEqual(restoredEntry.requestBody, entry.requestBody)
       XCTAssertEqual(restoredEntry.responseBody, entry.responseBody)
+    }
+
+    @MainActor
+    func testLoginSessionValuesAndJSONTypesRemainIntactOnDisk() throws {
+      let store = QFRequestLogStore(directoryURL: directoryURL)
+      let request = makeRequest(path: "auth/quick/sessions")
+      let body = Data(
+        #"{"session":{"accessToken":"fixture-access-token","accessTokenExpiresIn":7200,"refreshToken":"fixture-refresh-token","refreshTokenExpiresIn":2592000},"user":{"passwordConfigured":false}}"#
+          .utf8)
+      let id = store.begin(request: request)
+      store.finish(id: id, response: nil, data: body, error: nil)
+      let restored = QFRequestLogStore(directoryURL: directoryURL)
+      let entry = try XCTUnwrap(restored.entry(id: id))
+      struct Preview: Decodable {
+        struct Session: Decodable {
+          let accessToken: String
+          let accessTokenExpiresIn: Int
+          let refreshToken: String
+          let refreshTokenExpiresIn: Int
+        }
+        struct User: Decodable { let passwordConfigured: Bool }
+        let session: Session
+        let user: User
+      }
+      let decoded = try JSONDecoder().decode(Preview.self, from: Data(entry.responseBody.utf8))
+      XCTAssertEqual(decoded.session.accessToken, "fixture-access-token")
+      XCTAssertEqual(decoded.session.accessTokenExpiresIn, 7200)
+      XCTAssertEqual(decoded.session.refreshToken, "fixture-refresh-token")
+      XCTAssertEqual(decoded.session.refreshTokenExpiresIn, 2_592_000)
+      XCTAssertFalse(decoded.user.passwordConfigured)
+      XCTAssertFalse(entry.responseBody.contains("[REDACTED]"))
     }
 
     @MainActor
@@ -169,14 +201,13 @@
         XCTAssertGreaterThan(preview.utf8.count, 15 * 1024)
         XCTAssertTrue(preview.contains("visible-prefix-"))
         XCTAssertFalse(preview.contains(tail))
-        XCTAssertFalse(preview.contains("large-json-token-secret"))
-        XCTAssertFalse(preview.contains("long-json-password-secret"))
+        XCTAssertTrue(preview.contains("large-json-token-secret"))
         XCTAssertFalse(preview.contains("\u{FFFD}"), "Truncation split a UTF-8 character")
       }
     }
 
     @MainActor
-    func testDeviceAndAppleCredentialsAndEncodedFormFieldsAreRedacted() throws {
+    func testDeviceAndAppleCredentialsAndEncodedFormsRemainReadable() throws {
       let secrets = [
         "device-secret-value", "authorization-code-value", "identity-token-value",
         "form-password-value", "nested-url-password", "nested-url-token", "inline-bearer-value",
@@ -204,17 +235,16 @@
       XCTAssertTrue(entry.responseBody.contains("page=3"))
       let fileContents = try regularFiles().map { try Data(contentsOf: $0) }
       for secret in secrets {
-        XCTAssertFalse(entry.requestBody.contains(secret))
-        XCTAssertFalse(entry.responseBody.contains(secret))
+        XCTAssertTrue((entry.requestBody + entry.responseBody).contains(secret))
         for content in fileContents {
-          XCTAssertFalse(String(decoding: content, as: UTF8.self).contains(secret))
+          XCTAssertTrue(String(decoding: content, as: UTF8.self).contains(secret))
         }
       }
     }
 
     @MainActor
-    func testUnstructuredBodiesAndRawErrorDescriptionsAreOmitted() throws {
-      let secret = "unstructured-secret-must-never-be-persisted"
+    func testTextBodiesAndLocalizedTransportErrorsArePreserved() throws {
+      let secret = "unstructured-test-value-visible-in-debug"
       var request = makeRequest(path: "multipart")
       request.setValue("multipart/form-data; boundary=test", forHTTPHeaderField: "Content-Type")
       request.httpBody = Data(
@@ -231,12 +261,12 @@
       let id = store.begin(request: request)
       store.finish(id: id, response: response, data: Data(secret.utf8), error: error)
       let entry = try XCTUnwrap(store.entry(id: id))
-      XCTAssertTrue(entry.requestBody.contains("已省略"))
-      XCTAssertTrue(entry.responseBody.contains("已省略"))
-      XCTAssertFalse(try XCTUnwrap(entry.errorDescription).contains(secret))
+      XCTAssertTrue(entry.requestBody.contains(secret))
+      XCTAssertTrue(entry.responseBody.contains(secret))
+      XCTAssertTrue(try XCTUnwrap(entry.errorDescription).contains(secret))
       if case .failed = entry.status {} else { XCTFail("HTTP 500 must be a failed request") }
       for file in try regularFiles() {
-        XCTAssertFalse(String(decoding: try Data(contentsOf: file), as: UTF8.self).contains(secret))
+        XCTAssertTrue(String(decoding: try Data(contentsOf: file), as: UTF8.self).contains(secret))
       }
     }
 

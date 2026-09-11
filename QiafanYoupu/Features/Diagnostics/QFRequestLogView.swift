@@ -8,6 +8,19 @@
     @EnvironmentObject private var app: QFAppSession
     @State private var message: String?
     @State private var showMessage = false
+    @State private var activeAction: DebugAction?
+
+    private enum DebugAction {
+      case reloadConfiguration
+      case logout
+
+      var title: String {
+        switch self {
+        case .reloadConfiguration: return "正在重取配置"
+        case .logout: return "正在退出会话"
+        }
+      }
+    }
 
     init(store: QFRequestLogStore? = nil) {
       self.store = store ?? .shared
@@ -43,23 +56,28 @@
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
           ToolbarItem(placement: .navigationBarLeading) {
-            Menu("调试") {
-              Button("重新获取启动配置") { Task { await app.loadConfiguration() } }
+            Menu {
+              Button("重新获取启动配置") { perform(.reloadConfiguration) }
               Button("查看沙盒日志目录") {
                 message = QFCrashRecorder.shared.reportsDirectory.deletingLastPathComponent().path
                 showMessage = true
               }
               if app.user != nil {
-                Button("退出当前测试会话") {
-                  Task {
-                    do { try await app.logout() } catch {
-                      message = error.localizedDescription
-                      showMessage = true
-                    }
-                  }
+                Button("退出当前测试会话") { perform(.logout) }
+              }
+            } label: {
+              HStack(spacing: 6) {
+                if let action = displayedAction {
+                  ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: QFTheme.orange))
+                    .accessibilityHidden(true)
+                  Text(action.title)
+                } else {
+                  Text("调试")
                 }
               }
             }
+            .disabled(actionsDisabled)
             .accessibilityIdentifier("diagnostics.menu")
           }
           ToolbarItem(placement: .navigationBarTrailing) {
@@ -77,6 +95,35 @@
         Text(message ?? "")
       }
       .accessibilityIdentifier("diagnostics.requests")
+    }
+
+    private var displayedAction: DebugAction? {
+      activeAction ?? (app.loadingConfiguration ? .reloadConfiguration : nil)
+    }
+
+    private var actionsDisabled: Bool {
+      activeAction != nil || app.loadingConfiguration || app.isLoggingIn
+    }
+
+    private func perform(_ action: DebugAction) {
+      guard !actionsDisabled else { return }
+      activeAction = action
+      Task {
+        defer { activeAction = nil }
+        switch action {
+        case .reloadConfiguration:
+          await app.loadConfiguration()
+          if let error = app.configurationError {
+            message = error
+            showMessage = true
+          }
+        case .logout:
+          do { try await app.logout() } catch {
+            message = error.localizedDescription
+            showMessage = true
+          }
+        }
+      }
     }
 
     private var emptyState: some View {
