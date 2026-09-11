@@ -62,6 +62,7 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
 
   func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { updateSelection() }
   func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) { updateSelection() }
+  func scrollViewWillBeginDragging(_ scrollView: UIScrollView) { preloadAdjacentPages() }
   func scrollViewDidEndDragging(
     _ scrollView: UIScrollView, willDecelerate decelerate: Bool
   ) {
@@ -111,6 +112,7 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
       }
       pages.append(page)
     }
+    pages.first?.loadArtworkIfNeeded()
   }
 
   private func buildHeader() {
@@ -162,6 +164,7 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
   private func selectPage(_ page: Int) {
     guard (0..<5).contains(page), presentedViewController == nil else { return }
     selectedPage = page
+    pages[page].loadArtworkIfNeeded()
     pager.setContentOffset(
       CGPoint(x: CGFloat(page) * pager.bounds.width, y: 0),
       animated: !UIAccessibility.isReduceMotionEnabled)
@@ -171,7 +174,14 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
   private func updateSelection() {
     guard pager.bounds.width > 0 else { return }
     selectedPage = min(4, max(0, Int((pager.contentOffset.x / pager.bounds.width).rounded())))
+    pages[selectedPage].loadArtworkIfNeeded()
     updatePageAccessibility()
+  }
+
+  private func preloadAdjacentPages() {
+    for index in [selectedPage - 1, selectedPage + 1] where pages.indices.contains(index) {
+      pages[index].loadArtworkIfNeeded()
+    }
   }
 
   private func updatePageAccessibility() {
@@ -191,6 +201,7 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
       onContinue: { [weak self] in
         guard let self, !self.completed else { return }
         self.agreementAccepted = true
+        self.preloadAdjacentPages()
         if continueToApp { self.finishWelcome() }
       },
       onDecline: { [weak self] in self?.agreementAccepted = false })
@@ -215,6 +226,8 @@ private final class QFWelcomePageView: UIView {
   private let page: Int
   private let onSelectPage: (Int) -> Void
   private let onEnter: () -> Void
+  private let artwork = UIImageView()
+  private var artworkLoaded = false
 
   private static let titles = [
     ["今天，", "想做点什么？"],
@@ -248,8 +261,13 @@ private final class QFWelcomePageView: UIView {
 
   required init?(coder: NSCoder) { return nil }
 
+  func loadArtworkIfNeeded() {
+    guard !artworkLoaded else { return }
+    artworkLoaded = true
+    artwork.image = UIImage(named: "welcome-page-\(page + 1)-art")
+  }
+
   private func buildArtwork() {
-    let artwork = UIImageView(image: UIImage(named: "welcome-page-\(page + 1)-art"))
     artwork.contentMode = .scaleAspectFit
     artwork.clipsToBounds = true
     artwork.isAccessibilityElement = true

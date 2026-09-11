@@ -231,7 +231,8 @@ final class QFAuthAgreementControl: UIView, UITextViewDelegate {
 
   private func renderCheckmark() {
     let configuration = UIImage.SymbolConfiguration(pointSize: 21)
-    checkbox.setImage(UIImage(systemName: checked ? "checkmark.square.fill" : "square",
+    checkbox.backgroundColor = .clear
+    checkbox.setImage(UIImage(systemName: checked ? "checkmark.square" : "square",
                              withConfiguration: configuration), for: .normal)
     checkbox.tintColor = checked ? QFUI.green : QFAuthPalette.color(0x93A18B)
     checkbox.isSelected = checked
