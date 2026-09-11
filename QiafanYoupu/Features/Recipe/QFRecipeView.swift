@@ -17,7 +17,7 @@ final class QFRecipeViewController: QFPageViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = QFTabUI.color(0xF5F6F8)
+    view.backgroundColor = QFUI.background
     contentStack.spacing = 8
     contentStack.addArrangedSubview(makeHeader())
     filters = makeFilters()
@@ -88,7 +88,7 @@ final class QFRecipeViewController: QFPageViewController {
   private func makeFilters() -> UIStackView {
     let values = [("国家", "全球"), ("口味", "不限"), ("菜系", "全部"), ("评分", "不限")]
     let buttons = values.map { name, value -> UIView in
-      let control = QFTabUI.button("", background: .white) { [weak self] in
+      let control = QFTabUI.button("", background: QFUI.surface) { [weak self] in
         self?.showUnavailable("\(name)筛选")
       }
       control.layer.cornerRadius = 12
@@ -161,7 +161,7 @@ private final class QFRecipeCard: UIView {
   ) {
     row = QFTabUI.stack([], axis: .horizontal, spacing: compact ? 10 : 14)
     super.init(frame: .zero)
-    backgroundColor = .white
+    backgroundColor = QFUI.surface
     layer.cornerRadius = 18
     let open = QFTabUI.button("", action: onOpen)
     open.accessibilityLabel =
@@ -268,7 +268,7 @@ enum QFTabUI {
     return button
   }
   static func card(
-    _ content: UIView, padding: CGFloat = 14, background: UIColor = .white, border: Bool = false
+    _ content: UIView, padding: CGFloat = 14, background: UIColor = QFUI.surface, border: Bool = false
   ) -> UIView {
     let card = UIView()
     card.backgroundColor = background

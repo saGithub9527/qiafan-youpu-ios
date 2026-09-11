@@ -119,7 +119,7 @@ final class QFPlanViewController: QFPageViewController {
           let day = calendar.component(.day, from: date)
           let month = calendar.component(.month, from: date)
           let button = QFTabUI.button(
-            "\(day)", size: 16, weight: .medium, color: selected ? .white : QFUI.text,
+            "\(day)", size: 16, weight: .medium, color: selected ? QFUI.onPrimary : QFUI.text,
             background: selected ? QFUI.orange : .clear
           ) { [weak self] in
             self?.selectedDate = date
@@ -129,7 +129,7 @@ final class QFPlanViewController: QFPageViewController {
           button.contentEdgeInsets = .zero
           button.layer.cornerRadius = 10
           button.isSelected = selected
-          button.setTitleColor(selected ? .white : QFUI.text, for: .selected)
+          button.setTitleColor(selected ? QFUI.onPrimary : QFUI.text, for: .selected)
           button.titleLabel?.adjustsFontSizeToFitWidth = true
           button.titleLabel?.minimumScaleFactor = 0.8
           button.accessibilityLabel = "\(month)月\(day)日"
@@ -197,7 +197,7 @@ final class QFPlanViewController: QFPageViewController {
       let done = QFTabUI.button(
         dish.done ? "✓ 已做" : "做菜打卡", size: 12, weight: .medium,
         color: dish.done ? QFUI.green : QFUI.orange,
-        background: dish.done ? QFUI.paleGreen : QFTabUI.color(0xFFF0E7)
+        background: dish.done ? QFUI.successBackground : QFUI.tint
       ) { [weak self] in self?.showUnavailable("做菜打卡") }
       done.contentEdgeInsets = .zero
       done.layer.cornerRadius = 15
@@ -214,10 +214,10 @@ final class QFPlanViewController: QFPageViewController {
 
   private func installActions() {
     let create = QFTabUI.button(
-      "制定计划", size: 18, weight: .medium, color: .white, background: QFUI.orange
+      "制定计划", size: 18, weight: .medium, color: QFUI.onPrimary, background: QFUI.primary
     ) { [weak self] in self?.showUnavailable("制定计划") }
     create.accessibilityIdentifier = "plan.create"
-    let prepare = QFTabUI.button("备菜", size: 18, weight: .medium, background: .white) {
+    let prepare = QFTabUI.button("备菜", size: 18, weight: .medium, background: QFUI.surface) {
       [weak self] in self?.showUnavailable("备菜")
     }
     prepare.layer.borderWidth = 1

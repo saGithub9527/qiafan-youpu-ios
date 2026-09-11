@@ -28,7 +28,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
           "食材大全", subtitle: "分类查找，认识食材", symbol: "book.closed", background: QFUI.paleGreen,
           accent: QFUI.green),
         discoveryButton(
-          "食材组合推荐", subtitle: "选食材，看看能做什么", symbol: "circle", background: QFTabUI.color(0xFFF0E7),
+          "食材组合推荐", subtitle: "选食材，看看能做什么", symbol: "circle", background: QFUI.tint,
           accent: QFUI.orange),
       ], axis: .horizontal, spacing: 12)
     discovery.distribution = .fillEqually
@@ -43,19 +43,19 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       }, for: .valueChanged)
     segment.snp.makeConstraints { $0.height.equalTo(36) }
     contentStack.addArrangedSubview(
-      QFTabUI.card(segment, padding: 4, background: QFTabUI.color(0xE9EDE2)))
-    notice = QFTabUI.button("", background: QFTabUI.color(0xFFF4DC)) { [weak self] in
+      QFTabUI.card(segment, padding: 4, background: QFUI.surfaceAlt))
+    notice = QFTabUI.button("", background: QFUI.warningBackground) { [weak self] in
       self?.unavailable("临期食材")
     }
     notice.accessibilityLabel = "2 种食材临近标注日期，查看"
     let noticeText = QFTabUI.label(
-      "2 种食材临近标注日期", size: 12, color: QFTabUI.color(0xA16A17), lines: 0)
+      "2 种食材临近标注日期", size: 12, color: QFUI.warning, lines: 0)
     let noticeAction = QFTabUI.label(
-      "查看  ›", size: 12, weight: .medium, color: QFTabUI.color(0xA16A17))
+      "查看  ›", size: 12, weight: .medium, color: QFUI.warning)
     noticeAction.setContentCompressionResistancePriority(.required, for: .horizontal)
     let noticeRow = QFTabUI.stack(
       [
-        QFTabUI.symbol("clock", size: 17, color: QFTabUI.color(0xA16A17)), noticeText, UIView(),
+        QFTabUI.symbol("clock", size: 17, color: QFUI.warning), noticeText, UIView(),
         noticeAction,
       ], axis: .horizontal, spacing: 9)
     noticeRow.alignment = .center
@@ -99,11 +99,11 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     let scan = QFTabUI.iconButton("qrcode.viewfinder", label: "扫描小票二维码") { [weak self] in
       self?.unavailable("扫描小票二维码")
     }
-    scan.backgroundColor = .white
+    scan.backgroundColor = QFUI.surface
     scan.layer.cornerRadius = 14
     scan.accessibilityIdentifier = "ingredient.scan"
     let add = QFTabUI.button(
-      "＋ 添加", size: 14, weight: .semibold, color: .white, background: QFUI.orange
+      "＋ 添加", size: 14, weight: .semibold, color: QFUI.onPrimary, background: QFUI.primary
     ) { [weak self] in self?.unavailable("添加食材") }
     add.accessibilityIdentifier = "ingredient.add"
     add.contentEdgeInsets = .zero
@@ -120,7 +120,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     searchField.placeholder = "搜索食材名称"
     searchField.font = .systemFont(ofSize: 14)
     searchField.textColor = QFUI.text
-    searchField.tintColor = QFUI.orange
+    searchField.tintColor = QFUI.primary
     searchField.clearButtonMode = .whileEditing
     searchField.returnKeyType = .search
     searchField.delegate = self
@@ -175,7 +175,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     let row = QFTabUI.stack([], axis: .horizontal, spacing: 8)
     for category in categories {
       let button = QFTabUI.button(
-        category, size: 13, weight: .semibold, color: QFUI.secondary, background: .white
+        category, size: 13, weight: .semibold, color: QFUI.secondary, background: QFUI.surface
       ) { [weak self] in
         self?.selectedCategory = category
         self?.refreshCategories()
@@ -196,7 +196,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       let selected = selectedCategory == category
       // Keep the custom pill appearance and expose selection only through accessibility.
       button.accessibilityTraits = selected ? [.button, .selected] : [.button]
-      button.backgroundColor = selected ? QFUI.paleGreen : .white
+      button.backgroundColor = selected ? QFUI.successBackground : QFUI.surface
       button.layer.borderColor = (selected ? UIColor.clear : QFUI.border).cgColor
       button.setTitleColor(selected ? QFUI.green : QFUI.secondary, for: .normal)
     }
@@ -277,7 +277,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     top.addArrangedSubview(more)
     let date = QFTabUI.label(
       shopping ? ingredient.price : ingredient.date, size: 10.5,
-      color: shopping ? QFUI.orange : (ingredient.near ? QFTabUI.color(0xA66C1E) : QFUI.secondary))
+      color: shopping ? QFUI.orange : (ingredient.near ? QFUI.warning : QFUI.secondary))
     date.textAlignment = .right
     let status = QFTabUI.stack([top, date], spacing: 0)
     status.alignment = .trailing

@@ -13,6 +13,12 @@ struct QFLaunchOptions {
   let initialTab: QFTab
   let previewSignedIn: Bool
 
+  init(showWelcome: Bool, initialTab: QFTab, previewSignedIn: Bool) {
+    self.showWelcome = showWelcome
+    self.initialTab = initialTab
+    self.previewSignedIn = previewSignedIn
+  }
+
   init(defaults: UserDefaults = .standard, arguments: [String] = ProcessInfo.processInfo.arguments)
   {
     var debug = false

@@ -18,6 +18,7 @@
 		27B6A56294F8C2DFF938DF12 /* QFAlamofireTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D86AD2434296802E9101BE2 /* QFAlamofireTransportTests.swift */; };
 		27FEC33ECA7DA0AD090773B0 /* QiafanYoupuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2704CD4D9654FCDDD9522E01 /* QiafanYoupuApp.swift */; };
 		30C4E1788DF510FD1D90BE61 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 802CBECCB074A38DE425AD54 /* SnapKit */; };
+		35BBABB9985D6AA6D6D09266 /* QFSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B737891F4E3916E557B6CF /* QFSettingsView.swift */; };
 		3C4D8D6BAFC066581A5EC061 /* QFConsentStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */; };
 		3FC5C187F731499628ABC900 /* QFCrashRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5427871774578C1A4CF899 /* QFCrashRecorder.swift */; };
 		426E070AD835618AA12FDDC3 /* QFIngredientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */; };
@@ -104,6 +105,7 @@
 		8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFConsentStoreTests.swift; sourceTree = "<group>"; };
 		91E7423D360770883F28EAEB /* QFRemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRemoteImage.swift; sourceTree = "<group>"; };
+		A1B737891F4E3916E557B6CF /* QFSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSettingsView.swift; sourceTree = "<group>"; };
 		A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFProfileView.swift; sourceTree = "<group>"; };
 		AA9BC7D19A9AFF762588BAF5 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AF04B819F01D1047ACCD0101 /* QFLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLoginView.swift; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 			isa = PBXGroup;
 			children = (
 				A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */,
+				A1B737891F4E3916E557B6CF /* QFSettingsView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -514,6 +517,7 @@
 				0E2D05DE9C97040E34B0CD4C /* QFRequestLogStore.swift in Sources */,
 				047BD8CE6166C88B2D8114E1 /* QFRequestLogView.swift in Sources */,
 				FCB1B3E6968B3EE959D26B04 /* QFSafetyNoticeViewController.swift in Sources */,
+				35BBABB9985D6AA6D6D09266 /* QFSettingsView.swift in Sources */,
 				85DEAF56C1931564F3B950AC /* QFTheme.swift in Sources */,
 				15AC1E17AFBA5156BD9C584C /* QFWelcomeArtwork.swift in Sources */,
 				BB1E359D01A2D6BC299DB6BA /* QFWelcomeView.swift in Sources */,

@@ -21,6 +21,11 @@ struct QFServerConfig: Codable, Equatable {
   struct Agreements: Codable, Equatable {
     let userAgreement: String?
     let privacyPolicy: String?
+    let userAgreementUrl: String?
+    let privacyPolicyUrl: String?
+    let imageLicenseUrl: String?
+    let imageRightsUrl: String?
+
     var isAvailable: Bool {
       [userAgreement, privacyPolicy].allSatisfy {
         !($0?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
@@ -36,6 +41,20 @@ struct QFServerConfig: Codable, Equatable {
     return "server-"
       + SHA256.hash(data: Data(content.utf8)).map { String(format: "%02x", $0) }.joined()
   }
+}
+
+struct QFUserSettings: Codable, Equatable {
+  let theme: String
+  let interfaceLanguage: String
+  let planReminders: Bool
+  let workAndContributionUpdates: Bool
+}
+
+struct QFUserSettingsUpdate: Encodable {
+  let theme: String
+  let interfaceLanguage: String
+  let planReminders: Bool
+  let workAndContributionUpdates: Bool
 }
 
 struct QFUserProfile: Codable, Equatable {

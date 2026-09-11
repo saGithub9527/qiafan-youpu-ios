@@ -33,6 +33,7 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
   private let session = QFAppSession()
   private var startup: Task<Void, Never>?
   private var didScheduleCrashRecorder = false
+  private var launchOptions: QFLaunchOptions?
 
   func scene(
     _ scene: UIScene, willConnectTo sceneSession: UISceneSession,
@@ -40,10 +41,14 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
   ) {
     guard let windowScene = scene as? UIWindowScene else { return }
     let window = UIWindow(windowScene: windowScene)
-    window.overrideUserInterfaceStyle = .light
-    window.tintColor = QFUI.orange
-    window.rootViewController = QFRootViewController(app: session, options: QFLaunchOptions())
+    let options = QFLaunchOptions()
+    launchOptions = options
+    configureTheme(on: window)
+    window.rootViewController = QFRootViewController(app: session, options: options)
     self.window = window
+    QFThemeManager.shared.onChange = { [weak self] _ in
+      self?.reloadRootForTheme()
+    }
     window.makeKeyAndVisible()
     if !QFRuntime.isUnitTest {
       startup = Task { [session] in await session.start() }
@@ -58,6 +63,22 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
     DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 0.25) {
       _ = QFCrashRecorder.shared.start()
     }
+  }
+
+  private func configureTheme(on window: UIWindow) {
+    window.overrideUserInterfaceStyle = QFThemeManager.shared.current == .dark ? .dark : .light
+    window.tintColor = QFUI.primary
+    window.backgroundColor = QFUI.background
+  }
+
+  private func reloadRootForTheme() {
+    guard let window else { return }
+    configureTheme(on: window)
+    let options = QFLaunchOptions(
+      showWelcome: false, initialTab: .profile,
+      previewSignedIn: launchOptions?.previewSignedIn ?? false)
+    window.rootViewController = QFRootViewController(app: session, options: options)
+    window.makeKeyAndVisible()
   }
 }
 
@@ -148,7 +169,7 @@ private final class QFMainTabViewController: UIViewController {
     super.viewDidLoad()
     view.backgroundColor = QFUI.background
     view.addSubview(bar)
-    bar.backgroundColor = .white
+    bar.backgroundColor = QFUI.surface
     bar.snp.makeConstraints {
       $0.leading.trailing.bottom.equalToSuperview()
       // Keep the tabs above a docked keyboard; the guide returns to the safe-area bottom when hidden.

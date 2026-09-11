@@ -103,7 +103,7 @@
 
     private func makePagination() -> UIView {
       let container = UIView()
-      container.backgroundColor = .white
+      container.backgroundColor = QFUI.surface
       previousButton.setTitle("上一页", for: .normal)
       previousButton.accessibilityIdentifier = "diagnostics.requests.previousPage"
       nextButton.setTitle("下一页", for: .normal)
@@ -284,7 +284,7 @@
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
       super.init(style: style, reuseIdentifier: reuseIdentifier)
-      backgroundColor = .white
+      backgroundColor = QFUI.surface
       selectionStyle = .none
       isAccessibilityElement = false
       urlLabel.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
@@ -437,7 +437,7 @@
 
     private func card(_ content: UIView) -> UIView {
       let container = UIView()
-      container.backgroundColor = .white
+      container.backgroundColor = QFUI.surface
       container.layer.cornerRadius = 12
       container.addSubview(content)
       content.snp.makeConstraints { make in make.edges.equalToSuperview().inset(16) }

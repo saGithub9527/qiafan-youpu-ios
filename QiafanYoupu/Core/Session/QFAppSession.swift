@@ -17,6 +17,7 @@ final class QFAppSession: ObservableObject {
   @Published private(set) var configurationError: String?
   @Published private(set) var loadingConfiguration = false
   @Published private(set) var user: QFUserProfile?
+  @Published private(set) var userSettings: QFUserSettings?
   @Published private(set) var isLoggingIn = false
   @Published private(set) var sessionMessage: String?
 
@@ -151,6 +152,32 @@ final class QFAppSession: ObservableObject {
     }
   }
 
+  @discardableResult
+  func loadUserSettings() async throws -> QFUserSettings {
+    guard saved != nil else {
+      throw QFAPIError(code: 40100, message: "请先登录后再同步设置。")
+    }
+    let value: QFUserSettings = try await api.send(path: "me/settings")
+    userSettings = value
+    return value
+  }
+
+  @discardableResult
+  func updateUserSettings(_ value: QFUserSettings) async throws -> QFUserSettings {
+    guard saved != nil else {
+      throw QFAPIError(code: 40100, message: "请先登录后再同步设置。")
+    }
+    let body = QFUserSettingsUpdate(
+      theme: value.theme, interfaceLanguage: value.interfaceLanguage,
+      planReminders: value.planReminders,
+      workAndContributionUpdates: value.workAndContributionUpdates)
+    let updated: QFUserSettings = try await api.send(
+      path: "me/settings", method: "PUT", body: JSONEncoder().encode(body),
+      operationID: UUID())
+    userSettings = updated
+    return updated
+  }
+
   func refresh() async throws {
     try await refresh(allowDuringLogout: false)
   }
@@ -275,6 +302,7 @@ final class QFAppSession: ObservableObject {
     saved = nil
     api.accessToken = nil
     user = nil
+    userSettings = nil
     // device-id and deviceCredential deliberately remain for quick-login account reuse.
   }
 }

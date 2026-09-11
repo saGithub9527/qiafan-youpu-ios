@@ -32,7 +32,7 @@ final class QFProfileViewController: QFPageViewController {
     let title = QFTabUI.label("我的", size: 30, weight: .semibold)
     title.accessibilityTraits.insert(.header)
     let settings = QFTabUI.iconButton("gearshape", label: "设置", size: 22) { [weak self] in
-      self?.showUnavailable("设置")
+      self?.openSettings()
     }
     let header = QFTabUI.stack([title, UIView(), settings], axis: .horizontal, spacing: 10)
     header.alignment = .center
@@ -43,11 +43,11 @@ final class QFProfileViewController: QFPageViewController {
     featureCards = QFTabUI.stack(
       [
         feature(
-          "发布作品", subtitle: "记录今天的拿手菜", symbol: "photo", color: QFUI.orange,
-          background: QFTabUI.color(0xFFF0E7)),
+          "发布作品", subtitle: "记录今天的拿手菜", symbol: "photo", color: QFUI.onTint,
+          background: QFUI.tint),
         feature(
-          "补充图片", subtitle: "为食材、菜谱补充实拍", symbol: "photo.badge.plus", color: QFUI.green,
-          background: QFUI.paleGreen),
+          "补充图片", subtitle: "为食材、菜谱补充实拍", symbol: "photo.badge.plus", color: QFUI.success,
+          background: QFUI.successBackground),
       ], axis: .horizontal, spacing: 14)
     featureCards.distribution = .fillEqually
     contentStack.addArrangedSubview(featureCards)
@@ -98,7 +98,7 @@ final class QFProfileViewController: QFPageViewController {
     identityText.addArrangedSubview(nameLabel)
     identityText.addArrangedSubview(regionLabel)
     actionButton = QFTabUI.button(
-      "去登录", size: 14, weight: .medium, color: .white, background: QFUI.orange
+      "去登录", size: 14, weight: .medium, color: QFUI.onPrimary, background: QFUI.primary
     ) { [weak self] in
       guard let self else { return }
       self.signedIn ? self.showUnavailable("编辑资料") : self.onLogin()
@@ -135,7 +135,7 @@ final class QFProfileViewController: QFPageViewController {
     let imageSize: CGFloat = request != nil ? 72 : (signedIn ? 48 : 36)
     avatarImage.snp.updateConstraints { $0.size.equalTo(imageSize) }
     avatarImage.layer.cornerRadius = request != nil ? 36 : 0
-    avatarImage.tintColor = QFTabUI.color(0x9AA78C)
+    avatarImage.tintColor = QFUI.disabledText
     avatarImage.load(request, placeholder: placeholder, size: CGSize(width: 72, height: 72))
     QFTabUI.clear(menu)
     for (index, item) in QFProfileMenuItem.items.enumerated() {
@@ -160,7 +160,7 @@ final class QFProfileViewController: QFPageViewController {
     for (index, title) in ["收藏", "做菜天数", "作品"].enumerated() {
       let value = QFTabUI.label(
         values[index], size: 22, weight: .semibold,
-        color: previewSignedIn ? QFUI.text : QFTabUI.color(0x99A08F))
+        color: previewSignedIn ? QFUI.text : QFUI.disabledText)
       let name = QFTabUI.label(title, size: 13, color: QFUI.secondary)
       value.textAlignment = .center
       name.textAlignment = .center
@@ -230,6 +230,14 @@ final class QFProfileViewController: QFPageViewController {
 
   private func openProtected(_ title: String) {
     signedIn ? showUnavailable(title) : onLogin()
+  }
+
+  private func openSettings() {
+    guard presentedViewController == nil else { return }
+    let controller = QFSettingsViewController(app: app) { [weak self] in
+      self?.dismiss(animated: true)
+    }
+    present(controller, animated: true)
   }
 }
 

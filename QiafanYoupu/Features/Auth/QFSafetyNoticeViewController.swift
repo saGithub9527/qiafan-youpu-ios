@@ -18,7 +18,7 @@ final class QFSafetyNoticeViewController: UIViewController {
   private let actions = UIView()
   private let agreement = QFAuthAgreementControl(identifier: "notice.agreement", noticeStyle: true)
   private let continueButton = QFAuthLoadingButton(
-    "同意并继续", background: QFAuthPalette.color(0xEA643E))
+    "同意并继续", background: QFUI.primary, textColor: QFUI.onPrimary)
   private var handleHeight: Constraint?
   private var actionsBottom: Constraint?
   private var mode: Int?
@@ -44,11 +44,11 @@ final class QFSafetyNoticeViewController: UIViewController {
     super.viewDidLoad()
     view.backgroundColor = .clear
     view.accessibilityViewIsModal = true
-    dim.backgroundColor = QFAuthPalette.color(0x24372C).withAlphaComponent(0.39)
+    dim.backgroundColor = QFUI.overlay.withAlphaComponent(0.39)
     dim.isAccessibilityElement = false
     view.addSubview(dim)
     dim.snp.makeConstraints { $0.edges.equalToSuperview() }
-    sheet.backgroundColor = QFAuthPalette.color(0xFFFDF8)
+    sheet.backgroundColor = QFUI.surface
     sheet.layer.cornerRadius = 28
     sheet.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     sheet.clipsToBounds = true
@@ -124,7 +124,7 @@ final class QFSafetyNoticeViewController: UIViewController {
 
   private func buildHandle() {
     let capsule = UIView()
-    capsule.backgroundColor = QFAuthPalette.color(0xD5DACF)
+    capsule.backgroundColor = QFUI.border
     capsule.layer.cornerRadius = 2
     handle.addSubview(capsule)
     capsule.snp.makeConstraints { $0.centerX.equalToSuperview(); $0.top.equalToSuperview().offset(13); $0.width.equalTo(42); $0.height.equalTo(4) }
@@ -152,9 +152,9 @@ final class QFSafetyNoticeViewController: UIViewController {
       ("使用范围与限制", "请勿恶意抓取、干扰服务或滥用内容，\n具体使用规则以用户协议为准。"),
     ]
     for (index, item) in items.enumerated() {
-      let number = QFUI.label("\(index + 1)", size: 11, weight: .medium, color: QFAuthPalette.color(0xAC391C), lines: 1)
+      let number = QFUI.label("\(index + 1)", size: 11, weight: .medium, color: QFUI.onTint, lines: 1)
       number.textAlignment = .center
-      number.backgroundColor = QFAuthPalette.color(0xFFF0E5)
+      number.backgroundColor = QFUI.tint
       number.layer.cornerRadius = 9
       number.clipsToBounds = true
       number.snp.makeConstraints { $0.width.height.equalTo(18) }

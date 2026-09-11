@@ -48,7 +48,7 @@ final class QFLoginViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = QFAuthPalette.color(0xF8F8F2)
+    view.backgroundColor = QFUI.background
     buildLayout()
     wireActions()
     reloadAgreement()
@@ -109,7 +109,7 @@ final class QFLoginViewController: UIViewController {
     }
     closeButton.setImage(UIImage(systemName: "xmark", withConfiguration: UIImage.SymbolConfiguration(pointSize: 21, weight: .light)), for: .normal)
     closeButton.tintColor = QFAuthPalette.color(0x5E6C69)
-    closeButton.backgroundColor = .white
+    closeButton.backgroundColor = QFUI.surface
     closeButton.layer.cornerRadius = 20
     closeButton.accessibilityLabel = "关闭登录"
     closeButton.accessibilityIdentifier = "login.close"
