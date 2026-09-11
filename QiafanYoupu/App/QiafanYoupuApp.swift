@@ -1,23 +1,52 @@
-import SwiftUI
+import SnapKit
+import UIKit
 
 @main
-@MainActor
-struct QiafanYoupuApp: App {
-  private let options = QFLaunchOptions()
-  @StateObject private var session = QFAppSession()
-
-  init() {
+final class QFAppDelegate: UIResponder, UIApplicationDelegate {
+  func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {
     if !QFRuntime.isUnitTest { _ = QFCrashRecorder.shared.start() }
+    return true
   }
 
-  var body: some Scene {
-    WindowGroup {
-      QFRootView(options: options)
-        .task { if !QFRuntime.isUnitTest { await session.start() } }
-        .modifier(QFDiagnosticsAccess())
-        .environmentObject(session)
-        .preferredColorScheme(.light)
-        .tint(QFTheme.orange)
+  func application(
+    _ application: UIApplication,
+    configurationForConnecting connectingSceneSession: UISceneSession,
+    options: UIScene.ConnectionOptions
+  ) -> UISceneConfiguration {
+    let configuration = UISceneConfiguration(name: "Default", sessionRole: connectingSceneSession.role)
+    configuration.delegateClass = QFSceneDelegate.self
+    return configuration
+  }
+
+  func application(
+    _ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?
+  ) -> UIInterfaceOrientationMask {
+    UIDevice.current.userInterfaceIdiom == .pad ? .all : .portrait
+  }
+}
+
+@MainActor
+final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
+  var window: UIWindow?
+  private let session = QFAppSession()
+  private var startup: Task<Void, Never>?
+
+  func scene(
+    _ scene: UIScene, willConnectTo sceneSession: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions
+  ) {
+    guard let windowScene = scene as? UIWindowScene else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.overrideUserInterfaceStyle = .light
+    window.tintColor = QFUI.orange
+    window.rootViewController = QFRootViewController(app: session, options: QFLaunchOptions())
+    self.window = window
+    window.makeKeyAndVisible()
+    if !QFRuntime.isUnitTest {
+      startup = Task { [session] in await session.start() }
     }
   }
 }
@@ -25,7 +54,6 @@ struct QiafanYoupuApp: App {
 enum QFTab: String, CaseIterable, Identifiable {
   case recipe, plan, ingredient, profile
   var id: String { rawValue }
-
   var title: String {
     switch self {
     case .recipe: return "菜谱"
@@ -34,7 +62,6 @@ enum QFTab: String, CaseIterable, Identifiable {
     case .profile: return "我的"
     }
   }
-
   var symbol: String {
     switch self {
     case .recipe: return "book.closed"
@@ -45,103 +72,182 @@ enum QFTab: String, CaseIterable, Identifiable {
   }
 }
 
-private struct QFRootView: View {
-  let options: QFLaunchOptions
-  @State private var showWelcome: Bool
+@MainActor
+private final class QFRootViewController: UIViewController {
+  private let app: QFAppSession
+  private let options: QFLaunchOptions
+  private var current: UIViewController?
 
-  init(options: QFLaunchOptions) {
+  init(app: QFAppSession, options: QFLaunchOptions) {
+    self.app = app
     self.options = options
-    _showWelcome = State(initialValue: options.showWelcome)
+    super.init(nibName: nil, bundle: nil)
+  }
+  required init?(coder: NSCoder) { nil }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = QFUI.background
+    if options.showWelcome {
+      install(QFWelcomeViewController(app: app) { [weak self] in
+        UserDefaults.standard.set(true, forKey: QFLaunchPolicy.completedKey)
+        self?.showTabs()
+      })
+    } else {
+      showTabs()
+    }
   }
 
-  var body: some View {
-    Group {
-      if showWelcome {
-        QFWelcomeView {
-          UserDefaults.standard.set(true, forKey: QFLaunchPolicy.completedKey)
-          showWelcome = false
-        }
-      } else {
-        QFMainTabsView(options: options)
-      }
+  private func showTabs() {
+    install(QFMainTabViewController(app: app, options: options))
+  }
+
+  private func install(_ controller: UIViewController) {
+    if let current {
+      current.willMove(toParent: nil)
+      current.view.removeFromSuperview()
+      current.removeFromParent()
     }
-    .foregroundColor(QFTheme.text)
-    .background(QFTheme.background.ignoresSafeArea())
+    addChild(controller)
+    view.addSubview(controller.view)
+    controller.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+    controller.didMove(toParent: self)
+    current = controller
   }
 }
 
-private struct QFMainTabsView: View {
-  let options: QFLaunchOptions
-  @EnvironmentObject private var session: QFAppSession
-  @State private var selected: QFTab
-  @State private var showLogin = false
+@MainActor
+private final class QFMainTabViewController: UIViewController {
+  private let app: QFAppSession
+  private let options: QFLaunchOptions
+  private var pages: [QFTab: UIViewController] = [:]
+  private var buttons: [QFTab: QFTabButton] = [:]
+  private let contentView = UIView()
+  private let bar = UIView()
+  private var selected: QFTab
 
-  init(options: QFLaunchOptions) {
+  init(app: QFAppSession, options: QFLaunchOptions) {
+    self.app = app
     self.options = options
-    _selected = State(initialValue: options.initialTab)
+    selected = options.initialTab
+    super.init(nibName: nil, bundle: nil)
+  }
+  required init?(coder: NSCoder) { nil }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = QFUI.background
+    view.addSubview(bar)
+    bar.backgroundColor = .white
+    bar.snp.makeConstraints {
+      $0.leading.trailing.bottom.equalToSuperview()
+      // Keep the tabs above a docked keyboard; the guide returns to the safe-area bottom when hidden.
+      $0.top.equalTo(view.keyboardLayoutGuide.snp.top).offset(-56)
+    }
+    let tabStack = UIStackView()
+    tabStack.axis = .horizontal
+    tabStack.distribution = .fillEqually
+    bar.addSubview(tabStack)
+    tabStack.snp.makeConstraints {
+      $0.top.centerX.equalToSuperview()
+      $0.height.equalTo(56)
+      $0.leading.greaterThanOrEqualToSuperview()
+      $0.trailing.lessThanOrEqualToSuperview()
+      $0.width.equalToSuperview().priority(999)
+      $0.width.lessThanOrEqualTo(QFAdaptiveLayout.contentMaxWidth)
+    }
+    let divider = UIView()
+    divider.backgroundColor = QFUI.border
+    bar.addSubview(divider)
+    divider.snp.makeConstraints { $0.leading.trailing.top.equalToSuperview(); $0.height.equalTo(0.5) }
+    view.addSubview(contentView)
+    contentView.snp.makeConstraints {
+      $0.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+      $0.bottom.equalTo(bar.snp.top)
+    }
+    pages = [
+      .recipe: QFRecipeViewController(app: app),
+      .plan: QFPlanViewController(app: app),
+      .ingredient: QFIngredientViewController(app: app),
+      .profile: QFProfileViewController(app: app, previewSignedIn: options.previewSignedIn) {
+        [weak self] in self?.showLogin()
+      },
+    ]
+    for tab in QFTab.allCases {
+      let button = QFTabButton(tab: tab)
+      button.addAction(UIAction { [weak self] _ in self?.select(tab) }, for: .touchUpInside)
+      buttons[tab] = button
+      tabStack.addArrangedSubview(button)
+      guard let page = pages[tab] else { continue }
+      addChild(page)
+      contentView.addSubview(page.view)
+      page.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+      page.didMove(toParent: self)
+    }
+    select(selected)
+    QFDiagnosticsPresenter.attach(to: self, app: app, bottomInset: 76)
   }
 
-  var body: some View {
-    // Keep each page mounted so switching tabs preserves local search and date selections.
-    ZStack {
-      page(.recipe) { QFRecipeView() }
-      page(.plan) { QFPlanView() }
-      page(.ingredient) { QFIngredientView(isActive: selected == .ingredient) }
-      page(.profile) {
-        QFProfileView(previewSignedIn: options.previewSignedIn, user: session.user) {
-          showLogin = true
-        }
-      }
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
-    .fullScreenCover(isPresented: $showLogin) {
-      QFLoginView { showLogin = false }
-        .modifier(QFDiagnosticsAccess())
-        .preferredColorScheme(.light)
+  private func select(_ tab: QFTab) {
+    view.endEditing(true)
+    selected = tab
+    for item in QFTab.allCases {
+      pages[item]?.view.isHidden = item != tab
+      buttons[item]?.isSelected = item == tab
     }
   }
 
-  private func page<Content: View>(_ tab: QFTab, @ViewBuilder content: () -> Content) -> some View {
-    content()
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .opacity(selected == tab ? 1 : 0)
-      .allowsHitTesting(selected == tab)
-      .accessibilityHidden(selected != tab)
-  }
-
-  private var tabBar: some View {
-    HStack(spacing: 0) {
-      ForEach(QFTab.allCases) { tab in
-        Button {
-          selected = tab
-        } label: {
-          VStack(spacing: 4) {
-            Image(systemName: tab.symbol).font(.system(size: 22))
-            Text(tab.title).font(.system(size: 11, weight: .medium))
-          }
-          .foregroundColor(selected == tab ? QFTheme.orange : QFTheme.secondary)
-          .frame(maxWidth: .infinity, minHeight: 56)
-          .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("tab.\(tab.rawValue)")
-        .accessibilityLabel(tab.title)
-        .accessibilityAddTraits(selected == tab ? [.isSelected] : [])
-      }
+  private func showLogin() {
+    guard presentedViewController == nil else { return }
+    let controller = QFLoginViewController(app: app) { [weak self] in
+      self?.dismiss(animated: true)
     }
-    .background(Color.white.ignoresSafeArea(edges: .bottom))
-    .overlay(alignment: .top) { QFTheme.border.frame(height: 0.5) }
+    controller.modalPresentationStyle = .fullScreen
+    present(controller, animated: true)
+  }
+}
+
+private final class QFTabButton: UIButton {
+  private let icon = UIImageView()
+  private let caption = UILabel()
+
+  init(tab: QFTab) {
+    super.init(frame: .zero)
+    accessibilityIdentifier = "tab.\(tab.rawValue)"
+    accessibilityLabel = tab.title
+    isAccessibilityElement = true
+    icon.image = UIImage(systemName: tab.symbol)
+    icon.contentMode = .scaleAspectFit
+    caption.text = tab.title
+    caption.font = .systemFont(ofSize: 11, weight: .medium)
+    caption.textAlignment = .center
+    let stack = QFUI.stack([icon, caption], spacing: 4)
+    stack.alignment = .center
+    stack.isUserInteractionEnabled = false
+    stack.isAccessibilityElement = false
+    stack.accessibilityElementsHidden = true
+    addSubview(stack)
+    stack.snp.makeConstraints { $0.center.equalToSuperview(); $0.leading.trailing.equalToSuperview() }
+    icon.snp.makeConstraints { $0.width.height.equalTo(22) }
+    updateColor()
+  }
+  required init?(coder: NSCoder) { nil }
+  override var isSelected: Bool { didSet { updateColor() } }
+  private func updateColor() {
+    let color = isSelected ? QFUI.orange : QFUI.secondary
+    icon.tintColor = color
+    caption.textColor = color
+    accessibilityTraits = isSelected ? [.button, .selected] : [.button]
   }
 }
 
 private enum QFRuntime {
   static var isUnitTest: Bool {
     #if DEBUG
-      return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+      ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
         || NSClassFromString("XCTestCase") != nil
     #else
-      return false
+      false
     #endif
   }
 }

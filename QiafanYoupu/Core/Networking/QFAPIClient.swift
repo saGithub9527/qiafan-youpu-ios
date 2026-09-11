@@ -1,3 +1,4 @@
+import Alamofire
 import Foundation
 
 struct QFAPIEnvironment {
@@ -16,31 +17,37 @@ struct QFAPIEnvironment {
 final class QFAPIClient {
   let environment: QFAPIEnvironment
   private let identity: QFDeviceIdentity
-  private let transport: URLSession
+  private let transport: Alamofire.Session
   var accessToken: String?
   #if DEBUG
     var recordsRequests = true
+    var requestLogStore: QFRequestLogStore?
   #endif
 
   init(
     environment: QFAPIEnvironment = .current, identity: QFDeviceIdentity? = nil,
-    transport: URLSession? = nil
+    transportConfiguration: URLSessionConfiguration? = nil
   ) {
     self.environment = environment
     self.identity = identity ?? QFDeviceIdentity()
-    if let transport {
-      self.transport = transport
-    } else {
-      let configuration = URLSessionConfiguration.ephemeral
-      configuration.timeoutIntervalForRequest = 20
-      configuration.timeoutIntervalForResource = 30
-      configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-      configuration.urlCache = nil
-      configuration.httpCookieStorage = nil
-      configuration.httpShouldSetCookies = false
-      self.transport = URLSession(
-        configuration: configuration, delegate: QFNoRedirectDelegate(), delegateQueue: nil)
-    }
+    self.transport = Self.makeTransport(configuration: transportConfiguration ?? .ephemeral)
+  }
+
+  static func makeTransport(configuration source: URLSessionConfiguration) -> Alamofire.Session {
+    let configuration = source.copy() as? URLSessionConfiguration ?? .ephemeral
+    configuration.timeoutIntervalForRequest = 20
+    configuration.timeoutIntervalForResource = 30
+    configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+    configuration.urlCache = nil
+    configuration.httpCookieStorage = nil
+    configuration.httpShouldSetCookies = false
+    configuration.urlCredentialStorage = nil
+    return Alamofire.Session(
+      configuration: configuration,
+      interceptor: nil,
+      redirectHandler: Redirector(behavior: .doNotFollow),
+      cachedResponseHandler: ResponseCacher(behavior: .doNotCache),
+      eventMonitors: [])
   }
 
   func send<Value: Decodable>(
@@ -64,28 +71,29 @@ final class QFAPIClient {
     path: String, method: String, body: Data?,
     operationID: UUID?
   ) async throws -> QFAPIEnvelope<Value> {
+    try Task.checkCancellation()
     let request = try makeRequest(path: path, method: method, body: body, operationID: operationID)
     #if DEBUG
-      let logID = recordsRequests ? QFRequestLogStore.shared.begin(request: request) : nil
+      let logger = recordsRequests ? (requestLogStore ?? QFRequestLogStore.shared) : nil
+      let logID = logger?.begin(request: request)
     #endif
-    let data: Data
-    let response: URLResponse
-    do {
-      (data, response) = try await transport.data(for: request)
-    } catch {
-      #if DEBUG
-        if let logID {
-          QFRequestLogStore.shared.finish(id: logID, response: nil, data: nil, error: error)
-        }
-      #endif
-      throw error
-    }
-    let http = response as? HTTPURLResponse
+    // No validation or retry interceptor: HTTP failures must retain the server's envelope.
+    // Accept empty bodies here so the existing envelope decoder reports their HTTP status.
+    let response = await transport.request(request)
+      .serializingData(
+        automaticallyCancelling: true, emptyResponseCodes: Set(100...599)
+      )
+      .response
+    let failure: Error? =
+      Task.isCancelled ? CancellationError() : response.error.map(Self.transportError)
+    let http = response.response
+    let data = response.data ?? Data()
     #if DEBUG
       if let logID {
-        QFRequestLogStore.shared.finish(id: logID, response: http, data: data, error: nil)
+        logger?.finish(id: logID, response: http, data: response.data, error: failure)
       }
     #endif
+    if let failure { throw failure }
     guard let http, data.count <= 2 * 1024 * 1024 else {
       throw QFAPIError(code: 50000, message: "服务器响应格式或大小异常。")
     }
@@ -100,6 +108,20 @@ final class QFAPIClient {
         code: envelope.code, message: envelope.message, requestId: envelope.requestId)
     }
     return envelope
+  }
+
+  private static func transportError(_ error: AFError) -> Error {
+    switch error {
+    case .explicitlyCancelled:
+      return CancellationError()
+    case .sessionTaskFailed(let underlying):
+      if let urlError = underlying as? URLError, urlError.code == .cancelled {
+        return CancellationError()
+      }
+      return underlying
+    default:
+      return error
+    }
   }
 
   func makeRequest(path: String, method: String, body: Data?, operationID: UUID?) throws
@@ -127,16 +149,5 @@ final class QFAPIClient {
       request.setValue(operationID.uuidString.lowercased(), forHTTPHeaderField: "Idempotency-Key")
     }
     return request
-  }
-}
-
-private final class QFNoRedirectDelegate: NSObject, URLSessionTaskDelegate {
-  func urlSession(
-    _ session: URLSession, task: URLSessionTask,
-    willPerformHTTPRedirection response: HTTPURLResponse,
-    newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void
-  ) {
-    // Never forward device credentials, authorization codes or tokens to a redirected endpoint.
-    completionHandler(nil)
   }
 }

@@ -11,10 +11,13 @@
 		0798100BF07C4857C31FEA31 /* QFAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D88D7814793C72C44352488 /* QFAPIModels.swift */; };
 		0E2D05DE9C97040E34B0CD4C /* QFRequestLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A81C3A50329A1006B2D640A /* QFRequestLogStore.swift */; };
 		10286284B2287A5A8A7B9162 /* QFLaunchPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F95076D71B2459485C5050 /* QFLaunchPolicy.swift */; };
+		15AC1E17AFBA5156BD9C584C /* QFWelcomeArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFE2727CD228A894A789EAF /* QFWelcomeArtwork.swift */; };
 		1746AB969A207E4B06DA1032 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */; };
 		190860C7E3EC79826769E137 /* QFNetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */; };
 		25280A190A864957073D3749 /* QFReleaseWelcomeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B779EEA2A659A455A888F0B7 /* QFReleaseWelcomeUITests.swift */; };
+		27B6A56294F8C2DFF938DF12 /* QFAlamofireTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D86AD2434296802E9101BE2 /* QFAlamofireTransportTests.swift */; };
 		27FEC33ECA7DA0AD090773B0 /* QiafanYoupuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2704CD4D9654FCDDD9522E01 /* QiafanYoupuApp.swift */; };
+		30C4E1788DF510FD1D90BE61 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 802CBECCB074A38DE425AD54 /* SnapKit */; };
 		3C4D8D6BAFC066581A5EC061 /* QFConsentStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */; };
 		3FC5C187F731499628ABC900 /* QFCrashRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5427871774578C1A4CF899 /* QFCrashRecorder.swift */; };
 		426E070AD835618AA12FDDC3 /* QFIngredientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */; };
@@ -27,19 +30,27 @@
 		777DF14878B1EAEE4DFEF4F6 /* QFKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67CD54E8017A32326BC8B625 /* QFKeychainStore.swift */; };
 		845B02DF15278CE0C8D3E813 /* QFSessionRaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456B618222AA4AB66EF8D10D /* QFSessionRaceTests.swift */; };
 		85DEAF56C1931564F3B950AC /* QFTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C3F810CC0A4EF9665DE310 /* QFTheme.swift */; };
+		861F2D53DE5D63343DA80F17 /* QFAdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C25A9A113D762BF4D40DE1 /* QFAdaptiveLayout.swift */; };
 		86FD9CD7883CE7A479601E89 /* QFAppleAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6857C70B6A060023C897EFCB /* QFAppleAuthorization.swift */; };
 		90F3119FC6F1393D79B0FE5F /* QFCrashArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D9B04F6A950FD38F9E104A /* QFCrashArchive.swift */; };
 		B9D58A9FE7CDE87FF61B44EF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6435C5055C7DA34536D0E2C1 /* Assets.xcassets */; };
 		BB1E359D01A2D6BC299DB6BA /* QFWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1444A52A62F4605865A1986A /* QFWelcomeView.swift */; };
 		BB9FAD3856EE4977E760CAB0 /* QFRecipeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611149DF9B1649DD0E1C33E6 /* QFRecipeView.swift */; };
-		BBE7DF8121D88EDE52497D47 /* CrashReporter in Frameworks */ = {isa = PBXBuildFile; productRef = AEB76EFB73E676435E37C3E6 /* CrashReporter */; };
+		BBE7DF8121D88EDE52497D47 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 97B33A08F10D1CA841D23C11 /* Alamofire */; };
 		CEE1FD50DE79F703A054A80E /* QFProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */; };
+		D12A1D6850DC9BBDA65A550F /* QFRemoteImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE4F401E56851D9CA4C5A13 /* QFRemoteImageTests.swift */; };
+		D5A61B58081C0CF3CCAF6D59 /* QFRemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E7423D360770883F28EAEB /* QFRemoteImage.swift */; };
 		D60173D33583682B528DC893 /* QFMainUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D5B35D1107913F7F4F86C0 /* QFMainUITests.swift */; };
 		D6E0DB1046A459E6196766D9 /* QFPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1909E468D9C1F14FC5EEF336 /* QFPlanView.swift */; };
+		DA94DEAD3CC234005D6E2564 /* QFLayoutAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C36F80F38D71CA06108A9 /* QFLayoutAdapterTests.swift */; };
 		DF90DB8725C1B99614316846 /* ThirdPartyAcknowledgements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4F5E0C443399E9282FF9F67C /* ThirdPartyAcknowledgements.txt */; };
 		E08F8E4279EECC1439711D8F /* QFConnectedUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76EB9EBEFD9A3AB0514A26D3 /* QFConnectedUITests.swift */; };
+		E12CE2C6E51EBD79532C70E8 /* QFAdaptiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9ECEBE92685E532FE886B3 /* QFAdaptiveUITests.swift */; };
 		EF8BC0D76558038020F192A8 /* QFCrashArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */; };
+		F4671FD20F0906C5E031D149 /* CrashReporter in Frameworks */ = {isa = PBXBuildFile; productRef = AEB76EFB73E676435E37C3E6 /* CrashReporter */; };
 		F5B645F979984C45DC28D463 /* QFAppSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */; };
+		FCB1B3E6968B3EE959D26B04 /* QFSafetyNoticeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C679F277A0F83BA11EE5CC /* QFSafetyNoticeViewController.swift */; };
+		FF526CFE45D020DB230446D8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = CC81D1655F9D17E1C9D89FE2 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,11 +76,14 @@
 		1909E468D9C1F14FC5EEF336 /* QFPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFPlanView.swift; sourceTree = "<group>"; };
 		199372BB33EFE37BE8139659 /* QiafanYoupuUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QiafanYoupuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2704CD4D9654FCDDD9522E01 /* QiafanYoupuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiafanYoupuApp.swift; sourceTree = "<group>"; };
+		2BE4F401E56851D9CA4C5A13 /* QFRemoteImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRemoteImageTests.swift; sourceTree = "<group>"; };
 		371B893915D16815276BBA05 /* QFLaunchPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLaunchPolicyTests.swift; sourceTree = "<group>"; };
+		393C36F80F38D71CA06108A9 /* QFLayoutAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLayoutAdapterTests.swift; sourceTree = "<group>"; };
 		4295B6824E289E6EB699E87F /* QFRequestLogStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogStoreTests.swift; sourceTree = "<group>"; };
 		436ABDE7A489EBB541FD4113 /* QFDiagnosticsAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFDiagnosticsAccess.swift; sourceTree = "<group>"; };
 		44CDD7B36BCEE536A5E616BA /* QFAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAPIClient.swift; sourceTree = "<group>"; };
 		456B618222AA4AB66EF8D10D /* QFSessionRaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSessionRaceTests.swift; sourceTree = "<group>"; };
+		48C679F277A0F83BA11EE5CC /* QFSafetyNoticeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSafetyNoticeViewController.swift; sourceTree = "<group>"; };
 		4A81C3A50329A1006B2D640A /* QFRequestLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogStore.swift; sourceTree = "<group>"; };
 		4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCrashArchiveTests.swift; sourceTree = "<group>"; };
 		4F5E0C443399E9282FF9F67C /* ThirdPartyAcknowledgements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ThirdPartyAcknowledgements.txt; sourceTree = "<group>"; };
@@ -84,17 +98,22 @@
 		76EB9EBEFD9A3AB0514A26D3 /* QFConnectedUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFConnectedUITests.swift; sourceTree = "<group>"; };
 		7A5E67E8173DABB4E7CCE324 /* QFAuthViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAuthViews.swift; sourceTree = "<group>"; };
 		82F95076D71B2459485C5050 /* QFLaunchPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLaunchPolicy.swift; sourceTree = "<group>"; };
-		8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		8CFE2727CD228A894A789EAF /* QFWelcomeArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFWelcomeArtwork.swift; sourceTree = "<group>"; };
+		8D86AD2434296802E9101BE2 /* QFAlamofireTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAlamofireTransportTests.swift; sourceTree = "<group>"; };
+		8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFConsentStoreTests.swift; sourceTree = "<group>"; };
+		91E7423D360770883F28EAEB /* QFRemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRemoteImage.swift; sourceTree = "<group>"; };
 		A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFProfileView.swift; sourceTree = "<group>"; };
 		AF04B819F01D1047ACCD0101 /* QFLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLoginView.swift; sourceTree = "<group>"; };
 		B3C3F810CC0A4EF9665DE310 /* QFTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFTheme.swift; sourceTree = "<group>"; };
 		B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFNetworkingTests.swift; sourceTree = "<group>"; };
+		B6C25A9A113D762BF4D40DE1 /* QFAdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAdaptiveLayout.swift; sourceTree = "<group>"; };
 		B779EEA2A659A455A888F0B7 /* QFReleaseWelcomeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFReleaseWelcomeUITests.swift; sourceTree = "<group>"; };
 		BC5427871774578C1A4CF899 /* QFCrashRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCrashRecorder.swift; sourceTree = "<group>"; };
+		BF9ECEBE92685E532FE886B3 /* QFAdaptiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAdaptiveUITests.swift; sourceTree = "<group>"; };
 		DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAppSession.swift; sourceTree = "<group>"; };
 		FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientView.swift; sourceTree = "<group>"; };
-		FDB9DD4AACAF3E281942FDFA /* QiafanYoupu.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = QiafanYoupu.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDB9DD4AACAF3E281942FDFA /* QiafanYoupu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QiafanYoupu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,7 +121,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BBE7DF8121D88EDE52497D47 /* CrashReporter in Frameworks */,
+				BBE7DF8121D88EDE52497D47 /* Alamofire in Frameworks */,
+				FF526CFE45D020DB230446D8 /* Kingfisher in Frameworks */,
+				30C4E1788DF510FD1D90BE61 /* SnapKit in Frameworks */,
+				F4671FD20F0906C5E031D149 /* CrashReporter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +152,7 @@
 		1D23D37D8FE4125D6C7B1A33 /* QiafanYoupuUITests */ = {
 			isa = PBXGroup;
 			children = (
+				BF9ECEBE92685E532FE886B3 /* QFAdaptiveUITests.swift */,
 				76EB9EBEFD9A3AB0514A26D3 /* QFConnectedUITests.swift */,
 				59D5B35D1107913F7F4F86C0 /* QFMainUITests.swift */,
 				B779EEA2A659A455A888F0B7 /* QFReleaseWelcomeUITests.swift */,
@@ -188,14 +211,25 @@
 		9883E5D78C5A06D55D8A9ACB /* QiafanYoupuTests */ = {
 			isa = PBXGroup;
 			children = (
+				8D86AD2434296802E9101BE2 /* QFAlamofireTransportTests.swift */,
 				9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */,
 				4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */,
 				371B893915D16815276BBA05 /* QFLaunchPolicyTests.swift */,
+				393C36F80F38D71CA06108A9 /* QFLayoutAdapterTests.swift */,
 				B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */,
+				2BE4F401E56851D9CA4C5A13 /* QFRemoteImageTests.swift */,
 				4295B6824E289E6EB699E87F /* QFRequestLogStoreTests.swift */,
 				456B618222AA4AB66EF8D10D /* QFSessionRaceTests.swift */,
 			);
 			path = QiafanYoupuTests;
+			sourceTree = "<group>";
+		};
+		A377D6E62FED6F31BD699C82 /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				91E7423D360770883F28EAEB /* QFRemoteImage.swift */,
+			);
+			path = Media;
 			sourceTree = "<group>";
 		};
 		B7120518CEF1AD6C5AF71546 /* Session */ = {
@@ -244,6 +278,8 @@
 				6857C70B6A060023C897EFCB /* QFAppleAuthorization.swift */,
 				7A5E67E8173DABB4E7CCE324 /* QFAuthViews.swift */,
 				AF04B819F01D1047ACCD0101 /* QFLoginView.swift */,
+				48C679F277A0F83BA11EE5CC /* QFSafetyNoticeViewController.swift */,
+				8CFE2727CD228A894A789EAF /* QFWelcomeArtwork.swift */,
 				1444A52A62F4605865A1986A /* QFWelcomeView.swift */,
 			);
 			path = Auth;
@@ -252,6 +288,7 @@
 		CABB81F38859A7CF457CBB62 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				B6C25A9A113D762BF4D40DE1 /* QFAdaptiveLayout.swift */,
 				B3C3F810CC0A4EF9665DE310 /* QFTheme.swift */,
 			);
 			path = DesignSystem;
@@ -279,6 +316,7 @@
 			isa = PBXGroup;
 			children = (
 				7788A82F318C8D275132D66A /* Diagnostics */,
+				A377D6E62FED6F31BD699C82 /* Media */,
 				C5E225976E92F83D1729BF9F /* Networking */,
 				B7120518CEF1AD6C5AF71546 /* Session */,
 			);
@@ -329,6 +367,9 @@
 			);
 			name = QiafanYoupu;
 			packageProductDependencies = (
+				97B33A08F10D1CA841D23C11 /* Alamofire */,
+				CC81D1655F9D17E1C9D89FE2 /* Kingfisher */,
+				802CBECCB074A38DE425AD54 /* SnapKit */,
 				AEB76EFB73E676435E37C3E6 /* CrashReporter */,
 			);
 			productName = QiafanYoupu;
@@ -387,7 +428,10 @@
 			mainGroup = 108FD7AD20C9E5D61C0A67BF;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				4729895EF2ED754BFD582D39 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				7850A2CBE9F30AE98B11B286 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				AEC36B42A418575351F73159 /* XCRemoteSwiftPackageReference "plcrashreporter" */,
+				3AE500EA6A0B309487DB512C /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DD9BDF1E28281EFCDAE31C9C /* Products */;
@@ -419,6 +463,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E12CE2C6E51EBD79532C70E8 /* QFAdaptiveUITests.swift in Sources */,
 				E08F8E4279EECC1439711D8F /* QFConnectedUITests.swift in Sources */,
 				D60173D33583682B528DC893 /* QFMainUITests.swift in Sources */,
 				25280A190A864957073D3749 /* QFReleaseWelcomeUITests.swift in Sources */,
@@ -429,10 +474,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27B6A56294F8C2DFF938DF12 /* QFAlamofireTransportTests.swift in Sources */,
 				3C4D8D6BAFC066581A5EC061 /* QFConsentStoreTests.swift in Sources */,
 				EF8BC0D76558038020F192A8 /* QFCrashArchiveTests.swift in Sources */,
 				63F52E6D2B2510A93788BE05 /* QFLaunchPolicyTests.swift in Sources */,
+				DA94DEAD3CC234005D6E2564 /* QFLayoutAdapterTests.swift in Sources */,
 				190860C7E3EC79826769E137 /* QFNetworkingTests.swift in Sources */,
+				D12A1D6850DC9BBDA65A550F /* QFRemoteImageTests.swift in Sources */,
 				66B25D2418BF4B3BF594CCA1 /* QFRequestLogStoreTests.swift in Sources */,
 				845B02DF15278CE0C8D3E813 /* QFSessionRaceTests.swift in Sources */,
 			);
@@ -444,6 +492,7 @@
 			files = (
 				46E510128376CFA7F0F9A3FD /* QFAPIClient.swift in Sources */,
 				0798100BF07C4857C31FEA31 /* QFAPIModels.swift in Sources */,
+				861F2D53DE5D63343DA80F17 /* QFAdaptiveLayout.swift in Sources */,
 				F5B645F979984C45DC28D463 /* QFAppSession.swift in Sources */,
 				86FD9CD7883CE7A479601E89 /* QFAppleAuthorization.swift in Sources */,
 				5C49A52219D019B6FD7A8B6E /* QFAuthViews.swift in Sources */,
@@ -457,9 +506,12 @@
 				D6E0DB1046A459E6196766D9 /* QFPlanView.swift in Sources */,
 				CEE1FD50DE79F703A054A80E /* QFProfileView.swift in Sources */,
 				BB9FAD3856EE4977E760CAB0 /* QFRecipeView.swift in Sources */,
+				D5A61B58081C0CF3CCAF6D59 /* QFRemoteImage.swift in Sources */,
 				0E2D05DE9C97040E34B0CD4C /* QFRequestLogStore.swift in Sources */,
 				047BD8CE6166C88B2D8114E1 /* QFRequestLogView.swift in Sources */,
+				FCB1B3E6968B3EE959D26B04 /* QFSafetyNoticeViewController.swift in Sources */,
 				85DEAF56C1931564F3B950AC /* QFTheme.swift in Sources */,
+				15AC1E17AFBA5156BD9C584C /* QFWelcomeArtwork.swift in Sources */,
 				BB1E359D01A2D6BC299DB6BA /* QFWelcomeView.swift in Sources */,
 				27FEC33ECA7DA0AD090773B0 /* QiafanYoupuApp.swift in Sources */,
 			);
@@ -489,6 +541,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QiafanYoupu/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "恰饭有谱";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -560,7 +613,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -623,6 +676,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QiafanYoupu/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "恰饭有谱";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -700,7 +754,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -763,6 +817,30 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3AE500EA6A0B309487DB512C /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = exactVersion;
+				version = 6.0.0;
+			};
+		};
+		4729895EF2ED754BFD582D39 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = exactVersion;
+				version = 5.12.2;
+			};
+		};
+		7850A2CBE9F30AE98B11B286 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = exactVersion;
+				version = 8.12.0;
+			};
+		};
 		AEC36B42A418575351F73159 /* XCRemoteSwiftPackageReference "plcrashreporter" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/microsoft/plcrashreporter.git";
@@ -774,10 +852,25 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		802CBECCB074A38DE425AD54 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3AE500EA6A0B309487DB512C /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		97B33A08F10D1CA841D23C11 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4729895EF2ED754BFD582D39 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
 		AEB76EFB73E676435E37C3E6 /* CrashReporter */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AEC36B42A418575351F73159 /* XCRemoteSwiftPackageReference "plcrashreporter" */;
 			productName = CrashReporter;
+		};
+		CC81D1655F9D17E1C9D89FE2 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7850A2CBE9F30AE98B11B286 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

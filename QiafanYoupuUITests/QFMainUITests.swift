@@ -132,10 +132,12 @@ final class QFMainUITests: XCTestCase {
     XCTAssertTrue(app.buttons["welcome.skip"].waitForExistence(timeout: 10))
     capture("01-welcome")
     XCTAssertFalse(app.buttons["welcome.enter"].isHittable)
+    let pager = app.scrollViews["welcome.pages"]
+    XCTAssertTrue(pager.waitForExistence(timeout: 5))
     for _ in 0..<4 {
-      // Swipe in the illustration area so the gesture reaches the native SwiftUI pager.
-      let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.45))
-      let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.45))
+      // On iPad the centered pager is narrower than the window; start inside its illustration.
+      let start = pager.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.45))
+      let end = pager.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.45))
       start.press(forDuration: 0.05, thenDragTo: end)
     }
     XCTAssertTrue(app.buttons["welcome.enter"].isHittable)

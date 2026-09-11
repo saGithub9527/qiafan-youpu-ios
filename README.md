@@ -1,6 +1,6 @@
 # 恰饭有谱 · iOS 客户端
 
-Swift + SwiftUI 为主、UIKit 按需补充；iOS 15 起，iPhone 竖屏，Xcode 26.3 / Swift 5 语言模式。原 OC 实现保存在 Git 标签 `oc-uikit-baseline`。
+Swift + UIKit + SnapKit；iOS 15 起，iPhone 竖屏及 iPad 横竖屏，Xcode 26.3 / Swift 5 语言模式。原 OC 实现保存在 Git 标签 `oc-uikit-baseline`。
 
 已接入启动配置、快速登录、原生 Apple 授权、会话刷新、退出和基本资料恢复；菜谱、计划、食材仍为已确认的一级 UI 与本地样例。[实现范围](docs/实现范围.md)与[验证记录](docs/验证记录.md)分别记录边界和实测结果。
 
@@ -81,9 +81,10 @@ Debug 默认每次展示欢迎；Release 完成首次安全通知后不重复。
 
 ```text
 QiafanYoupu/
-├── App/                 生命周期、启动规则、Tab、会话注入
+├── App/                 AppDelegate / SceneDelegate、启动规则、Tab、会话协调
 ├── Core/
-│   ├── Networking/      URLSession 请求、公共头、响应模型
+│   ├── Networking/      Alamofire 请求、公共头、响应模型
+│   ├── Media/           Kingfisher 远程图片、分环境/用户缓存
 │   ├── Session/         Keychain、设备标识、真实登录与会话
 │   └── Diagnostics/     Debug 请求日志与本地崩溃归档
 ├── Features/
@@ -94,7 +95,7 @@ QiafanYoupu/
 └── Resources/           素材、隐私清单、第三方许可证
 ```
 
-网络用 Foundation URLSession，凭证用 Security Keychain，Apple 授权用 AuthenticationServices；SwiftUI 使用原生布局与分页。崩溃采集复用 [Microsoft PLCrashReporter](https://github.com/microsoft/plcrashreporter/tree/1.12.2)，固定 1.12.2，并提交锁文件和完整许可证。素材映射见 [ASSET-SOURCES](QiafanYoupu/Resources/ASSET-SOURCES.md)。
+网络使用 Alamofire 5.12.2；远程头像使用 Kingfisher 8.12.0；全部页面约束使用 SnapKit 6.0.0，欢迎、登录、四 Tab 和日志均迁移到 UIKit。凭证用 Security Keychain，Apple 授权用 AuthenticationServices；所有页面使用 UIKit，约束使用 SnapKit，欢迎分页使用系统 UIScrollView。窗口按可用宽高适配，主内容宽屏居中、窄屏换行，iPad 支持横竖屏。完整规则见 [第三方框架与布局适配](docs/第三方框架与布局适配.md)。崩溃采集复用 [Microsoft PLCrashReporter](https://github.com/microsoft/plcrashreporter/tree/1.12.2)，固定 1.12.2，并提交锁文件和完整许可证。素材映射见 [ASSET-SOURCES](QiafanYoupu/Resources/ASSET-SOURCES.md)。
 
 ## 测试
 

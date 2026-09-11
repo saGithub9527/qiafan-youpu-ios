@@ -24,14 +24,19 @@ final class QFAppleAuthorization: NSObject, ASAuthorizationControllerDelegate,
     let request = ASAuthorizationAppleIDProvider().createRequest()
     request.state = state
     // No email/name scope is requested: the API contract only needs the verified Apple identity.
-    return try await withCheckedThrowingContinuation { continuation in
-      self.continuation = continuation
-      let controller = ASAuthorizationController(authorizationRequests: [request])
-      self.controller = controller
-      controller.delegate = self
-      controller.presentationContextProvider = self
-      controller.performRequests()
-    }
+    return try await withTaskCancellationHandler(operation: {
+      try Task.checkCancellation()
+      return try await withCheckedThrowingContinuation { continuation in
+        self.continuation = continuation
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        self.controller = controller
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+      }
+    }, onCancel: {
+      Task { @MainActor [weak self] in self?.cancelPending(state: state) }
+    })
   }
 
   func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
@@ -42,6 +47,7 @@ final class QFAppleAuthorization: NSObject, ASAuthorizationControllerDelegate,
     controller: ASAuthorizationController,
     didCompleteWithAuthorization authorization: ASAuthorization
   ) {
+    guard controller === self.controller else { return }
     guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
       credential.state == state,
       let data = credential.authorizationCode,
@@ -56,7 +62,14 @@ final class QFAppleAuthorization: NSObject, ASAuthorizationControllerDelegate,
   func authorizationController(
     controller: ASAuthorizationController, didCompleteWithError error: Error
   ) {
+    guard controller === self.controller else { return }
     complete(.failure(error))
+  }
+
+  private func cancelPending(state: String) {
+    guard self.state == state else { return }
+    if #available(iOS 16.0, *) { controller?.cancel() }
+    complete(.failure(CancellationError()))
   }
 
   private func complete(_ result: Result<String, Error>) {

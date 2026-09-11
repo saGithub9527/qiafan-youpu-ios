@@ -96,7 +96,7 @@ private final class QFSessionRaceRouter {
 final class QFSessionRaceTests: XCTestCase {
   private var service: String!
   private var host: String!
-  private var transport: URLSession!
+  private var transportConfiguration: URLSessionConfiguration!
   private var router: QFSessionRaceRouter!
 
   override func setUp() {
@@ -108,16 +108,15 @@ final class QFSessionRaceTests: XCTestCase {
     QFSessionRaceProtocol.register(router, host: host)
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [QFSessionRaceProtocol.self]
-    transport = URLSession(configuration: configuration)
+    transportConfiguration = configuration
   }
 
   override func tearDownWithError() throws {
-    transport.invalidateAndCancel()
     QFSessionRaceProtocol.remove(host: host)
     let keychain = QFKeychainStore(service: service)
     for key in ["current", "device-id", "credential-test"] { try keychain.remove(key) }
     router = nil
-    transport = nil
+    transportConfiguration = nil
     try super.tearDownWithError()
   }
 
@@ -126,7 +125,7 @@ final class QFSessionRaceTests: XCTestCase {
     let identity = QFDeviceIdentity(service: service)
     let api = QFAPIClient(
       environment: QFAPIEnvironment(name: "test", baseURL: URL(string: "https://\(host!)/api/v1")),
-      identity: identity, transport: transport)
+      identity: identity, transportConfiguration: transportConfiguration)
     #if DEBUG
       api.recordsRequests = false
     #endif

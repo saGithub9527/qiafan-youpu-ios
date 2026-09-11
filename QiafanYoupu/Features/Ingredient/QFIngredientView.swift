@@ -1,415 +1,304 @@
-import SwiftUI
+import SnapKit
 import UIKit
 
-struct QFIngredientView: View {
-  let isActive: Bool
-  @State private var shopping = false
-  @State private var selectedCategory = "全部"
-  @State private var query = ""
-  @State private var nearDateFirst = true
-  @State private var unavailableTitle = ""
-  @State private var showsUnavailable = false
-  @FocusState private var searchFocused: Bool
-
+@MainActor
+final class QFIngredientViewController: QFPageViewController, UITextFieldDelegate {
+  private var shopping = false
+  private var selectedCategory = "全部"
+  private var nearDateFirst = true
   private let categories = ["全部", "蔬菜", "肉蛋", "奶制品", "水果", "谷物", "水产", "菌藻", "调味"]
+  private let searchField = UITextField()
+  private let segment = UISegmentedControl(items: ["家里已有 · 12", "待采购 · 3"])
+  private let list = QFTabUI.stack([], spacing: 10)
+  private let listTitle = QFTabUI.label("我的食材", size: 17, weight: .semibold)
+  private var sorting: UIButton!
+  private var notice: UIButton!
+  private var discovery: UIStackView!
+  private var categoryButtons: [String: UIButton] = [:]
+  private var compact = false
 
-  private var visibleIngredients: [QFIngredientSample] {
-    let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    scrollView.keyboardDismissMode = .onDrag
+    contentStack.addArrangedSubview(makeHeader())
+    contentStack.addArrangedSubview(makeSearch())
+    discovery = QFTabUI.stack(
+      [
+        discoveryButton(
+          "食材大全", subtitle: "分类查找，认识食材", symbol: "book.closed", background: QFUI.paleGreen,
+          accent: QFUI.green),
+        discoveryButton(
+          "食材组合推荐", subtitle: "选食材，看看能做什么", symbol: "circle", background: QFTabUI.color(0xFFF0E7),
+          accent: QFUI.orange),
+      ], axis: .horizontal, spacing: 12)
+    discovery.distribution = .fillEqually
+    contentStack.addArrangedSubview(discovery)
+    segment.selectedSegmentIndex = 0
+    segment.accessibilityIdentifier = "ingredient.segment"
+    segment.addAction(
+      UIAction { [weak self] _ in
+        guard let self else { return }
+        self.shopping = self.segment.selectedSegmentIndex == 1
+        self.refreshList()
+      }, for: .valueChanged)
+    segment.snp.makeConstraints { $0.height.equalTo(36) }
+    contentStack.addArrangedSubview(
+      QFTabUI.card(segment, padding: 4, background: QFTabUI.color(0xE9EDE2)))
+    notice = QFTabUI.button("", background: QFTabUI.color(0xFFF4DC)) { [weak self] in
+      self?.unavailable("临期食材")
+    }
+    notice.accessibilityLabel = "2 种食材临近标注日期，查看"
+    let noticeText = QFTabUI.label(
+      "2 种食材临近标注日期", size: 12, color: QFTabUI.color(0xA16A17), lines: 0)
+    let noticeAction = QFTabUI.label(
+      "查看  ›", size: 12, weight: .medium, color: QFTabUI.color(0xA16A17))
+    noticeAction.setContentCompressionResistancePriority(.required, for: .horizontal)
+    let noticeRow = QFTabUI.stack(
+      [
+        QFTabUI.symbol("clock", size: 17, color: QFTabUI.color(0xA16A17)), noticeText, UIView(),
+        noticeAction,
+      ], axis: .horizontal, spacing: 9)
+    noticeRow.alignment = .center
+    noticeRow.isUserInteractionEnabled = false
+    noticeRow.accessibilityElementsHidden = true
+    notice.addSubview(noticeRow)
+    noticeRow.snp.makeConstraints {
+      $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 12, left: 14, bottom: 12, right: 14))
+    }
+    contentStack.addArrangedSubview(notice)
+    contentStack.addArrangedSubview(makeCategories())
+    sorting = QFTabUI.button("", size: 12, color: QFUI.secondary) { [weak self] in
+      guard let self else { return }
+      self.nearDateFirst.toggle()
+      self.refreshList()
+    }
+    sorting.snp.makeConstraints { $0.height.greaterThanOrEqualTo(32) }
+    let heading = QFTabUI.stack([listTitle, UIView(), sorting], axis: .horizontal, spacing: 8)
+    heading.alignment = .center
+    contentStack.addArrangedSubview(heading)
+    list.accessibilityIdentifier = "ingredient.list"
+    contentStack.addArrangedSubview(list)
+    refreshCategories()
+    refreshList()
+  }
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    let next = view.bounds.width < 360
+    guard next != compact else { return }
+    compact = next
+    discovery.axis = compact ? .vertical : .horizontal
+  }
+
+  private func makeHeader() -> UIView {
+    let heading = QFTabUI.stack(
+      [
+        QFTabUI.label("食材", size: 28, weight: .bold),
+        QFTabUI.label("把家里的食材用起来", size: 12, color: QFUI.secondary, lines: 0),
+      ], spacing: 6)
+    let scan = QFTabUI.iconButton("qrcode.viewfinder", label: "扫描小票二维码") { [weak self] in
+      self?.unavailable("扫描小票二维码")
+    }
+    scan.backgroundColor = .white
+    scan.layer.cornerRadius = 14
+    scan.accessibilityIdentifier = "ingredient.scan"
+    let add = QFTabUI.button(
+      "＋ 添加", size: 14, weight: .semibold, color: .white, background: QFUI.orange
+    ) { [weak self] in self?.unavailable("添加食材") }
+    add.accessibilityIdentifier = "ingredient.add"
+    add.contentEdgeInsets = .zero
+    add.snp.makeConstraints {
+      $0.width.equalTo(72)
+      $0.height.equalTo(40)
+    }
+    let row = QFTabUI.stack([heading, scan, add], axis: .horizontal, spacing: 10)
+    row.alignment = .center
+    return row
+  }
+
+  private func makeSearch() -> UIView {
+    searchField.placeholder = "搜索食材名称"
+    searchField.font = .systemFont(ofSize: 14)
+    searchField.textColor = QFUI.text
+    searchField.tintColor = QFUI.orange
+    searchField.clearButtonMode = .whileEditing
+    searchField.returnKeyType = .search
+    searchField.delegate = self
+    searchField.accessibilityLabel = "搜索食材名称"
+    searchField.accessibilityIdentifier = "ingredient.search"
+    searchField.addAction(UIAction { [weak self] _ in self?.refreshList() }, for: .editingChanged)
+    let icon = QFTabUI.symbol("magnifyingglass", size: 19, color: QFUI.secondary)
+    let row = QFTabUI.stack([icon, searchField], axis: .horizontal, spacing: 12)
+    row.alignment = .center
+    row.snp.makeConstraints { $0.height.equalTo(22) }
+    return QFTabUI.card(row, padding: 11, border: true)
+  }
+
+  private func discoveryButton(
+    _ title: String, subtitle: String, symbol: String, background: UIColor, accent: UIColor
+  ) -> UIButton {
+    let button = QFTabUI.button("", background: background) { [weak self] in
+      self?.unavailable(title)
+    }
+    button.accessibilityLabel = title
+    button.accessibilityHint = subtitle
+    let icon = UIView()
+    let first = QFTabUI.symbol(symbol, size: 21, color: accent)
+    icon.addSubview(first)
+    first.snp.makeConstraints { $0.top.leading.equalToSuperview() }
+    icon.snp.makeConstraints {
+      $0.width.equalTo(29)
+      $0.height.equalTo(32)
+    }
+    if symbol == "circle" {
+      let second = QFTabUI.symbol("circle", size: 19, color: accent)
+      icon.addSubview(second)
+      second.snp.makeConstraints {
+        $0.leading.equalToSuperview().offset(7)
+        $0.top.equalToSuperview().offset(9)
+      }
+    }
+    let titleLabel = QFTabUI.label(title, size: 16, weight: .semibold, lines: 2)
+    let heading = QFTabUI.stack([titleLabel, UIView(), icon], axis: .horizontal, spacing: 4)
+    heading.alignment = .top
+    let body = QFTabUI.stack(
+      [heading, QFTabUI.label(subtitle, size: 11, color: accent, lines: 0)], spacing: 4)
+    body.isUserInteractionEnabled = false
+    body.accessibilityElementsHidden = true
+    button.addSubview(body)
+    body.snp.makeConstraints { $0.edges.equalToSuperview().inset(13) }
+    button.snp.makeConstraints { $0.height.greaterThanOrEqualTo(74) }
+    return button
+  }
+
+  private func makeCategories() -> UIView {
+    let row = QFTabUI.stack([], axis: .horizontal, spacing: 8)
+    for category in categories {
+      let button = QFTabUI.button(
+        category, size: 13, weight: .semibold, color: QFUI.secondary, background: .white
+      ) { [weak self] in
+        self?.selectedCategory = category
+        self?.refreshCategories()
+        self?.refreshList()
+      }
+      button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+      button.layer.cornerRadius = 16
+      button.layer.borderWidth = 1
+      button.accessibilityIdentifier = "ingredient.category.\(category)"
+      row.addArrangedSubview(button)
+      categoryButtons[category] = button
+    }
+    return QFTabUI.horizontalScroll(row, height: 32, identifier: "ingredient.categories")
+  }
+
+  private func refreshCategories() {
+    for (category, button) in categoryButtons {
+      let selected = selectedCategory == category
+      // Keep the custom pill appearance and expose selection only through accessibility.
+      button.accessibilityTraits = selected ? [.button, .selected] : [.button]
+      button.backgroundColor = selected ? QFUI.paleGreen : .white
+      button.layer.borderColor = (selected ? UIColor.clear : QFUI.border).cgColor
+      button.setTitleColor(selected ? QFUI.green : QFUI.secondary, for: .normal)
+    }
+  }
+
+  private func refreshList() {
+    let query = (searchField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
     let source = shopping ? QFIngredientSample.shopping : QFIngredientSample.inventory
     let ordered =
       !shopping && !nearDateFirst
-      ? source.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-      : source
-    return ordered.filter {
+      ? source.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending } : source
+    let ingredients = ordered.filter {
       (selectedCategory == "全部" || $0.category == selectedCategory)
-        && (trimmedQuery.isEmpty || $0.name.localizedCaseInsensitiveContains(trimmedQuery))
+        && (query.isEmpty || $0.name.localizedCaseInsensitiveContains(query))
+    }
+    if shopping, notice.superview != nil {
+      contentStack.removeArrangedSubview(notice)
+      notice.removeFromSuperview()
+    } else if !shopping, notice.superview == nil {
+      contentStack.insertArrangedSubview(notice, at: 4)
+    }
+    listTitle.text = shopping ? "待采购食材" : "我的食材"
+    sorting.setTitle(shopping ? "预计 ¥16.20" : (nearDateFirst ? "临期优先  ﹀" : "默认排序  ﹀"), for: .normal)
+    sorting.isEnabled = !shopping
+    sorting.accessibilityLabel =
+      shopping ? "预计花费16.20元" : (nearDateFirst ? "食材排序，临期优先" : "食材排序，默认排序")
+    QFTabUI.clear(list)
+    ingredients.forEach { list.addArrangedSubview(makeCard($0)) }
+    if ingredients.isEmpty {
+      list.addArrangedSubview(QFTabUI.empty("没有找到相关食材", detail: "换个名称或分类试试"))
     }
   }
 
-  var body: some View {
-    ScrollView(showsIndicators: false) {
-      VStack(spacing: 16) {
-        header
-        searchField
-        discoveryEntries
-        inventorySegment
-        if !shopping { nearDateNotice }
-        categoryStrip
-        listHeader
-        ingredientList
-      }
-      .padding(.horizontal, 20)
-      .padding(.top, 14)
-      .padding(.bottom, 24)
-    }
-    .simultaneousGesture(DragGesture().onChanged { _ in searchFocused = false })
-    .onChange(of: isActive) { active in
-      if !active { searchFocused = false }
-    }
-    .background(QFTheme.background.ignoresSafeArea())
-    .alert(unavailableTitle, isPresented: $showsUnavailable) {
-      Button("知道了", role: .cancel) {}
-    } message: {
-      Text("该功能暂未开放")
-    }
-  }
-
-  private var header: some View {
-    HStack(spacing: 10) {
-      VStack(alignment: .leading, spacing: 6) {
-        Text("食材")
-          .font(.system(size: 28, weight: .bold))
-          .foregroundColor(QFTheme.text)
-        Text("把家里的食材用起来")
-          .font(.system(size: 12))
-          .foregroundColor(QFTheme.secondary)
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      Button {
-        showUnavailable("扫描小票二维码")
-      } label: {
-        Image(systemName: "qrcode.viewfinder")
-          .font(.system(size: 20))
-          .foregroundColor(QFTheme.text)
-          .frame(width: 44, height: 40)
-          .background(Color.white, in: RoundedRectangle(cornerRadius: 14))
-          .overlay(RoundedRectangle(cornerRadius: 14).stroke(QFTheme.border, lineWidth: 1))
-      }
-      .buttonStyle(.plain)
-      .accessibilityLabel("扫描小票二维码")
-      .accessibilityIdentifier("ingredient.scan")
-      Button {
-        showUnavailable("添加食材")
-      } label: {
-        Text("＋ 添加")
-          .font(.system(size: 14, weight: .semibold))
-          .foregroundColor(.white)
-          .frame(width: 72, height: 40)
-          .background(QFTheme.orange, in: RoundedRectangle(cornerRadius: 14))
-      }
-      .buttonStyle(.plain)
-      .accessibilityIdentifier("ingredient.add")
-    }
-  }
-
-  private var searchField: some View {
-    HStack(spacing: 12) {
-      Image(systemName: "magnifyingglass")
-        .font(.system(size: 19))
-        .foregroundColor(QFTheme.secondary)
-        .frame(width: 19, height: 19)
-        .accessibilityHidden(true)
-      TextField("搜索食材名称", text: $query)
-        .font(.system(size: 14))
-        .foregroundColor(QFTheme.text)
-        .tint(QFTheme.orange)
-        .focused($searchFocused)
-        .submitLabel(.search)
-        .onSubmit { searchFocused = false }
-        .accessibilityLabel("搜索食材名称")
-        .accessibilityIdentifier("ingredient.search")
-      if !query.isEmpty && searchFocused {
-        Button {
-          query = ""
-        } label: {
-          Image(systemName: "xmark.circle.fill")
-            .foregroundColor(QFTheme.secondary)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("清除搜索")
-      }
-    }
-    .padding(.leading, 14)
-    .padding(.trailing, 12)
-    .frame(height: 44)
-    .background(Color.white, in: RoundedRectangle(cornerRadius: 14))
-    .overlay(RoundedRectangle(cornerRadius: 14).stroke(QFTheme.border, lineWidth: 1))
-  }
-
-  private var discoveryEntries: some View {
-    HStack(spacing: 12) {
-      QFIngredientDiscoveryButton(
-        title: "食材大全", subtitle: "分类查找，认识食材", symbol: "book.closed",
-        background: QFTheme.paleGreen, accent: QFTheme.green
-      ) { showUnavailable("食材大全") }
-      QFIngredientDiscoveryButton(
-        title: "食材组合推荐", subtitle: "选食材，看看能做什么", symbol: "circle",
-        background: Color(hex: 0xFFF0E7), accent: QFTheme.orange
-      ) { showUnavailable("食材组合推荐") }
-    }
-  }
-
-  private var inventorySegment: some View {
-    Picker("食材状态", selection: $shopping) {
-      Text("家里已有 · 12").tag(false)
-      Text("待采购 · 3").tag(true)
-    }
-    .pickerStyle(.segmented)
-    .labelsHidden()
-    .padding(4)
-    .frame(height: 44)
-    .background(Color(hex: 0xE9EDE2), in: RoundedRectangle(cornerRadius: 18))
-    .accessibilityIdentifier("ingredient.segment")
-  }
-
-  private var nearDateNotice: some View {
-    Button {
-      showUnavailable("临期食材")
-    } label: {
-      HStack(spacing: 9) {
-        Image(systemName: "clock")
-          .font(.system(size: 17))
-          .frame(width: 17, height: 17)
-        Text("2 种食材临近标注日期")
-          .font(.system(size: 12))
-        Spacer(minLength: 0)
-        Text("查看  ›")
-          .font(.system(size: 12, weight: .medium))
-      }
-      .foregroundColor(Color(hex: 0xA16A17))
-      .padding(.horizontal, 14)
-      .padding(.vertical, 12)
-      .background(Color(hex: 0xFFF4DC), in: RoundedRectangle(cornerRadius: 14))
-    }
-    .buttonStyle(.plain)
-    .accessibilityLabel("2 种食材临近标注日期，查看")
-  }
-
-  private var categoryStrip: some View {
-    ScrollView(.horizontal, showsIndicators: false) {
-      HStack(spacing: 8) {
-        ForEach(categories, id: \.self) { category in
-          QFIngredientCategoryButton(
-            name: category, selected: selectedCategory == category
-          ) { selectedCategory = category }
-        }
-      }
-    }
-    .frame(height: 32)
-    .accessibilityIdentifier("ingredient.categories")
-  }
-
-  private var listHeader: some View {
-    HStack(spacing: 8) {
-      Text(shopping ? "待采购食材" : "我的食材")
-        .font(.system(size: 17, weight: .semibold))
-        .foregroundColor(QFTheme.text)
-      Spacer(minLength: 0)
-      Button {
-        nearDateFirst.toggle()
-      } label: {
-        Text(shopping ? "预计 ¥16.20" : (nearDateFirst ? "临期优先  ﹀" : "默认排序  ﹀"))
-          .font(.system(size: 12))
-          .foregroundColor(QFTheme.secondary)
-          .frame(minHeight: 24)
-      }
-      .buttonStyle(.plain)
-      .disabled(shopping)
-      .accessibilityLabel(shopping ? "预计花费16.20元" : (nearDateFirst ? "食材排序，临期优先" : "食材排序，默认排序"))
-    }
-  }
-
-  private var ingredientList: some View {
-    LazyVStack(spacing: 10) {
-      ForEach(visibleIngredients) { ingredient in
-        QFIngredientSampleCard(ingredient: ingredient, shopping: shopping) {
-          showUnavailable("\(ingredient.name)管理")
-        }
-      }
-      if visibleIngredients.isEmpty {
-        VStack(spacing: 8) {
-          Text("没有找到相关食材")
-            .font(.system(size: 15, weight: .medium))
-            .foregroundColor(QFTheme.text)
-          Text("换个名称或分类试试")
-            .font(.system(size: 12))
-            .foregroundColor(QFTheme.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 30)
-        .background(Color.white, in: RoundedRectangle(cornerRadius: 18))
-      }
-    }
-    .accessibilityIdentifier("ingredient.list")
-  }
-
-  private func showUnavailable(_ title: String) {
-    searchFocused = false
-    unavailableTitle = title
-    showsUnavailable = true
-  }
-}
-
-private struct QFIngredientDiscoveryButton: View {
-  let title: String
-  let subtitle: String
-  let symbol: String
-  let background: Color
-  let accent: Color
-  let action: () -> Void
-
-  var body: some View {
-    Button(action: action) {
-      VStack(alignment: .leading, spacing: 0) {
-        HStack(alignment: .top, spacing: 4) {
-          Text(title)
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(QFTheme.text)
-            .lineLimit(1)
-            .minimumScaleFactor(0.76)
-          Spacer(minLength: 0)
-          Image(systemName: symbol)
-            .resizable()
-            .scaledToFit()
-            .frame(width: 21, height: 23)
-            .foregroundColor(accent)
-            .overlay(alignment: .topLeading) {
-              if symbol == "circle" {
-                Image(systemName: "circle")
-                  .resizable()
-                  .scaledToFit()
-                  .frame(width: 19, height: 19)
-                  .foregroundColor(accent)
-                  .offset(x: 7, y: 9)
-              }
-            }
-            .padding(.top, 4)
-        }
-        Spacer(minLength: 0)
-        Text(subtitle)
-          .font(.system(size: 11))
-          .foregroundColor(accent)
-          .lineLimit(1)
-          .minimumScaleFactor(0.85)
-      }
-      .padding(.leading, 14)
-      .padding(.trailing, 13)
-      .padding(.vertical, 13)
-      .frame(maxWidth: .infinity)
-      .frame(height: 74)
-      .background(background, in: RoundedRectangle(cornerRadius: 18))
-    }
-    .buttonStyle(.plain)
-    .accessibilityLabel(title)
-    .accessibilityHint(subtitle)
-  }
-}
-
-private struct QFIngredientCategoryButton: View {
-  let name: String
-  let selected: Bool
-  let action: () -> Void
-
-  var body: some View {
-    Button(action: action) {
-      Text(name)
-        .font(.system(size: 13, weight: .semibold))
-        .foregroundColor(selected ? QFTheme.green : QFTheme.secondary)
-        .padding(.horizontal, 15)
-        .frame(height: 32)
-        .background(selected ? QFTheme.paleGreen : Color.white, in: Capsule())
-        .overlay(Capsule().stroke(selected ? Color.clear : QFTheme.border, lineWidth: 1))
-    }
-    .buttonStyle(.plain)
-    .accessibilityLabel(name)
-    .accessibilityIdentifier("ingredient.category.\(name)")
-    .accessibilityAddTraits(selected ? .isSelected : [])
-  }
-}
-
-private struct QFIngredientSampleCard: View {
-  let ingredient: QFIngredientSample
-  let shopping: Bool
-  let onMore: () -> Void
-
-  var body: some View {
-    HStack(spacing: 12) {
-      QFIngredientArtwork(ingredient: ingredient)
-      VStack(alignment: .leading, spacing: 9) {
-        Text(ingredient.name)
-          .font(.system(size: 17, weight: .semibold))
-          .lineLimit(1)
-          .minimumScaleFactor(0.85)
-        Text(ingredient.amount)
-          .font(.system(size: 12))
-          .lineLimit(1)
-          .minimumScaleFactor(0.8)
-      }
-      .foregroundColor(QFTheme.text)
-      .frame(maxWidth: .infinity, alignment: .leading)
-      status
-    }
-    .padding(.leading, 14)
-    .padding(.trailing, 12)
-    .padding(.vertical, 13)
-    .background(Color.white, in: RoundedRectangle(cornerRadius: 18))
-    .overlay(RoundedRectangle(cornerRadius: 18).stroke(QFTheme.border, lineWidth: 1))
-  }
-
-  private var status: some View {
-    VStack(alignment: .trailing, spacing: 0) {
-      HStack(spacing: 5) {
-        if !shopping {
-          Text(ingredient.storage)
-            .font(.system(size: 10.5))
-            .foregroundColor(QFTheme.green)
-            .frame(width: 42, height: 22)
-            .background(QFTheme.paleGreen, in: Capsule())
-        }
-        Button(action: onMore) {
-          Image(systemName: "ellipsis")
-            .font(.system(size: 18))
-            .foregroundColor(QFTheme.secondary)
-            .frame(width: 40, height: 40)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(ingredient.name)，更多操作")
-      }
-      Text(shopping ? ingredient.price : ingredient.date)
-        .font(.system(size: 10.5))
-        .foregroundColor(
-          shopping ? QFTheme.orange : (ingredient.near ? Color(hex: 0xA66C1E) : QFTheme.secondary)
-        )
-        .lineLimit(1)
-    }
-    .frame(width: 92, alignment: .trailing)
-  }
-}
-
-private struct QFIngredientArtwork: View {
-  let ingredient: QFIngredientSample
-
-  private var image: UIImage {
+  private func makeCard(_ ingredient: QFIngredientSample) -> UIView {
+    let artwork = UIView()
+    artwork.layer.cornerRadius = 12
+    artwork.backgroundColor =
+      ingredient.id == "milk"
+      ? QFTabUI.color(0xE7F1F5)
+      : (ingredient.id == "egg" ? QFTabUI.color(0xFFF0D9) : QFUI.paleGreen)
+    artwork.snp.makeConstraints { $0.size.equalTo(48) }
     let fallbackByCategory = [
-      "肉蛋": "meat", "蔬菜": "vegetable", "奶制品": "milk", "水果": "fruit",
-      "谷物": "grain", "水产": "seafood", "菌藻": "mushroom", "调味": "seasoning",
+      "肉蛋": "meat", "蔬菜": "vegetable", "奶制品": "milk", "水果": "fruit", "谷物": "grain", "水产": "seafood",
+      "菌藻": "mushroom", "调味": "seasoning",
     ]
     let fallback = fallbackByCategory[ingredient.category] ?? "generic"
-    return UIImage(named: "ingredient-\(ingredient.id)")
-      ?? UIImage(named: "ingredient-\(fallback)")
-      ?? UIImage(named: "ingredient-generic")
-      ?? UIImage()
+    let image = UIImageView(
+      image: UIImage(named: "ingredient-\(ingredient.id)") ?? UIImage(
+        named: "ingredient-\(fallback)") ?? UIImage(named: "ingredient-generic"))
+    image.contentMode = .scaleAspectFit
+    artwork.addSubview(image)
+    image.snp.makeConstraints {
+      $0.center.equalToSuperview()
+      $0.size.equalTo(36)
+    }
+    let details = QFTabUI.stack(
+      [
+        QFTabUI.label(ingredient.name, size: 17, weight: .semibold, lines: 2),
+        QFTabUI.label(ingredient.amount, size: 12, lines: 0),
+      ], spacing: 9)
+    let more = QFTabUI.iconButton("ellipsis", label: "\(ingredient.name)，更多操作", size: 18) {
+      [weak self] in self?.unavailable("\(ingredient.name)管理")
+    }
+    let top = QFTabUI.stack([], axis: .horizontal, spacing: 5)
+    top.alignment = .center
+    if !shopping {
+      let storage = QFTabUI.label(ingredient.storage, size: 10.5, color: QFUI.green)
+      storage.textAlignment = .center
+      storage.backgroundColor = QFUI.paleGreen
+      storage.clipsToBounds = true
+      storage.layer.cornerRadius = 11
+      storage.snp.makeConstraints {
+        $0.width.equalTo(42)
+        $0.height.equalTo(22)
+      }
+      top.addArrangedSubview(storage)
+    }
+    top.addArrangedSubview(more)
+    let date = QFTabUI.label(
+      shopping ? ingredient.price : ingredient.date, size: 10.5,
+      color: shopping ? QFUI.orange : (ingredient.near ? QFTabUI.color(0xA66C1E) : QFUI.secondary))
+    date.textAlignment = .right
+    let status = QFTabUI.stack([top, date], spacing: 0)
+    status.alignment = .trailing
+    status.snp.makeConstraints { $0.width.equalTo(92) }
+    let row = QFTabUI.stack([artwork, details, status], axis: .horizontal, spacing: 8)
+    row.alignment = .center
+    return QFTabUI.card(row, padding: 13, border: true)
   }
 
-  private var background: Color {
-    if ingredient.id == "milk" { return Color(hex: 0xE7F1F5) }
-    if ingredient.id == "egg" { return Color(hex: 0xFFF0D9) }
-    return QFTheme.paleGreen
+  private func unavailable(_ title: String) {
+    view.endEditing(true)
+    showUnavailable(title)
   }
-
-  var body: some View {
-    Image(uiImage: image)
-      .resizable()
-      .scaledToFit()
-      .frame(width: 36, height: 36)
-      .frame(width: 48, height: 48)
-      .background(background, in: RoundedRectangle(cornerRadius: 12))
-      .accessibilityHidden(true)
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    textField.resignFirstResponder()
+    return true
   }
 }
 
 private struct QFIngredientSample: Identifiable {
+
   let id: String
   let name: String
   let category: String

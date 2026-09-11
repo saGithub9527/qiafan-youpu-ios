@@ -35,14 +35,14 @@ private final class QFTestTransport: URLProtocol {
 
 final class QFNetworkingTests: XCTestCase {
   private var service: String!
-  private var transport: URLSession!
+  private var transportConfiguration: URLSessionConfiguration!
 
   override func setUp() {
     super.setUp()
     service = "com.talka.qiafanyoupu.tests.\(UUID().uuidString)"
     let config = URLSessionConfiguration.ephemeral
     config.protocolClasses = [QFTestTransport.self]
-    transport = URLSession(configuration: config)
+    transportConfiguration = config
     QFTestTransport.lock.lock()
     QFTestTransport.requests = []
     QFTestTransport.handler = nil
@@ -50,7 +50,7 @@ final class QFNetworkingTests: XCTestCase {
   }
 
   override func tearDownWithError() throws {
-    transport.invalidateAndCancel()
+    transportConfiguration = nil
     let keychain = QFKeychainStore(service: service)
     for key in ["device-id", "credential-test", "current"] { try keychain.remove(key) }
     QFTestTransport.handler = nil
@@ -63,7 +63,10 @@ final class QFNetworkingTests: XCTestCase {
     let api = QFAPIClient(
       environment: QFAPIEnvironment(
         name: "test", baseURL: URL(string: "https://example.invalid/api/v1")), identity: identity,
-      transport: transport)
+      transportConfiguration: transportConfiguration)
+    #if DEBUG
+      api.recordsRequests = false
+    #endif
     return QFAppSession(api: api, identity: identity, keychain: QFKeychainStore(service: service))
   }
 
@@ -73,7 +76,10 @@ final class QFNetworkingTests: XCTestCase {
     let api = QFAPIClient(
       environment: QFAPIEnvironment(
         name: "test", baseURL: URL(string: "https://example.invalid/api/v1")), identity: identity,
-      transport: transport)
+      transportConfiguration: transportConfiguration)
+    #if DEBUG
+      api.recordsRequests = false
+    #endif
     let first = try api.makeRequest(path: "app/config", method: "GET", body: nil, operationID: nil)
     let operation = UUID()
     api.accessToken = token(1)

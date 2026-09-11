@@ -1,303 +1,258 @@
 import Foundation
-import SwiftUI
+import SnapKit
+import UIKit
 
-struct QFPlanView: View {
+@MainActor
+final class QFPlanViewController: QFPageViewController {
   private let calendar: Calendar
-  @State private var displayedMonth: Date
-  @State private var selectedDate: Date
-  @State private var unavailableFeature: QFPlanUnavailableFeature?
+  private var displayedMonth: Date
+  private var selectedDate: Date
+  private let monthLabel = QFTabUI.label("", size: 20, weight: .semibold)
+  private let dayLabel = QFTabUI.label("", size: 12, color: QFUI.secondary, lines: 0)
+  private let calendarRows = QFTabUI.stack([], spacing: 0)
+  private let meals = QFTabUI.stack([], spacing: 12)
+  private let summary = QFTabUI.stack([], axis: .horizontal, spacing: 10)
+  private var legend: UIStackView!
+  private var compact = false
 
-  init() {
+  override init(app: QFAppSession) {
     var calendar = Calendar(identifier: .gregorian)
     calendar.locale = Locale(identifier: "zh_CN")
     calendar.timeZone = .current
     calendar.firstWeekday = 2
     let today = calendar.startOfDay(for: Date())
-    let month = calendar.date(from: calendar.dateComponents([.year, .month], from: today)) ?? today
     self.calendar = calendar
-    _selectedDate = State(initialValue: today)
-    _displayedMonth = State(initialValue: month)
+    selectedDate = today
+    displayedMonth =
+      calendar.date(from: calendar.dateComponents([.year, .month], from: today)) ?? today
+    super.init(app: app)
+  }
+  required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.accessibilityIdentifier = "plan.screen"
+    let heading = QFTabUI.label("饮食计划", size: 29, weight: .semibold, lines: 0)
+    heading.accessibilityTraits.insert(.header)
+    let records = QFTabUI.button("做菜记录", size: 14, weight: .medium, color: QFUI.orange) {
+      [weak self] in self?.showUnavailable("做菜记录")
+    }
+    records.setContentCompressionResistancePriority(.required, for: .horizontal)
+    records.snp.makeConstraints { $0.height.greaterThanOrEqualTo(44) }
+    let header = QFTabUI.stack([heading, UIView(), records], axis: .horizontal, spacing: 8)
+    header.alignment = .center
+    contentStack.addArrangedSubview(header)
+    contentStack.addArrangedSubview(makeCalendar())
+    summary.distribution = .fillEqually
+    contentStack.addArrangedSubview(QFTabUI.card(summary, padding: 14, background: QFUI.paleGreen))
+    let dayTitle = QFTabUI.label("当日计划", size: 21, weight: .semibold)
+    dayTitle.accessibilityTraits.insert(.header)
+    dayLabel.textAlignment = .right
+    let dayHeading = QFTabUI.stack([dayTitle, UIView(), dayLabel], axis: .horizontal, spacing: 8)
+    dayHeading.alignment = .firstBaseline
+    contentStack.addArrangedSubview(dayHeading)
+    contentStack.addArrangedSubview(meals)
+    installActions()
+    refreshCalendar()
+    refreshMeals()
   }
 
-  var body: some View {
-    VStack(spacing: 0) {
-      ScrollView(showsIndicators: false) {
-        VStack(alignment: .leading, spacing: 16) {
-          header
-          QFPlanCalendarCard(
-            calendar: calendar,
-            month: displayedMonth,
-            selectedDate: selectedDate,
-            onMoveMonth: moveMonth,
-            onSelectDate: { selectedDate = $0 },
-            onToday: returnToToday
-          )
-          QFPlanSummaryView(showsFixture: showsFixture)
-          dayHeader
-          meals
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    let next = view.bounds.width < 360
+    guard next != compact else { return }
+    compact = next
+    legend.axis = compact ? .vertical : .horizontal
+  }
+
+  private func makeCalendar() -> UIView {
+    let previous = QFTabUI.iconButton("chevron.left", label: "上个月", size: 19) { [weak self] in
+      self?.moveMonth(-1)
+    }
+    let next = QFTabUI.iconButton("chevron.right", label: "下个月", size: 19) { [weak self] in
+      self?.moveMonth(1)
+    }
+    monthLabel.textAlignment = .center
+    monthLabel.adjustsFontSizeToFitWidth = true
+    monthLabel.minimumScaleFactor = 0.8
+    monthLabel.accessibilityTraits.insert(.header)
+    let monthHeader = QFTabUI.stack([previous, monthLabel, next], axis: .horizontal, spacing: 0)
+    let weekdays = QFTabUI.stack(
+      ["一", "二", "三", "四", "五", "六", "日"].map { value -> UILabel in
+        let label = QFTabUI.label(value, size: 14, color: QFUI.secondary)
+        label.textAlignment = .center
+        return label
+      }, axis: .horizontal, spacing: 0)
+    weekdays.distribution = .fillEqually
+    calendarRows.accessibilityIdentifier = "plan.calendar"
+    let legendText = QFTabUI.label("• 有做菜记录     ◦ 有待做计划", size: 11, color: QFUI.secondary, lines: 0)
+    let today = QFTabUI.button("回到今天", size: 12, weight: .medium, color: QFUI.orange) {
+      [weak self] in self?.returnToToday()
+    }
+    today.contentHorizontalAlignment = .right
+    today.setContentCompressionResistancePriority(.required, for: .horizontal)
+    today.snp.makeConstraints { $0.height.greaterThanOrEqualTo(36) }
+    legend = QFTabUI.stack([legendText, today], axis: .horizontal, spacing: 8)
+    return QFTabUI.card(
+      QFTabUI.stack([monthHeader, weekdays, calendarRows, legend], spacing: 8), padding: 12,
+      border: true)
+  }
+
+  private func refreshCalendar() {
+    monthLabel.text =
+      "\(calendar.component(.year, from: displayedMonth))年\(calendar.component(.month, from: displayedMonth))月"
+    QFTabUI.clear(calendarRows)
+    let weekday = calendar.component(.weekday, from: displayedMonth)
+    let leading = (weekday - calendar.firstWeekday + 7) % 7
+    let count = calendar.range(of: .day, in: .month, for: displayedMonth)?.count ?? 0
+    let slots = ((leading + count + 6) / 7) * 7
+    for week in stride(from: 0, to: slots, by: 7) {
+      let row = QFTabUI.stack([], axis: .horizontal, spacing: 0)
+      row.distribution = .fillEqually
+      for slot in week..<(week + 7) {
+        let offset = slot - leading
+        let cell = UIView()
+        if (0..<count).contains(offset),
+          let date = calendar.date(byAdding: .day, value: offset, to: displayedMonth)
+        {
+          let selected = calendar.isDate(date, inSameDayAs: selectedDate)
+          let day = calendar.component(.day, from: date)
+          let month = calendar.component(.month, from: date)
+          let button = QFTabUI.button(
+            "\(day)", size: 16, weight: .medium, color: selected ? .white : QFUI.text,
+            background: selected ? QFUI.orange : .clear
+          ) { [weak self] in
+            self?.selectedDate = date
+            self?.refreshCalendar()
+            self?.refreshMeals()
+          }
+          button.contentEdgeInsets = .zero
+          button.layer.cornerRadius = 10
+          button.isSelected = selected
+          button.setTitleColor(selected ? .white : QFUI.text, for: .selected)
+          button.titleLabel?.adjustsFontSizeToFitWidth = true
+          button.titleLabel?.minimumScaleFactor = 0.8
+          button.accessibilityLabel = "\(month)月\(day)日"
+          cell.addSubview(button)
+          button.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(3)
+            $0.top.bottom.equalToSuperview().inset(1)
+          }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 24)
+        row.addArrangedSubview(cell)
       }
-      QFPlanActionBar(onAction: showUnavailable)
-    }
-    .background(QFTheme.background)
-    .accessibilityElement(children: .contain)
-    .accessibilityIdentifier("plan.screen")
-    .alert(item: $unavailableFeature) { feature in
-      Alert(
-        title: Text(feature.title),
-        message: Text("该功能暂未开放"),
-        dismissButton: .default(Text("知道了"))
-      )
+      row.snp.makeConstraints { $0.height.equalTo(32) }
+      calendarRows.addArrangedSubview(row)
     }
   }
 
-  private var header: some View {
-    HStack(spacing: 8) {
-      Text("饮食计划")
-        .font(.system(size: 29, weight: .semibold))
-        .foregroundColor(QFTheme.text)
-        .accessibilityAddTraits(.isHeader)
-      Spacer(minLength: 8)
-      Button("做菜记录") { showUnavailable("做菜记录") }
-        .font(.system(size: 14, weight: .medium))
-        .foregroundColor(QFTheme.orange)
-        .frame(minHeight: 44)
-    }
-  }
-
-  private var dayHeader: some View {
-    HStack(alignment: .firstTextBaseline, spacing: 8) {
-      Text("当日计划")
-        .font(.system(size: 21, weight: .semibold))
-        .foregroundColor(QFTheme.text)
-        .accessibilityAddTraits(.isHeader)
-      Spacer(minLength: 0)
-      Text(selectedDayTitle)
-        .font(.system(size: 12))
-        .foregroundColor(QFTheme.secondary)
-        .multilineTextAlignment(.trailing)
-    }
-  }
-
-  @ViewBuilder private var meals: some View {
-    if showsFixture {
-      VStack(spacing: 12) {
-        ForEach(QFPlanFixtures.meals) { meal in
-          QFPlanMealCard(meal: meal, onAction: showUnavailable)
-        }
-      }
-    } else {
-      Text("当天还没有安排\n留一点期待，给下一餐")
-        .font(.system(size: 15))
-        .foregroundColor(QFTheme.secondary)
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 18)
-        .padding(.vertical, 32)
-        .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-    }
-  }
-
-  private var showsFixture: Bool { calendar.isDateInToday(selectedDate) }
-
-  private var selectedDayTitle: String {
+  private func refreshMeals() {
+    let fixture = calendar.isDateInToday(selectedDate)
     let formatter = DateFormatter()
     formatter.calendar = calendar
     formatter.locale = Locale(identifier: "zh_CN")
     formatter.timeZone = calendar.timeZone
     formatter.dateFormat = "M月d日 · EEEE"
-    return formatter.string(from: selectedDate)
+    dayLabel.text = formatter.string(from: selectedDate)
+    QFTabUI.clear(summary)
+    let values = fixture ? ["3 / 4 道", "¥36.60", "¥54.20"] : ["0 / 0 道", "¥0.00", "¥0.00"]
+    for (index, title) in ["已完成", "消耗成本", "采购支出"].enumerated() {
+      let value = QFTabUI.label(values[index], size: 22, weight: .semibold)
+      value.adjustsFontSizeToFitWidth = true
+      value.minimumScaleFactor = 0.7
+      summary.addArrangedSubview(
+        QFTabUI.stack([QFTabUI.label(title, size: 12, color: QFUI.green), value], spacing: 4))
+    }
+    QFTabUI.clear(meals)
+    if fixture {
+      QFPlanFixtures.meals.forEach { meals.addArrangedSubview(makeMeal($0)) }
+    } else {
+      meals.addArrangedSubview(QFTabUI.empty("当天还没有安排", detail: "留一点期待，给下一餐"))
+    }
+  }
+
+  private func makeMeal(_ meal: QFPlanMeal) -> UIView {
+    let more = QFTabUI.iconButton("ellipsis", label: "调整\(meal.title)计划", size: 18) { [weak self] in
+      self?.showUnavailable("调整当餐计划")
+    }
+    let heading = QFTabUI.stack(
+      [
+        QFTabUI.label(meal.title, size: 19, weight: .semibold), UIView(),
+        QFTabUI.label(
+          meal.detail, size: 12, color: meal.title == "午餐" ? QFUI.orange : QFUI.secondary), more,
+      ], axis: .horizontal, spacing: 8)
+    heading.alignment = .center
+    let body = QFTabUI.stack([heading], spacing: 12)
+    for dish in meal.dishes {
+      let image = UIImageView(image: UIImage(named: dish.asset))
+      image.contentMode = .scaleAspectFill
+      image.clipsToBounds = true
+      image.layer.cornerRadius = 12
+      image.snp.makeConstraints { $0.size.equalTo(48) }
+      let details = QFTabUI.stack(
+        [
+          QFTabUI.label(dish.title, size: 16, weight: .semibold, lines: 0),
+          QFTabUI.label(dish.detail, size: 12, color: QFUI.secondary, lines: 0),
+        ], spacing: 5)
+      let done = QFTabUI.button(
+        dish.done ? "✓ 已做" : "做菜打卡", size: 12, weight: .medium,
+        color: dish.done ? QFUI.green : QFUI.orange,
+        background: dish.done ? QFUI.paleGreen : QFTabUI.color(0xFFF0E7)
+      ) { [weak self] in self?.showUnavailable("做菜打卡") }
+      done.contentEdgeInsets = .zero
+      done.layer.cornerRadius = 15
+      done.snp.makeConstraints {
+        $0.width.equalTo(64)
+        $0.height.equalTo(30)
+      }
+      let row = QFTabUI.stack([image, details, done], axis: .horizontal, spacing: 10)
+      row.alignment = .center
+      body.addArrangedSubview(row)
+    }
+    return QFTabUI.card(body, padding: 14, border: true)
+  }
+
+  private func installActions() {
+    let create = QFTabUI.button(
+      "制定计划", size: 18, weight: .medium, color: .white, background: QFUI.orange
+    ) { [weak self] in self?.showUnavailable("制定计划") }
+    create.accessibilityIdentifier = "plan.create"
+    let prepare = QFTabUI.button("备菜", size: 18, weight: .medium, background: .white) {
+      [weak self] in self?.showUnavailable("备菜")
+    }
+    prepare.layer.borderWidth = 1
+    prepare.layer.borderColor = QFUI.border.cgColor
+    let bar = QFTabUI.stack([create, prepare], axis: .horizontal, spacing: 10)
+    bar.distribution = .fillEqually
+    view.addSubview(bar)
+    bar.snp.makeConstraints {
+      $0.centerX.equalTo(view.safeAreaLayoutGuide)
+      $0.leading.greaterThanOrEqualTo(view.safeAreaLayoutGuide).offset(20)
+      $0.trailing.lessThanOrEqualTo(view.safeAreaLayoutGuide).inset(20)
+      $0.width.lessThanOrEqualTo(720)
+      $0.width.equalTo(view.safeAreaLayoutGuide).offset(-40).priority(750)
+      $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(7)
+      $0.height.equalTo(49)
+    }
+    scrollView.snp.remakeConstraints {
+      $0.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+      $0.bottom.equalTo(bar.snp.top).offset(-6)
+    }
   }
 
   private func moveMonth(_ offset: Int) {
     if let month = calendar.date(byAdding: .month, value: offset, to: displayedMonth) {
       displayedMonth = month
+      refreshCalendar()
     }
   }
-
   private func returnToToday() {
-    let today = calendar.startOfDay(for: Date())
-    selectedDate = today
+    selectedDate = calendar.startOfDay(for: Date())
     displayedMonth =
-      calendar.date(from: calendar.dateComponents([.year, .month], from: today)) ?? today
-  }
-
-  private func showUnavailable(_ title: String) {
-    unavailableFeature = QFPlanUnavailableFeature(title: title)
-  }
-}
-
-private struct QFPlanUnavailableFeature: Identifiable {
-  let title: String
-  var id: String { title }
-}
-
-private struct QFPlanCalendarCard: View {
-  let calendar: Calendar
-  let month: Date
-  let selectedDate: Date
-  let onMoveMonth: (Int) -> Void
-  let onSelectDate: (Date) -> Void
-  let onToday: () -> Void
-
-  private let columns = Array(repeating: GridItem(.flexible(minimum: 0), spacing: 0), count: 7)
-  private let weekdays = ["一", "二", "三", "四", "五", "六", "日"]
-
-  var body: some View {
-    VStack(spacing: 8) {
-      monthHeader
-      HStack(spacing: 0) {
-        ForEach(weekdays, id: \.self) { weekday in
-          Text(weekday)
-            .font(.system(size: 14))
-            .foregroundColor(QFTheme.secondary)
-            .frame(maxWidth: .infinity)
-        }
-      }
-      LazyVGrid(columns: columns, spacing: 0) {
-        ForEach(days) { day in
-          if let date = day.date {
-            QFPlanDayButton(
-              day: calendar.component(.day, from: date),
-              month: calendar.component(.month, from: date),
-              selected: calendar.isDate(date, inSameDayAs: selectedDate),
-              onSelect: { onSelectDate(date) }
-            )
-          } else {
-            Color.clear.frame(height: 32).accessibilityHidden(true)
-          }
-        }
-      }
-      .accessibilityElement(children: .contain)
-      .accessibilityIdentifier("plan.calendar")
-      legend
-    }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 10)
-    .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-    .overlay(RoundedRectangle(cornerRadius: 18).stroke(QFTheme.border, lineWidth: 0.7))
-  }
-
-  private var monthHeader: some View {
-    HStack(spacing: 0) {
-      Button {
-        onMoveMonth(-1)
-      } label: {
-        Image(systemName: "chevron.left").frame(width: 44, height: 44)
-      }
-      .accessibilityLabel("上个月")
-      Text(monthTitle)
-        .font(.system(size: 20, weight: .semibold))
-        .foregroundColor(QFTheme.text)
-        .frame(maxWidth: .infinity)
-        .accessibilityAddTraits(.isHeader)
-      Button {
-        onMoveMonth(1)
-      } label: {
-        Image(systemName: "chevron.right").frame(width: 44, height: 44)
-      }
-      .accessibilityLabel("下个月")
-    }
-    .font(.system(size: 19, weight: .medium))
-    .foregroundColor(QFTheme.secondary)
-    .buttonStyle(.plain)
-  }
-
-  private var monthTitle: String {
-    "\(calendar.component(.year, from: month))年\(calendar.component(.month, from: month))月"
-  }
-
-  private var legend: some View {
-    HStack(spacing: 8) {
-      Text("• 有做菜记录     ◦ 有待做计划")
-        .font(.system(size: 11))
-        .foregroundColor(QFTheme.secondary)
-        .fixedSize(horizontal: false, vertical: true)
-      Spacer(minLength: 0)
-      Button("回到今天", action: onToday)
-        .font(.system(size: 12, weight: .medium))
-        .foregroundColor(QFTheme.orange)
-        .frame(minHeight: 36)
-        .fixedSize(horizontal: true, vertical: false)
-    }
-  }
-
-  private var days: [QFPlanCalendarDay] {
-    let weekday = calendar.component(.weekday, from: month)
-    let leadingDays = (weekday - calendar.firstWeekday + 7) % 7
-    let dayCount = calendar.range(of: .day, in: .month, for: month)?.count ?? 0
-    let slotCount = ((leadingDays + dayCount + 6) / 7) * 7
-    return (0..<slotCount).map { slot in
-      let dayOffset = slot - leadingDays
-      let date =
-        (0..<dayCount).contains(dayOffset)
-        ? calendar.date(byAdding: .day, value: dayOffset, to: month)
-        : nil
-      return QFPlanCalendarDay(id: slot, date: date)
-    }
-  }
-}
-
-private struct QFPlanCalendarDay: Identifiable {
-  let id: Int
-  let date: Date?
-}
-
-private struct QFPlanDayButton: View {
-  let day: Int
-  let month: Int
-  let selected: Bool
-  let onSelect: () -> Void
-
-  var body: some View {
-    Button(action: onSelect) {
-      Text("\(day)")
-        .font(.system(size: 16, weight: .medium))
-        .foregroundColor(selected ? Color.white : QFTheme.text)
-        .frame(maxWidth: .infinity)
-        .frame(height: 30)
-        .background(
-          RoundedRectangle(cornerRadius: 10).fill(selected ? QFTheme.orange : Color.clear))
-    }
-    .buttonStyle(.plain)
-    .padding(.horizontal, 3)
-    .frame(height: 32)
-    .accessibilityLabel("\(month)月\(day)日")
-    .accessibilityAddTraits(selected ? .isSelected : [])
-  }
-}
-
-private struct QFPlanSummaryView: View {
-  let showsFixture: Bool
-  private let titles = ["已完成", "消耗成本", "采购支出"]
-
-  var body: some View {
-    HStack(spacing: 10) {
-      ForEach(0..<titles.count, id: \.self) { index in
-        VStack(alignment: .leading, spacing: 4) {
-          Text(titles[index])
-            .font(.system(size: 12))
-            .foregroundColor(QFTheme.green)
-          Text(values[index])
-            .font(.system(size: 22, weight: .semibold))
-            .foregroundColor(QFTheme.text)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-      }
-    }
-    .padding(.horizontal, 14)
-    .padding(.vertical, 13)
-    .background(RoundedRectangle(cornerRadius: 18).fill(QFTheme.paleGreen))
-  }
-
-  private var values: [String] {
-    showsFixture ? ["3 / 4 道", "¥36.60", "¥54.20"] : ["0 / 0 道", "¥0.00", "¥0.00"]
+      calendar.date(from: calendar.dateComponents([.year, .month], from: selectedDate))
+      ?? selectedDate
+    refreshCalendar()
+    refreshMeals()
   }
 }
 
@@ -331,108 +286,4 @@ private enum QFPlanFixtures {
         QFPlanDish(title: "番茄鸡蛋汤", asset: "dish-soup", detail: "待完成", done: false),
       ]),
   ]
-}
-
-private struct QFPlanMealCard: View {
-  let meal: QFPlanMeal
-  let onAction: (String) -> Void
-
-  var body: some View {
-    VStack(spacing: 12) {
-      HStack(spacing: 8) {
-        Text(meal.title)
-          .font(.system(size: 19, weight: .semibold))
-          .foregroundColor(QFTheme.text)
-        Spacer(minLength: 0)
-        Text(meal.detail)
-          .font(.system(size: 12))
-          .foregroundColor(meal.title == "午餐" ? QFTheme.orange : QFTheme.secondary)
-        Button {
-          onAction("调整当餐计划")
-        } label: {
-          Image(systemName: "ellipsis")
-            .font(.system(size: 18, weight: .medium))
-            .foregroundColor(QFTheme.secondary)
-            .frame(width: 24, height: 32)
-        }
-        .accessibilityLabel("调整\(meal.title)计划")
-      }
-      ForEach(meal.dishes) { dish in
-        QFPlanDishRow(dish: dish, onCheckIn: { onAction("做菜打卡") })
-      }
-    }
-    .padding(.horizontal, 14)
-    .padding(.vertical, 12)
-    .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-    .overlay(RoundedRectangle(cornerRadius: 18).stroke(QFTheme.border, lineWidth: 0.7))
-  }
-}
-
-private struct QFPlanDishRow: View {
-  let dish: QFPlanDish
-  let onCheckIn: () -> Void
-
-  var body: some View {
-    HStack(spacing: 10) {
-      Image(dish.asset)
-        .resizable()
-        .scaledToFill()
-        .frame(width: 48, height: 48)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .accessibilityHidden(true)
-      VStack(alignment: .leading, spacing: 5) {
-        Text(dish.title)
-          .font(.system(size: 16, weight: .semibold))
-          .foregroundColor(QFTheme.text)
-        Text(dish.detail)
-          .font(.system(size: 12))
-          .foregroundColor(QFTheme.secondary)
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      Button(dish.done ? "✓ 已做" : "做菜打卡", action: onCheckIn)
-        .font(.system(size: 12, weight: .medium))
-        .foregroundColor(dish.done ? QFTheme.green : QFTheme.orange)
-        .frame(width: 64, height: 30)
-        .background(
-          Capsule().fill(dish.done ? QFTheme.paleGreen : Color(hex: 0xFFF0E7))
-        )
-        .buttonStyle(.plain)
-    }
-  }
-}
-
-private struct QFPlanActionBar: View {
-  let onAction: (String) -> Void
-
-  var body: some View {
-    HStack(spacing: 10) {
-      Button {
-        onAction("制定计划")
-      } label: {
-        Text("制定计划")
-          .font(.system(size: 18, weight: .medium))
-          .foregroundColor(.white)
-          .frame(maxWidth: .infinity)
-          .frame(height: 49)
-          .background(RoundedRectangle(cornerRadius: 17).fill(QFTheme.orange))
-      }
-      .accessibilityIdentifier("plan.create")
-      Button {
-        onAction("备菜")
-      } label: {
-        Text("备菜")
-          .font(.system(size: 18, weight: .medium))
-          .foregroundColor(QFTheme.text)
-          .frame(maxWidth: .infinity)
-          .frame(height: 49)
-          .background(RoundedRectangle(cornerRadius: 17).fill(Color.white))
-          .overlay(RoundedRectangle(cornerRadius: 17).stroke(QFTheme.border, lineWidth: 1))
-      }
-    }
-    .buttonStyle(.plain)
-    .padding(.horizontal, 20)
-    .padding(.top, 6)
-    .padding(.bottom, 7)
-    .background(QFTheme.background)
-  }
 }

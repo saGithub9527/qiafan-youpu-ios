@@ -1,295 +1,317 @@
-import SwiftUI
+import SnapKit
+import UIKit
 
-struct QFRecipeView: View {
-  @State private var selectedCategory = "推荐"
-  @State private var categoryScrollReset = 0
-  @State private var unavailableTitle = ""
-  @State private var showsUnavailable = false
+@MainActor
+final class QFRecipeViewController: QFPageViewController {
+  private var selectedCategory = "推荐"
+  private let categories = ["推荐", "早餐", "家常菜", "快手菜", "肉类", "素菜", "海鲜", "小吃", "烘焙", "甜品", "饮品"]
+  private var categoryButtons: [String: UIButton] = [:]
+  private var categoryIndicators: [String: UIView] = [:]
+  private var categoryScroll: UIScrollView!
+  private var filters: UIStackView!
+  private let list = QFTabUI.stack([], spacing: 12)
+  private let sectionTitle = QFTabUI.label("为你推荐", size: 17, weight: .semibold)
+  private let countLabel = QFTabUI.label("", size: 12, color: QFUI.secondary)
+  private var cards: [QFRecipeCard] = []
+  private var compact = false
 
-  private let categories = [
-    "推荐", "早餐", "家常菜", "快手菜", "肉类", "素菜", "海鲜", "小吃", "烘焙", "甜品", "饮品",
-  ]
-
-  private var visibleRecipes: [QFRecipeSample] {
-    QFRecipeSample.all.filter {
-      selectedCategory == "推荐" || $0.categories.contains(selectedCategory)
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = QFTabUI.color(0xF5F6F8)
+    contentStack.spacing = 8
+    contentStack.addArrangedSubview(makeHeader())
+    filters = makeFilters()
+    contentStack.addArrangedSubview(filters)
+    let clear = QFTabUI.button("清空筛选", size: 12, color: QFUI.secondary) { [weak self] in
+      self?.selectCategory("推荐")
+      self?.categoryScroll.setContentOffset(.zero, animated: true)
     }
+    clear.accessibilityIdentifier = "recipe.clearFilters"
+    clear.snp.makeConstraints { $0.height.greaterThanOrEqualTo(32) }
+    let section = QFTabUI.stack(
+      [sectionTitle, countLabel, UIView(), clear], axis: .horizontal, spacing: 10)
+    section.alignment = .center
+    contentStack.addArrangedSubview(section)
+    list.accessibilityIdentifier = "recipe.list"
+    contentStack.addArrangedSubview(list)
+    selectCategory("推荐")
   }
 
-  var body: some View {
-    ScrollView(showsIndicators: false) {
-      VStack(spacing: 0) {
-        categoryHeader
-          .padding(.bottom, 7)
-        filters
-          .padding(.bottom, 8)
-        sectionHeader
-          .padding(.bottom, 6)
-        recipeList
-      }
-      .padding(.horizontal, 20)
-      .padding(.top, 14)
-      .padding(.bottom, 24)
-    }
-    .background(Color(hex: 0xF5F6F8).ignoresSafeArea())
-    .alert(unavailableTitle, isPresented: $showsUnavailable) {
-      Button("知道了", role: .cancel) {}
-    } message: {
-      Text("该功能暂未开放")
-    }
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    let next = view.bounds.width < 360
+    guard next != compact else { return }
+    compact = next
+    filters.axis = compact ? .vertical : .horizontal
+    cards.forEach { $0.setCompact(compact) }
   }
 
-  private var categoryHeader: some View {
-    HStack(spacing: 8) {
-      QFRecipeCategoryStrip(
-        categories: categories,
-        selected: $selectedCategory,
-        reset: categoryScrollReset
-      )
-      Image(systemName: "chevron.right")
-        .font(.system(size: 12))
-        .foregroundColor(QFTheme.secondary)
-        .frame(width: 10, height: 15)
-        .accessibilityHidden(true)
-      Button {
-        showUnavailable("搜索菜谱")
-      } label: {
-        Image(systemName: "magnifyingglass")
-          .font(.system(size: 20))
-          .foregroundColor(QFTheme.text)
-          .frame(width: 40, height: 40)
+  private func makeHeader() -> UIView {
+    let row = QFTabUI.stack([], axis: .horizontal, spacing: 24)
+    for name in categories {
+      let button = QFTabUI.button(name, size: 17, weight: .semibold, color: QFUI.secondary) {
+        [weak self] in
+        self?.selectCategory(name)
       }
-      .buttonStyle(.plain)
-      .accessibilityLabel("搜索菜谱")
-      .accessibilityIdentifier("recipe.search")
+      button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 9, right: 0)
+      button.accessibilityIdentifier = "recipe.category.\(name)"
+      button.snp.makeConstraints {
+        $0.width.greaterThanOrEqualTo(42)
+        $0.height.equalTo(40)
+      }
+      let mark = UIView()
+      mark.backgroundColor = QFUI.orange
+      mark.layer.cornerRadius = 1.5
+      mark.isUserInteractionEnabled = false
+      button.addSubview(mark)
+      mark.snp.makeConstraints {
+        $0.centerX.equalToSuperview()
+        $0.bottom.equalToSuperview().inset(6)
+        $0.width.equalTo(32)
+        $0.height.equalTo(3)
+      }
+      row.addArrangedSubview(button)
+      categoryButtons[name] = button
+      categoryIndicators[name] = mark
     }
-  }
-
-  private var filters: some View {
-    HStack(spacing: 6) {
-      QFRecipeFilterButton(name: "国家", value: "全球") { showUnavailable("国家筛选") }
-      QFRecipeFilterButton(name: "口味", value: "不限") { showUnavailable("口味筛选") }
-      QFRecipeFilterButton(name: "菜系", value: "全部") { showUnavailable("菜系筛选") }
-      QFRecipeFilterButton(name: "评分", value: "不限") { showUnavailable("评分筛选") }
+    categoryScroll = QFTabUI.horizontalScroll(row, height: 40, identifier: "recipe.categories")
+    let arrow = QFTabUI.symbol("chevron.right", size: 12, color: QFUI.secondary)
+    let search = QFTabUI.iconButton("magnifyingglass", label: "搜索菜谱", size: 20) { [weak self] in
+      self?.showUnavailable("搜索菜谱")
     }
+    search.accessibilityIdentifier = "recipe.search"
+    let header = QFTabUI.stack([categoryScroll, arrow, search], axis: .horizontal, spacing: 8)
+    header.alignment = .center
+    return header
   }
 
-  private var sectionHeader: some View {
-    HStack(spacing: 10) {
-      Text(selectedCategory == "推荐" ? "为你推荐" : selectedCategory)
-        .font(.system(size: 17, weight: .semibold))
-        .foregroundColor(QFTheme.text)
-      Text("\(visibleRecipes.count) 道菜")
-        .font(.system(size: 12))
-        .foregroundColor(QFTheme.secondary)
-      Spacer(minLength: 0)
-      Button {
-        selectedCategory = "推荐"
-        categoryScrollReset += 1
-      } label: {
-        Text("清空筛选")
-          .font(.system(size: 12))
-          .foregroundColor(QFTheme.secondary)
-          .frame(minHeight: 28)
+  private func makeFilters() -> UIStackView {
+    let values = [("国家", "全球"), ("口味", "不限"), ("菜系", "全部"), ("评分", "不限")]
+    let buttons = values.map { name, value -> UIView in
+      let control = QFTabUI.button("", background: .white) { [weak self] in
+        self?.showUnavailable("\(name)筛选")
       }
-      .buttonStyle(.plain)
-      .accessibilityIdentifier("recipe.clearFilters")
+      control.layer.cornerRadius = 12
+      control.layer.borderWidth = 1
+      control.layer.borderColor = QFUI.border.cgColor
+      control.accessibilityLabel = "\(name)，\(value)"
+      control.accessibilityIdentifier = "recipe.filter.\(name)"
+      let labels = QFTabUI.stack(
+        [
+          QFTabUI.label(name, size: 10.5, color: QFUI.secondary),
+          QFTabUI.label(value, size: 12, weight: .medium),
+        ], spacing: 4)
+      let row = QFTabUI.stack(
+        [labels, UIView(), QFTabUI.symbol("chevron.down", size: 9, color: QFUI.secondary)],
+        axis: .horizontal, spacing: 3)
+      row.alignment = .bottom
+      row.isUserInteractionEnabled = false
+      control.addSubview(row)
+      row.snp.makeConstraints {
+        $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 7, left: 11, bottom: 7, right: 10))
+      }
+      control.snp.makeConstraints { $0.height.greaterThanOrEqualTo(48) }
+      return control
     }
+    let first = QFTabUI.stack(Array(buttons.prefix(2)), axis: .horizontal, spacing: 6)
+    let second = QFTabUI.stack(Array(buttons.suffix(2)), axis: .horizontal, spacing: 6)
+    first.distribution = .fillEqually
+    second.distribution = .fillEqually
+    let outer = QFTabUI.stack([first, second], axis: .horizontal, spacing: 6)
+    outer.distribution = .fillEqually
+    return outer
   }
 
-  private var recipeList: some View {
-    LazyVStack(spacing: 12) {
-      ForEach(visibleRecipes) { recipe in
-        QFRecipeSampleCard(
-          recipe: recipe,
-          onOpen: { showUnavailable(recipe.name) },
-          onBookmark: { showUnavailable("收藏菜谱") }
-        )
-      }
-      if visibleRecipes.isEmpty {
-        VStack(spacing: 8) {
-          Text("还没有找到相关菜谱")
-            .font(.system(size: 15, weight: .medium))
-            .foregroundColor(QFTheme.text)
-          Text("换个分类，发现更多好味道")
-            .font(.system(size: 12))
-            .foregroundColor(QFTheme.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
-        .padding(.horizontal, 12)
-        .background(Color.white, in: RoundedRectangle(cornerRadius: 18))
-      }
+  private func selectCategory(_ name: String) {
+    selectedCategory = name
+    for (category, button) in categoryButtons {
+      let selected = category == name
+      // Selection is drawn by our text and underline, without UIButton's system selection fill.
+      button.accessibilityTraits = selected ? [.button, .selected] : [.button]
+      button.setTitleColor(selected ? QFUI.text : QFUI.secondary, for: .normal)
+      button.titleLabel?.font = .systemFont(
+        ofSize: selected ? 20 : 17, weight: selected ? .bold : .semibold)
+      categoryIndicators[category]?.isHidden = !selected
     }
-    .accessibilityIdentifier("recipe.list")
-  }
-
-  private func showUnavailable(_ title: String) {
-    unavailableTitle = title
-    showsUnavailable = true
-  }
-}
-
-private struct QFRecipeCategoryStrip: View {
-  let categories: [String]
-  @Binding var selected: String
-  let reset: Int
-
-  var body: some View {
-    ScrollViewReader { proxy in
-      ScrollView(.horizontal, showsIndicators: false) {
-        HStack(spacing: 24) {
-          ForEach(categories, id: \.self) { name in
-            Button {
-              selected = name
-            } label: {
-              Text(name)
-                .font(
-                  .system(
-                    size: selected == name ? 20 : 17,
-                    weight: selected == name ? .bold : .semibold
-                  )
-                )
-                .foregroundColor(selected == name ? QFTheme.text : QFTheme.secondary)
-                .padding(.bottom, 9)
-                .frame(minWidth: 42)
-                .frame(height: 40)
-                .overlay(alignment: .bottom) {
-                  Capsule()
-                    .fill(selected == name ? QFTheme.orange : Color.clear)
-                    .frame(width: 32, height: 3)
-                    .padding(.bottom, 8)
-                }
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(name)
-            .accessibilityIdentifier("recipe.category.\(name)")
-            .accessibilityAddTraits(selected == name ? .isSelected : [])
-            .id(name)
-          }
-        }
-        .padding(.trailing, 8)
-      }
-      .frame(height: 40)
-      .accessibilityIdentifier("recipe.categories")
-      .onChange(of: reset) { _ in
-        withAnimation { proxy.scrollTo("推荐", anchor: .leading) }
-      }
+    let recipes = QFRecipeSample.all.filter { name == "推荐" || $0.categories.contains(name) }
+    sectionTitle.text = name == "推荐" ? "为你推荐" : name
+    countLabel.text = "\(recipes.count) 道菜"
+    QFTabUI.clear(list)
+    cards = recipes.map { recipe in
+      QFRecipeCard(
+        recipe: recipe, compact: compact,
+        onOpen: { [weak self] in self?.showUnavailable(recipe.name) },
+        onBookmark: { [weak self] in self?.showUnavailable("收藏菜谱") })
+    }
+    cards.forEach { list.addArrangedSubview($0) }
+    if recipes.isEmpty {
+      list.addArrangedSubview(QFTabUI.empty("还没有找到相关菜谱", detail: "换个分类，发现更多好味道"))
     }
   }
 }
 
-private struct QFRecipeFilterButton: View {
-  let name: String
-  let value: String
-  let action: () -> Void
+@MainActor
+private final class QFRecipeCard: UIView {
+  private let artwork = UIImageView()
+  private let row: UIStackView
 
-  var body: some View {
-    Button(action: action) {
-      HStack(alignment: .bottom, spacing: 3) {
-        VStack(alignment: .leading, spacing: 4) {
-          Text(name)
-            .font(.system(size: 10.5))
-            .foregroundColor(QFTheme.secondary)
-          Text(value)
-            .font(.system(size: 12, weight: .medium))
-            .foregroundColor(QFTheme.text)
-        }
-        Spacer(minLength: 0)
-        Image(systemName: "chevron.down")
-          .font(.system(size: 9))
-          .foregroundColor(QFTheme.secondary)
-          .frame(width: 9, height: 9)
-      }
-      .padding(.leading, 11)
-      .padding(.trailing, 10)
-      .frame(maxWidth: .infinity)
-      .frame(height: 48)
-      .background(Color.white, in: RoundedRectangle(cornerRadius: 12))
-      .overlay(RoundedRectangle(cornerRadius: 12).stroke(QFTheme.border, lineWidth: 1))
-    }
-    .buttonStyle(.plain)
-    .accessibilityLabel("\(name)，\(value)")
-    .accessibilityIdentifier("recipe.filter.\(name)")
-  }
-}
-
-private struct QFRecipeSampleCard: View {
-  let recipe: QFRecipeSample
-  let onOpen: () -> Void
-  let onBookmark: () -> Void
-
-  var body: some View {
-    Button(action: onOpen) {
-      HStack(spacing: 14) {
-        Image(recipe.asset)
-          .resizable()
-          .scaledToFill()
-          .frame(width: 108, height: 108)
-          .background(Color(hex: 0xFCF6EB))
-          .clipShape(RoundedRectangle(cornerRadius: 12))
-          .accessibilityHidden(true)
-        details
-      }
-      .padding(.leading, 10)
-      .padding(.trailing, 14)
-      .padding(.vertical, 10)
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .background(Color.white, in: RoundedRectangle(cornerRadius: 18))
-    }
-    .buttonStyle(.plain)
-    .accessibilityLabel(
+  init(
+    recipe: QFRecipeSample, compact: Bool, onOpen: @escaping () -> Void,
+    onBookmark: @escaping () -> Void
+  ) {
+    row = QFTabUI.stack([], axis: .horizontal, spacing: compact ? 10 : 14)
+    super.init(frame: .zero)
+    backgroundColor = .white
+    layer.cornerRadius = 18
+    let open = QFTabUI.button("", action: onOpen)
+    open.accessibilityLabel =
       "\(recipe.name)，\(recipe.origin)，\(recipe.time)，评分\(recipe.rating)，\(recipe.saves)"
-    )
-    .accessibilityHint("查看菜谱详情")
-    .overlay(alignment: .topTrailing) {
-      Button(action: onBookmark) {
-        Image(systemName: "bookmark")
-          .font(.system(size: 17))
-          .foregroundColor(QFTheme.secondary)
-          .frame(width: 40, height: 40)
-      }
-      .buttonStyle(.plain)
-      .accessibilityLabel("收藏\(recipe.name)")
-      .padding(6)
+    open.accessibilityHint = "查看菜谱详情"
+    addSubview(open)
+    open.snp.makeConstraints { $0.edges.equalToSuperview() }
+    artwork.image = UIImage(named: recipe.asset)
+    artwork.contentMode = .scaleAspectFill
+    artwork.backgroundColor = QFTabUI.color(0xFCF6EB)
+    artwork.clipsToBounds = true
+    artwork.layer.cornerRadius = 12
+    artwork.snp.makeConstraints { $0.size.equalTo(compact ? 84 : 108) }
+    let name = QFTabUI.label(recipe.name, size: 16, weight: .semibold, lines: 2)
+    let title = UIView()
+    title.addSubview(name)
+    name.snp.makeConstraints {
+      $0.top.leading.bottom.equalToSuperview()
+      $0.trailing.equalToSuperview().inset(32)
     }
+    let rating = QFTabUI.stack(
+      [
+        QFTabUI.label("★", size: 15, color: QFTabUI.color(0xE99A22)),
+        QFTabUI.label(recipe.rating, size: 13, weight: .medium), UIView(),
+        QFTabUI.label(recipe.saves, size: 11, color: QFUI.secondary),
+      ], axis: .horizontal, spacing: 5)
+    let details = QFTabUI.stack(
+      [
+        title, QFTabUI.label(recipe.origin, size: 12, color: QFUI.secondary, lines: 0),
+        QFTabUI.label(recipe.time, size: 12, color: QFUI.secondary, lines: 0), rating,
+      ], spacing: 7)
+    row.addArrangedSubview(artwork)
+    row.addArrangedSubview(details)
+    row.alignment = .center
+    row.isUserInteractionEnabled = false
+    row.accessibilityElementsHidden = true
+    addSubview(row)
+    row.snp.makeConstraints {
+      $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 14))
+    }
+    let bookmark = QFTabUI.iconButton(
+      "bookmark", label: "收藏\(recipe.name)", size: 17, action: onBookmark)
+    addSubview(bookmark)
+    bookmark.snp.makeConstraints { $0.top.trailing.equalToSuperview().inset(6) }
   }
+  required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+  func setCompact(_ compact: Bool) {
+    artwork.snp.updateConstraints { $0.size.equalTo(compact ? 84 : 108) }
+    row.spacing = compact ? 10 : 14
+  }
+}
 
-  private var details: some View {
-    VStack(alignment: .leading, spacing: 7) {
-      Text(recipe.name)
-        .font(.system(size: 16, weight: .semibold))
-        .foregroundColor(QFTheme.text)
-        .lineLimit(1)
-        .minimumScaleFactor(0.8)
-        .padding(.trailing, 22)
-      Text(recipe.origin)
-        .font(.system(size: 12))
-        .foregroundColor(QFTheme.secondary)
-      Text(recipe.time)
-        .font(.system(size: 12))
-        .foregroundColor(QFTheme.secondary)
-      Color.clear.frame(height: 1)
-      HStack(spacing: 5) {
-        Text("★")
-          .font(.system(size: 15))
-          .foregroundColor(Color(hex: 0xE99A22))
-        Text(recipe.rating)
-          .font(.system(size: 13, weight: .medium))
-          .foregroundColor(QFTheme.text)
-        Spacer(minLength: 0)
-        Text(recipe.saves)
-          .font(.system(size: 11))
-          .foregroundColor(QFTheme.secondary)
-          .lineLimit(1)
-          .minimumScaleFactor(0.8)
-      }
+/// Small UIKit composition helpers shared only by the four tab pages.
+@MainActor
+enum QFTabUI {
+  static func color(_ hex: UInt) -> UIColor {
+    UIColor(
+      red: CGFloat((hex >> 16) & 255) / 255, green: CGFloat((hex >> 8) & 255) / 255,
+      blue: CGFloat(hex & 255) / 255, alpha: 1)
+  }
+  static func label(
+    _ text: String, size: CGFloat, weight: UIFont.Weight = .regular, color: UIColor = QFUI.text,
+    lines: Int = 1
+  ) -> UILabel {
+    let label = QFUI.label(text, size: size, weight: weight, color: color, lines: lines)
+    label.setContentCompressionResistancePriority(.required, for: .vertical)
+    return label
+  }
+  static func stack(
+    _ views: [UIView], axis: NSLayoutConstraint.Axis = .vertical, spacing: CGFloat = 0
+  ) -> UIStackView {
+    QFUI.stack(views, axis: axis, spacing: spacing)
+  }
+  static func button(
+    _ title: String, size: CGFloat = 14, weight: UIFont.Weight = .regular,
+    color: UIColor = QFUI.text, background: UIColor = .clear, action: @escaping () -> Void
+  ) -> UIButton {
+    let button = QFUI.button(title, background: background, textColor: color)
+    button.titleLabel?.font = .systemFont(ofSize: size, weight: weight)
+    button.addAction(UIAction { _ in action() }, for: .touchUpInside)
+    return button
+  }
+  static func symbol(_ name: String, size: CGFloat, color: UIColor = QFUI.text) -> UIImageView {
+    let view = UIImageView(
+      image: UIImage(
+        systemName: name, withConfiguration: UIImage.SymbolConfiguration(pointSize: size)))
+    view.tintColor = color
+    view.contentMode = .scaleAspectFit
+    view.snp.makeConstraints { $0.size.equalTo(size + 2) }
+    view.isAccessibilityElement = false
+    return view
+  }
+  static func iconButton(
+    _ name: String, label: String, size: CGFloat = 20, action: @escaping () -> Void
+  ) -> UIButton {
+    let button = self.button("", action: action)
+    button.contentEdgeInsets = .zero
+    button.setImage(
+      UIImage(systemName: name, withConfiguration: UIImage.SymbolConfiguration(pointSize: size)),
+      for: .normal)
+    button.tintColor = QFUI.secondary
+    button.accessibilityLabel = label
+    button.snp.makeConstraints { $0.size.equalTo(40) }
+    return button
+  }
+  static func card(
+    _ content: UIView, padding: CGFloat = 14, background: UIColor = .white, border: Bool = false
+  ) -> UIView {
+    let card = UIView()
+    card.backgroundColor = background
+    card.layer.cornerRadius = 18
+    if border {
+      card.layer.borderWidth = 0.7
+      card.layer.borderColor = QFUI.border.cgColor
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
+    card.addSubview(content)
+    content.snp.makeConstraints { $0.edges.equalToSuperview().inset(padding) }
+    return card
+  }
+  static func empty(_ title: String, detail: String) -> UIView {
+    let titleLabel = label(title, size: 15, weight: .medium, color: QFUI.secondary, lines: 0)
+    let detailLabel = label(detail, size: 12, color: QFUI.secondary, lines: 0)
+    titleLabel.textAlignment = .center
+    detailLabel.textAlignment = .center
+    return card(stack([titleLabel, detailLabel], spacing: 8), padding: 28)
+  }
+  static func horizontalScroll(_ stack: UIStackView, height: CGFloat, identifier: String)
+    -> UIScrollView
+  {
+    let scroll = UIScrollView()
+    scroll.showsHorizontalScrollIndicator = false
+    scroll.accessibilityIdentifier = identifier
+    scroll.addSubview(stack)
+    stack.snp.makeConstraints {
+      $0.edges.equalTo(scroll.contentLayoutGuide)
+      $0.height.equalTo(scroll.frameLayoutGuide)
+    }
+    scroll.snp.makeConstraints { $0.height.equalTo(height) }
+    return scroll
+  }
+  static func clear(_ stack: UIStackView) {
+    stack.arrangedSubviews.forEach {
+      stack.removeArrangedSubview($0)
+      $0.removeFromSuperview()
+    }
   }
 }
 
 private struct QFRecipeSample: Identifiable {
+
   var id: String { name }
   let name: String
   let origin: String

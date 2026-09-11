@@ -1,5 +1,5 @@
 import Foundation
-import SwiftUI
+import Combine
 
 private struct QFSavedSession: Codable {
   let tokens: QFSessionTokens

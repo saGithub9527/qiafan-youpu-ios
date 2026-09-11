@@ -1,314 +1,245 @@
-import SwiftUI
+import Combine
+import SnapKit
+import UIKit
 
-struct QFProfileView: View {
-  let previewSignedIn: Bool
-  let user: QFUserProfile?
+@MainActor
+final class QFProfileViewController: QFPageViewController {
+  private let previewSignedIn: Bool
+  private let onLogin: () -> Void
+  private var user: QFUserProfile?
   private var signedIn: Bool { user != nil || previewSignedIn }
-  let onLogin: () -> Void
-  @State private var unavailableFeature: QFProfileUnavailableFeature?
+  private var compact = false
+  private let identityRow = QFTabUI.stack([], axis: .horizontal, spacing: 14)
+  private let identityText = QFTabUI.stack([], spacing: 6)
+  private let nameLabel = QFTabUI.label("", size: 20, weight: .semibold)
+  private let regionLabel = QFTabUI.label("", size: 12, color: QFUI.secondary, lines: 0)
+  private let avatarImage = QFRemoteImageView()
+  private var actionButton: UIButton!
+  private var featureCards: UIStackView!
+  private let menu = QFTabUI.stack([], spacing: 0)
+  private var preference: UIButton!
 
-  var body: some View {
-    ScrollView(showsIndicators: false) {
-      VStack(alignment: .leading, spacing: 20) {
-        header
-        QFProfileIdentityView(
-          previewSignedIn: previewSignedIn, user: user, onAction: identityTapped
-        )
-        .padding(.top, 2)
-        QFProfileStatsView(previewSignedIn: previewSignedIn)
-        featureCards
-        Text("我的内容")
-          .font(.system(size: 20, weight: .semibold))
-          .foregroundColor(QFTheme.text)
-          .accessibilityAddTraits(.isHeader)
-        menu
-        QFProfileMenuRow(
-          title: "兴趣偏好",
-          symbol: "slider.horizontal.3",
-          detail: signedIn ? "" : "登录后设置",
-          onAction: { openProtected("兴趣偏好") }
-        )
-        .padding(.horizontal, 16)
-        .padding(.vertical, 4)
-        .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-      }
-      .padding(.horizontal, 20)
-      .padding(.top, 14)
-      .padding(.bottom, 24)
+  init(app: QFAppSession, previewSignedIn: Bool, onLogin: @escaping () -> Void) {
+    self.previewSignedIn = previewSignedIn
+    self.onLogin = onLogin
+    super.init(app: app)
+  }
+  required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.accessibilityIdentifier = "profile.screen"
+    let title = QFTabUI.label("我的", size: 30, weight: .semibold)
+    title.accessibilityTraits.insert(.header)
+    let settings = QFTabUI.iconButton("gearshape", label: "设置", size: 22) { [weak self] in
+      self?.showUnavailable("设置")
     }
-    .background(QFTheme.background)
-    .accessibilityElement(children: .contain)
-    .accessibilityIdentifier("profile.screen")
-    .alert(item: $unavailableFeature) { feature in
-      Alert(
-        title: Text(feature.title),
-        message: Text("该功能暂未开放"),
-        dismissButton: .default(Text("知道了"))
-      )
-    }
+    let header = QFTabUI.stack([title, UIView(), settings], axis: .horizontal, spacing: 10)
+    header.alignment = .center
+    contentStack.addArrangedSubview(header)
+    makeIdentity()
+    contentStack.addArrangedSubview(identityRow)
+    contentStack.addArrangedSubview(makeStats())
+    featureCards = QFTabUI.stack(
+      [
+        feature(
+          "发布作品", subtitle: "记录今天的拿手菜", symbol: "photo", color: QFUI.orange,
+          background: QFTabUI.color(0xFFF0E7)),
+        feature(
+          "补充图片", subtitle: "为食材、菜谱补充实拍", symbol: "photo.badge.plus", color: QFUI.green,
+          background: QFUI.paleGreen),
+      ], axis: .horizontal, spacing: 14)
+    featureCards.distribution = .fillEqually
+    contentStack.addArrangedSubview(featureCards)
+    let contentTitle = QFTabUI.label("我的内容", size: 20, weight: .semibold)
+    contentTitle.accessibilityTraits.insert(.header)
+    contentStack.addArrangedSubview(contentTitle)
+    contentStack.addArrangedSubview(QFTabUI.card(menu, padding: 16))
+    preference = menuButton("兴趣偏好", symbol: "slider.horizontal.3", detail: "登录后设置")
+    contentStack.addArrangedSubview(QFTabUI.card(preference, padding: 16))
+    app.$user.removeDuplicates().receive(on: DispatchQueue.main).sink { [weak self] user in
+      self?.user = user
+      self?.refreshProfile()
+    }.store(in: &cancellables)
   }
 
-  private var header: some View {
-    HStack(spacing: 10) {
-      Text("我的")
-        .font(.system(size: 30, weight: .semibold))
-        .foregroundColor(QFTheme.text)
-        .accessibilityAddTraits(.isHeader)
-      Spacer()
-      Button {
-        showUnavailable("设置")
-      } label: {
-        Image(systemName: "gearshape")
-          .font(.system(size: 22, weight: .medium))
-          .foregroundColor(QFTheme.text)
-          .frame(width: 44, height: 44)
-      }
-      .buttonStyle(.plain)
-      .accessibilityLabel("设置")
-    }
-  }
-
-  private var featureCards: some View {
-    HStack(spacing: 14) {
-      QFProfileFeatureCard(
-        title: "发布作品",
-        subtitle: "记录今天的拿手菜",
-        symbol: "photo",
-        color: QFTheme.orange,
-        background: Color(hex: 0xFFF0E7),
-        onAction: { openProtected("发布作品") }
-      )
-      QFProfileFeatureCard(
-        title: "补充图片",
-        subtitle: "为食材、菜谱补充实拍",
-        symbol: "photo.badge.plus",
-        color: QFTheme.green,
-        background: QFTheme.paleGreen,
-        onAction: { openProtected("补充图片") }
-      )
-    }
-  }
-
-  private var menu: some View {
-    VStack(spacing: 0) {
-      ForEach(Array(QFProfileMenuItem.items.enumerated()), id: \.element.id) { index, item in
-        QFProfileMenuRow(
-          title: item.title,
-          symbol: item.symbol,
-          detail: signedIn ? "" : "登录后查看",
-          onAction: { openProtected(item.title) }
-        )
-        if index < QFProfileMenuItem.items.count - 1 {
-          Rectangle().fill(QFTheme.border).frame(height: 0.5)
-        }
-      }
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 4)
-    .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-  }
-
-  private func identityTapped() {
-    if signedIn {
-      showUnavailable("编辑资料")
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    let next = view.bounds.width < 360
+    guard next != compact else { return }
+    compact = next
+    featureCards.axis = compact ? .vertical : .horizontal
+    identityRow.removeArrangedSubview(actionButton)
+    identityText.removeArrangedSubview(actionButton)
+    actionButton.removeFromSuperview()
+    identityText.alignment = compact ? .leading : .fill
+    if compact {
+      identityText.addArrangedSubview(actionButton)
     } else {
-      onLogin()
+      identityRow.addArrangedSubview(actionButton)
+    }
+    nameLabel.numberOfLines = compact ? 2 : 1
+  }
+
+  private func makeIdentity() {
+    let avatar = UIView()
+    avatar.backgroundColor = QFUI.paleGreen
+    avatar.layer.cornerRadius = 36
+    avatar.snp.makeConstraints { $0.size.equalTo(72) }
+    avatar.addSubview(avatarImage)
+    avatarImage.clipsToBounds = true
+    avatarImage.isAccessibilityElement = false
+    avatarImage.snp.makeConstraints {
+      $0.center.equalToSuperview()
+      $0.size.equalTo(48)
+    }
+    nameLabel.adjustsFontSizeToFitWidth = true
+    nameLabel.minimumScaleFactor = 0.8
+    identityText.addArrangedSubview(nameLabel)
+    identityText.addArrangedSubview(regionLabel)
+    actionButton = QFTabUI.button(
+      "去登录", size: 14, weight: .medium, color: .white, background: QFUI.orange
+    ) { [weak self] in
+      guard let self else { return }
+      self.signedIn ? self.showUnavailable("编辑资料") : self.onLogin()
+    }
+    actionButton.contentEdgeInsets = .zero
+    actionButton.layer.cornerRadius = 19
+    actionButton.accessibilityIdentifier = "profile.login"
+    actionButton.snp.makeConstraints {
+      $0.width.equalTo(80)
+      $0.height.equalTo(38)
+    }
+    identityRow.addArrangedSubview(avatar)
+    identityRow.addArrangedSubview(identityText)
+    identityRow.addArrangedSubview(actionButton)
+    identityRow.alignment = .center
+  }
+
+  private func refreshProfile() {
+    nameLabel.text = user?.nickname ?? (previewSignedIn ? "小满的厨房" : "登录恰饭有谱")
+    if let user {
+      let parts = [user.countryCode, user.regionCode].compactMap { $0 }.filter { !$0.isEmpty }
+      regionLabel.text = parts.isEmpty ? "地区未设置" : parts.joined(separator: " · ")
+    } else {
+      regionLabel.text = previewSignedIn ? "中国 · 上海" : "收藏菜谱，记录下厨日常"
+    }
+    actionButton.setTitle(signedIn ? "编辑资料" : "去登录", for: .normal)
+    let request = user.flatMap {
+      QFRemoteImageRequest(
+        urlString: $0.avatarUrl, environment: app.api.environment.name,
+        apiBaseURL: app.api.environment.baseURL, userID: $0.userId)
+    }
+    let placeholder =
+      signedIn ? UIImage(named: "default-avatar") : UIImage(systemName: "person.fill")
+    let imageSize: CGFloat = request != nil ? 72 : (signedIn ? 48 : 36)
+    avatarImage.snp.updateConstraints { $0.size.equalTo(imageSize) }
+    avatarImage.layer.cornerRadius = request != nil ? 36 : 0
+    avatarImage.tintColor = QFTabUI.color(0x9AA78C)
+    avatarImage.load(request, placeholder: placeholder, size: CGSize(width: 72, height: 72))
+    QFTabUI.clear(menu)
+    for (index, item) in QFProfileMenuItem.items.enumerated() {
+      if index > 0 {
+        let divider = UIView()
+        divider.backgroundColor = QFUI.border
+        divider.snp.makeConstraints { $0.height.equalTo(0.5) }
+        menu.addArrangedSubview(divider)
+      }
+      menu.addArrangedSubview(
+        menuButton(item.title, symbol: item.symbol, detail: signedIn ? "" : "登录后查看"))
+    }
+    // Keep the preference card mounted while replacing only its label arrangement.
+    configureMenuButton(
+      preference, title: "兴趣偏好", symbol: "slider.horizontal.3", detail: signedIn ? "" : "登录后设置")
+  }
+
+  private func makeStats() -> UIView {
+    let values = previewSignedIn ? ["128", "26", "12"] : ["—", "—", "—"]
+    let row = QFTabUI.stack([], axis: .horizontal, spacing: 0)
+    row.distribution = .fillEqually
+    for (index, title) in ["收藏", "做菜天数", "作品"].enumerated() {
+      let value = QFTabUI.label(
+        values[index], size: 22, weight: .semibold,
+        color: previewSignedIn ? QFUI.text : QFTabUI.color(0x99A08F))
+      let name = QFTabUI.label(title, size: 13, color: QFUI.secondary)
+      value.textAlignment = .center
+      name.textAlignment = .center
+      row.addArrangedSubview(QFTabUI.stack([value, name], spacing: 4))
+    }
+    return QFTabUI.card(row, padding: 14)
+  }
+
+  private func feature(
+    _ title: String, subtitle: String, symbol: String, color: UIColor, background: UIColor
+  ) -> UIButton {
+    let button = QFTabUI.button("", background: background) { [weak self] in
+      self?.openProtected(title)
+    }
+    button.accessibilityLabel = title
+    let icons = QFTabUI.stack(
+      [
+        QFTabUI.symbol(symbol, size: 23, color: color), UIView(),
+        QFTabUI.symbol("chevron.right", size: 15, color: color),
+      ], axis: .horizontal, spacing: 8)
+    icons.alignment = .center
+    let spacer = UIView()
+    spacer.snp.makeConstraints { $0.height.greaterThanOrEqualTo(16) }
+    let labels = QFTabUI.stack(
+      [
+        icons, spacer, QFTabUI.label(title, size: 21, weight: .semibold, lines: 0),
+        QFTabUI.label(subtitle, size: 12, color: color, lines: 0),
+      ], spacing: 10)
+    labels.isUserInteractionEnabled = false
+    labels.accessibilityElementsHidden = true
+    button.addSubview(labels)
+    labels.snp.makeConstraints { $0.edges.equalToSuperview().inset(16) }
+    button.snp.makeConstraints { $0.height.greaterThanOrEqualTo(144) }
+    return button
+  }
+
+  private func menuButton(_ title: String, symbol: String, detail: String) -> UIButton {
+    let button = QFTabUI.button("") { [weak self] in self?.openProtected(title) }
+    configureMenuButton(button, title: title, symbol: symbol, detail: detail)
+    return button
+  }
+
+  private func configureMenuButton(
+    _ button: UIButton, title: String, symbol: String, detail: String
+  ) {
+    button.subviews.filter { $0.tag == 2101 }.forEach { $0.removeFromSuperview() }
+    button.accessibilityLabel = title
+    button.accessibilityHint = detail
+    let views: [UIView] = [
+      QFTabUI.symbol(symbol, size: 21), QFTabUI.label(title, size: 16, weight: .medium, lines: 0),
+      QFTabUI.label(detail, size: 12, color: QFUI.secondary),
+      QFTabUI.symbol("chevron.right", size: 15, color: QFUI.secondary),
+    ]
+    views[2].setContentCompressionResistancePriority(.required, for: .horizontal)
+    let row = QFTabUI.stack(views, axis: .horizontal, spacing: 12)
+    row.tag = 2101
+    row.alignment = .center
+    row.isUserInteractionEnabled = false
+    row.accessibilityElementsHidden = true
+    button.addSubview(row)
+    row.snp.makeConstraints {
+      $0.leading.trailing.equalToSuperview()
+      $0.top.bottom.equalToSuperview().inset(8)
+      $0.height.greaterThanOrEqualTo(35)
     }
   }
 
   private func openProtected(_ title: String) {
-    if signedIn {
-      showUnavailable(title)
-    } else {
-      onLogin()
-    }
-  }
-
-  private func showUnavailable(_ title: String) {
-    unavailableFeature = QFProfileUnavailableFeature(title: title)
+    signedIn ? showUnavailable(title) : onLogin()
   }
 }
 
-private struct QFProfileUnavailableFeature: Identifiable {
-  let title: String
-  var id: String { title }
-}
-
-private struct QFProfileIdentityView: View {
-  let previewSignedIn: Bool
-  let user: QFUserProfile?
-  private var signedIn: Bool { user != nil || previewSignedIn }
-  private var regionText: String {
-    guard let user else { return previewSignedIn ? "中国 · 上海" : "收藏菜谱，记录下厨日常" }
-    let parts = [user.countryCode, user.regionCode].compactMap { $0 }.filter { !$0.isEmpty }
-    return parts.isEmpty ? "地区未设置" : parts.joined(separator: " · ")
-  }
-  let onAction: () -> Void
-
-  var body: some View {
-    HStack(spacing: 14) {
-      avatar
-      VStack(alignment: .leading, spacing: 6) {
-        Text(user?.nickname ?? (previewSignedIn ? "小满的厨房" : "登录恰饭有谱"))
-          .font(.system(size: 20, weight: .semibold))
-          .foregroundColor(QFTheme.text)
-          .lineLimit(1)
-          .minimumScaleFactor(0.8)
-        Text(regionText)
-          .font(.system(size: 12))
-          .foregroundColor(QFTheme.secondary)
-          .fixedSize(horizontal: false, vertical: true)
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      Button(signedIn ? "编辑资料" : "去登录", action: onAction)
-        .font(.system(size: 14, weight: .medium))
-        .foregroundColor(.white)
-        .frame(width: 80, height: 38)
-        .background(Capsule().fill(QFTheme.orange))
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("profile.login")
-    }
-  }
-
-  private var avatar: some View {
-    ZStack {
-      Circle().fill(QFTheme.paleGreen)
-      if let avatar = user?.avatarUrl, let url = URL(string: avatar), url.scheme == "https" {
-        AsyncImage(url: url) { image in
-          image.resizable().scaledToFill()
-        } placeholder: {
-          Image("default-avatar").resizable().scaledToFit()
-        }
-        .frame(width: 72, height: 72).clipShape(Circle())
-      } else if signedIn {
-        Image("default-avatar")
-          .resizable()
-          .scaledToFit()
-          .frame(width: 48, height: 48)
-      } else {
-        Image(systemName: "person.fill")
-          .font(.system(size: 36))
-          .foregroundColor(Color(hex: 0x9AA78C))
-      }
-    }
-    .frame(width: 72, height: 72)
-    .accessibilityHidden(true)
-  }
-}
-
-private struct QFProfileStatsView: View {
-  let previewSignedIn: Bool
-  private let titles = ["收藏", "做菜天数", "作品"]
-
-  var body: some View {
-    HStack(spacing: 0) {
-      ForEach(0..<titles.count, id: \.self) { index in
-        VStack(spacing: 4) {
-          Text(values[index])
-            .font(.system(size: 22, weight: .semibold))
-            .foregroundColor(previewSignedIn ? QFTheme.text : Color(hex: 0x99A08F))
-          Text(titles[index])
-            .font(.system(size: 13))
-            .foregroundColor(QFTheme.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
-      }
-    }
-    .padding(.vertical, 14)
-    .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-  }
-
-  private var values: [String] {
-    previewSignedIn ? ["128", "26", "12"] : ["—", "—", "—"]
-  }
-}
-
-private struct QFProfileFeatureCard: View {
-  let title: String
-  let subtitle: String
-  let symbol: String
-  let color: Color
-  let background: Color
-  let onAction: () -> Void
-
-  var body: some View {
-    Button(action: onAction) {
-      VStack(alignment: .leading, spacing: 10) {
-        HStack {
-          Image(systemName: symbol)
-            .font(.system(size: 23))
-          Spacer(minLength: 0)
-          Image(systemName: "chevron.right")
-            .font(.system(size: 15, weight: .medium))
-        }
-        .foregroundColor(color)
-        Spacer(minLength: 0)
-        Text(title)
-          .font(.system(size: 21, weight: .semibold))
-          .foregroundColor(QFTheme.text)
-        Text(subtitle)
-          .font(.system(size: 12))
-          .foregroundColor(color)
-          .fixedSize(horizontal: false, vertical: true)
-      }
-      .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
-      .padding(16)
-      .background(RoundedRectangle(cornerRadius: 18).fill(background))
-    }
-    .buttonStyle(.plain)
-    .accessibilityElement(children: .ignore)
-    .accessibilityLabel(title)
-  }
-}
-
-private struct QFProfileMenuItem: Identifiable, Sendable {
+private struct QFProfileMenuItem {
   let title: String
   let symbol: String
-  var id: String { title }
-
   static let items = [
     QFProfileMenuItem(title: "我的作品", symbol: "photo"),
     QFProfileMenuItem(title: "我的图片贡献", symbol: "photo.badge.plus"),
     QFProfileMenuItem(title: "我的收藏", symbol: "bookmark"),
     QFProfileMenuItem(title: "做菜记录与统计", symbol: "calendar.badge.checkmark"),
   ]
-}
-
-private struct QFProfileMenuRow: View {
-  let title: String
-  let symbol: String
-  let detail: String
-  let onAction: () -> Void
-
-  var body: some View {
-    Button(action: onAction) {
-      HStack(spacing: 12) {
-        Image(systemName: symbol)
-          .font(.system(size: 21))
-          .foregroundColor(QFTheme.green)
-          .frame(width: 22)
-        Text(title)
-          .font(.system(size: 16, weight: .medium))
-          .foregroundColor(QFTheme.text)
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .fixedSize(horizontal: false, vertical: true)
-        if !detail.isEmpty {
-          Text(detail)
-            .font(.system(size: 12))
-            .foregroundColor(QFTheme.secondary)
-            .fixedSize()
-        }
-        Image(systemName: "chevron.right")
-          .font(.system(size: 15, weight: .medium))
-          .foregroundColor(QFTheme.secondary)
-      }
-      .frame(minHeight: 51)
-      .contentShape(Rectangle())
-    }
-    .buttonStyle(.plain)
-    .accessibilityElement(children: .ignore)
-    .accessibilityLabel(title)
-    .accessibilityHint(detail)
-  }
 }
