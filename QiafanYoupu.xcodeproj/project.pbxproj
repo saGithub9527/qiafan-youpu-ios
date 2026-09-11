@@ -50,6 +50,7 @@
 		F4671FD20F0906C5E031D149 /* CrashReporter in Frameworks */ = {isa = PBXBuildFile; productRef = AEB76EFB73E676435E37C3E6 /* CrashReporter */; };
 		F5B645F979984C45DC28D463 /* QFAppSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */; };
 		FCB1B3E6968B3EE959D26B04 /* QFSafetyNoticeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C679F277A0F83BA11EE5CC /* QFSafetyNoticeViewController.swift */; };
+		FE4B4DE882C500D913642D0A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA9BC7D19A9AFF762588BAF5 /* LaunchScreen.storyboard */; };
 		FF526CFE45D020DB230446D8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = CC81D1655F9D17E1C9D89FE2 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
@@ -100,10 +101,11 @@
 		82F95076D71B2459485C5050 /* QFLaunchPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLaunchPolicy.swift; sourceTree = "<group>"; };
 		8CFE2727CD228A894A789EAF /* QFWelcomeArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFWelcomeArtwork.swift; sourceTree = "<group>"; };
 		8D86AD2434296802E9101BE2 /* QFAlamofireTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAlamofireTransportTests.swift; sourceTree = "<group>"; };
-		8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFConsentStoreTests.swift; sourceTree = "<group>"; };
 		91E7423D360770883F28EAEB /* QFRemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRemoteImage.swift; sourceTree = "<group>"; };
 		A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFProfileView.swift; sourceTree = "<group>"; };
+		AA9BC7D19A9AFF762588BAF5 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AF04B819F01D1047ACCD0101 /* QFLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLoginView.swift; sourceTree = "<group>"; };
 		B3C3F810CC0A4EF9665DE310 /* QFTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFTheme.swift; sourceTree = "<group>"; };
 		B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFNetworkingTests.swift; sourceTree = "<group>"; };
@@ -113,7 +115,7 @@
 		BF9ECEBE92685E532FE886B3 /* QFAdaptiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAdaptiveUITests.swift; sourceTree = "<group>"; };
 		DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAppSession.swift; sourceTree = "<group>"; };
 		FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientView.swift; sourceTree = "<group>"; };
-		FDB9DD4AACAF3E281942FDFA /* QiafanYoupu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QiafanYoupu.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDB9DD4AACAF3E281942FDFA /* QiafanYoupu.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = QiafanYoupu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,6 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				6435C5055C7DA34536D0E2C1 /* Assets.xcassets */,
+				AA9BC7D19A9AFF762588BAF5 /* LaunchScreen.storyboard */,
 				8DBBCA22D31C8E379D28DDD8 /* PrivacyInfo.xcprivacy */,
 				4F5E0C443399E9282FF9F67C /* ThirdPartyAcknowledgements.txt */,
 			);
@@ -451,6 +454,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9D58A9FE7CDE87FF61B44EF /* Assets.xcassets in Resources */,
+				FE4B4DE882C500D913642D0A /* LaunchScreen.storyboard in Resources */,
 				1746AB969A207E4B06DA1032 /* PrivacyInfo.xcprivacy in Resources */,
 				DF90DB8725C1B99614316846 /* ThirdPartyAcknowledgements.txt in Resources */,
 			);

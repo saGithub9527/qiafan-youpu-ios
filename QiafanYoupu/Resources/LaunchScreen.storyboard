@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="QF-launch-controller">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <scene sceneID="QF-launch-scene">
+            <objects>
+                <viewController id="QF-launch-controller" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="QF-launch-view">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chef-logo" translatesAutoresizingMaskIntoConstraints="NO" id="QF-launch-logo">
+                                <rect key="frame" x="98.5" y="280" width="196" height="196"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="196" id="QF-logo-width"/>
+                                    <constraint firstAttribute="height" secondItem="QF-launch-logo" secondAttribute="width" multiplier="1:1" id="QF-logo-square"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="恰饭有谱" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QF-launch-title">
+                                <rect key="frame" x="136.5" y="494" width="120" height="29"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="24"/>
+                                <color key="textColor" red="0.1254901961" green="0.1647058824" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="下厨，从这里开始" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QF-launch-subtitle">
+                                <rect key="frame" x="139" y="531" width="115" height="16"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="13"/>
+                                <color key="textColor" red="0.4705882353" green="0.5058823529" blue="0.462745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="QF-launch-safe-area"/>
+                        <color key="backgroundColor" name="LaunchBackground"/>
+                        <constraints>
+                            <constraint firstItem="QF-launch-logo" firstAttribute="centerX" secondItem="QF-launch-safe-area" secondAttribute="centerX" id="QF-logo-center-x"/>
+                            <constraint firstItem="QF-launch-logo" firstAttribute="centerY" secondItem="QF-launch-safe-area" secondAttribute="centerY" constant="-48" id="QF-logo-center-y"/>
+                            <constraint firstItem="QF-launch-title" firstAttribute="top" secondItem="QF-launch-logo" secondAttribute="bottom" constant="18" id="QF-title-top"/>
+                            <constraint firstItem="QF-launch-title" firstAttribute="centerX" secondItem="QF-launch-safe-area" secondAttribute="centerX" id="QF-title-center-x"/>
+                            <constraint firstItem="QF-launch-subtitle" firstAttribute="top" secondItem="QF-launch-title" secondAttribute="bottom" constant="8" id="QF-subtitle-top"/>
+                            <constraint firstItem="QF-launch-subtitle" firstAttribute="centerX" secondItem="QF-launch-safe-area" secondAttribute="centerX" id="QF-subtitle-center-x"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QF-launch-first-responder" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="118" y="374"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="chef-logo" width="1024" height="1024"/>
+        <namedColor name="LaunchBackground">
+            <color red="1" green="0.9921568627" blue="0.9725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

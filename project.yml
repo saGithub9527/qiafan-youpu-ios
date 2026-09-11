@@ -62,8 +62,8 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: zh_CN
-        UILaunchScreen:
-          UIColorName: LaunchBackground
+        UILaunchStoryboardName: LaunchScreen
+        UIUserInterfaceStyle: Light
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         "UISupportedInterfaceOrientations~ipad":
           - UIInterfaceOrientationPortrait
@@ -73,6 +73,10 @@ targets:
         UIApplicationSupportsIndirectInputEvents: YES
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: NO
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).QFSceneDelegate
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.talka.qiafanyoupu

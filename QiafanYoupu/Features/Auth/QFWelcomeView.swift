@@ -3,54 +3,82 @@ import UIKit
 
 @MainActor
 final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
+  private enum Canvas {
+    static let size = CGSize(width: 390, height: 844)
+  }
+
   private let app: QFAppSession
   private let onComplete: () -> Void
-  private let form = UIView()
+  private let stage = UIView()
   private let pager = UIScrollView()
+  private let skipButton = UIButton(type: .system)
   private var pages: [QFWelcomePageView] = []
   private var selectedPage = 0
   private var lastPageWidth: CGFloat = 0
   private var completed = false
+  private var didPresentInitialNotice = false
+  private var agreementAccepted = false
 
   init(app: QFAppSession, onComplete: @escaping () -> Void) {
     self.app = app
     self.onComplete = onComplete
     super.init(nibName: nil, bundle: nil)
   }
+
   required init?(coder: NSCoder) { return nil }
+
+  override var preferredStatusBarStyle: UIStatusBarStyle { .darkContent }
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = QFUI.background
-    view.addSubview(form)
-    form.snp.makeConstraints {
-      $0.top.bottom.equalTo(view.safeAreaLayoutGuide)
-      $0.centerX.equalToSuperview()
-      $0.width.equalTo(view.safeAreaLayoutGuide.snp.width).priority(.high)
-      $0.width.lessThanOrEqualTo(520)
-      $0.leading.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.leading)
-      $0.trailing.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.trailing)
+    view.backgroundColor = QFWelcomePalette.background
+    buildStage()
+    buildPager()
+    buildHeader()
+    updatePageAccessibility()
+    QFDiagnosticsPresenter.attach(to: self, app: app, bottomInset: 76)
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    guard !didPresentInitialNotice else { return }
+    didPresentInitialNotice = true
+    presentSafetyNotice(continueToApp: false)
+  }
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    let horizontalScale = view.bounds.width / Canvas.size.width
+    let verticalScale = view.bounds.height / Canvas.size.height
+    let scale = max(0.1, min(horizontalScale, verticalScale))
+    stage.transform = CGAffineTransform(scaleX: scale, y: scale)
+
+    if pager.bounds.width > 0, abs(pager.bounds.width - lastPageWidth) > 0.5 {
+      lastPageWidth = pager.bounds.width
+      pager.setContentOffset(
+        CGPoint(x: CGFloat(selectedPage) * lastPageWidth, y: 0), animated: false)
     }
-    let header = UIView()
-    form.addSubview(header)
-    header.snp.makeConstraints { $0.top.equalToSuperview().offset(8); $0.leading.trailing.equalToSuperview().inset(24); $0.height.equalTo(44) }
-    let icon = UIImageView(image: UIImage(named: "chef-icon"))
-    icon.contentMode = .scaleAspectFit
-    icon.layer.cornerRadius = 9
-    icon.clipsToBounds = true
-    header.addSubview(icon)
-    icon.snp.makeConstraints { $0.leading.centerY.equalToSuperview(); $0.width.height.equalTo(30) }
-    let copy = QFUI.label("下厨，从这里开始", size: 12, weight: .medium, color: QFUI.secondary)
-    header.addSubview(copy)
-    copy.snp.makeConstraints { $0.leading.equalTo(icon.snp.trailing).offset(10); $0.centerY.equalToSuperview() }
-    let skip = UIButton(type: .system)
-    skip.setTitle("跳过介绍", for: .normal)
-    skip.titleLabel?.font = .systemFont(ofSize: 12)
-    skip.setTitleColor(QFUI.secondary, for: .normal)
-    skip.accessibilityIdentifier = "welcome.skip"
-    skip.addAction(UIAction { [weak self] _ in self?.requestEntry() }, for: .touchUpInside)
-    header.addSubview(skip)
-    skip.snp.makeConstraints { $0.trailing.centerY.equalToSuperview(); $0.width.equalTo(62); $0.height.equalTo(44); $0.leading.greaterThanOrEqualTo(copy.snp.trailing).offset(8) }
+  }
+
+  func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { updateSelection() }
+  func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) { updateSelection() }
+  func scrollViewDidEndDragging(
+    _ scrollView: UIScrollView, willDecelerate decelerate: Bool
+  ) {
+    if !decelerate { updateSelection() }
+  }
+
+  private func buildStage() {
+    view.addSubview(stage)
+    stage.backgroundColor = QFWelcomePalette.background
+    stage.snp.makeConstraints {
+      $0.center.equalToSuperview()
+      $0.width.equalTo(Canvas.size.width)
+      $0.height.equalTo(Canvas.size.height)
+    }
+  }
+
+  private func buildPager() {
     pager.isPagingEnabled = true
     pager.isDirectionalLockEnabled = true
     pager.showsHorizontalScrollIndicator = false
@@ -59,44 +87,84 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
     pager.contentInsetAdjustmentBehavior = .never
     pager.delegate = self
     pager.accessibilityIdentifier = "welcome.pages"
-    form.addSubview(pager)
-    pager.snp.makeConstraints { $0.top.equalTo(header.snp.bottom).offset(9); $0.leading.trailing.bottom.equalToSuperview() }
+    stage.addSubview(pager)
+    pager.snp.makeConstraints { $0.edges.equalToSuperview() }
+
     let row = UIStackView()
     row.axis = .horizontal
     row.spacing = 0
     pager.addSubview(row)
-    row.snp.makeConstraints { $0.edges.equalTo(pager.contentLayoutGuide); $0.height.equalTo(pager.frameLayoutGuide.snp.height) }
+    row.snp.makeConstraints {
+      $0.edges.equalTo(pager.contentLayoutGuide)
+      $0.height.equalTo(pager.frameLayoutGuide.snp.height)
+    }
+
     for index in 0..<5 {
-      let page = QFWelcomePageView(page: index, onSelectPage: { [weak self] page in self?.selectPage(page) },
-                                   onEnter: { [weak self] in self?.requestEntry() })
+      let page = QFWelcomePageView(
+        page: index,
+        onSelectPage: { [weak self] page in self?.selectPage(page) },
+        onEnter: { [weak self] in self?.requestEntry() })
       row.addArrangedSubview(page)
-      page.snp.makeConstraints { $0.width.equalTo(pager.frameLayoutGuide.snp.width) }
+      page.snp.makeConstraints {
+        $0.width.equalTo(pager.frameLayoutGuide.snp.width)
+        $0.height.equalTo(pager.frameLayoutGuide.snp.height)
+      }
       pages.append(page)
     }
-    updatePageAccessibility()
-    QFDiagnosticsPresenter.attach(to: self, app: app, bottomInset: 76)
   }
 
-  override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
-    if pager.bounds.width > 0, abs(pager.bounds.width - lastPageWidth) > 0.5 {
-      lastPageWidth = pager.bounds.width
-      pager.setContentOffset(CGPoint(x: CGFloat(selectedPage) * lastPageWidth, y: 0), animated: false)
+  private func buildHeader() {
+    let header = UIView()
+    stage.addSubview(header)
+    header.snp.makeConstraints {
+      $0.top.leading.trailing.equalToSuperview()
+      $0.height.equalTo(108)
     }
-    let height = view.bounds.height - view.safeAreaInsets.top - view.safeAreaInsets.bottom
-    pages.forEach { $0.updateAvailableHeight(height) }
-  }
 
-  func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { updateSelection() }
-  func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) { updateSelection() }
-  func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-    if !decelerate { updateSelection() }
+    let icon = UIImageView(image: UIImage(named: "chef-icon"))
+    icon.contentMode = .scaleAspectFit
+    icon.layer.cornerRadius = 9
+    icon.clipsToBounds = true
+    header.addSubview(icon)
+    icon.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(24)
+      $0.top.equalToSuperview().offset(64)
+      $0.width.height.equalTo(30)
+    }
+
+    let copy = UILabel()
+    copy.text = "下厨，从这里开始"
+    copy.font = QFWelcomePalette.font(size: 12, weight: .medium)
+    copy.textColor = QFWelcomePalette.secondary
+    header.addSubview(copy)
+    copy.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(64)
+      $0.centerY.equalTo(icon)
+    }
+
+    skipButton.setTitle("跳过介绍", for: .normal)
+    skipButton.titleLabel?.font = QFWelcomePalette.font(size: 12, weight: .regular)
+    skipButton.setTitleColor(QFWelcomePalette.secondary, for: .normal)
+    skipButton.contentHorizontalAlignment = .right
+    skipButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12)
+    skipButton.accessibilityIdentifier = "welcome.skip"
+    skipButton.addAction(
+      UIAction { [weak self] _ in self?.selectPage(4) }, for: .touchUpInside)
+    header.addSubview(skipButton)
+    skipButton.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(286)
+      $0.top.equalToSuperview().offset(60)
+      $0.width.equalTo(88)
+      $0.height.equalTo(44)
+    }
   }
 
   private func selectPage(_ page: Int) {
     guard (0..<5).contains(page), presentedViewController == nil else { return }
     selectedPage = page
-    pager.setContentOffset(CGPoint(x: CGFloat(page) * pager.bounds.width, y: 0), animated: !UIAccessibility.isReduceMotionEnabled)
+    pager.setContentOffset(
+      CGPoint(x: CGFloat(page) * pager.bounds.width, y: 0),
+      animated: !UIAccessibility.isReduceMotionEnabled)
     updatePageAccessibility()
   }
 
@@ -108,141 +176,218 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
 
   private func updatePageAccessibility() {
     pager.accessibilityValue = "第 \(selectedPage + 1) 页，共 5 页"
-    for (index, page) in pages.enumerated() { page.accessibilityElementsHidden = index != selectedPage }
+    skipButton.isHidden = selectedPage == 4
+    for (index, page) in pages.enumerated() {
+      page.accessibilityElementsHidden = index != selectedPage
+    }
+  }
+
+  private func presentSafetyNotice(continueToApp: Bool) {
+    guard !completed, presentedViewController == nil else { return }
+    let notice = QFSafetyNoticeViewController(
+      app: app,
+      checked: false,
+      onCheckedChange: { _ in },
+      onContinue: { [weak self] in
+        guard let self, !self.completed else { return }
+        self.agreementAccepted = true
+        if continueToApp { self.finishWelcome() }
+      },
+      onDecline: { [weak self] in self?.agreementAccepted = false })
+    present(notice, animated: false)
   }
 
   private func requestEntry() {
-    guard !completed, presentedViewController == nil else { return }
-    let notice = QFSafetyNoticeViewController(app: app, checked: false, onCheckedChange: { _ in }, onContinue: { [weak self] in
-      guard let self, !self.completed else { return }
-      self.completed = true
-      self.onComplete()
-    }, onDecline: {})
-    present(notice, animated: false)
+    guard !completed else { return }
+    if agreementAccepted { finishWelcome() }
+    else { presentSafetyNotice(continueToApp: true) }
+  }
+
+  private func finishWelcome() {
+    guard !completed, agreementAccepted else { return }
+    completed = true
+    onComplete()
   }
 }
 
 @MainActor
 private final class QFWelcomePageView: UIView {
   private let page: Int
-  private let scroll = UIScrollView()
-  private let stack = UIStackView()
-  private let artwork: QFWelcomeArtworkView
-  private let title: UILabel
-  private let subtitle: UILabel
-  private let indicators = UIStackView()
-  private var illustrationSize: Constraint?
-  private var contentTop: Constraint?
-  private var contentBottom: Constraint?
-  private var availableHeight: CGFloat = 0
-  private var lastArtworkSize: CGFloat = -1
   private let onSelectPage: (Int) -> Void
   private let onEnter: () -> Void
-  private var lastItem: UIView?
+
   private static let titles = [
-    "今天，\n想做点什么？", "把世界风味，\n端上餐桌", "搜一道菜，\n跟着步骤做",
-    "这一周，\n吃得有计划", "准备好，开饭啦",
+    ["今天，", "想做点什么？"],
+    ["把世界风味，", "端上餐桌"],
+    ["搜一道菜，", "跟着步骤做"],
+    ["这一周，", "吃得有计划"],
+    ["准备好，开饭啦"],
   ]
+
   private static let subtitles = [
-    "和小狗厨师一起，\n把每一天，做得有滋有味。",
-    "按国家、口味与菜系探索，\n找到今天想尝试的那一味。",
-    "先看需要什么食材，\n再跟着清晰步骤，一步步开做。",
-    "安排一周菜单，整理所需食材，\n让每天吃什么，提前有答案。",
-    "从第一道想做的菜开始，\n发现属于你的好味道。",
+    ["和小狗厨师一起，", "把每一天，做得有滋有味。"],
+    ["按国家、口味与菜系探索，", "找到今天想尝试的那一味。"],
+    ["先看需要什么食材，", "再跟着清晰步骤，一步步开做。"],
+    ["安排一周菜单，整理所需食材，", "让每天吃什么，提前有答案。"],
+    ["从第一道想做的菜开始，", "发现属于你的好味道。"],
   ]
 
   init(page: Int, onSelectPage: @escaping (Int) -> Void, onEnter: @escaping () -> Void) {
     self.page = page
     self.onSelectPage = onSelectPage
     self.onEnter = onEnter
-    artwork = QFWelcomeArtworkView(page: page)
-    title = QFUI.label(Self.titles[page], size: page == 4 ? 28 : 29, weight: .bold)
-    subtitle = QFUI.label(Self.subtitles[page], size: 14, color: QFUI.secondary)
     super.init(frame: .zero)
+    backgroundColor = QFWelcomePalette.background
     accessibilityIdentifier = "welcome.page.\(page + 1)"
-    scroll.showsVerticalScrollIndicator = false
-    scroll.isDirectionalLockEnabled = true
-    scroll.alwaysBounceVertical = false
-    scroll.contentInsetAdjustmentBehavior = .never
-    addSubview(scroll)
-    scroll.snp.makeConstraints { $0.edges.equalToSuperview() }
-    stack.axis = .vertical
-    stack.alignment = .center
-    stack.spacing = 0
-    scroll.addSubview(stack)
-    stack.snp.makeConstraints {
-      contentTop = $0.top.equalTo(scroll.contentLayoutGuide.snp.top).offset(17).constraint
-      $0.leading.trailing.equalTo(scroll.contentLayoutGuide).inset(24)
-      contentBottom = $0.bottom.equalTo(scroll.contentLayoutGuide.snp.bottom).inset(30).constraint
-      $0.width.equalTo(scroll.frameLayoutGuide.snp.width).offset(-48)
-    }
-    title.textAlignment = .center
-    title.accessibilityTraits.insert(.header)
-    subtitle.textAlignment = .center
-    let paragraph = NSMutableParagraphStyle()
-    paragraph.alignment = .center
-    paragraph.lineSpacing = 6
-    subtitle.attributedText = NSAttributedString(string: Self.subtitles[page], attributes: [
-      .font: UIFont.systemFont(ofSize: 14), .foregroundColor: QFUI.secondary, .paragraphStyle: paragraph
-    ])
-    [artwork, title, subtitle, indicators].forEach { stack.addArrangedSubview($0) }
-    artwork.snp.makeConstraints { illustrationSize = $0.width.equalTo(300).constraint; $0.height.equalTo(artwork.snp.width) }
-    title.snp.makeConstraints { $0.width.equalTo(stack.snp.width) }
-    subtitle.snp.makeConstraints { $0.width.equalTo(stack.snp.width) }
+    buildArtwork()
+    buildTitle()
+    buildSubtitle()
     buildIndicators()
-    if page == 0 {
-      let hint = QFUI.label("左右滑动，继续了解", size: 12, color: QFUI.secondary)
-      hint.textAlignment = .center
-      stack.addArrangedSubview(hint)
-      hint.snp.makeConstraints { $0.width.equalTo(stack.snp.width) }
-      lastItem = hint
-    } else if page == 4 {
-      let enter = QFAuthLoadingButton("进入 APP")
-      enter.accessibilityIdentifier = "welcome.enter"
-      enter.addAction(UIAction { [weak self] _ in self?.onEnter() }, for: .touchUpInside)
-      stack.addArrangedSubview(enter)
-      enter.snp.makeConstraints { $0.width.equalTo(stack.snp.width); $0.height.equalTo(55) }
-      lastItem = enter
-    }
-    updateLayout()
+    buildPageAction()
   }
+
   required init?(coder: NSCoder) { return nil }
 
-  override func layoutSubviews() { super.layoutSubviews(); updateLayout() }
-  func updateAvailableHeight(_ height: CGFloat) {
-    if availableHeight != height { availableHeight = height; setNeedsLayout() }
+  private func buildArtwork() {
+    let artwork = UIImageView(image: UIImage(named: "welcome-page-\(page + 1)-art"))
+    artwork.contentMode = .scaleAspectFit
+    artwork.clipsToBounds = true
+    artwork.isAccessibilityElement = true
+    artwork.accessibilityTraits = .image
+    artwork.accessibilityLabel = [
+      "小狗厨师拿着锅铲和一锅蔬菜",
+      "按国家、口味与菜系探索不同地方的菜",
+      "搜索菜谱、查看食材并跟着步骤做菜",
+      "安排一周菜单并整理需要的食材",
+      "小狗厨师准备开饭",
+    ][page]
+    addSubview(artwork)
+    artwork.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(24)
+      $0.top.equalToSuperview().offset(128)
+      $0.width.height.equalTo(342)
+    }
   }
 
-  private func updateLayout() {
-    let compact = availableHeight > 0 && availableHeight < 500
-    let widthLimit = max(1, min(390, bounds.width - 48))
-    let size = compact ? min(widthLimit, max(80, availableHeight * 0.36)) : widthLimit
-    if abs(size - lastArtworkSize) > 0.5 { lastArtworkSize = size; illustrationSize?.update(offset: size) }
-    stack.setCustomSpacing(compact ? 14 : 24, after: artwork)
-    stack.setCustomSpacing(compact ? 10 : 14, after: title)
-    stack.setCustomSpacing(compact ? 16 : 26, after: subtitle)
-    if lastItem != nil { stack.setCustomSpacing(compact ? 18 : (page == 0 ? 37 : 29), after: indicators) }
-    contentTop?.update(offset: compact ? 10 : 17)
-    contentBottom?.update(inset: compact ? 20 : 30)
+  private func buildTitle() {
+    let baselines: [CGFloat] = page == 4 ? [515] : [515, 554]
+    for (line, baseline) in zip(Self.titles[page], baselines) {
+      let label = makeLabel(
+        line, size: 30, weight: .semibold, color: QFWelcomePalette.text)
+      label.accessibilityTraits.insert(.header)
+      addSubview(label)
+      label.snp.makeConstraints {
+        $0.centerX.equalToSuperview()
+        $0.leading.greaterThanOrEqualToSuperview().offset(24)
+        $0.trailing.lessThanOrEqualToSuperview().offset(-24)
+        $0.lastBaseline.equalTo(self.snp.top).offset(baseline)
+      }
+    }
+  }
+
+  private func buildSubtitle() {
+    let baselines: [CGFloat] = page == 4 ? [558, 581] : [589, 612]
+    for (line, baseline) in zip(Self.subtitles[page], baselines) {
+      let label = makeLabel(
+        line, size: 14, weight: .regular, color: QFWelcomePalette.secondary)
+      addSubview(label)
+      label.snp.makeConstraints {
+        $0.centerX.equalToSuperview()
+        $0.leading.greaterThanOrEqualToSuperview().offset(18)
+        $0.trailing.lessThanOrEqualToSuperview().offset(-18)
+        $0.lastBaseline.equalTo(self.snp.top).offset(baseline)
+      }
+    }
   }
 
   private func buildIndicators() {
+    let indicators = UIStackView()
     indicators.axis = .horizontal
-    indicators.spacing = 5
+    indicators.distribution = .fillEqually
+    indicators.alignment = .fill
+    addSubview(indicators)
+    indicators.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(105)
+      $0.top.equalToSuperview().offset(640)
+      $0.width.equalTo(180)
+      $0.height.equalTo(34)
+    }
+
     for index in 0..<5 {
       let button = UIButton(type: .custom)
       button.accessibilityLabel = "第 \(index + 1) 页，共 5 页"
-      button.isSelected = index == page
       button.accessibilityTraits = index == page ? [.button, .selected] : [.button]
+      button.addAction(
+        UIAction { [weak self] _ in self?.onSelectPage(index) }, for: .touchUpInside)
       let capsule = UIView()
-      capsule.backgroundColor = index == page ? QFUI.orange : QFAuthPalette.color(0xD8DDD2)
-      capsule.layer.cornerRadius = 3
       capsule.isUserInteractionEnabled = false
+      capsule.backgroundColor =
+        index == page ? QFWelcomePalette.orange : QFWelcomePalette.pageDot
+      capsule.layer.cornerRadius = 3
       button.addSubview(capsule)
-      capsule.snp.makeConstraints { $0.center.equalToSuperview(); $0.width.equalTo(index == page ? 24 : 6); $0.height.equalTo(6) }
-      button.snp.makeConstraints { $0.width.equalTo(31); $0.height.equalTo(28) }
-      button.addAction(UIAction { [weak self] _ in self?.onSelectPage(index) }, for: .touchUpInside)
+      capsule.snp.makeConstraints {
+        $0.center.equalToSuperview()
+        $0.width.equalTo(index == page ? 24 : 6)
+        $0.height.equalTo(6)
+      }
       indicators.addArrangedSubview(button)
     }
+  }
+
+  private func buildPageAction() {
+    if page == 0 {
+      let hint = makeLabel(
+        "左右滑动，继续了解", size: 12, weight: .regular,
+        color: QFWelcomePalette.secondary)
+      addSubview(hint)
+      hint.snp.makeConstraints {
+        $0.centerX.equalToSuperview()
+        $0.lastBaseline.equalTo(self.snp.top).offset(738)
+      }
+    } else if page == 4 {
+      let enter = QFAuthLoadingButton(
+        "进入 APP", background: QFWelcomePalette.orange, size: 16, cornerRadius: 18)
+      enter.accessibilityIdentifier = "welcome.enter"
+      enter.addAction(UIAction { [weak self] _ in self?.onEnter() }, for: .touchUpInside)
+      addSubview(enter)
+      enter.snp.makeConstraints {
+        $0.leading.equalToSuperview().offset(24)
+        $0.top.equalToSuperview().offset(700)
+        $0.width.equalTo(342)
+        $0.height.equalTo(56)
+      }
+    }
+  }
+
+  private func makeLabel(
+    _ copy: String, size: CGFloat, weight: UIFont.Weight, color: UIColor
+  ) -> UILabel {
+    let label = UILabel()
+    label.text = copy
+    label.textAlignment = .center
+    label.font = QFWelcomePalette.font(size: size, weight: weight)
+    label.textColor = color
+    label.numberOfLines = 1
+    label.adjustsFontSizeToFitWidth = true
+    label.minimumScaleFactor = 0.8
+    return label
+  }
+}
+
+private enum QFWelcomePalette {
+  static let background = QFAuthPalette.color(0xFFFDF8)
+  static let orange = QFAuthPalette.color(0xEA643E)
+  static let text = QFAuthPalette.color(0x29342D)
+  static let secondary = QFAuthPalette.color(0x747C71)
+  static let pageDot = QFAuthPalette.color(0xDADDD3)
+
+  static func font(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+    let name: String
+    switch weight {
+    case .semibold: name = "PingFangSC-Semibold"
+    case .medium: name = "PingFangSC-Medium"
+    default: name = "PingFangSC-Regular"
+    }
+    return UIFont(name: name, size: size) ?? UIFont.systemFont(ofSize: size, weight: weight)
   }
 }

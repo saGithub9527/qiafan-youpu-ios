@@ -17,7 +17,8 @@ final class QFSafetyNoticeViewController: UIViewController {
   private let agreementSection = UIView()
   private let actions = UIView()
   private let agreement = QFAuthAgreementControl(identifier: "notice.agreement", noticeStyle: true)
-  private let continueButton = QFAuthLoadingButton("同意并继续")
+  private let continueButton = QFAuthLoadingButton(
+    "同意并继续", background: QFAuthPalette.color(0xEA643E))
   private var handleHeight: Constraint?
   private var actionsBottom: Constraint?
   private var mode: Int?
@@ -47,7 +48,7 @@ final class QFSafetyNoticeViewController: UIViewController {
     dim.isAccessibilityElement = false
     view.addSubview(dim)
     dim.snp.makeConstraints { $0.edges.equalToSuperview() }
-    sheet.backgroundColor = QFUI.background
+    sheet.backgroundColor = QFAuthPalette.color(0xFFFDF8)
     sheet.layer.cornerRadius = 28
     sheet.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     sheet.clipsToBounds = true

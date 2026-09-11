@@ -7,7 +7,6 @@ final class QFAppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    if !QFRuntime.isUnitTest { _ = QFCrashRecorder.shared.start() }
     return true
   }
 
@@ -33,6 +32,7 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
   private let session = QFAppSession()
   private var startup: Task<Void, Never>?
+  private var didScheduleCrashRecorder = false
 
   func scene(
     _ scene: UIScene, willConnectTo sceneSession: UISceneSession,
@@ -47,6 +47,16 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
     window.makeKeyAndVisible()
     if !QFRuntime.isUnitTest {
       startup = Task { [session] in await session.start() }
+    }
+  }
+
+  func sceneDidBecomeActive(_ scene: UIScene) {
+    guard !QFRuntime.isUnitTest, !didScheduleCrashRecorder else { return }
+    didScheduleCrashRecorder = true
+
+    // Keep crash-report decoding and disk maintenance away from the window's first frame.
+    DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 0.25) {
+      _ = QFCrashRecorder.shared.start()
     }
   }
 }
