@@ -356,6 +356,7 @@
 "商品查询失败，请检查网络后重试。" = "Die Produktabfrage ist fehlgeschlagen. Prüfe deine Internetverbindung und versuche es erneut.";
 "商品查询暂时受限，请稍后重试。" = "Die Produktabfrage ist vorübergehend begrenzt. Versuche es später erneut.";
 "商品资料来源：Open Food Facts（ODbL）" = "Produktdatenquelle: Open Food Facts (ODbL)";
+"商品资料来源：极速数据（阿里云市场）" = "Produktdatenquelle: Jisu Data (Alibaba Cloud Marketplace)";
 "商品金额" = "Warensumme";
 "商家" = "Händler";
 "回到今天" = "Heute";
@@ -811,7 +812,10 @@
 "本地千问模型" = "Qwen-Modell auf dem Gerät";
 "本地模型未能完成回答，请检查模型或稍后重试。" = "Das lokale Modell konnte die Antwort nicht abschließen. Prüfe das Modell oder versuche es später erneut.";
 "查询中…" = "Abfrage läuft…";
+"瓶" = "Flasche";
+"盒" = "Schachtel";
 "联网查询商品资料" = "Produktdaten online abrufen";
+"袋" = "Beutel";
 "设备内存不足，本次回答已停止，已保留现有内容。请稍后重试。" = "Der Arbeitsspeicher des Geräts reicht nicht aus. Die Antwort wurde angehalten, der bisherige Text bleibt erhalten. Versuche es später erneut.";
 "本地模式当前支持文字，请移除图片或选择云端模式。" = "Der lokale Modus unterstützt derzeit Text. Entferne die Bilder oder wähle den Cloud-Modus.";
 "本地生成超时，请稍后重试或缩短问题。" = "Die lokale Generierung hat das Zeitlimit überschritten. Versuche es später erneut oder kürze deine Frage.";
@@ -1301,6 +1305,7 @@
 "购买日期" = "Kaufdatum";
 "购买食材" = "Gekaufte Zutaten";
 "资料尚未修改" = "Keine Änderungen";
+"资料源标价：%@（计价单位未注明，请核对）" = "Preis laut Quelle: %@ (Preiseinheit nicht angegeben; bitte prüfen)";
 "跟着步骤做" = "folgen Sie dann jedem Schritt";
 "跳过介绍" = "Einführung überspringen";
 "跳过本次" = "Dieses Mal überspringen";

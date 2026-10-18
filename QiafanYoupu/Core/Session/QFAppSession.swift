@@ -730,6 +730,7 @@ final class QFAppSession: ObservableObject {
       || path.hasPrefix("me/shopping-lists") || path.hasPrefix("me/weekly-plan-proposals")
       || path.hasPrefix("me/cooking-statistics") || path.hasPrefix("me/ingredient-combinations") || path.hasPrefix("me/cooking-costs") || path.hasPrefix("me/purchase-receipts")
       || path.hasPrefix("me/preparation-expenses") || path.hasPrefix("me/cooking-records")
+      || path.hasPrefix("me/product-barcodes/")
   }
 
   func refreshIfNeededForContent() async throws {

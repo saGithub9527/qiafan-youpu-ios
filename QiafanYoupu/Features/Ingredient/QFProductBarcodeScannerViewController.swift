@@ -233,7 +233,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
       var info: QFBarcodeProductInfo?
       var state: QFBarcodeLookupState = .notFound
       do {
-        info = try await QFBarcodeProductLookup.shared.product(for: barcode, language: self.binding.language)
+        info = try await QFBarcodeProductLookup.shared.product(for: barcode, language: self.binding.language, app: self.app)
         if info != nil { state = .found }
       } catch {
         if Task.isCancelled { return }

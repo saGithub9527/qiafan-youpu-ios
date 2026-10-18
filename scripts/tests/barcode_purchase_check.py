@@ -59,7 +59,7 @@ import Foundation
  let enrichedJSON=try JSONSerialization.jsonObject(with:JSONEncoder().encode(enrichedRequest)) as! [String:Any]
  let enrichedLine=(enrichedJSON["items"] as! [[String:Any]])[0]
  precondition(enrichedLine["packageSize"] as? String=="350" && enrichedLine["packageContentUnit"] as? String=="g" && enrichedLine["lineAmount"]==nil)
- for key in ["scanBarcode","scanBarcodeSymbology","scanPackageLabel","scanLookupState","scanProductSource"] {precondition(enrichedLine[key]==nil)}
+ for key in ["scanBarcode","scanBarcodeSymbology","scanPackageLabel","scanLookupState","scanProductSource","scanReferencePrice","scanPackageType"] {precondition(enrichedLine[key]==nil)}
  for (raw,value,unit) in [(#""quantity":"1500 ml","product_quantity":"1500","product_quantity_unit":"ml""#,"1500","ml"),(#""quantity":"1,5 L""#,"1.5","l")] {
   let bytes=Data((#"{"status":"success","product":{"code":"3017620422003","product_name":"Drink","#+raw+"}}").utf8)
   let metadata=try QFBarcodeProductInfo.read(bytes,requestedCode:barcode.value,language:"en")!
@@ -76,6 +76,26 @@ import Foundation
  let actualNotFound=#"{"code":"6925303723934","status":"failure","result":{"id":"product_not_found"}}"#
  let actualMissing=try QFBarcodeProductInfo.read(Data(actualNotFound.utf8),requestedCode:"6925303723934",language:"zh-Hans")
  precondition(actualMissing==nil)
+ let domestic=#"{"status":"FOUND","product":{"barcode":"6925303723934","name":"统一绿茶 茉莉味茶饮料","packageLabel":"1000毫升 · 1(升) · 瓶装","netContent":{"value":"1","unit":"l"},"referencePrice":"￥40.00","packageType":"瓶装","packageUnit":"bottle","source":"JISU_ALIYUN"}}"#
+ let domesticResult=try JSONDecoder().decode(QFBarcodeProductInfo.ServerResult.self,from:Data(domestic.utf8))
+ let domesticInfo=domesticResult.metadata(for:"6925303723934")!
+ let drinkBarcode=QFProductBarcode(value:"6925303723934",symbology:"EAN13")!
+ var drink=QFPurchaseReceiptLine.scannedProduct(barcode:drinkBarcode,info:domesticInfo)
+ precondition(drink.name=="统一绿茶 茉莉味茶饮料" && drink.quantity=="1" && drink.unitCode=="bottle" && drink.packageUnit=="bottle")
+ precondition(drink.packageSize=="1" && drink.packageContentUnit=="l" && drink.lineAmount==nil)
+ precondition(drink.scanReferencePrice=="￥40.00" && drink.scanProductSource=="JISU_ALIYUN")
+ drink.quantity="3";drink.unitCode="bag";drink.name="User edit";drink.lineAmount="9.50"
+ drink.applyBarcodeInfo(domesticInfo,status:.found)
+ precondition(drink.quantity=="3" && drink.unitCode=="bag" && drink.name=="User edit" && drink.lineAmount=="9.50")
+ precondition(domesticResult.metadata(for:barcode.value)==nil)
+ let unsafeDomestic=domestic.replacingOccurrences(of:"JISU_ALIYUN",with:"UNKNOWN")
+ let unsafeMetadata=try JSONDecoder().decode(QFBarcodeProductInfo.ServerResult.self,from:Data(unsafeDomestic.utf8)).metadata(for:drinkBarcode.value)
+ precondition(unsafeMetadata==nil)
+ drink.ingredientId=ingredient
+ var drinkDraft=restored;drinkDraft.items=[drink]
+ let drinkJSON=try JSONSerialization.jsonObject(with:JSONEncoder().encode(drinkDraft.request())) as! [String:Any]
+ let drinkLine=(drinkJSON["items"] as! [[String:Any]])[0]
+ precondition(drinkLine["scanReferencePrice"]==nil && drinkLine["scanPackageType"]==nil && drinkLine["lineAmount"] as? String=="9.50")
  let wrong=try QFBarcodeProductInfo.read(Data(response.utf8),requestedCode:"1234567890128",language:"en");precondition(wrong==nil)
  let absent=#"{"status":"failure","result":{"id":"product_not_found"}}"#
  let missing=try QFBarcodeProductInfo.read(Data(absent.utf8),requestedCode:barcode.value,language:"zh-Hans");precondition(missing==nil)
@@ -83,7 +103,7 @@ import Foundation
  let invalid=try QFBarcodeProductInfo.read(Data(bad.utf8),requestedCode:barcode.value,language:"en");precondition(invalid==nil)
  var old=try JSONSerialization.jsonObject(with:JSONEncoder().encode(restored)) as! [String:Any]
  var legacyLines=old["items"] as! [[String:Any]]
- for key in ["scanBarcode","scanBarcodeSymbology","scanPackageLabel","scanLookupState","scanProductSource"] {legacyLines[0].removeValue(forKey:key)}
+ for key in ["scanBarcode","scanBarcodeSymbology","scanPackageLabel","scanLookupState","scanProductSource","scanReferencePrice","scanPackageType"] {legacyLines[0].removeValue(forKey:key)}
  old["items"]=legacyLines
  let legacy=try JSONDecoder().decode(QFPurchaseReceiptDraft.self,from:JSONSerialization.data(withJSONObject:old))
  precondition(legacy.items[0].scanBarcode==nil && legacy.items[0].name==restored.items[0].name)

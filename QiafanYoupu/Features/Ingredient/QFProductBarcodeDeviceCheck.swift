@@ -135,7 +135,26 @@ enum QFProductBarcodeDeviceCheck {
         && savedLine.quantity == "1" && savedLine.unitCode == "pack", "netContentsSeparateFromPurchaseCount", run)
       try require(descendant(in: controller.view, id: "purchase.scan-product") is UIButton,
         "productScanEntryExists", run)
-      let unavailable = QFProductBarcode(value: "6925303723934", symbology: "EAN13")!
+      let drinkBarcode = QFProductBarcode(value: "6925303723934", symbology: "EAN13")!
+      let beforeActivation = try await productLookup.product(for: drinkBarcode, language: "en", app: app)
+      try require(beforeActivation == nil, "disabledDomesticAndOffMissHandled", run)
+      let drinkMetadata = try await productLookup.product(for: drinkBarcode, language: "en", app: app)
+      let drinkLine = QFPurchaseReceiptLine.scannedProduct(barcode: drinkBarcode, info: drinkMetadata)
+      controller.appendScannedProduct(drinkLine)
+      let drinkName = descendant(in: controller.view, id: "purchase.name." + drinkLine.id) as? UITextField
+      let drinkContent = descendant(in: controller.view, id: "purchase.net-content." + drinkLine.id) as? UILabel
+      let drinkPrice = descendant(in: controller.view, id: "purchase.reference-price." + drinkLine.id) as? UILabel
+      try require(drinkName?.text == "统一绿茶 茉莉味茶饮料", "domesticBackendNameVisible", run)
+      try require(drinkContent?.text == "1 l", "domesticNetContentVisible", run)
+      try require(drinkPrice?.text?.contains("￥40.00") == true && drinkPrice?.text?.contains("pricing unit unspecified") == true,
+        "sourcePriceClearlySeparate", run)
+      let drinkDraft = QFContentDraftStore.load(QFPurchaseReceiptDraft.self, app: app, kind: run.draftKind)
+      let storedDrink = drinkDraft?.items.first { $0.id == drinkLine.id }
+      try require(storedDrink?.unitCode == "bottle" && storedDrink?.quantity == "1" && storedDrink?.lineAmount == nil,
+        "oneBottleSuggestedWithoutInferringPaidAmount", run)
+      try require(network.summary().reads["/api/v1/me/product-barcodes/6925303723934"] == 2,
+        "domesticActivationNotHiddenByOldOffMiss", run)
+      let unavailable = QFProductBarcode(value: "4006381333931", symbology: "EAN13")!
       let absent = try await productLookup.product(for: unavailable, language: "en")
       try require(absent == nil, "realLookupClassHandles404AsUnlisted", run)
       let missingLine = QFPurchaseReceiptLine.scannedProduct(barcode: unavailable, lookupState: .notFound)
@@ -349,6 +368,10 @@ private final class Network: @unchecked Sendable {
       "/api/v1/me/settings": try envelope(["theme": "SYSTEM", "planReminders": false, "workAndContributionUpdates": false]),
       "/api/v1/measurement-units": try envelope([["code": "piece", "dimension": "COUNT", "symbol": "piece",
         "name": "piece", "factorToBase": "1", "decimalAllowed": false]]),
+      "/api/v1/me/product-barcodes/6925303723934": try envelope(["status": "FOUND", "product": [
+        "barcode": "6925303723934", "name": "统一绿茶 茉莉味茶饮料", "packageLabel": "1000毫升 · 1(升) · 瓶装",
+        "netContent": ["value": "1", "unit": "l"], "referencePrice": "￥40.00", "packageType": "瓶装",
+        "packageUnit": "bottle", "source": "JISU_ALIYUN"]]),
     ]
   }
   func response(for request: URLRequest) -> Data? {
@@ -365,6 +388,9 @@ private final class Network: @unchecked Sendable {
       if url.path == "/api/v3/product/3017620422003" {
         return Data(#"{"status":"success","product":{"code":"3017620422003","product_name":"Nutella","quantity":"400 g e","product_quantity":400,"product_quantity_unit":"g"}}"#.utf8)
       }
+      if url.path == "/api/v3/product/4006381333931" {
+        return Data(#"{"code":"4006381333931","status":"failure","result":{"id":"product_not_found"}}"#.utf8)
+      }
       if url.path == "/api/v3/product/6925303723934" {
         return Data(#"{"code":"6925303723934","status":"failure","result":{"id":"product_not_found"}}"#.utf8)
       }
@@ -372,11 +398,20 @@ private final class Network: @unchecked Sendable {
     }
     guard let url = request.url, url.scheme == "https", url.host == host, url.user == nil,
       url.password == nil, let data = payloads[url.path] else { unexpected += 1; return nil }
+    if url.path.hasPrefix("/api/v1/me/product-barcodes/") {
+      guard request.value(forHTTPHeaderField: "Authorization")?.hasPrefix("Bearer ") == true,
+        request.value(forHTTPHeaderField: "Device-Id") != nil,
+        request.value(forHTTPHeaderField: "Accept-Language") == "en" else { unexpected += 1; return nil }
+    }
     reads[url.path, default: 0] += 1
+    if url.path == "/api/v1/me/product-barcodes/6925303723934", reads[url.path] == 1 {
+      return Data(#"{"code":0,"message":"fixture","data":{"status":"DISABLED","product":null}}"#.utf8)
+    }
     return data
   }
   func statusCode(for request: URLRequest) -> Int {
-    request.url?.host == "world.openfoodfacts.org" && request.url?.path == "/api/v3/product/6925303723934" ? 404 : 200
+    request.url?.host == "world.openfoodfacts.org"
+      && ["/api/v3/product/4006381333931", "/api/v3/product/6925303723934"].contains(request.url?.path ?? "") ? 404 : 200
   }
   func summary() -> (reads: [String: Int], blockedWrites: Int, unexpected: Int) {
     lock.lock(); defer { lock.unlock() }

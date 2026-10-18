@@ -6,13 +6,42 @@ enum QFBarcodeLookupState: String {
 }
 
 struct QFBarcodeProductInfo: Equatable {
-  struct NetContent: Equatable {
+  struct NetContent: Decodable, Equatable {
     let value: String
     let unit: String
   }
   let name: String?
   let packageLabel: String?
   let netContent: NetContent?
+  var source = "OPEN_FOOD_FACTS"
+  var referencePrice: String? = nil
+  var packageType: String? = nil
+  var packageUnit: String? = nil
+
+  struct ServerResult: Decodable {
+    let status: String
+    let product: Product?
+    struct Product: Decodable {
+      let barcode: String
+      let name: String?
+      let packageLabel: String?
+      let netContent: NetContent?
+      let referencePrice: String?
+      let packageType: String?
+      let packageUnit: String?
+      let source: String
+    }
+    func metadata(for code: String) -> QFBarcodeProductInfo? {
+      guard status == "FOUND", let product, product.source == "JISU_ALIYUN",
+        let expected = canonical(code), canonical(product.barcode) == expected,
+        let name = clean(product.name, limit: 100) else { return nil }
+      let contents = product.netContent.flatMap { validatedContent($0.value, unit: $0.unit) }
+      return .init(name: name, packageLabel: clean(product.packageLabel, limit: 240), netContent: contents,
+        source: "JISU_ALIYUN", referencePrice: clean(product.referencePrice, limit: 120),
+        packageType: clean(product.packageType, limit: 80),
+        packageUnit: product.packageUnit.flatMap { ["bottle", "bag", "box", "pack"].contains($0) ? $0 : nil })
+    }
+  }
   static func read(_ data: Data, requestedCode: String, language: String) throws -> Self? {
     guard data.count <= 256 * 1024,
       let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -79,13 +108,18 @@ extension QFPurchaseReceiptLine {
     line.scanBarcodeSymbology = barcode.symbology
     line.scanProductSource = source
     line.applyBarcodeInfo(info, status: info == nil ? lookupState : .found)
+    // Only the initial scan adopts a verified packaging reference. A retry must
+    // preserve the unit/count already chosen by the user.
+    if let unit = info?.packageUnit { line.unitCode = unit; line.packageUnit = unit }
     return line
   }
   mutating func applyBarcodeInfo(_ info: QFBarcodeProductInfo?, status: QFBarcodeLookupState) {
     scanLookupState = status.rawValue
     guard let info else { return }
-    scanProductSource = "OPEN_FOOD_FACTS"
+    scanProductSource = info.source
     scanPackageLabel = info.packageLabel
+    scanReferencePrice = info.referencePrice
+    scanPackageType = info.packageType
     if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { name = info.name ?? "" }
     if packageSize == nil, packageContentUnit == nil,
       ["box", "bottle", "bag", "pack"].contains(unitCode), let contents = info.netContent {

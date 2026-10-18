@@ -31,6 +31,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     weak var name: UITextField?
     weak var status: UILabel?
     weak var package: UILabel?
+    weak var referencePrice: UILabel?
     weak var contents: UILabel?
     weak var source: UIButton?
     weak var retry: UIButton?
@@ -255,19 +256,22 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
       let status = QFTabUI.label("", size: 13, color: QFUI.secondary, lines: 0)
       status.accessibilityIdentifier = "purchase.barcode-status." + line.id
       let package = QFTabUI.label("", size: 13, color: QFUI.secondary, lines: 0)
+      let referencePrice = QFTabUI.label("", size: 12, color: QFUI.secondary, lines: 0)
+      referencePrice.accessibilityIdentifier = "purchase.reference-price." + line.id
       let contents = QFTabUI.label("", size: 16, weight: .semibold, lines: 0)
       contents.accessibilityIdentifier = "purchase.net-content." + line.id
-      let source = QFTabUI.button(app.text("商品资料来源：Open Food Facts（ODbL）", "Product data: Open Food Facts (ODbL)"), size: 12, color: QFUI.secondary) { [weak self] in
-        guard let self else { return }
-        self.present(SFSafariViewController(url: URL(string: "https://world.openfoodfacts.org/data")!), animated: true)
+      let source = QFTabUI.button("", size: 12, color: QFUI.secondary) { [weak self] in
+        guard let self, let current = self.draft.items.first(where: { $0.id == line.id }) else { return }
+        let url = current.scanProductSource == "JISU_ALIYUN" ? "https://www.jisuapi.com/api/barcode2/" : "https://world.openfoodfacts.org/data"
+        self.present(SFSafariViewController(url: URL(string: url)!), animated: true)
       }
       source.contentHorizontalAlignment = .leading; source.titleLabel?.numberOfLines = 0
       let retry = QFTabUI.button(app.text("联网查询商品资料", "Look up product online"), size: 14, color: QFUI.orange) { [weak self] in self?.retryProduct(line.id) }
       retry.contentHorizontalAlignment = .leading; retry.titleLabel?.numberOfLines = 0
       retry.accessibilityIdentifier = "purchase.barcode-retry." + line.id
-      barcodeRows[line.id] = .init(name: productName, status: status, package: package, contents: contents, source: source, retry: retry)
+      barcodeRows[line.id] = .init(name: productName, status: status, package: package, referencePrice: referencePrice, contents: contents, source: source, retry: retry)
       updateBarcodeRow(line)
-      rows.append(contentsOf: [status, package, source, retry])
+      rows.append(contentsOf: [status, package, referencePrice, source, retry])
       rows.append(QFTabUI.label(app.text("数量1是可修改的默认值，价格需手动填写；包装净含量不代表购买数量。", "1 is an editable starting count. Enter the price yourself; package contents are not the quantity bought."), size: 12, color: QFUI.secondary, lines: 0))
       rows.append(values)
       rows.append(labeled(app.text("每包装净含量", "Net content per package"), contents))
@@ -292,7 +296,15 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     QFTabUI.stack([QFTabUI.label(title, size: 12, color: QFUI.secondary, lines: 0), view], spacing: 8)
   }
   private func unitName(_ code: String) -> String {
-    units.first { $0.code == code }?.name ?? (code == "pack" ? app.text("包", "Pack") : code)
+    units.first { $0.code == code }?.name ?? {
+      switch code {
+      case "pack": return app.text("包", "Pack")
+      case "bottle": return app.text("瓶", "Bottle")
+      case "bag": return app.text("袋", "Bag")
+      case "box": return app.text("盒", "Box")
+      default: return code
+      }
+    }()
   }
   private func updateBarcodeRow(_ line: QFPurchaseReceiptLine) {
     guard let row = barcodeRows[line.id] else { return }
@@ -313,7 +325,12 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     row.package?.isHidden = line.scanPackageLabel == nil
     row.contents?.text = line.packageSize.flatMap { size in line.packageContentUnit.map { size + " " + unitName($0) } }
       ?? app.text("待补全", "To complete")
-    row.source?.isHidden = line.scanProductSource != "OPEN_FOOD_FACTS"
+    row.referencePrice?.text = line.scanReferencePrice.map { app.format("资料源标价：%@（计价单位未注明，请核对）", "Source price: %@ (pricing unit unspecified; please check)", $0) }
+    row.referencePrice?.isHidden = line.scanReferencePrice == nil
+    row.source?.setTitle(line.scanProductSource == "JISU_ALIYUN"
+      ? app.text("商品资料来源：极速数据（阿里云市场）", "Product data: Jisu Data (Alibaba Cloud Marketplace)")
+      : app.text("商品资料来源：Open Food Facts（ODbL）", "Product data: Open Food Facts (ODbL)"), for: .normal)
+    row.source?.isHidden = !["OPEN_FOOD_FACTS", "JISU_ALIYUN"].contains(line.scanProductSource ?? "")
     row.retry?.isHidden = state == .localOnly
     row.retry?.isEnabled = productLookup == nil && draft.pending == nil && !submitting
       && (line.scanBarcodeSymbology != nil || line.scanBarcode?.count == 13)
@@ -331,7 +348,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
       guard let self else { return }
       var info: QFBarcodeProductInfo?, state: QFBarcodeLookupState = .notFound
       do {
-        info = try await QFBarcodeProductLookup.shared.product(for: barcode, language: binding.language, refresh: true)
+        info = try await QFBarcodeProductLookup.shared.product(for: barcode, language: binding.language, refresh: true, app: self.app)
         if info != nil { state = .found }
       } catch {
         if Task.isCancelled { return }

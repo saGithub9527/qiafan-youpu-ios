@@ -28,6 +28,8 @@ struct QFPurchaseReceiptLine: Codable, Equatable {
   var scanBarcodeSymbology: String? = nil
   var scanProductSource: String? = nil
   var scanPackageLabel: String? = nil
+  var scanReferencePrice: String? = nil
+  var scanPackageType: String? = nil
   var scanLookupState: String? = nil
   var matchedIngredientName: String? = nil
 }
@@ -148,6 +150,7 @@ struct QFPurchaseReceiptDraft: Codable, Equatable {
         var line = $0; line.name = line.name.trimmingCharacters(in: .whitespacesAndNewlines)
         line.lotId = nil; line.netAmount = nil; line.scanBarcode = nil; line.scanBarcodeSymbology = nil
         line.scanProductSource = nil; line.scanPackageLabel = nil; line.scanLookupState = nil
+        line.scanReferencePrice = nil; line.scanPackageType = nil
         line.matchedIngredientName = nil; return line
       }, shoppingSource: shoppingSource)
   }

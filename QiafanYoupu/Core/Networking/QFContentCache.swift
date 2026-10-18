@@ -87,6 +87,9 @@ final class QFContentCache {
     }
   }
   func store<Value>(_ value: Value, scope: String, path: String, query: [String: String] = [:]) {
+    // Provider outcomes are transient. Keep in-flight coalescing, but an outage
+    // or a disabled trial must not become a cached "no product" result.
+    if path.hasPrefix("me/product-barcodes/") { return }
     let key = cacheKey(scope: scope, path: path, query: query)
     let ttl: TimeInterval
     if path == "profile/options" || path == "home/recipe-options" {

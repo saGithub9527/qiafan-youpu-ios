@@ -2168,6 +2168,12 @@
         "Product data: Open Food Facts (ODbL)"
       ]
     },
+    "商品资料来源：极速数据（阿里云市场）": {
+      "english": "Product data: Jisu Data (Alibaba Cloud Marketplace)",
+      "englishVariants": [
+        "Product data: Jisu Data (Alibaba Cloud Marketplace)"
+      ]
+    },
     "商品金额": {
       "english": "Items subtotal",
       "englishVariants": [
@@ -5850,6 +5856,12 @@
         "Status unavailable"
       ]
     },
+    "瓶": {
+      "english": "Bottle",
+      "englishVariants": [
+        "Bottle"
+      ]
+    },
     "生成 AI 周计划": {
       "english": "Generate AI weekly plan",
       "englishVariants": [
@@ -6098,6 +6110,12 @@
       "english": "The sign-in state is updating. Please wait.",
       "englishVariants": [
         "The sign-in state is updating. Please wait."
+      ]
+    },
+    "盒": {
+      "english": "Box",
+      "englishVariants": [
+        "Box"
       ]
     },
     "目标日期存在冲突内容，或本机暂时无法写入。原内容仍保留，请先保存或整理该日草稿，再重试。": {
@@ -6841,6 +6859,12 @@
       "english": "Add dish",
       "englishVariants": [
         "Add dish"
+      ]
+    },
+    "袋": {
+      "english": "Bag",
+      "englishVariants": [
+        "Bag"
       ]
     },
     "裁剪头像": {
@@ -7868,6 +7892,12 @@
       "english": "No changes",
       "englishVariants": [
         "No changes"
+      ]
+    },
+    "资料源标价：%@（计价单位未注明，请核对）": {
+      "english": "Source price: %@ (pricing unit unspecified; please check)",
+      "englishVariants": [
+        "Source price: %@ (pricing unit unspecified; please check)"
       ]
     },
     "跟着步骤做": {
