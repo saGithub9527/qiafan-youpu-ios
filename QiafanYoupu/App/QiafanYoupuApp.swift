@@ -63,7 +63,12 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     window.makeKeyAndVisible()
     if !QFRuntime.isUnitTest {
-      startup = Task { [session] in await session.start() }
+      startup = Task { [session] in
+        await session.start()
+        #if DEBUG
+        await QFProductBarcodeDeviceCheck.verifyLiveIfRequested(app: session)
+        #endif
+      }
     }
   }
 

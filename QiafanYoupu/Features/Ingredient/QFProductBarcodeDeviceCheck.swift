@@ -3,11 +3,64 @@ import CoreGraphics
 import Foundation
 import UIKit
 
-/// Explicit, fixed-input developer check. It never receives the real App session.
+/// Isolated fixture checks plus a separately requested, read-only test-server check.
 @MainActor
 enum QFProductBarcodeDeviceCheck {
   private static var started = false
   private static var active: Run?
+  private static var liveStarted = false
+
+  /// One explicit public product query through the user's existing App session.
+  /// Never writes a receipt, inventory, chat, preference or authentication export.
+  static func verifyLiveIfRequested(app: QFAppSession) async {
+    let args = ProcessInfo.processInfo.arguments
+    guard !liveStarted, args.contains("-QFVerifyLiveProductBarcode"),
+      let index = args.firstIndex(of: "-QFCheckRun"), args.indices.contains(index + 1),
+      let id = UUID(uuidString: args[index + 1]) else { return }
+    liveStarted = true
+    let began = ProcessInfo.processInfo.systemUptime
+    let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("product-barcode-live-" + id.uuidString.lowercased() + ".json")
+    var result: [String: Any] = ["runID": id.uuidString.lowercased(), "status": "STARTED", "businessWrites": 0]
+    func save() {
+      if let data = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) {
+        try? data.write(to: url, options: .atomic)
+      }
+    }
+    save()
+    do {
+      guard app.api.environment.baseURL?.host == "test-api.yzsalingo.com", app.user != nil else {
+        throw Failure("Requires the approved test environment and an existing signed-in session")
+      }
+      let scope = QFAssistantAgent.scope(app)
+      let reply: QFBarcodeProductInfo.ServerResult = try await QFContentLoadingContext.$forceRefresh.withValue(true) {
+        try await app.contentRequest(path: "me/product-barcodes/6925303723934")
+      }
+      try Task.checkCancellation()
+      guard QFAssistantAgent.scope(app) == scope,
+        let info = reply.metadata(for: "6925303723934"),
+        let barcode = QFProductBarcode(value: "6925303723934", symbology: "EAN13") else {
+        throw Failure("Live response or account binding did not match")
+      }
+      let line = QFPurchaseReceiptLine.scannedProduct(barcode: barcode, info: info)
+      let assertions = ["domesticSource": info.source == "JISU_ALIYUN",
+        "productName": info.name?.contains("统一") == true,
+        "oneBottle": line.quantity == "1" && line.unitCode == "bottle",
+        "oneLitrePerBottle": line.packageSize == "1" && line.packageContentUnit == "l",
+        "sourcePriceIsNotPaidAmount": info.referencePrice != nil && line.lineAmount == nil]
+      result["assertions"] = assertions
+      result["status"] = assertions.values.allSatisfy { $0 } ? "LIVE_PRODUCT_BARCODE_VERIFIED" : "FAILED"
+      result["productName"] = info.name; result["packageType"] = info.packageType
+      result["netContent"] = line.packageSize; result["netContentUnit"] = line.packageContentUnit
+      result["referencePrice"] = info.referencePrice
+    } catch {
+      result["status"] = error is CancellationError ? "CANCELLED" : "FAILED"
+      // Deliberately exclude errors/headers that might contain private session data.
+      result["errorType"] = String(describing: type(of: error))
+    }
+    result["elapsedSeconds"] = ProcessInfo.processInfo.systemUptime - began
+    save()
+  }
 
   static func startIfRequested() {
     let arguments = ProcessInfo.processInfo.arguments
