@@ -2087,12 +2087,12 @@ Apache-2.0. Notice: Resources/Legal/LaunchDarkly-SSE-NOTICE.txt; full Apache tex
 HTTP remains existing Alamofire; no EventSource reconnection engine included.
 
 
-Open Food Facts optional product-name reference
+Open Food Facts optional product metadata reference
 https://world.openfoodfacts.org
 Database: Open Database License (ODbL) 1.0
 https://opendatacommons.org/licenses/odbl/1-0/
 Individual contents: Database Contents License (DbCL) 1.0
 https://opendatacommons.org/licenses/dbcl/1-0/
-Product names are optional review suggestions. This feature does not retrieve
+Product names and package net contents are optional review suggestions. This feature does not retrieve
 product photos, prices or nutrition data, and does not infer purchase quantities.
-Attribution is shown beside names fetched from Open Food Facts.
+Attribution is shown beside product metadata fetched from Open Food Facts.

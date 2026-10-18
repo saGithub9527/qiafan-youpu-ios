@@ -27,6 +27,19 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
   private var action: UIButton!
   private var headerAction: UIButton!
   private var scannedFeedback: String?
+  private struct BarcodeRow {
+    weak var name: UITextField?
+    weak var status: UILabel?
+    weak var package: UILabel?
+    weak var contents: UILabel?
+    weak var source: UIButton?
+    weak var retry: UIButton?
+  }
+  private var barcodeRows: [String: BarcodeRow] = [:]
+  private var unitButtons: [(UIButton, String)] = []
+  private var productLookup: Task<Void, Never>?
+  private var lookupOperation: UUID?
+  private var lookupLineID: String?
   private var locale: Locale { Locale(identifier: QFInterfaceLanguage.normalized(app.interfaceLanguage).localeIdentifier) }
   override var reloadsOnAppearance: Bool { false }
   override var hasUnsavedChanges: Bool { editingBill && !saved && (!draft.items.isEmpty || draft.pending != nil) }
@@ -48,8 +61,14 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     super.init(app: app, title: app.text("采购账单", "Purchase receipt"))
   }
   required init?(coder: NSCoder) { nil }
+  deinit { productLookup?.cancel() }
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    lookupOperation = nil; productLookup?.cancel(); productLookup = nil; lookupLineID = nil
+  }
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
+    for line in draft.items { updateBarcodeRow(line) }
     if let feedback = scannedFeedback { scannedFeedback = nil; message(feedback) }
   }
   func appendScannedProduct(_ line: QFPurchaseReceiptLine) {
@@ -77,6 +96,10 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     execute(reloadOnFailure: true, showsInitialReadProgress: false) { [self] in
       units = try await app.measurementUnits()
       if !editingBill { render() }
+      else {
+        for (button, code) in unitButtons { button.setTitle(unitName(code) + "  ⌄", for: .normal) }
+        for line in draft.items { updateBarcodeRow(line) }
+      }
     }
   }
   @discardableResult private func persist() -> Bool {
@@ -140,6 +163,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     QFTabUI.stack([QFTabUI.label(title, size: 14, color: QFUI.secondary, lines: 0), UIView(), QFTabUI.label(value, size: 16, weight: .semibold, lines: 0)], axis: .horizontal, spacing: 10)
   }
   private func renderEditor() {
+    barcodeRows.removeAll(); unitButtons.removeAll()
     let locked = draft.pending != nil || conflicted
     if draft.items.contains(where: { $0.ingredientId == nil }) {
       form.addArrangedSubview(QFTabUI.label(app.text("请核对商家、币种及每项商品的名称、数量、单位和价格，再选择对应食材；保存前不会入库。", "Review the merchant, currency, and each item's name, quantity, unit and price, then match its ingredient. Nothing is stocked until you save."), size: 13, color: QFUI.secondary, lines: 0))
@@ -207,6 +231,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     let quantity = field(app.text("数量", "Quantity"), value: line.quantity) { [weak self] value in self?.edit(line.id) { $0.quantity = self.map { QFPurchaseNumber.normalize(value, locale: $0.locale) } ?? value } }
     quantity.accessibilityIdentifier = "purchase.quantity." + line.id
     let unit = QFTabUI.button(unitName(line.unitCode) + "  ⌄", size: 16, color: QFUI.text, background: QFUI.surface) { [weak self] in self?.chooseUnit(line.id) }
+    unitButtons.append((unit, line.unitCode))
     unit.layer.borderColor = QFUI.border.cgColor; unit.layer.borderWidth = 1; unit.layer.cornerRadius = 12
     let amount = field(app.text("价格待补全", "Price needed"), value: line.lineAmount ?? "") { [weak self] value in
       self?.edit(line.id) { $0.lineAmount = value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : self.map { QFPurchaseNumber.normalize(value, locale: $0.locale) } ?? value }
@@ -217,9 +242,9 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     values.distribution = .fillEqually
     let location = field(app.text("存放位置", "Storage location"), value: line.location, keyboard: .default) { [weak self] value in self?.edit(line.id) { $0.location = value } }
     let details = QFTabUI.button(app.text("规格与有效期", "Specification and expiry") + "  ›", size: 13, color: QFUI.orange) { [weak self] in
-      guard let self else { return }
-      self.open(QFStockSpecificationViewController(app: self.app, unitCode: line.unitCode,
-        value: .init(packageSize: line.packageSize, packageContentUnit: line.packageContentUnit, expiresOn: line.expiresOn), units: self.units) { [weak self] value in
+      guard let self, let current = self.draft.items.first(where: { $0.id == line.id }) else { return }
+      self.open(QFStockSpecificationViewController(app: self.app, unitCode: current.unitCode,
+        value: .init(packageSize: current.packageSize, packageContentUnit: current.packageContentUnit, expiresOn: current.expiresOn), units: self.units) { [weak self] value in
         self?.edit(line.id) { $0.packageSize = value.packageSize; $0.packageContentUnit = value.packageContentUnit; $0.expiresOn = value.expiresOn; $0.packageUnit = QFStockSpecification.isPackage($0.unitCode) ? $0.unitCode : nil }; self?.render()
       })
     }
@@ -227,18 +252,29 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     var rows: [UIView] = [heading, labeled(app.text("对应食材", "Matched ingredient"), identity)]
     if let barcode = line.scanBarcode {
       rows.append(QFTabUI.label(app.format("商品条码：%@", "Product barcode: %@", barcode), size: 12, color: QFUI.secondary, lines: 0))
-      rows.append(QFTabUI.label(app.text("数量1是可修改的默认值，价格需手动填写；包装净含量不代表购买数量。", "1 is an editable starting count. Enter the price yourself; package contents are not the quantity bought."), size: 12, color: QFUI.secondary, lines: 0))
-      if line.scanProductSource == "OPEN_FOOD_FACTS" {
-        let source = QFTabUI.button(app.text("参考名称来源：Open Food Facts（ODbL）", "Reference name: Open Food Facts (ODbL)"), size: 12, color: QFUI.secondary) { [weak self] in
-          guard let self else { return }
-          self.present(SFSafariViewController(url: URL(string: "https://world.openfoodfacts.org/data")!), animated: true)
-        }
-        source.contentHorizontalAlignment = .leading; source.titleLabel?.numberOfLines = 0; rows.append(source)
-      } else {
-        rows.append(QFTabUI.label(app.text("未获取到可靠名称，请手动填写并选择对应食材。", "No reliable name was retrieved. Enter it and match the ingredient yourself."), size: 12, color: QFUI.secondary, lines: 0))
+      let status = QFTabUI.label("", size: 13, color: QFUI.secondary, lines: 0)
+      status.accessibilityIdentifier = "purchase.barcode-status." + line.id
+      let package = QFTabUI.label("", size: 13, color: QFUI.secondary, lines: 0)
+      let contents = QFTabUI.label("", size: 16, weight: .semibold, lines: 0)
+      contents.accessibilityIdentifier = "purchase.net-content." + line.id
+      let source = QFTabUI.button(app.text("商品资料来源：Open Food Facts（ODbL）", "Product data: Open Food Facts (ODbL)"), size: 12, color: QFUI.secondary) { [weak self] in
+        guard let self else { return }
+        self.present(SFSafariViewController(url: URL(string: "https://world.openfoodfacts.org/data")!), animated: true)
       }
+      source.contentHorizontalAlignment = .leading; source.titleLabel?.numberOfLines = 0
+      let retry = QFTabUI.button(app.text("联网查询商品资料", "Look up product online"), size: 14, color: QFUI.orange) { [weak self] in self?.retryProduct(line.id) }
+      retry.contentHorizontalAlignment = .leading; retry.titleLabel?.numberOfLines = 0
+      retry.accessibilityIdentifier = "purchase.barcode-retry." + line.id
+      barcodeRows[line.id] = .init(name: productName, status: status, package: package, contents: contents, source: source, retry: retry)
+      updateBarcodeRow(line)
+      rows.append(contentsOf: [status, package, source, retry])
+      rows.append(QFTabUI.label(app.text("数量1是可修改的默认值，价格需手动填写；包装净含量不代表购买数量。", "1 is an editable starting count. Enter the price yourself; package contents are not the quantity bought."), size: 12, color: QFUI.secondary, lines: 0))
+      rows.append(values)
+      rows.append(labeled(app.text("每包装净含量", "Net content per package"), contents))
+    } else {
+      rows.append(values)
     }
-    rows.append(contentsOf: [values, location, details])
+    rows.append(contentsOf: [location, details])
     let body = QFTabUI.stack(rows, spacing: 14)
     return QFTabUI.card(body, padding: 15, border: true)
   }
@@ -255,7 +291,63 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
   private func labeled(_ title: String, _ view: UIView) -> UIView {
     QFTabUI.stack([QFTabUI.label(title, size: 12, color: QFUI.secondary, lines: 0), view], spacing: 8)
   }
-  private func unitName(_ code: String) -> String { units.first { $0.code == code }?.name ?? code }
+  private func unitName(_ code: String) -> String {
+    units.first { $0.code == code }?.name ?? (code == "pack" ? app.text("包", "Pack") : code)
+  }
+  private func updateBarcodeRow(_ line: QFPurchaseReceiptLine) {
+    guard let row = barcodeRows[line.id] else { return }
+    if row.name?.isFirstResponder == false, row.name?.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true { row.name?.text = line.name }
+    let state = line.scanLookupState.flatMap(QFBarcodeLookupState.init(rawValue:)) ?? .skipped
+    switch state {
+    case .found:
+      row.status?.text = line.name.isEmpty
+        ? app.text("未获取到可靠名称，请手动填写并选择对应食材。", "No reliable name was retrieved. Enter it and match the ingredient yourself.")
+        : app.text("已联网获取商品资料，请与包装核对。", "Product data retrieved online. Check it against the package.")
+    case .notFound: row.status?.text = app.text("当前商品库未收录此条码，请填写商品名称和净含量。", "This barcode is not in the current product database. Enter its name and net contents.")
+    case .unavailable: row.status?.text = app.text("商品查询失败，请检查网络后重试。", "Product lookup failed. Check your connection and retry.")
+    case .rateLimited: row.status?.text = app.text("商品查询暂时受限，请稍后重试。", "Product lookup is temporarily rate limited. Please try again later.")
+    case .localOnly: row.status?.text = app.text("门店内部条码需由门店提供商品资料，请手动填写。", "Store-specific barcodes need the store's product data. Enter the item manually.")
+    case .skipped: row.status?.text = app.text("尚未查询商品资料，可点击联网查询。", "Product data has not been checked. Tap to look it up online.")
+    }
+    row.package?.text = line.scanPackageLabel.map { app.format("包装标注：%@", "Package label: %@", $0) }
+    row.package?.isHidden = line.scanPackageLabel == nil
+    row.contents?.text = line.packageSize.flatMap { size in line.packageContentUnit.map { size + " " + unitName($0) } }
+      ?? app.text("待补全", "To complete")
+    row.source?.isHidden = line.scanProductSource != "OPEN_FOOD_FACTS"
+    row.retry?.isHidden = state == .localOnly
+    row.retry?.isEnabled = productLookup == nil && draft.pending == nil && !submitting
+      && (line.scanBarcodeSymbology != nil || line.scanBarcode?.count == 13)
+    row.retry?.setTitle(lookupLineID == line.id ? app.text("查询中…", "Looking up…") : app.text("联网查询商品资料", "Look up product online"), for: .normal)
+  }
+  private func retryProduct(_ id: String) {
+    guard productLookup == nil, receipt == nil, draft.pending == nil, !submitting,
+      let line = draft.items.first(where: { $0.id == id }), let code = line.scanBarcode,
+      let kind = line.scanBarcodeSymbology ?? (code.count == 13 ? "EAN13" : nil),
+      let barcode = QFProductBarcode(value: code, symbology: kind), barcode.lookupCode != nil else { return }
+    view.endEditing(true)
+    let binding = QFAssistantAgent.scope(app), household = draft.householdId, operation = UUID()
+    lookupOperation = operation; lookupLineID = id
+    productLookup = Task { [weak self] in
+      guard let self else { return }
+      var info: QFBarcodeProductInfo?, state: QFBarcodeLookupState = .notFound
+      do {
+        info = try await QFBarcodeProductLookup.shared.product(for: barcode, language: binding.language, refresh: true)
+        if info != nil { state = .found }
+      } catch {
+        if Task.isCancelled { return }
+        state = (error as? QFBarcodeProductLookup.Failure) == .rateLimited ? .rateLimited : .unavailable
+      }
+      guard !Task.isCancelled, self.lookupOperation == operation else { return }
+      self.productLookup = nil; self.lookupLineID = nil; self.lookupOperation = nil
+      guard self.receipt == nil, self.editingBill,
+        QFAssistantAgent.scope(self.app) == binding, self.draft.householdId == household,
+        self.draft.pending == nil, !self.submitting, let index = self.draft.items.firstIndex(where: { $0.id == id }) else { return }
+      self.draft.items[index].applyBarcodeInfo(info, status: state)
+      self.persist()
+      for item in self.draft.items { self.updateBarcodeRow(item) }
+    }
+    for item in draft.items { updateBarcodeRow(item) }
+  }
   private func selectIngredient(replacing: String? = nil) {
     view.endEditing(true)
     open(QFCatalogSearchViewController(app: app, type: "INGREDIENT") { [weak self] item in

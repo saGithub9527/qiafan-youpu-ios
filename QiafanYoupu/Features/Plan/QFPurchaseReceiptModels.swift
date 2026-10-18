@@ -25,7 +25,10 @@ struct QFPurchaseReceiptLine: Codable, Equatable {
   var netAmount: String?
   // Local review hints only; InputLine deliberately excludes them from the API.
   var scanBarcode: String? = nil
+  var scanBarcodeSymbology: String? = nil
   var scanProductSource: String? = nil
+  var scanPackageLabel: String? = nil
+  var scanLookupState: String? = nil
   var matchedIngredientName: String? = nil
 }
 struct QFPurchaseReceipt: Codable, Equatable {
@@ -143,8 +146,9 @@ struct QFPurchaseReceiptDraft: Codable, Equatable {
       date: date, time: time, timeZone: timeZone, merchant: merchant.trimmingCharacters(in: .whitespacesAndNewlines),
       currency: currency, discount: QFPurchaseNumber.string(reduction), items: items.map {
         var line = $0; line.name = line.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        line.lotId = nil; line.netAmount = nil; line.scanBarcode = nil
-        line.scanProductSource = nil; line.matchedIngredientName = nil; return line
+        line.lotId = nil; line.netAmount = nil; line.scanBarcode = nil; line.scanBarcodeSymbology = nil
+        line.scanProductSource = nil; line.scanPackageLabel = nil; line.scanLookupState = nil
+        line.matchedIngredientName = nil; return line
       }, shoppingSource: shoppingSource)
   }
 }

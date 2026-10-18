@@ -1752,6 +1752,18 @@
         "Assistant memory"
       ]
     },
+    "包": {
+      "english": "Pack",
+      "englishVariants": [
+        "Pack"
+      ]
+    },
+    "包装标注：%@": {
+      "english": "Package label: %@",
+      "englishVariants": [
+        "Package label: %@"
+      ]
+    },
     "午餐": {
       "english": "Lunch",
       "englishVariants": [
@@ -1846,12 +1858,6 @@
       "english": "Link account",
       "englishVariants": [
         "Link account"
-      ]
-    },
-    "参考名称来源：Open Food Facts（ODbL）": {
-      "english": "Reference name: Open Food Facts (ODbL)",
-      "englishVariants": [
-        "Reference name: Open Food Facts (ODbL)"
       ]
     },
     "反馈内容": {
@@ -2142,6 +2148,24 @@
       "english": "Product barcode: %@",
       "englishVariants": [
         "Product barcode: %@"
+      ]
+    },
+    "商品查询失败，请检查网络后重试。": {
+      "english": "Product lookup failed. Check your connection and retry.",
+      "englishVariants": [
+        "Product lookup failed. Check your connection and retry."
+      ]
+    },
+    "商品查询暂时受限，请稍后重试。": {
+      "english": "Product lookup is temporarily rate limited. Please try again later.",
+      "englishVariants": [
+        "Product lookup is temporarily rate limited. Please try again later."
+      ]
+    },
+    "商品资料来源：Open Food Facts（ODbL）": {
+      "english": "Product data: Open Food Facts (ODbL)",
+      "englishVariants": [
+        "Product data: Open Food Facts (ODbL)"
       ]
     },
     "商品金额": {
@@ -2615,10 +2639,10 @@
         "In stock"
       ]
     },
-    "对准食材包装上的条形码\n仅发送条码查询名称，照片不会上传": {
-      "english": "Point at the barcode on the food package\nOnly the code is sent for name lookup; photos stay on your device",
+    "对准食材包装上的条形码\n联网查询名称和净含量，照片不会上传": {
+      "english": "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device",
       "englishVariants": [
-        "Point at the barcode on the food package\nOnly the code is sent for name lookup; photos stay on your device"
+        "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device"
       ]
     },
     "对应食材": {
@@ -2667,6 +2691,12 @@
       "english": "The generation request has not been submitted.",
       "englishVariants": [
         "The generation request has not been submitted."
+      ]
+    },
+    "尚未查询商品资料，可点击联网查询。": {
+      "english": "Product data has not been checked. Tap to look it up online.",
+      "englishVariants": [
+        "Product data has not been checked. Tap to look it up online."
       ]
     },
     "展开剩余 %d 道": {
@@ -2928,6 +2958,12 @@
         "Linked"
       ]
     },
+    "已联网获取商品资料，请与包装核对。": {
+      "english": "Product data retrieved online. Check it against the package.",
+      "englishVariants": [
+        "Product data retrieved online. Check it against the package."
+      ]
+    },
     "已被新采购单替代": {
       "english": "Replaced by a new shopping list",
       "englishVariants": [
@@ -2940,10 +2976,10 @@
         "Included in total"
       ]
     },
-    "已识别条码，正在查询商品名称…\n也可直接点击手动填写": {
-      "english": "Barcode detected. Looking up the product name…\nYou can also enter it manually",
+    "已识别条码，正在联网查询商品资料…\n也可直接点击手动填写": {
+      "english": "Barcode detected. Looking up product data online…\nYou can also enter it manually",
       "englishVariants": [
-        "Barcode detected. Looking up the product name…\nYou can also enter it manually"
+        "Barcode detected. Looking up product data online…\nYou can also enter it manually"
       ]
     },
     "已购买": {
@@ -3205,6 +3241,12 @@
         "There are no posts in this category."
       ]
     },
+    "当前商品库未收录此条码，请填写商品名称和净含量。": {
+      "english": "This barcode is not in the current product database. Enter its name and net contents.",
+      "englishVariants": [
+        "This barcode is not in the current product database. Enter its name and net contents."
+      ]
+    },
     "当前密码": {
       "english": "Current password",
       "englishVariants": [
@@ -3366,7 +3408,8 @@
     "待补全": {
       "english": "Missing",
       "englishVariants": [
-        "Missing"
+        "Missing",
+        "To complete"
       ]
     },
     "待采购 · %d": {
@@ -5104,6 +5147,12 @@
         "View this meal plan and preparation"
       ]
     },
+    "查询中…": {
+      "english": "Looking up…",
+      "englishVariants": [
+        "Looking up…"
+      ]
+    },
     "标注到期日期": {
       "english": "Add expiry date",
       "englishVariants": [
@@ -6502,6 +6551,12 @@
       "english": "Duration: %.0f ms",
       "englishVariants": [
         "Duration: %.0f ms"
+      ]
+    },
+    "联网查询商品资料": {
+      "english": "Look up product online",
+      "englishVariants": [
+        "Look up product online"
       ]
     },
     "联网检索暂不可用，未取得可引用的资料。请稍后重试。": {
@@ -8456,6 +8511,12 @@
       "english": "Keyboard input",
       "englishVariants": [
         "Keyboard input"
+      ]
+    },
+    "门店内部条码需由门店提供商品资料，请手动填写。": {
+      "english": "Store-specific barcodes need the store's product data. Enter the item manually.",
+      "englishVariants": [
+        "Store-specific barcodes need the store's product data. Enter the item manually."
       ]
     },
     "闭眼": {

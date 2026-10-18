@@ -287,6 +287,8 @@
 "加餐" = "En-cas";
 "助手响应无法解析，请稍后重试。" = "Impossible d’analyser la réponse de l’assistant. Réessayez plus tard.";
 "助手记忆" = "Mémoire de l’assistant";
+"包" = "Paquet";
+"包装标注：%@" = "Indication sur l’emballage : %@";
 "午餐" = "Déjeuner";
 "协议和图片规则在哪里？" = "Où sont les politiques et les règles d'image ?";
 "单一数量" = "Quantité exacte";
@@ -303,7 +305,6 @@
 "去安排" = "Planifier ce repas";
 "去登录" = "Se connecter";
 "去绑定" = "Lier le compte";
-"参考名称来源：Open Food Facts（ODbL）" = "Source du nom proposé : Open Food Facts (ODbL)";
 "反馈内容" = "Retour d’information";
 "发布作品" = "Publier";
 "发现属于你的好味道。" = "et découvrez des saveurs par vous-même.";
@@ -352,6 +353,9 @@
 "响应头" = "En-têtes de réponse";
 "商品名称" = "Nom du produit";
 "商品条码：%@" = "Code-barres du produit : %@";
+"商品查询失败，请检查网络后重试。" = "La recherche du produit a échoué. Vérifiez votre connexion et réessayez.";
+"商品查询暂时受限，请稍后重试。" = "La recherche du produit est temporairement limitée. Réessayez plus tard.";
+"商品资料来源：Open Food Facts（ODbL）" = "Source des données produit : Open Food Facts (ODbL)";
 "商品金额" = "Sous-total des articles";
 "商家" = "Commerçant";
 "回到今天" = "Aujourd'hui";
@@ -430,7 +434,7 @@
 "家里已有 · %d" = "À la maison · %d";
 "家里已有：%@" = "À la maison : %@";
 "家里有" = "En stock";
-"对准食材包装上的条形码\n仅发送条码查询名称，照片不会上传" = "Visez le code-barres de l’emballage alimentaire\nSeul le code est envoyé pour rechercher le nom ; les photos ne sont pas téléversées";
+"对准食材包装上的条形码\n联网查询名称和净含量，照片不会上传" = "Visez le code-barres sur l’emballage alimentaire\nLe nom et la quantité nette sont recherchés en ligne ; aucune photo n’est envoyée";
 "对应食材" = "Ingrédient associé";
 "将这份周计划加入日历？" = "Ajouter ce plan hebdomadaire au calendrier ?";
 "尊重原创，也支持依法授权的图片" = "Respectez le travail original et les images correctement sous licence";
@@ -439,6 +443,7 @@
 "小狗厨师拿着锅铲和一锅蔬菜" = "Un chiot chef tenant une spatule à côté d'une casserole de légumes";
 "尚未开放" = "À venir plus tard";
 "尚未提交生成请求。" = "La demande de génération n’a pas encore été envoyée.";
+"尚未查询商品资料，可点击联网查询。" = "Les données du produit n’ont pas encore été recherchées. Touchez pour les rechercher en ligne.";
 "展开剩余 %d 道" = "Afficher %d plats de plus";
 "展开问题分析" = "Développer l’analyse de la question";
 "州、省或地区（选填）" = "État, province ou région (facultatif)";
@@ -482,9 +487,10 @@
 "已知每包装净含量" = "Contenu net par emballage connu";
 "已确认的采购单不能修改" = "Une liste de courses confirmée ne peut pas être modifiée";
 "已绑定" = "Relié";
+"已联网获取商品资料，请与包装核对。" = "Données produit obtenues en ligne. Vérifiez-les sur l’emballage.";
 "已被新采购单替代" = "Remplacée par une nouvelle liste";
 "已计入合计" = "Inclus dans le total";
-"已识别条码，正在查询商品名称…\n也可直接点击手动填写" = "Code-barres détecté. Recherche du nom du produit…\nVous pouvez aussi choisir la saisie manuelle";
+"已识别条码，正在联网查询商品资料…\n也可直接点击手动填写" = "Code-barres détecté. Recherche des données produit en ligne…\nVous pouvez aussi les saisir manuellement";
 "已购买" = "Acheté";
 "已跳过" = "Ignoré";
 "已过期" = "Périmés";
@@ -528,6 +534,7 @@
 "当前主题" = "Thème actuel";
 "当前分类 %d 项 · 按收藏时间" = "%1$d dans cette catégorie · Date enregistrée";
 "当前分类中没有作品。" = "Aucune publication dans cette catégorie.";
+"当前商品库未收录此条码，请填写商品名称和净含量。" = "Ce code-barres n’est pas dans la base de produits actuelle. Saisissez le nom et la quantité nette.";
 "当前密码" = "Mot de passe actuel";
 "当前封面" = "Couverture actuelle";
 "当前库存" = "Stock actuel";
@@ -803,6 +810,8 @@
 "本周" = "Cette semaine";
 "本地千问模型" = "Modèle Qwen sur l’appareil";
 "本地模型未能完成回答，请检查模型或稍后重试。" = "Le modèle local n’a pas pu terminer sa réponse. Vérifiez le modèle ou réessayez plus tard.";
+"查询中…" = "Recherche…";
+"联网查询商品资料" = "Rechercher le produit en ligne";
 "设备内存不足，本次回答已停止，已保留现有内容。请稍后重试。" = "La mémoire de l’appareil est insuffisante, la réponse a donc été interrompue. Le texte déjà affiché est conservé. Réessayez plus tard.";
 "本地模式当前支持文字，请移除图片或选择云端模式。" = "Le mode local prend actuellement en charge le texte. Retirez les images ou choisissez le mode cloud.";
 "本地生成超时，请稍后重试或缩短问题。" = "La génération locale a dépassé le délai. Réessayez plus tard ou raccourcissez votre question.";
@@ -1399,6 +1408,7 @@
 "金额" = "Montant";
 "错误：%@" = "Erreur : %1$@";
 "键盘输入" = "Saisie au clavier";
+"门店内部条码需由门店提供商品资料，请手动填写。" = "Les codes internes nécessitent les données du magasin. Saisissez le produit manuellement.";
 "闭眼" = "Yeux fermés";
 "问菜谱、食材，或聊聊今天吃什么" = "Posez une question sur les recettes, les ingrédients ou les repas du jour";
 "问题" = "Problème";

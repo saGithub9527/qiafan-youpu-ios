@@ -90,7 +90,13 @@ enum QFProductBarcodeDeviceCheck {
       guard let barcode = QFProductBarcode(value: "3017620422003", symbology: "EAN13") else {
         throw Failure("Public EAN13 fixture did not pass validation")
       }
-      let line = QFPurchaseReceiptLine.scannedProduct(barcode: barcode, name: "Public barcode fixture")
+      let productLookup = QFBarcodeProductLookup(configuration: configuration)
+      let metadata = try await productLookup.product(for: barcode, language: "en")
+      _ = try await productLookup.product(for: barcode, language: "en")
+      try require(network.summary().reads["/api/v3/product/3017620422003"] == 1, "lookupCacheAvoidsDuplicateRequest", run)
+      _ = try await productLookup.product(for: barcode, language: "en", refresh: true)
+      try require(network.summary().reads["/api/v3/product/3017620422003"] == 2, "explicitRetryBypassesCache", run)
+      let line = QFPurchaseReceiptLine.scannedProduct(barcode: barcode, info: metadata)
       let imported = QFReceiptImport(date: "2026-10-17", currency: "CNY", sellerID: nil,
         invoiceTotal: nil, lines: [line])
       // The UUID household makes even the draft kind distinct from receipt.personal.new.
@@ -108,6 +114,9 @@ enum QFProductBarcodeDeviceCheck {
       guard let field = descendant(in: controller.view, id: "purchase.name." + line.id) as? UITextField else {
         throw Failure("Product name UITextField missing")
       }
+      try require(field.text == "Nutella", "metadataNamePrefilled", run)
+      let netContent = descendant(in: controller.view, id: "purchase.net-content." + line.id) as? UILabel
+      try require(netContent?.text == "400 g", "netContentVisibleOnPurchaseCard", run)
       try require(field.isEnabled && field.isUserInteractionEnabled && field.window === window,
         "productNameFieldEnabled", run)
       try require(field.becomeFirstResponder(), "productNameFieldAcceptsEditing", run)
@@ -122,8 +131,21 @@ enum QFProductBarcodeDeviceCheck {
       try require(savedLine.quantity == "1" && savedLine.lineAmount == nil && savedLine.ingredientId == nil,
         "defaultQuantityNoPriceOrIngredientGuess", run)
       try require(savedLine.scanBarcode == "3017620422003", "barcodePreservedInDraft", run)
+      try require(savedLine.packageSize == "400" && savedLine.packageContentUnit == "g"
+        && savedLine.quantity == "1" && savedLine.unitCode == "pack", "netContentsSeparateFromPurchaseCount", run)
       try require(descendant(in: controller.view, id: "purchase.scan-product") is UIButton,
         "productScanEntryExists", run)
+      let unavailable = QFProductBarcode(value: "6925303723934", symbology: "EAN13")!
+      let absent = try await productLookup.product(for: unavailable, language: "en")
+      try require(absent == nil, "realLookupClassHandles404AsUnlisted", run)
+      let missingLine = QFPurchaseReceiptLine.scannedProduct(barcode: unavailable, lookupState: .notFound)
+      controller.appendScannedProduct(missingLine)
+      let status = descendant(in: controller.view, id: "purchase.barcode-status." + missingLine.id) as? UILabel
+      try require(status?.text?.contains("not in the current product database") == true, "unlistedProductExplained", run)
+      let missingContent = descendant(in: controller.view, id: "purchase.net-content." + missingLine.id) as? UILabel
+      try require(missingContent?.text == "To complete", "unknownNetContentsExplicit", run)
+      try require(descendant(in: controller.view, id: "purchase.barcode-retry." + missingLine.id) is UIButton,
+        "onlineRetryAvailable", run)
       let summary = network.summary()
       try require(summary.blockedWrites == 0 && summary.unexpected == 0, "noWriteOrUnexpectedRequest", run)
       finish(run, status: "PRODUCT_BARCODE_CHECK_COMPLETED")
@@ -295,7 +317,7 @@ private final class FixtureProtocol: URLProtocol, @unchecked Sendable {
   override func startLoading() {
     Self.lock.lock(); let network = Self.network; Self.lock.unlock()
     guard let network, let data = network.response(for: request), let url = request.url,
-      let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1",
+      let response = HTTPURLResponse(url: url, statusCode: network.statusCode(for: request), httpVersion: "HTTP/1.1",
         headerFields: ["Content-Type": "application/json"]) else {
       client?.urlProtocol(self, didFailWithError: URLError(.unsupportedURL)); return
     }
@@ -332,10 +354,29 @@ private final class Network: @unchecked Sendable {
   func response(for request: URLRequest) -> Data? {
     lock.lock(); defer { lock.unlock() }
     guard request.httpMethod == "GET" else { blockedWrites += 1; return nil }
+    if let url = request.url, url.scheme == "https", url.host == "world.openfoodfacts.org" {
+      let params = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+      let fields = Set((params.first { $0.name == "fields" }?.value ?? "").split(separator: ",").map(String.init))
+      guard request.value(forHTTPHeaderField: "Authorization") == nil,
+        request.value(forHTTPHeaderField: "Device-Id") == nil,
+        fields.isSuperset(of: ["code", "product_name", "quantity", "product_quantity", "product_quantity_unit"]),
+        url.user == nil, url.password == nil else { unexpected += 1; return nil }
+      reads[url.path, default: 0] += 1
+      if url.path == "/api/v3/product/3017620422003" {
+        return Data(#"{"status":"success","product":{"code":"3017620422003","product_name":"Nutella","quantity":"400 g e","product_quantity":400,"product_quantity_unit":"g"}}"#.utf8)
+      }
+      if url.path == "/api/v3/product/6925303723934" {
+        return Data(#"{"code":"6925303723934","status":"failure","result":{"id":"product_not_found"}}"#.utf8)
+      }
+      unexpected += 1; return nil
+    }
     guard let url = request.url, url.scheme == "https", url.host == host, url.user == nil,
       url.password == nil, let data = payloads[url.path] else { unexpected += 1; return nil }
     reads[url.path, default: 0] += 1
     return data
+  }
+  func statusCode(for request: URLRequest) -> Int {
+    request.url?.host == "world.openfoodfacts.org" && request.url?.path == "/api/v3/product/6925303723934" ? 404 : 200
   }
   func summary() -> (reads: [String: Int], blockedWrites: Int, unexpected: Int) {
     lock.lock(); defer { lock.unlock() }

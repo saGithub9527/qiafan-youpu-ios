@@ -161,7 +161,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); active = true; handlingResult = false; selectedBarcode = nil; resetHint(); startCamera() }
   override func viewWillDisappear(_ animated: Bool) { super.viewWillDisappear(animated); active = false; cancelWork(); camera.stop() }
   private func cancelWork() { operation = UUID(); lookup?.cancel(); lookup = nil; handlingResult = false }
-  private func resetHint() { message.text = app.text("对准食材包装上的条形码\n仅发送条码查询名称，照片不会上传", "Point at the barcode on the food package\nOnly the code is sent for name lookup; photos stay on your device") }
+  private func resetHint() { message.text = app.text("对准食材包装上的条形码\n联网查询名称和净含量，照片不会上传", "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device") }
   private func control(_ symbol: String, title: String, action: @escaping () -> Void) -> UIView {
     let button = UIButton(type: .system)
     button.setImage(UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 26)), for: .normal)
@@ -226,16 +226,22 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   private func resolve(_ barcode: QFProductBarcode) {
     guard active, sameScope else { return }
     selectedBarcode = barcode; operation = UUID(); let token = operation
-    guard barcode.lookupCode != nil else { openProduct(.scannedProduct(barcode: barcode)); return }
-    message.text = app.text("已识别条码，正在查询商品名称…\n也可直接点击手动填写", "Barcode detected. Looking up the product name…\nYou can also enter it manually")
+    guard barcode.lookupCode != nil else { openProduct(.scannedProduct(barcode: barcode, lookupState: .localOnly)); return }
+    message.text = app.text("已识别条码，正在联网查询商品资料…\n也可直接点击手动填写", "Barcode detected. Looking up product data online…\nYou can also enter it manually")
     lookup = Task { [weak self] in
       guard let self else { return }
       var info: QFBarcodeProductInfo?
-      do { info = try await QFBarcodeProductLookup.shared.name(for: barcode, language: self.binding.language) }
-      catch { if Task.isCancelled { return } }
+      var state: QFBarcodeLookupState = .notFound
+      do {
+        info = try await QFBarcodeProductLookup.shared.product(for: barcode, language: self.binding.language)
+        if info != nil { state = .found }
+      } catch {
+        if Task.isCancelled { return }
+        state = (error as? QFBarcodeProductLookup.Failure) == .rateLimited ? .rateLimited : .unavailable
+      }
       guard !Task.isCancelled, self.active, self.sameScope, self.operation == token else { return }
       self.lookup = nil
-      self.openProduct(.scannedProduct(barcode: barcode, name: info?.name, source: info == nil ? nil : "OPEN_FOOD_FACTS"))
+      self.openProduct(.scannedProduct(barcode: barcode, info: info, lookupState: state))
     }
   }
   private func manualEntry() {

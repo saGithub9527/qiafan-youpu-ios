@@ -120,7 +120,7 @@ targets:
         QFGetuiAppKey: $(QF_GETUI_APP_KEY)
         QFGetuiAppSecret: $(QF_GETUI_APP_SECRET)
         GT_MinimumOSVersion: "15.0"
-        NSCameraUsageDescription: 扫描小票上的二维码以录入采购明细。
+        NSCameraUsageDescription: 扫描食材商品包装上的条形码以填写采购明细。
         CFBundleDisplayName: 恰饭有谱
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)

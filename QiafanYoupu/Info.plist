@@ -23,7 +23,7 @@
 	<key>GT_MinimumOSVersion</key>
 	<string>15.0</string>
 	<key>NSCameraUsageDescription</key>
-	<string>扫描食材包装上的商品条形码，以填写采购明细。</string>
+	<string>扫描食材商品包装上的条形码以填写采购明细。</string>
 	<key>QFAPIBaseURL</key>
 	<string>$(QF_API_BASE_URL)</string>
 	<key>QFAPIEnvironment</key>

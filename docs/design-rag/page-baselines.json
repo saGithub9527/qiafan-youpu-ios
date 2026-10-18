@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-17",
+  "updatedAt": "2026-10-18",
   "sourceRoot": "../../../../../全球菜谱APP-设计档案/01-当前设计",
   "precedence": [
     "approved PNG and page interaction JSON",
@@ -1440,6 +1440,161 @@
       },
       "supersedes": "inventory-preparation-r1",
       "approvedException": "2026-10-17 用户要求移除小票扫描，仅扫描食材商品包装条形码，名称可改；牙线只作为扫码举例。"
+    },
+    {
+      "id": "product-barcode-scanner-r2",
+      "supersedes": "product-barcode-scanner-r1",
+      "productPage": "PLAN-19",
+      "title": "商品包装条形码扫描",
+      "keywords": [
+        "小票",
+        "二维码",
+        "商品",
+        "数量",
+        "价格",
+        "文字识别",
+        "OCR",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/19-小票二维码扫描.png",
+          "sha256": "078a204a4250657316ed32f50045d1a80cbd553ef8f2c99dd2d2db14e83342f2"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r2.md",
+          "sha256": "154bf9e85fc0e37add29b083cac91f9b9ccee8c62eaa9fac2eb8b45434f8d952"
+        }
+      ],
+      "approvedException": "2026-10-18 用户要求扫码联网显示商品名称、数量、价格与重量；本次补齐商品资料/净含量及明确失败状态，实际件数和成交价仍由用户核对。",
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "background": "dark green",
+        "navigation": "fixed top back and centered title",
+        "scanner": "centered corner frame, scan line, one hint",
+        "footer": "flashlight, manual entry and photo library"
+      },
+      "interactionContract": [
+        "Push with camera permission; stop capture offscreen/background.",
+        "Decode product EAN/UPC only; no receipt QR/OCR.",
+        "One item per selected barcode, anonymous optional fixed-provider name lookup with manual fallback.",
+        "Editable product name independent from ingredient ID; default count1, unknown price nil.",
+        "Only final purchase Save writes stock; drafts and existing receipts stay readable.",
+        "Request online product name and package net content; show product-not-found, network failure and rate-limit distinctly.",
+        "Editable purchase count starts at one package; explicit package mass/volume is separate and unknown paid price stays empty.",
+        "Retry only fills missing fields, preserves current edits and draft, and is scoped to account/household/language."
+      ]
+    },
+    {
+      "id": "purchase-product-entry-r3",
+      "productPage": "PLAN-11-12-13-14-15-20",
+      "title": "采购商品名称编辑与条码录入",
+      "keywords": [
+        "采购",
+        "成本",
+        "花销",
+        "账单",
+        "入库",
+        "价格补全",
+        "退款",
+        "规格",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/11-备菜花销与采购账单.png",
+          "sha256": "fb834621842aa7d2753c0eefbc4616fba481c519571d88f21827c2cb406a0303"
+        },
+        {
+          "path": "04-计划与备菜/12-采购账单详情与编辑入口.png",
+          "sha256": "891715f66c40d75bbfe2622a55f1cfe3b4cddb0846345faf49ff33ae84b4c43b"
+        },
+        {
+          "path": "04-计划与备菜/13-食材实际消耗成本.png",
+          "sha256": "840d273c0ed6fe36a74b96f7a91d351350bcf645958cc6bf4f47ecd47663ac41"
+        },
+        {
+          "path": "04-计划与备菜/14-采购账单原位编辑.png",
+          "sha256": "05f098cc8279eb3de4887f7e7369d34da657545c90a51ad29696ee5dcc4e0664"
+        },
+        {
+          "path": "04-计划与备菜/15-补全缺失的食材成本.png",
+          "sha256": "2f490ae6f837522e7380f97a971a6d31df5deb8580e720109277b66a1e7e2c08"
+        },
+        {
+          "path": "04-计划与备菜/20-采购明细确认入库.png",
+          "sha256": "26d4c8f8250643f6535c5bfd175637f8501c3791cf071b864e186b193f171296"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r2.md",
+          "sha256": "154bf9e85fc0e37add29b083cac91f9b9ccee8c62eaa9fac2eb8b45434f8d952"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "cardCornerRadius": 18,
+        "minimumActionHeight": 48,
+        "chartHeight": 150
+      },
+      "interactionContract": [
+        "Pages push and preserve edge-back; fixed navigation and save footer are outside the scrolling form.",
+        "Week/month/custom expense filters use business dates; chart currencies remain separate.",
+        "Bill detail edits in place; local drafts do not make write requests until Save.",
+        "First receipt save creates expense and inventory exactly once; uncertain retry retains the frozen UUID/body.",
+        "Unknown price is not zero; missing old-source price completion never creates purchase expense.",
+        "Changing old purchase facts revalidates event-time stock and recalculates later costs.",
+        "Tables support pull-to-refresh and automatic upward pagination; forms do not pull-refresh away edits.",
+        "Product name is a text field, ingredient mapping separate; manual amount/quantity confirmation.",
+        "Barcode hints remain local; same-code repeats never increment quantity automatically; frozen pending drafts cannot append.",
+        "Request online product name and package net content; show product-not-found, network failure and rate-limit distinctly.",
+        "Editable purchase count starts at one package; explicit package mass/volume is separate and unknown paid price stays empty.",
+        "Retry only fills missing fields, preserves current edits and draft, and is scoped to account/household/language."
+      ],
+      "allowedDynamicChanges": [
+        "localized content",
+        "real money and quantities",
+        "unknown price and date states",
+        "safe-area and accessibility resizing"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFPurchaseReceiptViewController.swift",
+        "enum": "QFPurchaseLayout",
+        "constants": {
+          "pageInset": 20,
+          "cardRadius": 18,
+          "actionHeight": 48,
+          "chartHeight": 150
+        }
+      },
+      "supersedes": "purchase-product-entry-r2",
+      "approvedException": "2026-10-18 用户要求扫码联网显示商品名称、数量、价格与重量；本次补齐商品资料/净含量及明确失败状态，实际件数和成交价仍由用户核对。"
     }
   ]
 }
