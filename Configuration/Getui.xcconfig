@@ -1,0 +1,7 @@
+// Committed defaults are intentionally empty. Create Getui.local.xcconfig next to
+// this file for local builds; that file is ignored by Git.
+QF_GETUI_APP_ID =
+QF_GETUI_APP_KEY =
+QF_GETUI_APP_SECRET =
+
+#include? "Getui.local.xcconfig"

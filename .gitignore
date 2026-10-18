@@ -13,8 +13,20 @@ xcuserdata/
 *.p12
 *.mobileprovision
 secrets/
+Configuration/Getui.local.xcconfig
 /预览/
 
 # Swift Package Manager: commit Package.resolved once external packages are used.
 .build/
 !Package.resolved
+
+# Local runtime state and downloaded model weights are kept on this Mac.
+*.gguf
+/Packages/*/.swiftpm/
+/Packages/*/build-owner.json
+/docs/*-owner.json
+/docs/*-verification.json
+/docs/assistant-overlay-20261011.md
+
+# Historical character production files; the app's required assets stay tracked.
+/docs/assistant-character-concepts-20261012/

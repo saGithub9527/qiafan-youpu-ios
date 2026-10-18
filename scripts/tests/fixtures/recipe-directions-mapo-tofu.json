@@ -1,0 +1,38 @@
+{
+  "source": {
+    "endpoint": "https://test-api.yzsalingo.com/api/v1/home/recipes/b9491989-a862-58b4-8bdf-1336397aa8a1",
+    "language": "zh-Hans",
+    "responseSha256": "5903323fab18bdcc2ea12571b55f3bc007ce83864474017267371938bfc2e3bb",
+    "sourceName": "HowToCook",
+    "sourceURL": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/meat_dish/%E9%BA%BB%E5%A9%86%E8%B1%86%E8%85%90/%E9%BA%BB%E5%A9%86%E8%B1%86%E8%85%90.md",
+    "license": "Unlicense",
+    "attribution": "HowToCook contributors",
+    "purpose": "Regression fixture for read-only projection; original published section text is unchanged."
+  },
+  "data": {
+    "id": "b9491989-a862-58b4-8bdf-1336397aa8a1",
+    "title": "麻婆豆腐",
+    "steps": [
+      {
+        "title": "来源原文 · 必备原料和工具",
+        "body": "- 内脂豆腐（推荐清美）\n- 水果刀\n- 咸鸭蛋（推荐留夫鸭的，这个是灵魂）\n- 五花肉（超市的肉糜也行）\n- 大蒜\n- 生姜\n- 小米椒（不吃辣的可选）\n- 香辣酱（推荐广乐的）\n- 花椒\n- 食盐\n- 酱油（味极鲜酱油）"
+      },
+      {
+        "title": "来源原文 · 计算",
+        "body": "- 1 盒内脂豆腐\n- 1 枚咸鸭蛋\n- 20-30g 五花肉\n- 两瓣大蒜\n- 2 片生姜\n- 5 根小米辣\n- 5g 蒜蓉辣酱\n- 20 颗花椒\n- 3g 食盐\n- 10g 酱油"
+      },
+      {
+        "title": "来源原文 · 操作",
+        "body": "1. 大蒜和生姜切碎，备用\n2. 小米辣切成辣椒圈，备用\n3. 五花肉切成肉糜（本来就是买的肉糜的跳过）\n4. 肉糜中加入一半的食盐和味极鲜酱油，搅拌均匀，备用\n5. 鸭蛋用菜刀竖着对半切开（注意安全），去除蛋黄（一定要去除，不然会腥），剩下的蛋白捣碎成大约 2 mm * 2 mm 大小，不用太碎，备用\n6. 打开豆腐包装，用水果刀将在盒子中的豆腐划成大约 2.5 cm * 3 cm 大小，备用\n7. 热锅，锅内放入 10ml - 15ml 食用油。等待 10 秒让油温升高\n8. 调成小火，放入大蒜、生姜、辣椒圈、花椒、咸鸭蛋、蒜蓉辣酱翻炒 20 秒，炒出香味\n9. 调成中火，放入肉糜，翻炒大约 1 分钟，肉炒变色\n10. 调成小火，放入豆腐，将剩下的食盐、味极鲜酱油酱油均匀的洒在豆腐上\n11. 从锅边倒入开水（不然豆腐容易破），没过豆腐即可\n12. 开大火，水沸腾后立马转入中火，等待大约 10 分钟\n13. 等到水只剩 1/5 并且豆腐表面已经入色，关火，盛盘"
+      },
+      {
+        "title": "来源原文 · 附加内容",
+        "body": "- 期间一定要注意观察，防止糊锅"
+      },
+      {
+        "title": "资料来源",
+        "body": "HowToCook 社区食谱；按来源原文整理，未声明本项目已试做。原始配比与适量表述未换算。\nhttps://github.com/Anduin2017/HowToCook/blob/master/dishes/meat_dish/%E9%BA%BB%E5%A9%86%E8%B1%86%E8%85%90/%E9%BA%BB%E5%A9%86%E8%B1%86%E8%85%90.md\n许可：Unlicense。归档日期：2026-09-07"
+      }
+    ]
+  }
+}

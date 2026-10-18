@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/launchdarkly/swift-eventsource",
+  "tag": "3.4.0",
+  "commit": "430a39e5ac704650f9b42913b9dfc2aebb67dcf1",
+  "license": "Apache-2.0",
+  "copiedFilesSHA256": {
+    "EventParser.swift": "4c86f46d70d2daea2958bc936f0ba37136d59fd18341195523e8336da47bb1e4",
+    "UTF8LineParser.swift": "08db8246a28614b16315a6541eb6f5847eb029e53c92e57126670c8f02e28708",
+    "Types.swift": "3b5138a347ee95a38444d0005df5132e0f1ef3edc7d5e4f902849c5e9aa92ce9"
+  },
+  "scope": "unchanged UTF8 line and SSE parser only; HTTP/auth remain existing Alamofire; no auto reconnect"
+}

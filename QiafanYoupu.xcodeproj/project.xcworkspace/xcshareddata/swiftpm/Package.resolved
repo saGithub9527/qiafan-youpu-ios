@@ -1,5 +1,5 @@
 {
-  "originHash" : "436292304703cec3f53e4f3afc1f9627a1c4b239be5985c809e710d9834cb233",
+  "originHash" : "ce6779fde135de536aac1d191d91c0ba42c333a4b8a81f2b4bbb624118ac9453",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -11,12 +11,63 @@
       }
     },
     {
+      "identity" : "charts",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ChartsOrg/Charts.git",
+      "state" : {
+        "revision" : "dd9c72e3d7e751e769971092a6bd72d39198ae63",
+        "version" : "5.1.0"
+      }
+    },
+    {
+      "identity" : "getui-gtcsdk-ios-cocoapods",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/GetuiLaboratory/getui-gtcsdk-ios-cocoapods.git",
+      "state" : {
+        "revision" : "80d402955ea0980730984c3d2d349dff9c2fe649"
+      }
+    },
+    {
+      "identity" : "getui-sdk-ios-cocoapods",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/GetuiLaboratory/getui-sdk-ios-cocoapods.git",
+      "state" : {
+        "revision" : "464c86e453c9c06e23d71bcad3958d1f1b7a68ab"
+      }
+    },
+    {
+      "identity" : "jxsegmentedview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pujiaxin33/JXSegmentedView.git",
+      "state" : {
+        "revision" : "fbbf965d7396bd99ac1ce88a80b6c950b85313f6",
+        "version" : "1.4.1"
+      }
+    },
+    {
       "identity" : "kingfisher",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
         "revision" : "be0d257b9bd47a4e6e1265fc8c237411825f107a",
         "version" : "8.12.0"
+      }
+    },
+    {
+      "identity" : "mbprogresshud",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jdg/MBProgressHUD.git",
+      "state" : {
+        "revision" : "4a7c5f3e53cdea77c5dcb8578c2ee5acacdf6781"
+      }
+    },
+    {
+      "identity" : "mjrefresh",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/CoderMJLee/MJRefresh.git",
+      "state" : {
+        "revision" : "535d39c86e592d73f8b8e75f9bf1eda62ca4a4ce",
+        "version" : "3.7.9"
       }
     },
     {

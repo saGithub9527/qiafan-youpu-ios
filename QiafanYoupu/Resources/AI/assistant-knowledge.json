@@ -1,0 +1,762 @@
+{
+  "schemaVersion": 1,
+  "documents": [
+    {
+      "id": "food-separate",
+      "revision": "2026-10-15.1",
+      "reviewedAt": "2026-10-15",
+      "validUntil": "2027-01-15",
+      "sourceURL": "https://ask.fsis.usda.gov/article/How-do-I-keep-my-foods-safe-to-eat",
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": null,
+      "languages": {
+        "zh-Hans": {
+          "title": "生熟分开",
+          "keywords": "交叉污染 生肉 砧板 刀具 卫生",
+          "body": "生肉与即食食物分开；处理后清洗手、砧板和用具。"
+        },
+        "zh-Hant": {
+          "title": "生熟分開",
+          "keywords": "交叉污染 生肉 砧板 刀具 衛生",
+          "body": "生肉與即食食物分開；處理後清洗手、砧板和用具。"
+        },
+        "en": {
+          "title": "Separate raw and cooked food",
+          "keywords": "cross contamination raw meat boards hygiene",
+          "body": "Keep raw meat away from ready-to-eat food; wash hands, boards and utensils."
+        },
+        "ja": {
+          "title": "生と調理済み食品を分ける",
+          "keywords": "交差汚染 生肉 まな板 衛生",
+          "body": "生肉とそのまま食べる食品を分け、手・まな板・器具を洗いましょう。"
+        },
+        "ko": {
+          "title": "날음식과 조리된 음식 분리",
+          "keywords": "교차오염 생고기 도마 위생",
+          "body": "생고기를 바로 먹는 음식과 분리하고 손, 도마, 도구를 씻으세요."
+        },
+        "ru": {
+          "title": "Разделяйте сырое и готовое",
+          "keywords": "перекрёстное загрязнение мясо доска гигиена",
+          "body": "Держите сырое мясо отдельно от готовой еды; мойте руки, доски и посуду."
+        },
+        "es": {
+          "title": "Separar alimentos crudos y listos",
+          "keywords": "contaminación cruzada carne tabla higiene",
+          "body": "Separe la carne cruda de alimentos listos; lave manos, tablas y utensilios."
+        },
+        "fr": {
+          "title": "Séparer le cru et le prêt à manger",
+          "keywords": "contamination croisée viande planche hygiène",
+          "body": "Séparez la viande crue des aliments prêts; lavez mains, planches et ustensiles."
+        },
+        "de": {
+          "title": "Rohes und Verzehrfertiges trennen",
+          "keywords": "Kreuzkontamination Fleisch Brett Hygiene",
+          "body": "Rohes Fleisch getrennt halten; Hände, Bretter und Geräte reinigen."
+        },
+        "pt-BR": {
+          "title": "Separar alimentos crus e prontos",
+          "keywords": "contaminação cruzada carne tábua higiene",
+          "body": "Separe carne crua de alimentos prontos; lave mãos, tábuas e utensílios."
+        }
+      },
+      "directQuestions": {
+        "zh-Hans": [
+          "如何避免生熟交叉污染？",
+          "生肉和熟食应该怎么分开？",
+          "处理生肉后该清洗什么？"
+        ],
+        "zh-Hant": [
+          "如何避免生熟交叉污染？",
+          "生肉和熟食應該怎麼分開？",
+          "處理生肉後該清洗什麼？"
+        ],
+        "en": [
+          "How can cross contamination be avoided?",
+          "How should raw meat and ready-to-eat food be kept separate?",
+          "What should be washed after handling raw meat?"
+        ],
+        "ja": [
+          "食品の交差汚染を防ぐには？",
+          "生肉と調理済み食品はどう分ける？",
+          "生肉を扱った後は何を洗う？"
+        ],
+        "ko": [
+          "식품의 교차오염은 어떻게 예방하나요?",
+          "생고기와 바로 먹는 음식은 어떻게 분리하나요?",
+          "생고기를 만진 후 무엇을 씻어야 하나요?"
+        ],
+        "ru": [
+          "Как избежать перекрёстного загрязнения продуктов?",
+          "Как хранить сырое мясо отдельно от готовой еды?",
+          "Что нужно мыть после работы с сырым мясом?"
+        ],
+        "es": [
+          "¿Cómo evitar la contaminación cruzada?",
+          "¿Cómo separar la carne cruda de los alimentos listos para comer?",
+          "¿Qué hay que lavar después de manipular carne cruda?"
+        ],
+        "fr": [
+          "Comment éviter la contamination croisée ?",
+          "Comment séparer la viande crue des aliments prêts à manger ?",
+          "Que faut-il laver après avoir manipulé de la viande crue ?"
+        ],
+        "de": [
+          "Wie lässt sich Kreuzkontamination vermeiden?",
+          "Wie werden rohes Fleisch und verzehrfertige Speisen getrennt?",
+          "Was sollte nach dem Umgang mit rohem Fleisch gereinigt werden?"
+        ],
+        "pt-BR": [
+          "Como evitar a contaminação cruzada?",
+          "Como separar carne crua de alimentos prontos para comer?",
+          "O que lavar depois de manusear carne crua?"
+        ]
+      }
+    },
+    {
+      "id": "food-leftovers",
+      "revision": "2026-10-16.2",
+      "reviewedAt": "2026-10-16",
+      "validUntil": "2027-01-15",
+      "sourceURL": "https://ask.fsis.usda.gov/article/How-do-I-handle-leftovers-safely",
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": null,
+      "languages": {
+        "zh-Hans": {
+          "title": "剩菜及时冷藏",
+          "keywords": "剩菜 剩饭 熟食储存",
+          "body": "剩菜分装浅容器，及时冷藏；并遵守食品标签的储存要求。"
+        },
+        "zh-Hant": {
+          "title": "剩菜及時冷藏",
+          "keywords": "剩菜 剩飯 熟食儲存",
+          "body": "剩菜分裝淺容器，及時冷藏；並遵守食品標籤的儲存要求。"
+        },
+        "en": {
+          "title": "Chill leftovers promptly",
+          "keywords": "leftovers refrigeration storage",
+          "body": "Refrigerate leftovers promptly in shallow containers; follow food storage labels."
+        },
+        "ja": {
+          "title": "残り物は早めに冷蔵",
+          "keywords": "残り物 作り置き 保存",
+          "body": "残り物を浅い容器に分けて早めに冷蔵し、表示の保存方法を守りましょう。"
+        },
+        "ko": {
+          "title": "남은 음식은 바로 냉장",
+          "keywords": "남은음식 남은 음식 보관",
+          "body": "남은 음식은 얕은 용기에 나눠 바로 냉장하고 보관 표시를 따르세요."
+        },
+        "ru": {
+          "title": "Быстро охлаждайте остатки",
+          "keywords": "остатки хранение охлаждение",
+          "body": "Быстро убирайте остатки в холодильник в неглубокой таре; соблюдайте маркировку."
+        },
+        "es": {
+          "title": "Refrigerar pronto las sobras",
+          "keywords": "sobras refrigeración conservación",
+          "body": "Refrigere pronto las sobras en recipientes poco profundos; siga las etiquetas."
+        },
+        "fr": {
+          "title": "Réfrigérer rapidement les restes",
+          "keywords": "restes conservation réfrigération",
+          "body": "Réfrigérez rapidement les restes dans des récipients peu profonds; suivez l’étiquetage."
+        },
+        "de": {
+          "title": "Reste rasch kühlen",
+          "keywords": "Speisereste Essensreste Aufbewahrung",
+          "body": "Reste zügig in flachen Behältern kühlen; Lagerhinweise auf Verpackungen beachten."
+        },
+        "pt-BR": {
+          "title": "Refrigerar as sobras logo",
+          "keywords": "sobras refrigeração armazenamento",
+          "body": "Refrigere logo as sobras em recipientes rasos; siga os rótulos."
+        }
+      },
+      "directQuestions": {
+        "zh-Hans": [
+          "剩菜怎么保存？",
+          "剩饭剩菜如何安全储存？",
+          "剩菜应该怎么冷藏？"
+        ],
+        "zh-Hant": [
+          "剩菜怎麼保存？",
+          "剩飯剩菜如何安全儲存？",
+          "剩菜應該怎麼冷藏？"
+        ],
+        "en": [
+          "How should leftovers be stored?",
+          "How can leftovers be stored safely?",
+          "How should leftovers be refrigerated?"
+        ],
+        "ja": [
+          "残り物はどう保存する？",
+          "残った料理を安全に保存するには？",
+          "残り物はどう冷蔵する？"
+        ],
+        "ko": [
+          "남은 음식은 어떻게 보관하나요?",
+          "남은 요리를 안전하게 보관하려면 어떻게 하나요?",
+          "남은 음식은 어떻게 냉장하나요?"
+        ],
+        "ru": [
+          "Как хранить остатки еды?",
+          "Как безопасно хранить оставшуюся еду?",
+          "Как убирать остатки еды в холодильник?"
+        ],
+        "es": [
+          "¿Cómo guardar las sobras?",
+          "¿Cómo conservar las sobras de forma segura?",
+          "¿Cómo refrigerar las sobras?"
+        ],
+        "fr": [
+          "Comment conserver les restes ?",
+          "Comment conserver les restes sans risque ?",
+          "Comment réfrigérer les restes ?"
+        ],
+        "de": [
+          "Wie sollten Speisereste aufbewahrt werden?",
+          "Wie werden Essensreste sicher gelagert?",
+          "Wie sollten Speisereste gekühlt werden?"
+        ],
+        "pt-BR": [
+          "Como guardar as sobras?",
+          "Como armazenar as sobras com segurança?",
+          "Como refrigerar as sobras?"
+        ]
+      }
+    },
+    {
+      "id": "food-thawing",
+      "revision": "2026-10-15.1",
+      "reviewedAt": "2026-10-15",
+      "validUntil": "2027-01-15",
+      "sourceURL": "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/freezing-and-food-safety",
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": null,
+      "languages": {
+        "zh-Hans": {
+          "title": "安全解冻",
+          "keywords": "解冻 冻肉 冷冻 微波炉",
+          "body": "可在冰箱冷藏室解冻；使用微波炉解冻后应立即烹调。"
+        },
+        "zh-Hant": {
+          "title": "安全解凍",
+          "keywords": "解凍 凍肉 冷凍 微波爐",
+          "body": "可在冰箱冷藏室解凍；使用微波爐解凍後應立即烹調。"
+        },
+        "en": {
+          "title": "Thaw safely",
+          "keywords": "thaw defrost frozen microwave",
+          "body": "Thaw in the refrigerator; cook immediately after microwave thawing."
+        },
+        "ja": {
+          "title": "安全に解凍する",
+          "keywords": "解凍 冷凍 電子レンジ",
+          "body": "冷蔵庫で解凍できます。電子レンジで解凍したら、すぐ調理しましょう。"
+        },
+        "ko": {
+          "title": "안전하게 해동",
+          "keywords": "해동 냉동 전자레인지",
+          "body": "냉장고에서 해동하고, 전자레인지로 해동했다면 즉시 조리하세요."
+        },
+        "ru": {
+          "title": "Безопасная разморозка",
+          "keywords": "разморозка замороженный микроволновка",
+          "body": "Размораживайте в холодильнике; после микроволновой разморозки готовьте сразу."
+        },
+        "es": {
+          "title": "Descongelar con seguridad",
+          "keywords": "descongelar congelado microondas",
+          "body": "Descongele en el frigorífico; cocine inmediatamente tras descongelar en microondas."
+        },
+        "fr": {
+          "title": "Décongeler en sécurité",
+          "keywords": "décongélation surgelé micro-ondes",
+          "body": "Décongelez au réfrigérateur; cuisez immédiatement après une décongélation au micro-ondes."
+        },
+        "de": {
+          "title": "Sicher auftauen",
+          "keywords": "Auftauen Gefrorenes Mikrowelle",
+          "body": "Im Kühlschrank auftauen; nach dem Auftauen in der Mikrowelle sofort garen."
+        },
+        "pt-BR": {
+          "title": "Descongelar com segurança",
+          "keywords": "descongelar congelado micro-ondas",
+          "body": "Descongele na geladeira; cozinhe imediatamente após descongelar no micro-ondas."
+        }
+      },
+      "directQuestions": {
+        "zh-Hans": [
+          "冻肉怎么安全解冻？",
+          "如何安全解冻食物？",
+          "微波炉解冻后应该怎么处理？"
+        ],
+        "zh-Hant": [
+          "凍肉怎麼安全解凍？",
+          "如何安全解凍食物？",
+          "微波爐解凍後應該怎麼處理？"
+        ],
+        "en": [
+          "How can frozen meat be thawed safely?",
+          "How can food be defrosted safely?",
+          "What should be done after microwave thawing?"
+        ],
+        "ja": [
+          "冷凍肉を安全に解凍するには？",
+          "食品を安全に解凍するには？",
+          "電子レンジで解凍した後はどうする？"
+        ],
+        "ko": [
+          "냉동 고기는 어떻게 안전하게 해동하나요?",
+          "음식을 안전하게 해동하려면 어떻게 하나요?",
+          "전자레인지로 해동한 후에는 어떻게 해야 하나요?"
+        ],
+        "ru": [
+          "Как безопасно размораживать мясо?",
+          "Как безопасно размораживать продукты?",
+          "Что делать после разморозки в микроволновке?"
+        ],
+        "es": [
+          "¿Cómo descongelar carne de forma segura?",
+          "¿Cómo descongelar alimentos de forma segura?",
+          "¿Qué hacer después de descongelar en el microondas?"
+        ],
+        "fr": [
+          "Comment décongeler la viande sans risque ?",
+          "Comment décongeler les aliments en toute sécurité ?",
+          "Que faire après une décongélation au micro-ondes ?"
+        ],
+        "de": [
+          "Wie lässt sich Fleisch sicher auftauen?",
+          "Wie werden Lebensmittel sicher aufgetaut?",
+          "Was ist nach dem Auftauen in der Mikrowelle zu tun?"
+        ],
+        "pt-BR": [
+          "Como descongelar carne com segurança?",
+          "Como descongelar alimentos com segurança?",
+          "O que fazer após descongelar no micro-ondas?"
+        ]
+      }
+    },
+    {
+      "id": "food-thermometer",
+      "revision": "2026-10-15.1",
+      "reviewedAt": "2026-10-15",
+      "validUntil": "2027-01-15",
+      "sourceURL": "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/food-thermometers",
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": null,
+      "languages": {
+        "zh-Hans": {
+          "title": "用温度计判断熟度",
+          "keywords": "温度计 熟度 肉色 熟透 中心温度",
+          "body": "使用食物温度计；只看肉的颜色不能证明已安全熟透。"
+        },
+        "zh-Hant": {
+          "title": "用溫度計判斷熟度",
+          "keywords": "溫度計 熟度 肉色 熟透 中心溫度",
+          "body": "使用食物溫度計；只看肉的顏色不能證明已安全熟透。"
+        },
+        "en": {
+          "title": "Check with a thermometer",
+          "keywords": "thermometer doneness meat color temperature",
+          "body": "Use a food thermometer; color alone cannot establish safe doneness."
+        },
+        "ja": {
+          "title": "温度計で確認",
+          "keywords": "温度計 火通り 肉 色 中心温度",
+          "body": "食品用温度計で確認しましょう。肉の色だけでは安全な加熱を判断できません。"
+        },
+        "ko": {
+          "title": "온도계로 확인",
+          "keywords": "온도계 익힘 고기 색 중심온도",
+          "body": "식품용 온도계를 사용하세요. 고기 색만으로 안전하게 익었는지 알 수 없습니다."
+        },
+        "ru": {
+          "title": "Проверяйте термометром",
+          "keywords": "термометр готовность мясо цвет температура",
+          "body": "Используйте пищевой термометр: цвет мяса не доказывает безопасную готовность."
+        },
+        "es": {
+          "title": "Comprobar con termómetro",
+          "keywords": "termómetro cocción carne color temperatura",
+          "body": "Use un termómetro alimentario; el color no demuestra una cocción segura."
+        },
+        "fr": {
+          "title": "Vérifier au thermomètre",
+          "keywords": "thermomètre cuisson viande couleur température",
+          "body": "Utilisez un thermomètre alimentaire; la couleur ne prouve pas une cuisson sûre."
+        },
+        "de": {
+          "title": "Mit Thermometer prüfen",
+          "keywords": "Thermometer Gargrad Fleisch Farbe Temperatur",
+          "body": "Ein Lebensmittelthermometer verwenden; die Farbe allein belegt kein sicheres Durchgaren."
+        },
+        "pt-BR": {
+          "title": "Verificar com termômetro",
+          "keywords": "termômetro cozimento carne cor temperatura",
+          "body": "Use termômetro culinário; a cor não comprova cozimento seguro."
+        }
+      },
+      "directQuestions": {
+        "zh-Hans": [
+          "如何判断肉是否熟透？",
+          "只看肉的颜色能判断熟透吗？",
+          "判断食物熟度该用什么？"
+        ],
+        "zh-Hant": [
+          "如何判斷肉是否熟透？",
+          "只看肉的顏色能判斷熟透嗎？",
+          "判斷食物熟度該用什麼？"
+        ],
+        "en": [
+          "How can meat doneness be checked?",
+          "Can meat color alone prove that it is cooked safely?",
+          "What should be used to check food doneness?"
+        ],
+        "ja": [
+          "肉に火が通ったかどう確かめる？",
+          "肉の色だけで安全に加熱できたと判断できる？",
+          "食品の火の通り具合は何で確認する？"
+        ],
+        "ko": [
+          "고기가 완전히 익었는지 어떻게 확인하나요?",
+          "고기 색만 보고 안전하게 익었다고 판단할 수 있나요?",
+          "음식이 익었는지 무엇으로 확인해야 하나요?"
+        ],
+        "ru": [
+          "Как проверить готовность мяса?",
+          "Можно ли судить о безопасности мяса только по цвету?",
+          "Чем проверять готовность пищи?"
+        ],
+        "es": [
+          "¿Cómo comprobar que la carne está bien cocida?",
+          "¿Basta el color de la carne para saber si es segura?",
+          "¿Qué usar para comprobar la cocción de los alimentos?"
+        ],
+        "fr": [
+          "Comment vérifier que la viande est bien cuite ?",
+          "La couleur de la viande suffit-elle à garantir une cuisson sûre ?",
+          "Quel outil utiliser pour vérifier la cuisson des aliments ?"
+        ],
+        "de": [
+          "Wie lässt sich prüfen, ob Fleisch durchgegart ist?",
+          "Reicht die Fleischfarbe aus, um sicheres Durchgaren festzustellen?",
+          "Womit sollte der Garzustand von Lebensmitteln geprüft werden?"
+        ],
+        "pt-BR": [
+          "Como verificar se a carne está bem cozida?",
+          "Só a cor da carne comprova que ela foi cozida com segurança?",
+          "O que usar para verificar o cozimento dos alimentos?"
+        ]
+      }
+    },
+    {
+      "id": "guide-plan",
+      "revision": "2026-10-16.2",
+      "reviewedAt": "2026-10-16",
+      "validUntil": "2027-01-15",
+      "sourceURL": null,
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": "plan",
+      "languages": {
+        "zh-Hans": {
+          "title": "制定饮食计划",
+          "keywords": "计划 安排 菜单",
+          "body": "在计划页选择日期和餐次，再选择菜谱与份数；核对后点击保存。助手生成的建议不会自动保存。"
+        },
+        "zh-Hant": {
+          "title": "制定飲食計畫",
+          "keywords": "計劃 安排 菜單",
+          "body": "在計畫頁選擇日期和餐次，再選擇食譜與份數；核對後點選儲存。助手建議不會自動儲存。"
+        },
+        "en": {
+          "title": "Create a meal plan",
+          "keywords": "plan planning schedule menu",
+          "body": "Choose a date and meal in Plans, then recipes and servings. Review and save yourself; assistant suggestions are not saved automatically."
+        },
+        "ja": {
+          "title": "食事プランを作成",
+          "keywords": "計画 予定 献立",
+          "body": "プランで日付と食事を選び、レシピと人数を指定して確認後に保存します。提案は自動保存されません。"
+        },
+        "ko": {
+          "title": "식사 계획 만들기",
+          "keywords": "계획 일정 식단",
+          "body": "계획에서 날짜와 끼니, 레시피와 인분을 선택하고 확인 후 저장하세요. 제안은 자동 저장되지 않습니다."
+        },
+        "ru": {
+          "title": "Составить план питания",
+          "keywords": "план планирование расписание меню",
+          "body": "Выберите дату, приём пищи, рецепты и порции в плане. Проверьте и сохраните; предложения не сохраняются автоматически."
+        },
+        "es": {
+          "title": "Crear un plan de comidas",
+          "keywords": "plan planificación horario menú",
+          "body": "En Planes, elija fecha, comida, recetas y raciones. Revise y guarde; las sugerencias no se guardan solas."
+        },
+        "fr": {
+          "title": "Créer un programme de repas",
+          "keywords": "planification planning programme menu",
+          "body": "Dans Planning, choisissez date, repas, recettes et portions. Vérifiez puis enregistrez; les suggestions ne sont pas enregistrées automatiquement."
+        },
+        "de": {
+          "title": "Essensplan erstellen",
+          "keywords": "Plan Planung Zeitplan Speiseplan",
+          "body": "Unter Plan Datum, Mahlzeit, Rezepte und Portionen wählen. Prüfen und selbst speichern; Vorschläge werden nicht automatisch gespeichert."
+        },
+        "pt-BR": {
+          "title": "Criar um plano de refeições",
+          "keywords": "plano planejamento agenda cardápio",
+          "body": "Em Planos, escolha data, refeição, receitas e porções. Revise e salve; sugestões não são salvas automaticamente."
+        }
+      }
+    },
+    {
+      "id": "guide-inventory",
+      "revision": "2026-10-16.2",
+      "reviewedAt": "2026-10-16",
+      "validUntil": "2027-01-15",
+      "sourceURL": null,
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": "inventory",
+      "languages": {
+        "zh-Hans": {
+          "title": "查看和整理库存",
+          "keywords": "库存 剩余 单位 到期 添加食材",
+          "body": "在食材库存中查看数量、单位和到期日。先确认个人或家庭范围；不同单位不能直接相加，未知用量需要核对。"
+        },
+        "zh-Hant": {
+          "title": "查看與整理庫存",
+          "keywords": "庫存 剩餘 單位 到期 新增食材",
+          "body": "在食材庫存查看數量、單位和到期日。先確認個人或家庭範圍；不同單位不能直接相加，未知用量需核對。"
+        },
+        "en": {
+          "title": "Review ingredient stock",
+          "keywords": "inventory stock expiry quantities units",
+          "body": "Check quantities, units and expiry in inventory. Confirm personal or household scope; different units cannot simply be added, and unknown amounts need review."
+        },
+        "ja": {
+          "title": "食材在庫を確認",
+          "keywords": "在庫 残量 単位 期限",
+          "body": "在庫で数量、単位、期限を確認します。個人・家庭の範囲に注意し、異なる単位や不明量をそのまま合算しないでください。"
+        },
+        "ko": {
+          "title": "식재료 재고 확인",
+          "keywords": "재고 잔량 단위 유통기한",
+          "body": "재고의 수량, 단위, 기한을 확인하세요. 개인·가족 범위를 확인하고 서로 다른 단위나 미확인 수량을 단순 합산하지 마세요."
+        },
+        "ru": {
+          "title": "Проверить запасы",
+          "keywords": "запасы остаток единицы срок",
+          "body": "Проверьте количество, единицы и сроки в запасах. Учитывайте личную или семейную область; разные единицы и неизвестные количества требуют проверки."
+        },
+        "es": {
+          "title": "Revisar existencias",
+          "keywords": "inventario existencias caducidad cantidades unidades",
+          "body": "Revise cantidades, unidades y caducidad. Confirme el ámbito personal o familiar; las unidades distintas y cantidades desconocidas requieren revisión."
+        },
+        "fr": {
+          "title": "Vérifier les stocks",
+          "keywords": "stock inventaire péremption quantités unités",
+          "body": "Vérifiez quantités, unités et dates. Confirmez l’espace personnel ou familial; unités différentes et quantités inconnues nécessitent une vérification."
+        },
+        "de": {
+          "title": "Vorräte prüfen",
+          "keywords": "Vorrat Bestand Verfallsdatum Mengen Einheiten",
+          "body": "Mengen, Einheiten und Ablauf prüfen. Persönlichen oder Haushaltsbereich beachten; unterschiedliche Einheiten und unbekannte Mengen erst prüfen."
+        },
+        "pt-BR": {
+          "title": "Conferir o estoque",
+          "keywords": "estoque inventário validade quantidades unidades",
+          "body": "Confira quantidades, unidades e validade. Confirme o âmbito pessoal ou familiar; unidades diferentes e quantidades desconhecidas exigem revisão."
+        }
+      }
+    },
+    {
+      "id": "guide-search",
+      "revision": "2026-10-16.2",
+      "reviewedAt": "2026-10-16",
+      "validUntil": "2027-01-15",
+      "sourceURL": null,
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": "recipes",
+      "languages": {
+        "zh-Hans": {
+          "title": "查找菜谱与详细做法",
+          "keywords": "搜索 查找 做法 步骤 收藏",
+          "body": "在菜谱页搜索菜名，并打开详情查看材料和完整步骤。正文不可用时不要把卡片摘要当作完整做法。"
+        },
+        "zh-Hant": {
+          "title": "尋找食譜與詳細做法",
+          "keywords": "搜尋 查找 作法 步驟 收藏",
+          "body": "在食譜頁搜尋菜名，開啟詳情查看材料和完整步驟。正文不可用時，卡片摘要不代表完整做法。"
+        },
+        "en": {
+          "title": "Find recipes and instructions",
+          "keywords": "search searching steps favorites favourites",
+          "body": "Search a dish in Recipes and open its detail for ingredients and full steps. A card summary is not complete instructions when content is unavailable."
+        },
+        "ja": {
+          "title": "レシピと作り方を探す",
+          "keywords": "検索 探す 手順 お気に入り",
+          "body": "レシピで料理名を検索し、詳細で材料と手順を確認します。本文がない場合、カードの概要は完全な作り方ではありません。"
+        },
+        "ko": {
+          "title": "레시피와 조리법 찾기",
+          "keywords": "검색 찾기 단계 즐겨찾기",
+          "body": "레시피에서 음식 이름을 검색하고 상세에서 재료와 전체 단계를 확인하세요. 본문이 없으면 카드 요약을 전체 조리법으로 보지 마세요."
+        },
+        "ru": {
+          "title": "Найти рецепт и способ приготовления",
+          "keywords": "поиск искать шаги избранное",
+          "body": "Ищите блюдо в рецептах и открывайте подробности с ингредиентами и шагами. Краткая карточка не заменяет отсутствующий полный рецепт."
+        },
+        "es": {
+          "title": "Buscar recetas e instrucciones",
+          "keywords": "buscar búsqueda pasos favoritos",
+          "body": "Busque un plato en Recetas y abra sus ingredientes y pasos. El resumen de una tarjeta no sustituye las instrucciones completas."
+        },
+        "fr": {
+          "title": "Trouver une recette et ses étapes",
+          "keywords": "recherche rechercher étapes favoris",
+          "body": "Cherchez un plat dans Recettes puis ouvrez les ingrédients et étapes. Le résumé d’une carte ne remplace pas les instructions complètes."
+        },
+        "de": {
+          "title": "Rezepte und Anleitung finden",
+          "keywords": "Suche suchen Schritte Favoriten",
+          "body": "Gericht unter Rezepte suchen und Details für Zutaten und Schritte öffnen. Eine Kartenübersicht ersetzt keine fehlende vollständige Anleitung."
+        },
+        "pt-BR": {
+          "title": "Buscar receitas e instruções",
+          "keywords": "buscar pesquisa passos favoritos",
+          "body": "Busque um prato em Receitas e abra ingredientes e etapas. O resumo do cartão não substitui as instruções completas."
+        }
+      }
+    },
+    {
+      "id": "guide-network",
+      "revision": "2026-10-15.1",
+      "reviewedAt": "2026-10-15",
+      "validUntil": "2027-01-15",
+      "sourceURL": null,
+      "license": "Project-authored summary; linked source text is not redistributed.",
+      "destination": "model_settings",
+      "languages": {
+        "zh-Hans": {
+          "title": "本地模型与联网查询",
+          "keywords": "本地 模型 千问 联网 离线 下载 云端",
+          "body": "在聊天的模式菜单打开模型管理。联网查询与云端推理独立；关闭联网时，本地助手只使用本机知识，不查询远端库存或计划。"
+        },
+        "zh-Hant": {
+          "title": "本地模型與連網查詢",
+          "keywords": "本地 模型 千問 連網 離線 下載 雲端",
+          "body": "在聊天模式選單開啟模型管理。連網查詢與雲端推理獨立；關閉連網時只使用本機知識，不查詢遠端庫存或計畫。"
+        },
+        "en": {
+          "title": "Local model and network lookups",
+          "keywords": "local model Qwen network offline download cloud",
+          "body": "Open model management from the chat mode menu. Network lookup and cloud inference are separate; with lookups off, local knowledge is used and remote stock or plans are not fetched."
+        },
+        "ja": {
+          "title": "端末モデルとネット検索",
+          "keywords": "端末 モデル Qwen ネット オフライン ダウンロード クラウド",
+          "body": "チャットのモードからモデル管理を開きます。ネット検索とクラウド推論は別設定で、検索がオフなら端末知識のみ使い、遠隔の在庫や予定を取得しません。"
+        },
+        "ko": {
+          "title": "기기 모델과 네트워크 조회",
+          "keywords": "기기 모델 Qwen 네트워크 오프라인 다운로드 클라우드",
+          "body": "채팅 모드 메뉴에서 모델 관리를 여세요. 네트워크 조회와 클라우드 추론은 별개이며, 조회가 꺼져 있으면 기기 지식만 쓰고 원격 재고·계획을 가져오지 않습니다."
+        },
+        "ru": {
+          "title": "Локальная модель и сеть",
+          "keywords": "локальная модель Qwen сеть офлайн загрузка облако",
+          "body": "Откройте управление моделью в меню режима чата. Сетевой поиск и облачный вывод независимы; без сети используются знания устройства, а удалённые запасы и планы не запрашиваются."
+        },
+        "es": {
+          "title": "Modelo local y consultas de red",
+          "keywords": "modelo local Qwen red sin conexión descarga nube",
+          "body": "Abra la gestión del modelo desde el modo de chat. Consultas de red e inferencia en la nube son independientes; sin consultas se usa conocimiento local, sin obtener existencias ni planes remotos."
+        },
+        "fr": {
+          "title": "Modèle local et requêtes réseau",
+          "keywords": "modèle local Qwen réseau hors ligne téléchargement cloud",
+          "body": "Ouvrez la gestion du modèle depuis le mode du chat. Requêtes réseau et inférence cloud sont distinctes; sans requêtes, seules les connaissances locales sont utilisées, sans stocks ni programmes distants."
+        },
+        "de": {
+          "title": "Lokales Modell und Netzwerkabfragen",
+          "keywords": "lokales Modell Qwen Netzwerk offline Download Cloud",
+          "body": "Modellverwaltung im Chatmodus öffnen. Netzwerkabfragen und Cloud-Inferenz sind getrennt; ohne Abfragen wird nur lokales Wissen genutzt, keine entfernten Vorräte oder Pläne."
+        },
+        "pt-BR": {
+          "title": "Modelo local e consultas de rede",
+          "keywords": "modelo local Qwen rede offline download nuvem",
+          "body": "Abra o gerenciamento pelo modo do chat. Consulta de rede e inferência na nuvem são separadas; sem consultas, usa-se conhecimento local, sem buscar estoques ou planos remotos."
+        }
+      }
+    },
+    {
+      "id": "guide-assistant",
+      "revision": "2026-10-16.3",
+      "reviewedAt": "2026-10-16",
+      "validUntil": "2027-01-15",
+      "sourceURL": null,
+      "license": "Project-authored product capability guide.",
+      "destination": "recipes",
+      "languages": {
+        "zh-Hans": {
+          "title": "我能帮你做什么",
+          "keywords": "你能做什么|你会什么|你有哪些功能|你有什么功能|能帮我处理哪些问题|你可以帮我做什么|你能帮我做什么|你可以做什么|能帮我解决什么|你能帮我处理哪些问题|你能帮我处理哪些问题呢",
+          "body": "我能帮你找菜谱和做法、解答烹饪与食材保存问题。允许联网时，还能查询饮食计划和家庭库存、准备计划草稿。下方入口可打开相应页面；保存计划、扣减库存等更改仍由你确认，无法读取的数据会明确告知。"
+        },
+        "zh-Hant": {
+          "title": "我能幫你做什麼",
+          "keywords": "你能做什麼|你會什麼|你有哪些功能|你有什麼功能|能幫我處理哪些問題|你可以幫我做什麼|你能幫我做什麼|你可以做什麼|你能幫我處理哪些問題",
+          "body": "我能幫你找食譜和做法、解答烹飪與食材保存問題。允許連網時，還能查詢飲食計畫和家庭庫存、準備計畫草稿。下方入口可開啟對應頁面；儲存計畫、扣減庫存等變更仍由你確認，無法讀取的資料會明確告知。"
+        },
+        "en": {
+          "title": "How I can help",
+          "keywords": "what can you do|what can you help me with|what problems can you help|your capabilities|what are your features",
+          "body": "I can find recipes and cooking steps, explain cooking and food storage, and show checkable sources. With network access, I can read your meal plans and household stock and prepare a plan draft. Use the links below to open those pages. You confirm saves or stock deductions; I will say when data is unavailable."
+        },
+        "ja": {
+          "title": "できること",
+          "keywords": "何ができますか|何を手伝えますか|どんな機能|何をしてくれる|できることを教えて",
+          "body": "レシピや調理手順を探し、料理や食品保存を出典付きで説明できます。通信が許可されていれば食事プランや家庭の在庫を読み、プラン下書きを準備できます。下の入口から各画面を開けます。保存や在庫の差し引きはご自身で確認します。取得できない情報は明示します。"
+        },
+        "ko": {
+          "title": "도와드릴 수 있는 일",
+          "keywords": "무엇을 할 수|어떤 일을 도와|어떤 기능|무슨 기능|뭘 할 수",
+          "body": "레시피와 조리법을 찾고 조리·식품 보관 지식을 출처와 함께 설명해요. 네트워크가 허용되면 식단과 가족 재고를 조회하고 식단 초안을 준비해요. 아래 링크로 관련 화면을 열 수 있어요. 저장과 재고 차감은 직접 확인하며, 읽을 수 없는 정보는 알려드려요."
+        },
+        "ru": {
+          "title": "Чем я могу помочь",
+          "keywords": "что ты умеешь|что вы умеете|чем можешь помочь|чем можете помочь|какие у тебя функции",
+          "body": "Я помогу найти рецепты и этапы приготовления, объяснить готовку и хранение с источниками. Если сеть разрешена, прочитаю планы и семейные запасы, подготовлю черновик плана. Ссылки ниже открывают нужные экраны. Сохранение и списание вы подтверждаете сами; о недоступных данных я сообщу."
+        },
+        "es": {
+          "title": "Cómo puedo ayudarte",
+          "keywords": "qué puedes hacer|en qué me puedes ayudar|con qué puedes ayudar|cuáles son tus funciones",
+          "body": "Puedo buscar recetas y pasos y explicar cocina y conservación con fuentes. Con la red permitida, puedo leer planes y existencias familiares y preparar un borrador. Los enlaces abren las pantallas correspondientes. Tú confirmas guardar o descontar existencias; avisaré si faltan datos."
+        },
+        "fr": {
+          "title": "Comment je peux vous aider",
+          "keywords": "que peux-tu faire|que pouvez-vous faire|comment peux-tu m’aider|quelles sont tes fonctions",
+          "body": "Je peux trouver recettes et étapes, expliquer cuisine et conservation avec des sources. Si le réseau est autorisé, je peux lire vos programmes et stocks et préparer un brouillon. Les liens ouvrent les écrans concernés. Vous confirmez tout enregistrement ou déduction ; je signale les données indisponibles."
+        },
+        "de": {
+          "title": "Wobei ich helfen kann",
+          "keywords": "was kannst du|wobei kannst du helfen|welche funktionen hast du|was können sie",
+          "body": "Ich kann Rezepte und Schritte finden und Kochen und Lagerung mit Quellen erklären. Bei erlaubtem Netzwerkzugriff kann ich Pläne und Familienvorräte lesen und einen Entwurf vorbereiten. Die Links öffnen die jeweiligen Seiten. Speichern und Abbuchen bestätigst du selbst; fehlende Daten kennzeichne ich."
+        },
+        "pt-BR": {
+          "title": "Como posso ajudar",
+          "keywords": "o que você pode fazer|como você pode me ajudar|quais são suas funções|o que voce pode fazer",
+          "body": "Posso buscar receitas e etapas e explicar culinária e conservação com fontes. Se a rede estiver permitida, leio planos e estoque familiar e preparo um rascunho. Os links abrem as telas correspondentes. Você confirma salvamentos e descontos; avisarei sobre dados indisponíveis."
+        }
+      }
+    }
+  ]
+}

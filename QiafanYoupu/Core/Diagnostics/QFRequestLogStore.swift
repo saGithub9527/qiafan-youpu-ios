@@ -49,7 +49,7 @@
     @Published private(set) var totalCount = 0
     @Published private(set) var totalPages = 1
     @Published private(set) var revision = 0
-    @Published private(set) var storageError: String?
+    @Published private(set) var storageErrorCode: Int?
 
     let pageSize = 20
     private let directoryURL: URL
@@ -112,7 +112,7 @@
         requestBody: request.httpBodyStream != nil
           ? QFRequestLogPreview.bounded("[流式请求体未读取]", limit: maxBodyBytes)
           : QFRequestLogPreview.body(
-            request.httpBody,
+            QFRequestLogPreview.passwordSafeBody(request),
             contentType: request.value(forHTTPHeaderField: "Content-Type"),
             limit: maxBodyBytes
           ),
@@ -231,7 +231,7 @@
           }
           try enforceLimits()
         }
-        storageError = nil
+        storageErrorCode = nil
       } catch {
         reportStorageError(error)
       }
@@ -250,16 +250,26 @@
     }
 
     private func reportStorageError(_ error: Error) {
-      storageError = "请求日志文件读写失败（错误码 \((error as NSError).code)）"
+      storageErrorCode = (error as NSError).code
     }
   }
 
   private enum QFRequestLogPreview {
     private static let truncation = "\n[内容已截断]"
 
+    static func passwordSafeBody(_ request: URLRequest) -> Data? {
+      if request.url?.path.hasSuffix("/me/assistant/knowledge/search") == true { return nil }
+      guard request.url?.path.hasSuffix("/me/password") == true else { return request.httpBody }
+      guard let body = request.httpBody,
+        var fields = try? JSONSerialization.jsonObject(with: body) as? [String: Any]
+      else { return Data("[密码请求体已隐藏]".utf8) }
+      for key in ["oldPassword", "newPassword"] where fields[key] != nil { fields[key] = "[已隐藏]" }
+      return try? JSONSerialization.data(withJSONObject: fields)
+    }
+
     static func body(_ data: Data?, contentType: String?, limit: Int) -> String {
       guard let data, !data.isEmpty else { return "" }
-      // Size limits protect the debug view; field names and values are never redacted.
+      // Password-change fields are masked before formatting; other existing diagnostics retain their format.
       guard data.count <= 2 * 1024 * 1024 else {
         return bounded("[内容过大，已省略；\(data.count) 字节]", limit: limit)
       }

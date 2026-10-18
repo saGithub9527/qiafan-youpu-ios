@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+import UIKit
 
 @testable import QiafanYoupu
 
@@ -79,6 +80,141 @@ private final class QFAlamofireTestProtocol: URLProtocol {
 }
 
 final class QFAlamofireTransportTests: XCTestCase {
+  func testAssistantRequestCapturesHouseholdAndTimezoneWithoutClientAuthorityFields() throws {
+    let family = UUID().uuidString.lowercased()
+    let payload = QFAssistantChatRequest(text: "今天晚餐吃什么？", allowCloud: true, allowWeb: true,
+      history: [.init(role: "user", content: "之前的问题")], householdId: family, timeZone: "Asia/Shanghai")
+    let (body, type) = try payload.encoded(imageData: nil, mimeType: "image/jpeg")
+    let object = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
+    XCTAssertEqual(type, "application/json")
+    XCTAssertEqual(Set(object.keys), ["text", "allowCloud", "allowWeb", "history", "householdId", "timeZone"])
+    XCTAssertEqual(object["allowWeb"] as? Bool, true)
+    XCTAssertEqual(object["householdId"] as? String, family)
+    XCTAssertEqual(object["timeZone"] as? String, "Asia/Shanghai")
+    XCTAssertNil(object["userId"]); XCTAssertNil(object["model"])
+  }
+
+  func testAssistantPersonalImageRequestPreservesTimezoneHistoryAndImage() throws {
+    let payload = QFAssistantChatRequest(text: "图片中的食材", allowCloud: true, allowWeb: false,
+      history: [.init(role: "assistant", content: "历史回答")], householdId: nil, timeZone: "America/Los_Angeles")
+    let bytes = Data([0x89, 0x50, 0x4E, 0x47])
+    let (body, type) = try payload.encoded(imageData: bytes, mimeType: "image/png")
+    let wire = String(decoding: body, as: UTF8.self)
+    XCTAssertTrue(type.hasPrefix("multipart/form-data; boundary="))
+    XCTAssertTrue(wire.contains("name=\"timeZone\"\r\n\r\nAmerica/Los_Angeles"))
+    XCTAssertTrue(wire.contains("name=\"history\""))
+    XCTAssertTrue(wire.contains("name=\"allowWeb\"\r\n\r\nfalse"))
+    XCTAssertTrue(wire.contains("filename=\"image.png\""))
+    XCTAssertNotNil(body.range(of: bytes))
+    XCTAssertFalse(wire.contains("name=\"householdId\""))
+    let personal = try payload.encoded(imageData: nil, mimeType: "image/png")
+    let object = try XCTUnwrap(JSONSerialization.jsonObject(with: personal.body) as? [String: Any])
+    XCTAssertNil(object["householdId"])
+    XCTAssertEqual(object["allowWeb"] as? Bool, false)
+    XCTAssertThrowsError(try payload.encoded(imageData: bytes, mimeType: "image/gif"))
+  }
+
+  func testLegacyChatRequestOmitsUnsupportedWebConsentForBothWireFormats() throws {
+    let payload = QFAssistantChatRequest(text: "hello", allowCloud: true, history: [], householdId: nil, timeZone: "UTC")
+    let plain = try payload.encoded(imageData: nil, mimeType: "image/jpeg")
+    let object = try XCTUnwrap(JSONSerialization.jsonObject(with: plain.body) as? [String: Any])
+    XCTAssertNil(object["allowWeb"])
+    let multipart = try payload.encoded(imageData: Data([0xFF, 0xD8]), mimeType: "image/jpeg")
+    XCTAssertFalse(String(decoding: multipart.body, as: UTF8.self).contains("name=\"allowWeb\""))
+  }
+
+  @MainActor
+  private func withConversation(_ body: (QFAppSession, QFDigitalAssistantConversationViewController, UIWindow, @escaping (UIApplication.State) -> Void) async throws -> Void) async throws {
+    let app = QFAppSession(api: makeClient(), keychain: QFKeychainStore(service: service))
+    app.setInterfaceLanguage("zh-Hans")
+    var state = UIApplication.State.active
+    let chat = QFDigitalAssistantConversationViewController(app: app, applicationState: { state })
+    let nav = UINavigationController(rootViewController: chat)
+    let window: UIWindow
+    if let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first {
+      window = UIWindow(windowScene: scene)
+    } else { window = UIWindow(frame: UIScreen.main.bounds) }
+    let previous = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap(\.windows).first(where: \.isKeyWindow)
+    window.rootViewController = nav; window.makeKeyAndVisible()
+    window.layoutIfNeeded(); chat.view.layoutIfNeeded()
+    let zhKey = "qf.assistant.conversation.v2.\(QFAssistantAgent.scope(app).cacheKey)"
+    defer {
+      chat.debugEndScene(); window.isHidden = true; window.rootViewController = nil; previous?.makeKey()
+      UserDefaults.standard.removeObject(forKey: zhKey)
+      UserDefaults.standard.removeObject(forKey: "qf.assistant.conversation.v2.\(QFAssistantAgent.scope(app).cacheKey)")
+    }
+    try await body(app, chat, window, { state = $0 })
+  }
+
+  @MainActor
+  func testAssistantBackgroundCompletionReappearsWithFullAnswer() async throws {
+    try await withConversation { _, chat, _, setState in
+      _ = chat.debugBeginStreaming(text: "已生成的开头")
+      setState(.background)
+      chat.debugCompleteStreaming(text: "已生成的开头，以及后台完成的完整回答。")
+      setState(.active)
+      NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+      try await Task.sleep(nanoseconds: 100_000_000)
+      XCTAssertEqual(chat.debugVisibleAnswer, "已生成的开头，以及后台完成的完整回答。")
+    }
+  }
+
+  @MainActor
+  func testAssistantMemorySheetStopsCaptureButKeepsSubmittedAnswerRunning() async throws {
+    try await withConversation { _, chat, _, _ in
+      let task = chat.debugBeginStreaming(text: "")
+      defer { task.cancel() }
+      let url = FileManager.default.temporaryDirectory.appendingPathComponent("qf-capture-test-\(UUID()).m4a")
+      try Data([1]).write(to: url)
+      defer { try? FileManager.default.removeItem(at: url) }
+      let permissionToken = chat.debugOwnCaptureFile(url)
+      chat.debugOpenMemory()
+      XCTAssertFalse(chat.debugCaptureIsCurrent(permissionToken), "Late permission/transcription callbacks must lose authority")
+      XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+      XCTAssertFalse(task.isCancelled, "Opening a feature must preserve a submitted generation")
+      chat.presentedViewController?.dismiss(animated: false)
+    }
+  }
+
+  @MainActor
+  func testAssistantClosingStopsCaptureButKeepsSubmittedAnswerRunning() async throws {
+    try await withConversation { _, chat, _, _ in
+      let task = chat.debugBeginStreaming(text: "")
+      defer { task.cancel() }
+      let url = FileManager.default.temporaryDirectory.appendingPathComponent("qf-capture-test-\(UUID()).m4a")
+      try Data([1]).write(to: url)
+      defer { try? FileManager.default.removeItem(at: url) }
+      let permissionToken = chat.debugOwnCaptureFile(url)
+      chat.debugClose()
+      XCTAssertFalse(chat.debugCaptureIsCurrent(permissionToken))
+      XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+      XCTAssertFalse(task.isCancelled)
+    }
+  }
+
+  @MainActor
+  func testAssistantReusedControllerRefreshesLanguageAndFailureAccessibility() async throws {
+    try await withConversation { app, chat, _, _ in
+      XCTAssertEqual(chat.title, "饮食助手")
+      app.setInterfaceLanguage("en")
+      try await Task.sleep(nanoseconds: 100_000_000)
+      XCTAssertEqual(chat.title, "Diet assistant")
+      XCTAssertEqual(chat.navigationItem.leftBarButtonItem?.accessibilityLabel, "Close")
+      XCTAssertEqual(chat.debugMessageAccessibility, "Message")
+      let cell = QFAssistantChatCell(style: .default, reuseIdentifier: nil)
+      @MainActor func button(_ view: UIView) -> UIView? {
+        if view.accessibilityIdentifier == "assistant.process.toggle" { return view }
+        return view.subviews.lazy.compactMap { button($0) }.first
+      }
+      var item = QFAssistantLocalMessage(id: UUID(), role: "assistant", text: "", createdAt: Date(), state: "complete", process: [.init(stage: "generating", state: "complete")])
+      cell.configure(item, app: app, expanded: false, actionTitle: { _ in "" })
+      XCTAssertEqual(button(cell)?.accessibilityValue, "Completed")
+      item.state = "failed"
+      cell.configure(item, app: app, expanded: false, actionTitle: { _ in "" })
+      XCTAssertEqual(button(cell)?.accessibilityValue, "Generation failed")
+    }
+  }
+
   private struct Fixture: Decodable {
     let value: String
   }
@@ -319,6 +455,130 @@ final class QFAlamofireTransportTests: XCTestCase {
       XCTAssertFalse(entry.responseBody.contains("[REDACTED]"))
     }
   #endif
+
+  @MainActor
+  func testAssistantPreStreamHTTP401AllowsOneSessionRefresh() async throws {
+    let body = envelope(NSNull(), code: 40100, message: "expired fixture")
+    do {
+      _ = try await assistantStream(status: 401, contentType: "application/json", data: body)
+      XCTFail("A pre-stream HTTP 401 must expose an explicit authentication-rejection marker")
+    } catch let rejection as QFAssistantStreamHTTPUnauthorized {
+      XCTAssertEqual(rejection.failure.code, 40100)
+      XCTAssertEqual(rejection.failure.message, "expired fixture")
+    }
+    XCTAssertEqual(route.snapshot().count, 1)
+  }
+
+  @MainActor
+  func testAssistantPreStreamHTTP401WithoutJsonKeepsTheSameRefreshGate() async throws {
+    do {
+      _ = try await assistantStream(status: 401, contentType: "application/json", data: Data())
+      XCTFail("An empty HTTP 401 is still an HTTP authentication rejection")
+    } catch let rejection as QFAssistantStreamHTTPUnauthorized {
+      XCTAssertEqual(rejection.failure.code, 40100)
+    }
+    XCTAssertEqual(route.snapshot().count, 1)
+  }
+
+  @MainActor
+  func testAssistantBodyCode401DoesNotAuthorizeRefreshForOtherHttpStatuses() async throws {
+    for status in [200, 403, 429, 503] {
+      do {
+        _ = try await assistantStream(status: status, contentType: "application/json",
+          data: envelope(NSNull(), code: 40100, message: "body must not authorize a replay"))
+        XCTFail("Only HTTP 401 may authorize the refresh gate")
+      } catch let failure as QFAPIError {
+        XCTAssertEqual(failure.code, 40100)
+      }
+      XCTAssertEqual(route.snapshot().count, 1)
+    }
+  }
+
+  @MainActor
+  func testAssistantFirstSseError401CannotBecomeAReplayableHttpFailure() async throws {
+    let wire = "event: error\ndata: {\"code\":40100,\"message\":\"already streaming\"}\n\n"
+    do {
+      _ = try await assistantStream(status: 200, contentType: "text/event-stream", data: Data(wire.utf8))
+      XCTFail("A terminal SSE error must be returned without automatic replay authority")
+    } catch let failure as QFAPIError {
+      XCTAssertEqual(failure.code, 40100)
+      XCTAssertEqual(failure.message, "already streaming")
+    }
+    XCTAssertEqual(route.snapshot().count, 1)
+  }
+
+  @MainActor
+  func testAssistantUnknownSseEventAlsoBlocksReplayEvenWithHttp401() async throws {
+    let wire = "event: future-event\ndata: {}\n\nevent: error\ndata: {\"code\":40100,\"message\":\"terminal\"}\n\n"
+    do {
+      _ = try await assistantStream(status: 401, contentType: "text/event-stream", data: Data(wire.utf8))
+      XCTFail("Every SSE event, including an unknown one, must close the HTTP refresh gate")
+    } catch let failure as QFAPIError { XCTAssertEqual(failure.code, 40100) }
+    XCTAssertEqual(route.snapshot().count, 1)
+  }
+
+  @MainActor
+  func testAssistantSseDoneOnNon2xxCannotBecomeSuccessOrRefreshAuthority() async throws {
+    let wire = "event: done\ndata: {\"answer\":\"untrusted success\"}\n\n"
+    do {
+      _ = try await assistantStream(status: 401, contentType: "text/event-stream", data: Data(wire.utf8))
+      XCTFail("Non-2xx SSE cannot return success or authorize replay after an event")
+    } catch let failure as QFAPIError { XCTAssertEqual(failure.code, 40100) }
+    XCTAssertEqual(route.snapshot().count, 1)
+  }
+
+  @MainActor
+  func testAssistantAdvertisedResumeKeepsOperationBodyAndCursorWithoutDuplicatingText() async throws {
+    let initial = "id: 1\nevent: delta\ndata: {\"text\":\"你好\"}\n\nid: 2\nevent: delta\ndata: {\"text\":\""
+    let recovered = "id: 1\nevent: delta\ndata: {\"text\":\"你好\"}\n\nid: 2\nevent: delta\ndata: {\"text\":\"！\"}\n\nid: 3\nevent: done\ndata: {\"answer\":\"你好！\"}\n\n"
+    stub { request in
+      let wire = request.value(forHTTPHeaderField: "X-QF-Stream-Resume") == "1" ? recovered : initial
+      return .response(200, ["Content-Type":"text/event-stream","X-QF-Stream-Resume":"1"], Data(wire.utf8))
+    }
+    let transport = QFAPIClient.makeTransport(configuration: configuration, requestTimeout: 3, resourceTimeout: 5)
+    defer { transport.session.invalidateAndCancel() }
+    var request = URLRequest(url: URL(string: "https://\(host!)/api/v1/me/assistant/chat/stream")!)
+    request.httpMethod = "POST"; request.httpBody = Data("fixture".utf8); request.setValue("fixed-job", forHTTPHeaderField: "Idempotency-Key")
+    var text = ""
+    let result = try await QFAssistantStreamRun(language: "en", onEvent: { if case .delta(let delta) = $0 { text += delta } }).start(transport: transport, request: request)
+    XCTAssertEqual(result.answer, "你好！"); XCTAssertEqual(text, "你好！")
+    let requests = route.snapshot(); XCTAssertEqual(requests.count, 2)
+    XCTAssertEqual(requests.last?.value(forHTTPHeaderField: "Last-Event-ID"), "1")
+    XCTAssertEqual(requests.last?.value(forHTTPHeaderField: "Idempotency-Key"), "fixed-job")
+    XCTAssertEqual(requests.first?.httpBody, requests.last?.httpBody)
+  }
+
+  @MainActor
+  func testAssistantLegacyServerEofCannotTriggerAnotherBillablePost() async throws {
+    let wire = "event: delta\ndata: {\"text\":\"partial\"}\n\n"
+    do {
+      _ = try await assistantStream(status: 200, contentType: "text/event-stream", data: Data(wire.utf8))
+      XCTFail("EOF without done must remain incomplete")
+    } catch {}
+    XCTAssertEqual(route.snapshot().count, 1)
+  }
+
+  @MainActor
+  private func assistantStream(status: Int, contentType: String, data: Data) async throws -> QFAssistantStreamResult {
+    stub { _ in .response(status, ["Content-Type": contentType], data) }
+    let transport = QFAPIClient.makeTransport(configuration: configuration, requestTimeout: 3, resourceTimeout: 5)
+    defer { transport.session.invalidateAndCancel() }
+    var request = URLRequest(url: URL(string: "https://\(host!)/api/v1/me/assistant/chat/stream")!)
+    request.httpMethod = "POST"; request.httpBody = Data("{}".utf8)
+    return try await QFAssistantStreamRun(language: "en", onEvent: { _ in }).start(transport: transport, request: request)
+  }
+
+  @MainActor
+  func testAssistantConnectivityWaitingDoesNotChangeStandardTransportOrSource() {
+    configuration.waitsForConnectivity = false
+    let ordinary = QFAPIClient.makeTransport(configuration: configuration)
+    let assistant = QFAPIClient.makeTransport(configuration: configuration, requestTimeout: 45, resourceTimeout: 240, waitsForConnectivity: true)
+    defer { ordinary.session.invalidateAndCancel(); assistant.session.invalidateAndCancel() }
+    XCTAssertFalse(configuration.waitsForConnectivity)
+    XCTAssertFalse(ordinary.session.configuration.waitsForConnectivity)
+    XCTAssertTrue(assistant.session.configuration.waitsForConnectivity)
+    XCTAssertEqual(assistant.session.configuration.timeoutIntervalForResource, 240)
+  }
 
   private var headers: [String: String] {
     ["Content-Type": "application/json", "Request-Id": "fixture-request-id"]

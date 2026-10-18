@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "Сканирование штрихкодов на упаковках продуктов для ввода покупок.";
+"NSMicrophoneUsageDescription" = "Запись голосового сообщения и преобразование в текст.";
+"NSSpeechRecognitionUsageDescription" = "Голос преобразуется в текст перед отправкой помощнику по питанию.";
+"NSPhotoLibraryUsageDescription" = "Выбор фотографий продуктов, рецептов или штрихкодов товаров.";

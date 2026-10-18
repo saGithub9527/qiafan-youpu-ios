@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "掃描食材包裝上的商品條碼，以填寫採購明細。";
+"NSMicrophoneUsageDescription" = "錄入語音訊息並轉換為文字。";
+"NSSpeechRecognitionUsageDescription" = "將語音訊息轉換為文字後傳送給飲食助理。";
+"NSPhotoLibraryUsageDescription" = "選擇食材、食譜或商品條碼圖片。";

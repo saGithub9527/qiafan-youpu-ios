@@ -1,0 +1,297 @@
+{
+  "version": "1.78.0",
+  "source": "https://github.com/google/filament/releases/download/v1.78.0/filament-v1.78.0-ios.tgz",
+  "archiveSHA256": "a5476b14496401847854f9aa26a1c11e2e6b3d77a3834d1deedc762abf025242",
+  "libraries": [
+    "filament",
+    "backend",
+    "filaflat",
+    "filabridge",
+    "utils",
+    "geometry",
+    "smol-v",
+    "abseil",
+    "gltfio_core",
+    "dracodec",
+    "meshoptimizer",
+    "stb",
+    "uberarchive",
+    "uberzlib",
+    "zstd",
+    "shaders",
+    "ktxreader",
+    "basis_transcoder"
+  ],
+  "files": [
+    {
+      "path": "Binaries/libabseil.xcframework/Info.plist",
+      "bytes": 1144,
+      "sha256": "8ededccf34db8e0f78bb61c13d0f8f976d0840adb22310be3762753337d59f67"
+    },
+    {
+      "path": "Binaries/libabseil.xcframework/ios-arm64/libabseil.a",
+      "bytes": 1483128,
+      "sha256": "8a9bba0afd2913e13f8f5fbda851cb45659e2381aa89b7ae3228a3fb83b75687"
+    },
+    {
+      "path": "Binaries/libabseil.xcframework/ios-arm64_x86_64-simulator/libabseil.a",
+      "bytes": 3058680,
+      "sha256": "6a97a6d5d750e22d5f8e38f89edf5953a1a64cfa5234d7a806abe7feb7da5bbe"
+    },
+    {
+      "path": "Binaries/libbackend.xcframework/Info.plist",
+      "bytes": 1148,
+      "sha256": "75095bae5ec9e51d3bdb5c055bd3ef26dad206742c9fd2a85183cc1023305f09"
+    },
+    {
+      "path": "Binaries/libbackend.xcframework/ios-arm64/libbackend.a",
+      "bytes": 1330096,
+      "sha256": "3561ccef26e9cb41b7aba38534440e1da8aada3ad3b36c05a05f8365540cec0b"
+    },
+    {
+      "path": "Binaries/libbackend.xcframework/ios-arm64_x86_64-simulator/libbackend.a",
+      "bytes": 2726904,
+      "sha256": "57a97da17f79a7c8caf73b5af05b5f8d12766f17e4b2b2cad6b19a160beedc2c"
+    },
+    {
+      "path": "Binaries/libbasis_transcoder.xcframework/Info.plist",
+      "bytes": 1184,
+      "sha256": "c9757a3d2ea981b3c08e7d873f29bb4e838769abb43c117fadfb8d4ac59a6fc6"
+    },
+    {
+      "path": "Binaries/libbasis_transcoder.xcframework/ios-arm64/libbasis_transcoder.a",
+      "bytes": 916632,
+      "sha256": "fb538ad8747fabc2cd6f7745d22c442fe9097ba15bad744e3b0155a861c57ff1"
+    },
+    {
+      "path": "Binaries/libbasis_transcoder.xcframework/ios-arm64_x86_64-simulator/libbasis_transcoder.a",
+      "bytes": 1952344,
+      "sha256": "a461723cc2fae2d8b8b85957966cbc7ac362143974acff9a135d49b90af7e1a8"
+    },
+    {
+      "path": "Binaries/libdracodec.xcframework/Info.plist",
+      "bytes": 1152,
+      "sha256": "749867d8f6ba92ff4b1adc5fd56c66f17c27b2e04362593438fb60d3405d2ce1"
+    },
+    {
+      "path": "Binaries/libdracodec.xcframework/ios-arm64/libdracodec.a",
+      "bytes": 1257432,
+      "sha256": "0fed3754631a57750e510c5f88bc1edab38584ade0d5962f6f197dafa80750e3"
+    },
+    {
+      "path": "Binaries/libdracodec.xcframework/ios-arm64_x86_64-simulator/libdracodec.a",
+      "bytes": 2668608,
+      "sha256": "c5996759ce3ce5450c13189aa7f4a7edd27b3ca968b9abbcfc836bf24a4e1c72"
+    },
+    {
+      "path": "Binaries/libfilabridge.xcframework/Info.plist",
+      "bytes": 1160,
+      "sha256": "6b3f47a5652111aa7e38574e9b5082aa5d7ccc6134baa85e4fa4194ea2986efa"
+    },
+    {
+      "path": "Binaries/libfilabridge.xcframework/ios-arm64/libfilabridge.a",
+      "bytes": 82312,
+      "sha256": "d2bb7ca5fcdb61a02674660cc2306cc1ccea78a311429f6b625dacf4619dd778"
+    },
+    {
+      "path": "Binaries/libfilabridge.xcframework/ios-arm64_x86_64-simulator/libfilabridge.a",
+      "bytes": 172376,
+      "sha256": "ebf7f60c3d59ca8ac45c3e57f0dc9573d37b6b721e88a7fcefdbfc74e392b069"
+    },
+    {
+      "path": "Binaries/libfilaflat.xcframework/Info.plist",
+      "bytes": 1152,
+      "sha256": "76c572cebbd088ed21605086d760d5ab304821baa25507cf7fbb29aeae359d46"
+    },
+    {
+      "path": "Binaries/libfilaflat.xcframework/ios-arm64/libfilaflat.a",
+      "bytes": 29936,
+      "sha256": "a694c8e296af89c468e919f94bc71d24cac896e42f8890e20d9a7408f36b7a05"
+    },
+    {
+      "path": "Binaries/libfilaflat.xcframework/ios-arm64_x86_64-simulator/libfilaflat.a",
+      "bytes": 64568,
+      "sha256": "86091fbbaadd72ef4233ddd85d55f471aa1433305bb40ffd439295c22c9882da"
+    },
+    {
+      "path": "Binaries/libfilament.xcframework/Info.plist",
+      "bytes": 1152,
+      "sha256": "2c14f30339ef8b9645c9ca54203f39ea3e9a58d4e8b9ea0e88c04c6c969f53a5"
+    },
+    {
+      "path": "Binaries/libfilament.xcframework/ios-arm64/libfilament.a",
+      "bytes": 2831280,
+      "sha256": "e0f31450a916b5985ab0d5122355a4add4ff6086bb5bf7647b5c4a0d489c87b4"
+    },
+    {
+      "path": "Binaries/libfilament.xcframework/ios-arm64_x86_64-simulator/libfilament.a",
+      "bytes": 5902304,
+      "sha256": "e1d0b4ac1c4c26927e8730c6a199222395fa826655b2b60314797b8718ddd84f"
+    },
+    {
+      "path": "Binaries/libgeometry.xcframework/Info.plist",
+      "bytes": 1152,
+      "sha256": "62fac80cf6b5d67a0d31832bba5361421f21a2d3edbdaa4594c2374f605761e4"
+    },
+    {
+      "path": "Binaries/libgeometry.xcframework/ios-arm64/libgeometry.a",
+      "bytes": 220328,
+      "sha256": "73967a28fceffd404cd1bdf11e5b46a7b24ee11567e1fb6b3336d24920c64f46"
+    },
+    {
+      "path": "Binaries/libgeometry.xcframework/ios-arm64_x86_64-simulator/libgeometry.a",
+      "bytes": 493240,
+      "sha256": "f507a7b62964851a6885fbceef0aee4329f192306d3c6648b49dfbfc631131f5"
+    },
+    {
+      "path": "Binaries/libgltfio_core.xcframework/Info.plist",
+      "bytes": 1164,
+      "sha256": "5edb45cc71d9910f7d6c29b74f67b502075fced099f4401983cc1181dfcb9af1"
+    },
+    {
+      "path": "Binaries/libgltfio_core.xcframework/ios-arm64/libgltfio_core.a",
+      "bytes": 732968,
+      "sha256": "9a823725de854d3e70a4fd727f90a849bc2dc787964bf2ce46473ad6bbd08aa4"
+    },
+    {
+      "path": "Binaries/libgltfio_core.xcframework/ios-arm64_x86_64-simulator/libgltfio_core.a",
+      "bytes": 1549544,
+      "sha256": "2b93ca95e1475037235e7455d1c74a31d8004503d52cd71719b43fa058f272bc"
+    },
+    {
+      "path": "Binaries/libktxreader.xcframework/Info.plist",
+      "bytes": 1156,
+      "sha256": "f4acea530e67beb7e46fe12e689d67229885cce215e8b16868c465334fbb41e9"
+    },
+    {
+      "path": "Binaries/libktxreader.xcframework/ios-arm64/libktxreader.a",
+      "bytes": 28584,
+      "sha256": "dc1c9fd31cde64a2f4607ec66cc50871962cd8ef3cb29d567804c474c73b9c1c"
+    },
+    {
+      "path": "Binaries/libktxreader.xcframework/ios-arm64_x86_64-simulator/libktxreader.a",
+      "bytes": 60536,
+      "sha256": "eb6c79daa6acb4237a37f6d4af4c7f7bca49eec29e945da30218fafb4aa80c38"
+    },
+    {
+      "path": "Binaries/libmeshoptimizer.xcframework/Info.plist",
+      "bytes": 1172,
+      "sha256": "553ecef5baf4d098153fd9372455b86c8ef59eadff72f29233b41de403c13c59"
+    },
+    {
+      "path": "Binaries/libmeshoptimizer.xcframework/ios-arm64/libmeshoptimizer.a",
+      "bytes": 81432,
+      "sha256": "cc18f52e08166333cefeb6555ead0c54cbc518bf1c1658c19e5a0eccdf352f7d"
+    },
+    {
+      "path": "Binaries/libmeshoptimizer.xcframework/ios-arm64_x86_64-simulator/libmeshoptimizer.a",
+      "bytes": 189856,
+      "sha256": "ffa331c2e493a312da81ba99478fe4474ff9af6ddb6ae678685cd878ec420a60"
+    },
+    {
+      "path": "Binaries/libshaders.xcframework/Info.plist",
+      "bytes": 1148,
+      "sha256": "8f8129977dd1920acd14cb7df8b685ba54bb00fda6ed4e788ffc1d48553f7ec9"
+    },
+    {
+      "path": "Binaries/libshaders.xcframework/ios-arm64/libshaders.a",
+      "bytes": 145408,
+      "sha256": "1cb8998aae110c36a0a88b2fd5caea8f1ca7c51b6e2c5de7791b0d6012a604a4"
+    },
+    {
+      "path": "Binaries/libshaders.xcframework/ios-arm64_x86_64-simulator/libshaders.a",
+      "bytes": 290840,
+      "sha256": "8651579305788d517beca98276a55c4afc5a43d62982199388acf7355d1edb7c"
+    },
+    {
+      "path": "Binaries/libsmol-v.xcframework/Info.plist",
+      "bytes": 1144,
+      "sha256": "4b755beae0c64894c069868a4b3a91436d5bc36c83dd532d75e636a52fc5a4a8"
+    },
+    {
+      "path": "Binaries/libsmol-v.xcframework/ios-arm64/libsmol-v.a",
+      "bytes": 38424,
+      "sha256": "3d16589447eca888b1f30d2c58e89941a73da3a7339d4eb0487a5e7288aaabe4"
+    },
+    {
+      "path": "Binaries/libsmol-v.xcframework/ios-arm64_x86_64-simulator/libsmol-v.a",
+      "bytes": 70648,
+      "sha256": "0a67673fd14af443d8434591fd70e3dce5bc7daa1add8fe60a13f149a18194c5"
+    },
+    {
+      "path": "Binaries/libstb.xcframework/Info.plist",
+      "bytes": 1132,
+      "sha256": "90032fcb31ef0c9dae0add9db6da6d25435ab531961ed243f0acde2acc47809b"
+    },
+    {
+      "path": "Binaries/libstb.xcframework/ios-arm64/libstb.a",
+      "bytes": 96376,
+      "sha256": "cf741a8ad9fe393d02d45f5e83f88010cf9a7241c98852365b51158b905b55f6"
+    },
+    {
+      "path": "Binaries/libstb.xcframework/ios-arm64_x86_64-simulator/libstb.a",
+      "bytes": 195240,
+      "sha256": "0c959719938b7b0893f5ea74fb5faaadfb68c1dda189c411129a64c4a503be22"
+    },
+    {
+      "path": "Binaries/libuberarchive.xcframework/Info.plist",
+      "bytes": 1164,
+      "sha256": "0dd1c5be2f23b62171a753ed651e15359d527a72370a06c337c1bf1387d6db86"
+    },
+    {
+      "path": "Binaries/libuberarchive.xcframework/ios-arm64/libuberarchive.a",
+      "bytes": 216496,
+      "sha256": "0af0c1e01b47da04aa8b1e852437ff84ee72c8cbe223eeb9e9ea827638827c4e"
+    },
+    {
+      "path": "Binaries/libuberarchive.xcframework/ios-arm64_x86_64-simulator/libuberarchive.a",
+      "bytes": 432896,
+      "sha256": "6554c244e21b04caac09b19808b91fa48ffb0c2bc820deb69dd6ff1422345f22"
+    },
+    {
+      "path": "Binaries/libuberzlib.xcframework/Info.plist",
+      "bytes": 1152,
+      "sha256": "333fad60b012dd27c21c342d7cee13204330484c5b04a630e03d7e173c93ab47"
+    },
+    {
+      "path": "Binaries/libuberzlib.xcframework/ios-arm64/libuberzlib.a",
+      "bytes": 23528,
+      "sha256": "409f507aa936db99f798b1e50951658087b6280dc397e37973cbf60d676d38f2"
+    },
+    {
+      "path": "Binaries/libuberzlib.xcframework/ios-arm64_x86_64-simulator/libuberzlib.a",
+      "bytes": 47536,
+      "sha256": "a8dd7ba0950943baba29d85f90c1267b76a5c0ba455a4f62e4d576ddca3c7cde"
+    },
+    {
+      "path": "Binaries/libutils.xcframework/Info.plist",
+      "bytes": 1140,
+      "sha256": "4db8c8cf920b76218cbeb499795eb0c6613c3313f10fe627ef043fc2b8211bf4"
+    },
+    {
+      "path": "Binaries/libutils.xcframework/ios-arm64/libutils.a",
+      "bytes": 319232,
+      "sha256": "87b7b5accd3891a2036c211b49481db05289d2306fd11bbc8263d881991b7052"
+    },
+    {
+      "path": "Binaries/libutils.xcframework/ios-arm64_x86_64-simulator/libutils.a",
+      "bytes": 677568,
+      "sha256": "332f21bb67d88953e1e189928b839ed558a38b1e3684736fbcb1b904d352009d"
+    },
+    {
+      "path": "Binaries/libzstd.xcframework/Info.plist",
+      "bytes": 1136,
+      "sha256": "0d742a41b1c8f79e30955e7352a9551c30cd110d7718cdc620ce7eb86f89124b"
+    },
+    {
+      "path": "Binaries/libzstd.xcframework/ios-arm64/libzstd.a",
+      "bytes": 659560,
+      "sha256": "3aed5a35fceb1e84bc2f6dbfd960c1a5852496c92f6fd60d8672fd23826afabc"
+    },
+    {
+      "path": "Binaries/libzstd.xcframework/ios-arm64_x86_64-simulator/libzstd.a",
+      "bytes": 1470968,
+      "sha256": "b1256ce151fda40990600ea8cfcf02a9bba6324630a9eea2ef74d87091ec1213"
+    }
+  ]
+}

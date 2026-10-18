@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "Produktbarcodes auf Lebensmittelverpackungen scannen, um Einkäufe zu erfassen.";
+"NSMicrophoneUsageDescription" = "Sprachnachricht aufnehmen und in Text umwandeln.";
+"NSSpeechRecognitionUsageDescription" = "Sprache vor dem Senden an den Ernährungsassistenten in Text umwandeln.";
+"NSPhotoLibraryUsageDescription" = "Fotos von Lebensmitteln, Rezepten oder Produktbarcodes auswählen.";

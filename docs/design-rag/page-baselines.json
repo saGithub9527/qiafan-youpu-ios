@@ -1,0 +1,1445 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-17",
+  "sourceRoot": "../../../../../全球菜谱APP-设计档案/01-当前设计",
+  "precedence": [
+    "approved PNG and page interaction JSON",
+    "editable PSD and delivery notes",
+    "explicit user-approved exceptions",
+    "implementation previews and Git history"
+  ],
+  "pages": [
+    {
+      "id": "recipe-home-r7",
+      "supersedes": "recipe-home-r6",
+      "productPage": "HOME-01",
+      "title": "菜谱首页 · 横向分类与单列卡片",
+      "keywords": [
+        "首页",
+        "菜谱",
+        "推荐",
+        "顶部分类",
+        "Tab",
+        "左右滑动",
+        "筛选",
+        "列表",
+        "JXSegmentedView"
+      ],
+      "sources": [
+        {
+          "path": "01-菜谱与筛选/01-菜谱-推荐.png",
+          "sha256": "0c3858ba705fd9a56cde1f64751bfe5712c270ce6bafb41312eb3ec013831c12"
+        },
+        {
+          "path": "01-菜谱与筛选/页面与交互.json",
+          "sha256": "db18dca6e896abf22da97145865e119474008b3f3ccd221604aea9cb27b1003b"
+        },
+        {
+          "path": "01-菜谱与筛选/交付说明.md",
+          "sha256": "5efcc2af5cdbea821e12f1bd10eaaf74bd5d130e2615cf899b875def894956bf"
+        },
+        {
+          "path": "01-菜谱与筛选/接口接入说明.md",
+          "sha256": "1a5bc8fb92f8162c97e76568a75ef54cc87cc5c9512482730168f45cb044d728"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "categoryHeight": 44,
+        "categorySpacing": 8,
+        "categoryViewport": [
+          12,
+          49,
+          312,
+          44
+        ],
+        "categoryTextLeading": 20,
+        "fixedSearchRect": [
+          332,
+          49,
+          46,
+          44
+        ],
+        "filterRects": [
+          [
+            20,
+            105,
+            83,
+            47
+          ],
+          [
+            109,
+            105,
+            83,
+            47
+          ],
+          [
+            198,
+            105,
+            83,
+            47
+          ],
+          [
+            287,
+            105,
+            83,
+            47
+          ]
+        ],
+        "filterSpacing": 6,
+        "filterCornerRadius": 12,
+        "filterBorderWidth": 1,
+        "sectionTitleBaselineY": 181,
+        "firstCardRect": [
+          20,
+          195,
+          350,
+          128
+        ],
+        "cardGap": 12,
+        "cardCornerRadius": 18,
+        "cardImageSize": 108,
+        "cardImageCornerRadius": 12
+      },
+      "interactionContract": [
+        "Top category taps and horizontal list paging stay bidirectionally synchronized.",
+        "The category strip scrolls directly by horizontal swipe and has no trailing arrow control.",
+        "Search, filters, and section heading remain fixed while category pages move horizontally.",
+        "Each category keeps independent vertical offset, pull-to-refresh state, and incremental pagination.",
+        "Navigation edge-pop wins over horizontal category paging at the leading screen edge.",
+        "Filter changes reload only the visible page immediately and mark other initialized pages stale.",
+        "Vertical lists use pull-to-refresh and automatic upward pagination; no manual next-page button."
+      ],
+      "approvedUserChanges": [
+        {
+          "date": "2026-09-16",
+          "change": "Remove the right-side category arrow and give its width back to the horizontally scrollable category strip."
+        }
+      ],
+      "allowedDynamicChanges": [
+        "localized text length",
+        "server-provided category names and order",
+        "recipe content, counts, loading, empty, and failure states",
+        "safe-area and Dynamic Type adaptation without changing information hierarchy"
+      ],
+      "explicitApprovalRequired": [
+        "page hierarchy",
+        "fixed versus scrolling region boundaries",
+        "filter count or order",
+        "card direction or geometry",
+        "navigation model",
+        "new product capability"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Recipe/QFRecipeHomeModels.swift",
+        "enum": "QFRecipeHomeLayout",
+        "constants": {
+          "pageHorizontalInset": 20,
+          "categoryControlLeading": 12,
+          "categoryTopOffset": 5,
+          "categoryHeight": 44,
+          "categorySpacing": 8,
+          "filterTopGap": 12,
+          "filterHeight": 47,
+          "filterSpacing": 6,
+          "sectionHeight": 39,
+          "listTopGap": 1,
+          "cardMinimumHeight": 128,
+          "cardImageSize": 108,
+          "cardGap": 12,
+          "cardCornerRadius": 18
+        }
+      }
+    },
+    {
+      "id": "plan-create-r1",
+      "productPage": "PLAN-03-04",
+      "title": "制定计划与多选菜谱",
+      "keywords": [
+        "制定计划",
+        "多菜",
+        "日期范围",
+        "重复",
+        "选菜",
+        "草稿"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/03-制定计划.png",
+          "sha256": "9ed134db23908557f9dd196e29781bc91d5afcc899fc2baf28cdce5803f75b4a"
+        },
+        {
+          "path": "04-计划与备菜/04-为计划选菜.png",
+          "sha256": "8d33fa1e22fa779203c4ef7ae66592d2262eaa93bb22819704dd9e74d10b3da3"
+        },
+        {
+          "path": "04-计划与备菜/功能覆盖.md",
+          "sha256": "9ad6d37a3153c9e407c41e077158f991cddb085203f5840d314bc7d375848ffc"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "modeHeight": 38,
+        "cardCornerRadius": 18,
+        "fixed": [
+          "navigation",
+          "selection search and source tabs",
+          "selection count and primary action"
+        ],
+        "scrolling": [
+          "date and meal draft form",
+          "recipe selection list"
+        ],
+        "mealOrder": [
+          "BREAKFAST",
+          "LUNCH",
+          "DINNER"
+        ]
+      },
+      "interactionContract": [
+        "Navigation uses push/pop with guarded edge-back for local unsaved selection.",
+        "Selection and form edits only update local drafts. Save submits one atomic batch.",
+        "Single day or finite inclusive range supports selected ISO weekdays. No indefinite background generation.",
+        "Selecting recipes supports localized name/ingredient search, all/favorite/frequent sources, multiple selection, existing-meal indicators, native pull refresh and MJRefresh upward paging.",
+        "No inventory deduction when saving a plan. Existing recipes are skipped without altering their servings or cooking records."
+      ],
+      "allowedDynamicChanges": [
+        "localized content and Dynamic Type",
+        "loading, empty, failed, existing and selected states",
+        "date picker and weekly repeat expanded states using native UIKit controls"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFCreatePlanViewController.swift",
+        "enum": "QFCreatePlanLayout",
+        "constants": {
+          "pageInset": 20,
+          "modeHeight": 38,
+          "cardRadius": 18,
+          "actionHeight": 50
+        }
+      },
+      "implementationNotes": [
+        "Dates and selected weekday expansion are capped at 42 inclusive days as an explicit bounded API rule; this is not an unlimited recurring schedule.",
+        "Hash/constant verification detects drift; it does not replace simulator visual and interaction review."
+      ]
+    },
+    {
+      "id": "plan-adjust-r1",
+      "productPage": "PLAN-05",
+      "title": "调整当餐计划",
+      "keywords": [
+        "调整当餐计划",
+        "换菜",
+        "移动日期",
+        "跳过",
+        "恢复",
+        "移出计划"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/05-调整当餐计划.png",
+          "sha256": "a947bdc635305bd1b11b9e8ecb7283b1cf373dd2be7846d23bff7a8da27f420b"
+        },
+        {
+          "path": "04-计划与备菜/功能覆盖.md",
+          "sha256": "9ad6d37a3153c9e407c41e077158f991cddb085203f5840d314bc7d375848ffc"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "sheetCornerRadius": 26,
+        "rowCornerRadius": 12,
+        "actionOrder": [
+          "replace",
+          "move",
+          "skip-or-restore",
+          "remove"
+        ],
+        "fixedRegions": [
+          "sheet grabber and safe-area boundary"
+        ],
+        "scrollingRegions": [
+          "meal selection and actions when Dynamic Type needs more room"
+        ]
+      },
+      "interactionContract": [
+        "The contextual menu is a bottom sheet on the existing day plan; recipe and date editors push onto the existing navigation stack.",
+        "For meals with several dishes, select a dish before changing its plan. Completed dishes cannot be replaced or skipped.",
+        "Move drafts stay local until save; expectedRevision prevents overwriting concurrent changes. Lost-response recovery accepts only an exactly matching server state.",
+        "Skip is reversible and keeps the plan visible; remove keeps cooking history. Neither operation creates cooking history or deducts stock."
+      ],
+      "allowedDynamicChanges": [
+        "localized text and Dynamic Type",
+        "pending/completed/skipped states",
+        "native sheet detent adapts to screen size; iOS15 uses large detent for accessibility"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFMealActionsViewController.swift",
+        "enum": "QFMealAdjustmentLayout",
+        "constants": {
+          "pageInset": 20,
+          "rowHeight": 44,
+          "rowRadius": 12,
+          "rowGap": 6,
+          "sheetRadius": 26
+        }
+      },
+      "implementationNotes": [
+        "Actions use the system UISheetPresentationController. The 42 pt drawn rows gain a 44 pt minimum touch area.",
+        "This page edits the selected occurrence; linked recurring-series editing is not claimed implemented."
+      ]
+    },
+    {
+      "id": "plan-complete-r1",
+      "productPage": "PLAN-06",
+      "title": "确认完成做菜",
+      "keywords": [
+        "完成做菜",
+        "实际用量",
+        "库存扣减",
+        "完成打卡",
+        "确认完成"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/06-完成做菜确认.png",
+          "sha256": "98bc1f3cbaec4aa340a9050654c64d105bed79c95d486ae684de60ab8f8a68ea"
+        },
+        {
+          "path": "04-计划与备菜/功能覆盖.md",
+          "sha256": "9ad6d37a3153c9e407c41e077158f991cddb085203f5840d314bc7d375848ffc"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 24,
+        "cardCornerRadius": 18,
+        "minimumMaterialRowHeight": 64,
+        "fixed": [
+          "navigation",
+          "bottom confirmation action"
+        ],
+        "scrolling": [
+          "recipe identity",
+          "actual date and meal",
+          "actual quantities and stock balances",
+          "cost summary"
+        ],
+        "tableColumnOrder": [
+          "ingredient",
+          "actual amount",
+          "unit",
+          "cost"
+        ]
+      },
+      "interactionContract": [
+        "Push/pop navigation; actual quantities and material choices remain local until confirmation.",
+        "Date and meal use native controls; action sheets anchor to the tapped control.",
+        "Save uses one stable cooking-record UUID, expectedPlanRevision and actual materials. Record, inventory and receipt commit or roll back together.",
+        "Unknown transport results freeze the payload for exact retry; stock rejection permits edits. Plan conflicts first reconcile an existing cooking record; never silently create another record ID.",
+        "Missing cost is displayed as unavailable, never zero. Debounced server previews read the actual inventory price basis without saving the draft or reserving stock; confirmation revalidates. Material-delta editing is tracked by plan-record-edit-r1."
+      ],
+      "allowedDynamicChanges": [
+        "Localized text and Dynamic Type",
+        "Recipe/stock content and material count",
+        "Explicit missing price and missing translation states",
+        "Existing user-authorized add/change material control"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFCompleteMealViewController.swift",
+        "enum": "QFMealCompletionLayout",
+        "constants": {
+          "pageInset": 24,
+          "cardRadius": 18,
+          "actionHeight": 54,
+          "rowHeight": 64
+        }
+      },
+      "implementationNotes": [
+        "Approved source defines layout. Cost preview fills the existing cost cells and summary without rebuilding the focused material field.",
+        "Source/hash verification supplements simulator checks; it does not replace them."
+      ]
+    },
+    {
+      "id": "plan-record-edit-r1",
+      "productPage": "PLAN-09-16",
+      "title": "做菜记录原位修改与撤销确认",
+      "keywords": [
+        "修改记录",
+        "实际用量",
+        "差额",
+        "库存返还",
+        "撤销打卡",
+        "记录详情"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/09-修改做菜记录.png",
+          "sha256": "f258e2c7e77db24f402d727eab49beab15b114a3af1e5e644df63ca929501fa5"
+        },
+        {
+          "path": "04-计划与备菜/16-撤销做菜打卡确认.png",
+          "sha256": "cb6fc4f6aaecd604afebf8e6e4d92e20ec7ba33b3e1ad41aab9caa145e2453a0"
+        },
+        {
+          "path": "04-计划与备菜/功能覆盖.md",
+          "sha256": "9ad6d37a3153c9e407c41e077158f991cddb085203f5840d314bc7d375848ffc"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 24,
+        "cardCornerRadius": 18,
+        "minimumMaterialRowHeight": 46,
+        "fixed": [
+          "centered title and edit toggle",
+          "bottom save and undo actions"
+        ],
+        "scrolling": [
+          "recipe identity and completion badge",
+          "actual date and meal",
+          "ingredient / actual amount / unit / cost table",
+          "cost summary"
+        ],
+        "confirmation": "Centered white card over dimmed current detail, with keep and destructive confirm actions"
+      },
+      "interactionContract": [
+        "Push/pop detail; editing expands in place and only changes a local account-scoped draft until save.",
+        "The original record revision and a single request UUID freeze together for uncertain retries; a conflict requires explicit reload.",
+        "Successful ordinary save uses the response snapshot and invalidates affected caches; uncertain retry success fetches latest once because a replay may be historical.",
+        "Changed quantities update only inventory deltas; undo sends the original expectedRevision and restores only net remaining consumption.",
+        "Unknown costs remain unavailable; changing quantities immediately clears any displayed stale total.",
+        "Historical ingredient names remain user record snapshots; interface actions and server units use the app language."
+      ],
+      "allowedDynamicChanges": [
+        "localized text and Dynamic Type",
+        "material count, quantity, unit and known/missing costs",
+        "native date picker and unit/meal action sheets anchored to their source"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFCookingRecordDetailViewController.swift",
+        "enum": "QFCookingRecordDetailLayout",
+        "constants": {
+          "pageInset": 24,
+          "cardRadius": 18,
+          "rowHeight": 46,
+          "actionHeight": 52
+        }
+      },
+      "implementationNotes": [
+        "ACTUAL records use this page. NONE and LEGACY keep their existing editor; LEGACY quantities are read-only.",
+        "Cost basis and per-lot prices are not implemented; explicit unavailable state prevents stale/zero costs.",
+        "This baseline traces the approved design source; verification checks source hashes and constants, while simulator evidence separately checks behavior and visible layout."
+      ]
+    },
+    {
+      "id": "plan-history-r1",
+      "productPage": "PLAN-08",
+      "title": "计划做菜记录：月汇总与按日历史",
+      "keywords": [
+        "计划做菜记录",
+        "历史",
+        "本月完成",
+        "下厨天数",
+        "周日期",
+        "记录分页"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/08-做菜记录.png",
+          "sha256": "689f3d4f2146c6d7848fe439e7d51d426662a7af7376d8c3c60c77bd0b0cd549"
+        },
+        {
+          "path": "04-计划与备菜/功能覆盖.md",
+          "sha256": "9ad6d37a3153c9e407c41e077158f991cddb085203f5840d314bc7d375848ffc"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 24,
+        "summaryCardCount": 2,
+        "summaryHeight": 90,
+        "cardRadius": 18,
+        "dateHeight": 64,
+        "recordMinimumHeight": 86,
+        "fixed": [
+          "centered navigation title, back, add-record action"
+        ],
+        "scrolling": [
+          "monthly completed count and cooking-day cards",
+          "month heading and seven-day date strip",
+          "selected-day heading and totals",
+          "vertical record cards",
+          "monthly cost and dish-statistics entry"
+        ]
+      },
+      "interactionContract": [
+        "This plan-tab entry uses design08. The previously confirmed profile calendar/list view remains separate.",
+        "Records use native reusable UITableView and stable diffable IDs. A full card opens the existing detail via push/pop.",
+        "GET month/date/page loads20 selected-day records; day totals and month summary come from full server aggregates, never from the visible page.",
+        "Native pull-to-refresh resets the selected day to page0. Existing MJRefresh handles automatic upward paging; failure does not advance its page.",
+        "Week navigation and day selection are local controls; recent day snapshots are reused. Child writes invalidate local snapshots and reload shown pages once on return.",
+        "Loading, failure, empty and missing-cost states remain distinct. Unknown cost is not rendered as zero, and currencies are not added together.",
+        "Backfill targets the selected date and existing multi-dish/multi-meal local draft; future dates cannot create history."
+      ],
+      "allowedDynamicChanges": [
+        "localized date/currency/text and Dynamic Type",
+        "record content, counts, missing costs, loading and error states",
+        "vertical list length and server pagination"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFPlanCookingHistoryViewController.swift",
+        "enum": "QFPlanHistoryLayout",
+        "constants": {
+          "pageInset": 24,
+          "cardRadius": 18,
+          "summaryHeight": 90,
+          "dateHeight": 64,
+          "recordHeight": 86
+        }
+      },
+      "implementationNotes": [
+        "Monthly dish statistics reuse the existing statistics page with an explicit month scope; full design10 visual implementation remains separate.",
+        "Inventory-derived cost calculation is not claimed complete. Displayed costs are only existing record values with missing amounts explicitly identified.",
+        "Seven-day strip is centered on initial selection; arrows move7days. Tapping another day in the visible strip preserves its visible dates."
+      ]
+    },
+    {
+      "id": "plan-backfill-r1",
+      "productPage": "PLAN-07",
+      "title": "同日多菜多餐补记与实际库存确认",
+      "keywords": [
+        "补记",
+        "多道菜",
+        "早餐",
+        "午餐",
+        "晚餐",
+        "实际用量",
+        "本地草稿"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/07-补记做菜.png",
+          "sha256": "0d25d142c73de89cd2f9819c46fa283d8a72814174c5c5dac2b6055cca7bfebb"
+        },
+        {
+          "path": "04-计划与备菜/功能覆盖.md",
+          "sha256": "9ad6d37a3153c9e407c41e077158f991cddb085203f5840d314bc7d375848ffc"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 24,
+        "cardCornerRadius": 18,
+        "materialRowMinimumHeight": 64,
+        "actionMinimumHeight": 54,
+        "fixed": [
+          "centered title, back and local draft action",
+          "bottom save action"
+        ],
+        "scrolling": [
+          "meal introduction card",
+          "actual date and meal row",
+          "dish selector",
+          "ingredient / actual amount / unit / stock cost table",
+          "cost summary",
+          "add another dish action"
+        ]
+      },
+      "interactionContract": [
+        "One shared actual date, at most30 dishes; each dish has its own meal. User explicitly requested multiple dishes/meals on one date, not a range of dates.",
+        "Only the selected dish is expanded to preserve the existing design07 hierarchy. Native actions switch between already added dishes.",
+        "Drafts and typed material amounts are local, scoped by account and personal/household inventory. Reading units/catalog/balances never writes a cooking record.",
+        "Recipe quantities are cleared on selection; users confirm positive actual quantities and mapped inventory ingredients before saving.",
+        "One batch request commits all records and stock changes atomically. An uncertain result freezes request UUID, full payload and request language across relaunch and retry.",
+        "Known business validation/stock rejection allows editing; authentication, permission and unknown transport failures retain the receipt.",
+        "One debounced read-only server preview quotes the complete multi-dish draft together. Currencies remain separate; missing unit cost and total are explicit, never zero. Editing stays local and does not reserve inventory."
+      ],
+      "allowedDynamicChanges": [
+        "localized copy and Dynamic Type",
+        "dish/material count and selected dish",
+        "known/unknown stock and missing cost",
+        "user-authorized multiple dish and meal selection"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFBackfillCookingViewController.swift",
+        "enum": "QFBackfillLayout",
+        "constants": {
+          "pageInset": 24,
+          "cardRadius": 18,
+          "materialRowHeight": 64,
+          "actionHeight": 54
+        }
+      },
+      "implementationNotes": [
+        "No new dependencies. Reuse UIKit controls, existing SnapKit constraints, catalog picker and local draft store.",
+        "Legacy personal drafts for the selected date are imported without deleting unrelated dates; legacy cleanup happens only after a valid atomic response.",
+        "Source and constant verification supplements, and does not replace, simulator layout and behavior checks.",
+        "V46 purchase/cost basis and read-only cooking-cost-previews supply this page. Unit price keeps up to six decimal places; save independently revalidates current stock and history."
+      ]
+    },
+    {
+      "id": "inventory-preparation-r1",
+      "productPage": "PLAN-17-21-22 / INGREDIENT-04-05-06",
+      "title": "备菜库存：列表、原位编辑与删除确认",
+      "keywords": [
+        "库存",
+        "备菜",
+        "冰箱",
+        "原位编辑",
+        "删除确认",
+        "食材"
+      ],
+      "sources": [
+        {
+          "path": "05-食材/04-备菜-冰箱已有.png",
+          "sha256": "be9481bdcbaa1e666451e48dcdbd3180665e5ffe338808520b1d75c14e4d1d53"
+        },
+        {
+          "path": "05-食材/05-备菜-原位编辑.png",
+          "sha256": "b2e69bd47165cbee1407bd488fac7e98c57175f99475e155b6af11e0f82f57b3"
+        },
+        {
+          "path": "05-食材/06-备菜-删除确认.png",
+          "sha256": "bb31d25d245ddd0b7d1b2740cb549079202fbcc08588b9dd1c94585205c8684e"
+        },
+        {
+          "path": "05-食材/设计说明.md",
+          "sha256": "699779e57f2820460559eff3273231f634224e580e5a941615e7377031e61517"
+        },
+        {
+          "path": "05-食材/食材图标全局规范.json",
+          "sha256": "dbf9522b4c25741c32f56cc3b27a29e162799638243d35041a15a036241dce88"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "fixedNavigation": "返回、居中备菜、手动添加；内容滚动不带动导航",
+        "scrollOrder": [
+          "扫描小票",
+          "冰箱已有/待采购",
+          "搜索",
+          "单列库存卡片"
+        ],
+        "pageInset": 20,
+        "cardRadius": 16,
+        "iconSize": 48,
+        "editFields": "食材名称/存放位置；库存数量/单位，2x2；取消/删除/保存",
+        "deletion": "底部确认sheet，带取消和红色删除"
+      },
+      "interactionContract": [
+        "库存卡片原位展开，编辑不调用写接口；提交数量与位置原子保存",
+        "列表按批次ID增量替换；列表下拉与MJRefresh上拉，编辑中不覆盖草稿",
+        "删除需明确确认；服务端归档，不删除流水，不自动复活归档库存",
+        "草稿按账号及个人/家庭scope隔离；请求不确定时冻结原body/key重试",
+        "食材身份和基础单位本阶段只读，不能把跨食材替换当成改名；此为尚未完成的设计能力，不宣称设计已全量实现",
+        "扫码、采购自动重算与成本日期/规格/价格不在本次完成范围"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Ingredient/QFInventoryInlineDraft.swift",
+        "constants": {
+          "cardRadius": 16,
+          "iconSize": 48,
+          "fieldHeight": 44,
+          "sheetRadius": 26
+        }
+      }
+    },
+    {
+      "id": "plan-purchase-cost-r1",
+      "productPage": "PLAN-11-12-13-14-15-20",
+      "title": "备菜花销、账单与实际消耗成本",
+      "keywords": [
+        "采购",
+        "成本",
+        "花销",
+        "账单",
+        "入库",
+        "价格补全",
+        "退款",
+        "规格"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/11-备菜花销与采购账单.png",
+          "sha256": "fb834621842aa7d2753c0eefbc4616fba481c519571d88f21827c2cb406a0303"
+        },
+        {
+          "path": "04-计划与备菜/12-采购账单详情与编辑入口.png",
+          "sha256": "891715f66c40d75bbfe2622a55f1cfe3b4cddb0846345faf49ff33ae84b4c43b"
+        },
+        {
+          "path": "04-计划与备菜/13-食材实际消耗成本.png",
+          "sha256": "840d273c0ed6fe36a74b96f7a91d351350bcf645958cc6bf4f47ecd47663ac41"
+        },
+        {
+          "path": "04-计划与备菜/14-采购账单原位编辑.png",
+          "sha256": "05f098cc8279eb3de4887f7e7369d34da657545c90a51ad29696ee5dcc4e0664"
+        },
+        {
+          "path": "04-计划与备菜/15-补全缺失的食材成本.png",
+          "sha256": "2f490ae6f837522e7380f97a971a6d31df5deb8580e720109277b66a1e7e2c08"
+        },
+        {
+          "path": "04-计划与备菜/20-采购明细确认入库.png",
+          "sha256": "26d4c8f8250643f6535c5bfd175637f8501c3791cf071b864e186b193f171296"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "cardCornerRadius": 18,
+        "minimumActionHeight": 48,
+        "chartHeight": 150
+      },
+      "interactionContract": [
+        "Pages push and preserve edge-back; fixed navigation and save footer are outside the scrolling form.",
+        "Week/month/custom expense filters use business dates; chart currencies remain separate.",
+        "Bill detail edits in place; local drafts do not make write requests until Save.",
+        "First receipt save creates expense and inventory exactly once; uncertain retry retains the frozen UUID/body.",
+        "Unknown price is not zero; missing old-source price completion never creates purchase expense.",
+        "Changing old purchase facts revalidates event-time stock and recalculates later costs.",
+        "Tables support pull-to-refresh and automatic upward pagination; forms do not pull-refresh away edits.",
+        "Receipt QR decoding requires a merchant-data integration; arbitrary URLs are not treated as purchased items."
+      ],
+      "allowedDynamicChanges": [
+        "localized content",
+        "real money and quantities",
+        "unknown price and date states",
+        "safe-area and accessibility resizing"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFPurchaseReceiptViewController.swift",
+        "enum": "QFPurchaseLayout",
+        "constants": {
+          "pageInset": 20,
+          "cardRadius": 18,
+          "actionHeight": 48,
+          "chartHeight": 150
+        }
+      }
+    },
+    {
+      "id": "receipt-scanner-r1",
+      "productPage": "PLAN-19",
+      "title": "小票二维码扫描",
+      "keywords": [
+        "扫码",
+        "小票",
+        "相机",
+        "二维码"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/19-小票二维码扫描.png",
+          "sha256": "078a204a4250657316ed32f50045d1a80cbd553ef8f2c99dd2d2db14e83342f2"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "background": "dark green",
+        "navigation": "fixed top back and centered title",
+        "scanner": "centered corner frame, scan line, one hint",
+        "footer": "flashlight and photo library; no shutter"
+      },
+      "interactionContract": [
+        "Push navigation; camera starts after permission, stops offscreen and in background.",
+        "QR only, including photo library; no OCR replacement.",
+        "Decoded URLs never trigger arbitrary fetches; merchant item retrieval requires a configured resolver.",
+        "Unsupported receipt offers manual local purchase draft; nothing is uploaded or stocked by scanning."
+      ]
+    },
+    {
+      "id": "receipt-scanner-r2",
+      "supersedes": "receipt-scanner-r1",
+      "productPage": "PLAN-19",
+      "title": "小票扫码与印字识别",
+      "keywords": [
+        "小票",
+        "二维码",
+        "商品",
+        "数量",
+        "价格",
+        "文字识别",
+        "OCR"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/19-小票二维码扫描.png",
+          "sha256": "078a204a4250657316ed32f50045d1a80cbd553ef8f2c99dd2d2db14e83342f2"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        }
+      ],
+      "approvedException": "2026-10-09 用户明确要求在没有二维码样本时从小票上识别商品、数量和价格，因此增加拍摄纸质小票的本机文字识别入口；固定导航、扫描框和深绿色视觉保持不变。",
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "background": "dark green",
+        "navigation": "fixed top back and centered title",
+        "scanner": "centered corner frame, scan line, one hint",
+        "footer": "flashlight, native document capture and photo library"
+      },
+      "interactionContract": [
+        "Push navigation; camera starts after permission, stops offscreen and in background.",
+        "Decode supported structured QR items locally; arbitrary URLs are never fetched.",
+        "A document photo is recognized on device, and every result remains an editable local draft.",
+        "User must review merchant, currency, quantity, unit, price and ingredient mapping before saving; scanning alone never writes inventory.",
+        "Unsupported or unreadable receipt offers manual draft or continued scanning."
+      ]
+    },
+    {
+      "id": "ingredient-discovery-r1",
+      "productPage": "INGREDIENT-01-03",
+      "title": "食材首页、食材大全与组合推荐",
+      "keywords": [
+        "食材大全",
+        "组合推荐",
+        "食材首页",
+        "分类侧栏",
+        "库存匹配",
+        "Emoji"
+      ],
+      "sources": [
+        {
+          "path": "05-食材/01-食材-首页.png",
+          "sha256": "b4b6f156a3f8f6e24ba3c721665d3cc4c16db23c4922be495822cad275b8234c"
+        },
+        {
+          "path": "05-食材/02-食材大全.png",
+          "sha256": "07d50ecbe355650525a87958a21dbb884f0f4e146390d87df9936e97422e15f7"
+        },
+        {
+          "path": "05-食材/03-食材组合推荐.png",
+          "sha256": "4afda8e9e8c5c2cd0ca72b07fcec91750b407051be17c7b3300502b09bc2087f"
+        },
+        {
+          "path": "05-食材/设计说明.md",
+          "sha256": "699779e57f2820460559eff3273231f634224e580e5a941615e7377031e61517"
+        },
+        {
+          "path": "05-食材/食材图标全局规范.json",
+          "sha256": "dbf9522b4c25741c32f56cc3b27a29e162799638243d35041a15a036241dce88"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "catalogColumns": 2,
+        "sidebarWidth": 68,
+        "catalogLeading": 100,
+        "cardRadius": 20,
+        "ingredientIconSlot": 48,
+        "combinationHorizontalInset": 20
+      },
+      "interactionContract": [
+        "Fixed search and category sidebar; card list alone uses pull refresh and MJRefresh pagination.",
+        "Combination mode, selected chips, taste and time remain above the results scroll. Edge navigation gesture has priority.",
+        "At home picks positive stock; free choice uses current-language published catalog. Up to 40 unique standard IDs, no selection writes.",
+        "Server returns AVAILABLE, SHORT or UNCONFIRMED, never assume uncertain conversion is sufficient stock.",
+        "Use persisted server iconKey, category fallback, then generic; no translated-name identity guessing.",
+        "Account, household and language switches cancel stale requests and clear old context."
+      ],
+      "implementationBoundary": [
+        "Merchant receipt parsing has no external provider contract yet.",
+        "Hash checks are not a substitute for simulator and visual verification."
+      ]
+    },
+    {
+      "id": "plan-cooking-usage-r1",
+      "productPage": "PLAN-10-18",
+      "title": "菜品使用统计与采购清单原子入库",
+      "keywords": [
+        "菜品统计",
+        "做菜次数",
+        "采购清单",
+        "入库",
+        "统计"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/10-菜品使用统计.png",
+          "sha256": "24873064e63db31000faab31cd682b81b540466e49b8c2e597c1d26a85a07bda"
+        },
+        {
+          "path": "04-计划与备菜/18-备菜-待采购.png",
+          "sha256": "a4e8e5c6880327aab3fefd06ac7ee2ba6274fbb91939ef4c09df55182463df6d"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "cardCornerRadius": 18,
+        "minimumActionHeight": 48,
+        "statisticsColumns": 3
+      },
+      "interactionContract": [
+        "10 keeps week/month/custom filters, three summary values, ranked recipe cards and original orange/green palette. Infinite pagination uses existing MJRefresh; no title-based identity grouping.",
+        "Statistics count the complete requested range on the server. Unknown costs remain pending and currencies remain separate.",
+        "18 receipt confirmation is a local draft. Only final Save atomically writes the receipt, inventory and selected shopping fulfillment. Checking an item alone does not receive stock.",
+        "Source list and item revisions plus durable request UUID protect concurrent receipt and retry. Archived source stock can receive only historical returns, never new consumption."
+      ],
+      "implementationBoundary": [
+        "Merchant QR item retrieval still requires an external provider.",
+        "Fixture, real database and live deployment checks are distinct."
+      ]
+    },
+    {
+      "id": "plan-home-r1",
+      "title": "计划月历与多菜餐单",
+      "keywords": [
+        "计划",
+        "月历",
+        "餐单",
+        "空餐次",
+        "展开",
+        "收起"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/01-计划-月历与当日概览.png",
+          "sha256": "0ebbc7e39456fde7e8d75e1a973bd3adf19129dde93b13a39b05735774a3d646"
+        },
+        {
+          "path": "04-计划与备菜/02-计划-多菜餐单与打卡.png",
+          "sha256": "631a89b31319fb9dcc522b70527fb6b6ebf5aebb76fae73732a4c481fe6a44bc"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "collapsedDishCount": 3,
+        "fixed": [
+          "制定计划、备菜及底部Tab"
+        ],
+        "scrolling": [
+          "月历、当日概览、三餐卡片"
+        ]
+      },
+      "interactionContract": [
+        "早餐午餐晚餐保留空餐次的去安排入口。",
+        "每餐超过3道先展示前三道，可展开与收起；展开不调用接口、不修改计划。",
+        "按当前账号、个人/家庭及日期隔离展开状态。"
+      ]
+    },
+    {
+      "id": "assistant-chat-r1",
+      "productPage": "ASSISTANT-CHAT",
+      "title": "智能体 · 全屏聊天与真实流式过程",
+      "keywords": [
+        "智能体",
+        "聊天",
+        "全屏",
+        "SSE",
+        "DeepSeek",
+        "千问",
+        "过程"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r1.md",
+          "sha256": "c13826bf61686c510d904f60f93ff5ccfe3b63a32fe32f06ac02742345626ce7"
+        }
+      ],
+      "layoutContract": {
+        "presentation": "fullScreen",
+        "horizontalInset": 16,
+        "composerMaxHeight": 132,
+        "navigation": "safe area fixed",
+        "list": "UITableView reuse",
+        "composer": "keyboard layout guide"
+      },
+      "interactionContract": [
+        "本地默认，可显式切换云端",
+        "实际进度与回答分开，过程可折叠",
+        "停止保留partial，不自动重放",
+        "上滑阅读时不强制滚动到底部",
+        "账号家庭语言切换取消并隔离"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Assistant/QFAssistantChatUI.swift",
+        "constants": {
+          "chatHorizontalInset": 16,
+          "composerMaxHeight": 132
+        }
+      }
+    },
+    {
+      "id": "assistant-chat-r2",
+      "productPage": "ASSISTANT-CHAT",
+      "title": "智能体 · 持续会话与即时思考",
+      "keywords": [
+        "智能体",
+        "聊天",
+        "全屏",
+        "SSE",
+        "DeepSeek",
+        "千问",
+        "过程"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r2.md",
+          "sha256": "6bdce970d832b2fcfd80989c5ae072651d4a009b9353312ef0704527dc8ed9ea"
+        }
+      ],
+      "layoutContract": {
+        "presentation": "fullScreen",
+        "horizontalInset": 16,
+        "composerMaxHeight": 132,
+        "navigation": "safe area fixed",
+        "list": "UITableView reuse",
+        "composer": "keyboard layout guide"
+      },
+      "interactionContract": [
+        "本地默认，可显式切换云端",
+        "发送同步显示扫光思考与即时问题理解",
+        "真实正文逐字显示，气泡宽度按内容适配",
+        "导航和关闭不取消，返回复用同一任务",
+        "短暂断网仅恢复已声明协议的同一任务，最多两次",
+        "明确停止或账号家庭语言切换取消并隔离"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Assistant/QFAssistantChatUI.swift",
+        "constants": {
+          "chatHorizontalInset": 16,
+          "composerMaxHeight": 132
+        }
+      },
+      "supersedes": "assistant-chat-r1"
+    },
+    {
+      "id": "assistant-chat-r3",
+      "productPage": "ASSISTANT-CHAT",
+      "title": "智能体 · 实时语音与平滑正文",
+      "keywords": [
+        "智能体",
+        "聊天",
+        "全屏",
+        "SSE",
+        "DeepSeek",
+        "千问",
+        "过程",
+        "语音",
+        "按住说话",
+        "实时转写",
+        "渐现",
+        "菜谱详情"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r3.md",
+          "sha256": "c56f19541d4791affdbd57d42c63cbf005295a662b3faa18e9336db95dfc209a"
+        }
+      ],
+      "layoutContract": {
+        "presentation": "fullScreen",
+        "horizontalInset": 16,
+        "composerMaxHeight": 132,
+        "navigation": "safe area fixed",
+        "list": "UITableView reuse",
+        "composer": "keyboard layout guide"
+      },
+      "interactionContract": [
+        "本地默认，可显式切换云端",
+        "发送同步显示扫光思考与即时问题理解",
+        "真实正文逐字显示，气泡宽度按内容适配",
+        "导航和关闭不取消，返回复用同一任务",
+        "短暂断网仅恢复已声明协议的同一任务，最多两次",
+        "明确停止或账号家庭语言切换取消并隔离",
+        "语音与发送各自独立；按住实时转写，松手可编辑，上滑取消",
+        "随显示刷新追加真实文字，仅新增字渐现，手动阅读不拉到底部",
+        "两个菜谱入口共享原文结构投影，不把原料和计算编号为步骤"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Assistant/QFAssistantChatUI.swift",
+        "constants": {
+          "chatHorizontalInset": 16,
+          "composerMaxHeight": 132
+        }
+      },
+      "supersedes": "assistant-chat-r2"
+    },
+    {
+      "id": "assistant-chat-r4",
+      "productPage": "ASSISTANT-CHAT",
+      "title": "智能体 · 默认联网与首页下一餐提醒",
+      "keywords": [
+        "智能体",
+        "聊天",
+        "全屏",
+        "SSE",
+        "DeepSeek",
+        "千问",
+        "过程",
+        "语音",
+        "按住说话",
+        "实时转写",
+        "渐现",
+        "菜谱详情",
+        "默认联网",
+        "计划提醒",
+        "库存",
+        "下一餐",
+        "首页光球"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r4.md",
+          "sha256": "101566bf411fbfdb826f9c9fcc9011c030ffdcab0760763389b21e1114f6e159"
+        }
+      ],
+      "layoutContract": {
+        "presentation": "fullScreen",
+        "horizontalInset": 16,
+        "composerMaxHeight": 132,
+        "navigation": "safe area fixed",
+        "list": "UITableView reuse",
+        "composer": "keyboard layout guide"
+      },
+      "interactionContract": [
+        "本地默认，可显式切换云端",
+        "发送同步显示扫光思考与即时问题理解",
+        "真实正文逐字显示，气泡宽度按内容适配",
+        "导航和关闭不取消，返回复用同一任务",
+        "短暂断网仅恢复已声明协议的同一任务，最多两次",
+        "明确停止或账号家庭语言切换取消并隔离",
+        "语音与发送各自独立；按住实时转写，松手可编辑，上滑取消",
+        "随显示刷新追加真实文字，仅新增字渐现，手动阅读不拉到底部",
+        "两个菜谱入口共享原文结构投影，不把原料和计算编号为步骤",
+        "联网偏好缺省开启，显式关闭持久保留且账号隔离",
+        "首页光球显示真实下一餐与库存，点击既有计划路由",
+        "真实提醒优先，范围切换清理，未知库存明确提示",
+        "单条计划先冻结幂等正文，保留原计划"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Assistant/QFAssistantChatUI.swift",
+        "constants": {
+          "chatHorizontalInset": 16,
+          "composerMaxHeight": 132
+        }
+      },
+      "supersedes": "assistant-chat-r3"
+    },
+    {
+      "id": "product-barcode-scanner-r1",
+      "supersedes": "receipt-scanner-r2",
+      "productPage": "PLAN-19",
+      "title": "商品包装条形码扫描",
+      "keywords": [
+        "小票",
+        "二维码",
+        "商品",
+        "数量",
+        "价格",
+        "文字识别",
+        "OCR",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/19-小票二维码扫描.png",
+          "sha256": "078a204a4250657316ed32f50045d1a80cbd553ef8f2c99dd2d2db14e83342f2"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r1.md",
+          "sha256": "24a428344465b29d90999e20d336ab9092e500254e24b357ad5f97c87abc06fb"
+        }
+      ],
+      "approvedException": "2026-10-17 用户要求移除小票扫描，仅扫描食材商品包装条形码，名称可改；牙线只作为扫码举例。",
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "background": "dark green",
+        "navigation": "fixed top back and centered title",
+        "scanner": "centered corner frame, scan line, one hint",
+        "footer": "flashlight, manual entry and photo library"
+      },
+      "interactionContract": [
+        "Push with camera permission; stop capture offscreen/background.",
+        "Decode product EAN/UPC only; no receipt QR/OCR.",
+        "One item per selected barcode, anonymous optional fixed-provider name lookup with manual fallback.",
+        "Editable product name independent from ingredient ID; default count1, unknown price nil.",
+        "Only final purchase Save writes stock; drafts and existing receipts stay readable."
+      ]
+    },
+    {
+      "id": "purchase-product-entry-r2",
+      "productPage": "PLAN-11-12-13-14-15-20",
+      "title": "采购商品名称编辑与条码录入",
+      "keywords": [
+        "采购",
+        "成本",
+        "花销",
+        "账单",
+        "入库",
+        "价格补全",
+        "退款",
+        "规格",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/11-备菜花销与采购账单.png",
+          "sha256": "fb834621842aa7d2753c0eefbc4616fba481c519571d88f21827c2cb406a0303"
+        },
+        {
+          "path": "04-计划与备菜/12-采购账单详情与编辑入口.png",
+          "sha256": "891715f66c40d75bbfe2622a55f1cfe3b4cddb0846345faf49ff33ae84b4c43b"
+        },
+        {
+          "path": "04-计划与备菜/13-食材实际消耗成本.png",
+          "sha256": "840d273c0ed6fe36a74b96f7a91d351350bcf645958cc6bf4f47ecd47663ac41"
+        },
+        {
+          "path": "04-计划与备菜/14-采购账单原位编辑.png",
+          "sha256": "05f098cc8279eb3de4887f7e7369d34da657545c90a51ad29696ee5dcc4e0664"
+        },
+        {
+          "path": "04-计划与备菜/15-补全缺失的食材成本.png",
+          "sha256": "2f490ae6f837522e7380f97a971a6d31df5deb8580e720109277b66a1e7e2c08"
+        },
+        {
+          "path": "04-计划与备菜/20-采购明细确认入库.png",
+          "sha256": "26d4c8f8250643f6535c5bfd175637f8501c3791cf071b864e186b193f171296"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r1.md",
+          "sha256": "24a428344465b29d90999e20d336ab9092e500254e24b357ad5f97c87abc06fb"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "cardCornerRadius": 18,
+        "minimumActionHeight": 48,
+        "chartHeight": 150
+      },
+      "interactionContract": [
+        "Pages push and preserve edge-back; fixed navigation and save footer are outside the scrolling form.",
+        "Week/month/custom expense filters use business dates; chart currencies remain separate.",
+        "Bill detail edits in place; local drafts do not make write requests until Save.",
+        "First receipt save creates expense and inventory exactly once; uncertain retry retains the frozen UUID/body.",
+        "Unknown price is not zero; missing old-source price completion never creates purchase expense.",
+        "Changing old purchase facts revalidates event-time stock and recalculates later costs.",
+        "Tables support pull-to-refresh and automatic upward pagination; forms do not pull-refresh away edits.",
+        "Product name is a text field, ingredient mapping separate; manual amount/quantity confirmation.",
+        "Barcode hints remain local; same-code repeats never increment quantity automatically; frozen pending drafts cannot append."
+      ],
+      "allowedDynamicChanges": [
+        "localized content",
+        "real money and quantities",
+        "unknown price and date states",
+        "safe-area and accessibility resizing"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFPurchaseReceiptViewController.swift",
+        "enum": "QFPurchaseLayout",
+        "constants": {
+          "pageInset": 20,
+          "cardRadius": 18,
+          "actionHeight": 48,
+          "chartHeight": 150
+        }
+      },
+      "supersedes": "plan-purchase-cost-r1",
+      "approvedException": "2026-10-17 用户要求移除小票扫描，仅扫描食材商品包装条形码，名称可改；牙线只作为扫码举例。"
+    },
+    {
+      "id": "inventory-preparation-r2",
+      "productPage": "PLAN-17-21-22 / INGREDIENT-04-05-06",
+      "title": "备菜库存与商品条码入口",
+      "keywords": [
+        "库存",
+        "备菜",
+        "冰箱",
+        "原位编辑",
+        "删除确认",
+        "食材",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "05-食材/04-备菜-冰箱已有.png",
+          "sha256": "be9481bdcbaa1e666451e48dcdbd3180665e5ffe338808520b1d75c14e4d1d53"
+        },
+        {
+          "path": "05-食材/05-备菜-原位编辑.png",
+          "sha256": "b2e69bd47165cbee1407bd488fac7e98c57175f99475e155b6af11e0f82f57b3"
+        },
+        {
+          "path": "05-食材/06-备菜-删除确认.png",
+          "sha256": "bb31d25d245ddd0b7d1b2740cb549079202fbcc08588b9dd1c94585205c8684e"
+        },
+        {
+          "path": "05-食材/设计说明.md",
+          "sha256": "699779e57f2820460559eff3273231f634224e580e5a941615e7377031e61517"
+        },
+        {
+          "path": "05-食材/食材图标全局规范.json",
+          "sha256": "dbf9522b4c25741c32f56cc3b27a29e162799638243d35041a15a036241dce88"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r1.md",
+          "sha256": "24a428344465b29d90999e20d336ab9092e500254e24b357ad5f97c87abc06fb"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "fixedNavigation": "返回、居中备菜、手动添加；内容滚动不带动导航",
+        "scrollOrder": [
+          "扫描商品条码",
+          "冰箱已有/待采购",
+          "搜索",
+          "单列库存卡片"
+        ],
+        "pageInset": 20,
+        "cardRadius": 16,
+        "iconSize": 48,
+        "editFields": "食材名称/存放位置；库存数量/单位，2x2；取消/删除/保存",
+        "deletion": "底部确认sheet，带取消和红色删除"
+      },
+      "interactionContract": [
+        "库存卡片原位展开，编辑不调用写接口；提交数量与位置原子保存",
+        "列表按批次ID增量替换；列表下拉与MJRefresh上拉，编辑中不覆盖草稿",
+        "删除需明确确认；服务端归档，不删除流水，不自动复活归档库存",
+        "草稿按账号及个人/家庭scope隔离；请求不确定时冻结原body/key重试",
+        "食材身份和基础单位本阶段只读，不能把跨食材替换当成改名；此为尚未完成的设计能力，不宣称设计已全量实现",
+        "扫码、采购自动重算与成本日期/规格/价格不在本次完成范围",
+        "扫描入口改为商品包装条形码；不扫描小票QR/OCR，库存卡片编辑合同保持。"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Ingredient/QFInventoryInlineDraft.swift",
+        "constants": {
+          "cardRadius": 16,
+          "iconSize": 48,
+          "fieldHeight": 44,
+          "sheetRadius": 26
+        }
+      },
+      "supersedes": "inventory-preparation-r1",
+      "approvedException": "2026-10-17 用户要求移除小票扫描，仅扫描食材商品包装条形码，名称可改；牙线只作为扫码举例。"
+    }
+  ]
+}

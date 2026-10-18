@@ -1,0 +1,6 @@
+// Copy this file to Getui.local.xcconfig and fill values from the Getui app page.
+// AppSecret is required by the iOS SDK and is therefore embedded in the signed app.
+// Never put the server-side MasterSecret here.
+QF_GETUI_APP_ID = your_getui_app_id
+QF_GETUI_APP_KEY = your_getui_app_key
+QF_GETUI_APP_SECRET = your_getui_app_secret

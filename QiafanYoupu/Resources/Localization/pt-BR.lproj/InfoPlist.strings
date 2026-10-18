@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "Ler códigos de barras em embalagens de alimentos para registrar compras.";
+"NSMicrophoneUsageDescription" = "Grave uma mensagem de voz e converta-a em texto.";
+"NSSpeechRecognitionUsageDescription" = "Converta a voz em texto antes de enviar ao assistente de alimentação.";
+"NSPhotoLibraryUsageDescription" = "Selecionar fotos de alimentos, receitas ou códigos de barras de produtos.";

@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "Scan barcodes on food packages to enter purchase details.";
+"NSMicrophoneUsageDescription" = "Record a voice message and convert it to text.";
+"NSSpeechRecognitionUsageDescription" = "Convert voice messages to text before sending them to the diet assistant.";
+"NSPhotoLibraryUsageDescription" = "Choose food, recipe or product-barcode photos.";

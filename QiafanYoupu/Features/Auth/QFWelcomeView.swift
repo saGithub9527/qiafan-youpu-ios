@@ -102,7 +102,7 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
 
     for index in 0..<5 {
       let page = QFWelcomePageView(
-        page: index,
+        app: app, page: index,
         onSelectPage: { [weak self] page in self?.selectPage(page) },
         onEnter: { [weak self] in self?.requestEntry() })
       row.addArrangedSubview(page)
@@ -135,7 +135,7 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
     }
 
     let copy = UILabel()
-    copy.text = "下厨，从这里开始"
+    copy.text = app.text("下厨，从这里开始", "Start cooking here")
     copy.font = QFWelcomePalette.font(size: 12, weight: .medium)
     copy.textColor = QFWelcomePalette.secondary
     header.addSubview(copy)
@@ -144,7 +144,7 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
       $0.centerY.equalTo(icon)
     }
 
-    skipButton.setTitle("跳过介绍", for: .normal)
+    skipButton.setTitle(app.text("跳过介绍", "Skip intro"), for: .normal)
     skipButton.titleLabel?.font = QFWelcomePalette.font(size: 12, weight: .regular)
     skipButton.setTitleColor(QFWelcomePalette.secondary, for: .normal)
     skipButton.contentHorizontalAlignment = .right
@@ -185,7 +185,8 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
   }
 
   private func updatePageAccessibility() {
-    pager.accessibilityValue = "第 \(selectedPage + 1) 页，共 5 页"
+    pager.accessibilityValue = app.format(
+      "第 %d 页，共 5 页", "Page %d of 5", selectedPage + 1)
     skipButton.isHidden = selectedPage == 4
     for (index, page) in pages.enumerated() {
       page.accessibilityElementsHidden = index != selectedPage
@@ -223,29 +224,35 @@ final class QFWelcomeViewController: UIViewController, UIScrollViewDelegate {
 
 @MainActor
 private final class QFWelcomePageView: UIView {
+  private let app: QFAppSession
   private let page: Int
   private let onSelectPage: (Int) -> Void
   private let onEnter: () -> Void
   private let artwork = UIImageView()
   private var artworkLoaded = false
 
-  private static let titles = [
-    ["今天，", "想做点什么？"],
-    ["把世界风味，", "端上餐桌"],
-    ["搜一道菜，", "跟着步骤做"],
-    ["这一周，", "吃得有计划"],
-    ["准备好，开饭啦"],
-  ]
+  private var titles: [[String]] {
+    [
+      [app.text("今天，", "What would you"), app.text("想做点什么？", "like to cook today?")],
+      [app.text("把世界风味，", "Bring world flavors"), app.text("端上餐桌", "to your table")],
+      [app.text("搜一道菜，", "Find a recipe,"), app.text("跟着步骤做", "then follow each step")],
+      [app.text("这一周，", "Plan your meals"), app.text("吃得有计划", "for the week")],
+      [app.text("准备好，开饭啦", "Ready? Let's eat!")],
+    ]
+  }
 
-  private static let subtitles = [
-    ["和小狗厨师一起，", "把每一天，做得有滋有味。"],
-    ["按国家、口味与菜系探索，", "找到今天想尝试的那一味。"],
-    ["先看需要什么食材，", "再跟着清晰步骤，一步步开做。"],
-    ["安排一周菜单，整理所需食材，", "让每天吃什么，提前有答案。"],
-    ["从第一道想做的菜开始，", "发现属于你的好味道。"],
-  ]
+  private var subtitles: [[String]] {
+    [
+      [app.text("和小狗厨师一起，", "Cook with our puppy chef"), app.text("把每一天，做得有滋有味。", "and make every day delicious.")],
+      [app.text("按国家、口味与菜系探索，", "Explore by country, taste, and cuisine"), app.text("找到今天想尝试的那一味。", "to find what you want today.")],
+      [app.text("先看需要什么食材，", "Check the ingredients first,"), app.text("再跟着清晰步骤，一步步开做。", "then cook with clear instructions.")],
+      [app.text("安排一周菜单，整理所需食材，", "Plan a weekly menu and ingredients"), app.text("让每天吃什么，提前有答案。", "so every meal has an answer.")],
+      [app.text("从第一道想做的菜开始，", "Start with the first dish you want to make"), app.text("发现属于你的好味道。", "and discover flavors of your own.")],
+    ]
+  }
 
-  init(page: Int, onSelectPage: @escaping (Int) -> Void, onEnter: @escaping () -> Void) {
+  init(app: QFAppSession, page: Int, onSelectPage: @escaping (Int) -> Void, onEnter: @escaping () -> Void) {
+    self.app = app
     self.page = page
     self.onSelectPage = onSelectPage
     self.onEnter = onEnter
@@ -273,11 +280,11 @@ private final class QFWelcomePageView: UIView {
     artwork.isAccessibilityElement = true
     artwork.accessibilityTraits = .image
     artwork.accessibilityLabel = [
-      "小狗厨师拿着锅铲和一锅蔬菜",
-      "按国家、口味与菜系探索不同地方的菜",
-      "搜索菜谱、查看食材并跟着步骤做菜",
-      "安排一周菜单并整理需要的食材",
-      "小狗厨师准备开饭",
+      app.text("小狗厨师拿着锅铲和一锅蔬菜", "A puppy chef holding a spatula beside a pot of vegetables"),
+      app.text("按国家、口味与菜系探索不同地方的菜", "Explore dishes from different places by country, taste, and cuisine"),
+      app.text("搜索菜谱、查看食材并跟着步骤做菜", "Search recipes, check ingredients, and follow cooking steps"),
+      app.text("安排一周菜单并整理需要的食材", "Plan a weekly menu and organize the ingredients you need"),
+      app.text("小狗厨师准备开饭", "The puppy chef is ready to eat"),
     ][page]
     addSubview(artwork)
     artwork.snp.makeConstraints {
@@ -289,7 +296,7 @@ private final class QFWelcomePageView: UIView {
 
   private func buildTitle() {
     let baselines: [CGFloat] = page == 4 ? [515] : [515, 554]
-    for (line, baseline) in zip(Self.titles[page], baselines) {
+    for (line, baseline) in zip(titles[page], baselines) {
       let label = makeLabel(
         line, size: 30, weight: .semibold, color: QFWelcomePalette.text)
       label.accessibilityTraits.insert(.header)
@@ -305,7 +312,7 @@ private final class QFWelcomePageView: UIView {
 
   private func buildSubtitle() {
     let baselines: [CGFloat] = page == 4 ? [558, 581] : [589, 612]
-    for (line, baseline) in zip(Self.subtitles[page], baselines) {
+    for (line, baseline) in zip(subtitles[page], baselines) {
       let label = makeLabel(
         line, size: 14, weight: .regular, color: QFWelcomePalette.secondary)
       addSubview(label)
@@ -333,7 +340,7 @@ private final class QFWelcomePageView: UIView {
 
     for index in 0..<5 {
       let button = UIButton(type: .custom)
-      button.accessibilityLabel = "第 \(index + 1) 页，共 5 页"
+      button.accessibilityLabel = app.format("第 %d 页，共 5 页", "Page %d of 5", index + 1)
       button.accessibilityTraits = index == page ? [.button, .selected] : [.button]
       button.addAction(
         UIAction { [weak self] _ in self?.onSelectPage(index) }, for: .touchUpInside)
@@ -355,7 +362,7 @@ private final class QFWelcomePageView: UIView {
   private func buildPageAction() {
     if page == 0 {
       let hint = makeLabel(
-        "左右滑动，继续了解", size: 12, weight: .regular,
+        app.text("左右滑动，继续了解", "Swipe to learn more"), size: 12, weight: .regular,
         color: QFWelcomePalette.secondary)
       addSubview(hint)
       hint.snp.makeConstraints {
@@ -364,7 +371,7 @@ private final class QFWelcomePageView: UIView {
       }
     } else if page == 4 {
       let enter = QFAuthLoadingButton(
-        "进入 APP", background: QFWelcomePalette.orange, size: 16, cornerRadius: 18)
+        app.text("进入 APP", "Enter app"), background: QFWelcomePalette.orange, size: 16, cornerRadius: 18)
       enter.accessibilityIdentifier = "welcome.enter"
       enter.addAction(UIAction { [weak self] _ in self?.onEnter() }, for: .touchUpInside)
       addSubview(enter)

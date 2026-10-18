@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "食品パッケージの商品バーコードを読み取り、購入明細を入力します。";
+"NSMicrophoneUsageDescription" = "音声メッセージを録音して文字に変換します。";
+"NSSpeechRecognitionUsageDescription" = "音声を文字に変換して食事アシスタントに送信します。";
+"NSPhotoLibraryUsageDescription" = "食材、レシピ、商品バーコードの画像を選択します。";

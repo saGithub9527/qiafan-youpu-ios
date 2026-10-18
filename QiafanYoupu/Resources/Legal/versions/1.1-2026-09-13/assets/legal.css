@@ -1,0 +1,60 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #2c3029;
+  background: #f7f7f2;
+  --accent: #f46236;
+  --muted: #74796f;
+  --line: #e8e9e1;
+}
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+* { box-sizing: border-box; }
+body { margin: 0; overflow-wrap: break-word; background: #f7f7f2; }
+a { color: #c94824; text-underline-offset: 3px; }
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 3; padding: 10px 12px; border-radius: 8px; background: #fff; box-shadow: 0 4px 16px rgb(48 53 42 / 16%); transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+a:focus-visible { outline: 3px solid #f08a68; outline-offset: 3px; border-radius: 3px; }
+.legal-header { position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--line); background: rgb(255 255 252 / 94%); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.legal-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(calc(100% - 32px), 780px); min-height: 58px; margin: 0 auto; }
+.brand { display: flex; align-items: center; gap: 9px; padding: 10px 0; color: #292d27; text-decoration: none; font-weight: 700; }
+.brand-mark { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 10px; color: #fff; background: var(--accent); }
+.document-nav { display: flex; flex-shrink: 0; gap: 12px; font-size: 0.8125rem; }
+.document-nav a { padding: 12px 2px; color: #676c63; text-decoration: none; }
+.document-nav a:hover { text-decoration: underline; }
+.document-nav a[aria-current="page"] { color: #a53618; font-weight: 650; }
+.legal-main { width: min(calc(100% - 32px), 780px); margin: 28px auto 60px; padding: 42px clamp(22px, 6vw, 60px) 54px; border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 18px 60px rgb(48 53 42 / 4%); }
+.draft-notice { margin: 0 0 28px; padding: 13px 15px; border: 1px solid #f2c7b9; border-radius: 10px; color: #8c3c25; background: #fff4ef; font-size: 0.8125rem; line-height: 1.6; }
+h1 { margin: 0 0 12px; font-size: clamp(1.6875rem, 6vw, 2.375rem); line-height: 1.25; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 34px; color: var(--muted); font-size: 0.8125rem; }
+.lead { margin-bottom: 32px; color: #535950; line-height: 1.9; }
+.legal-toc { margin: 0 0 30px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: #fafbf7; }
+.legal-toc strong { font-size: 0.875rem; }
+.legal-toc ul { columns: 2; column-gap: 24px; margin-bottom: 0; padding-left: 18px; }
+.legal-toc li { break-inside: avoid; font-size: 0.8125rem; line-height: 1.7; }
+.legal-toc li + li { margin-top: 5px; }
+.legal-toc a { color: #535950; }
+h2[id] { scroll-margin-top: 100px; }
+a[href^="mailto:"] { overflow-wrap: anywhere; }
+h2 { margin: 34px 0 12px; padding-top: 2px; font-size: 1.1875rem; line-height: 1.5; }
+h3 { margin: 22px 0 8px; font-size: 1rem; }
+p, li { font-size: 0.9375rem; line-height: 1.9; }
+p { margin: 10px 0; }
+ol, ul { margin: 10px 0; padding-left: 22px; }
+li + li { margin-top: 7px; }
+.placeholder { color: #a13d22; font-weight: 650; }
+.contact-card { margin-top: 18px; padding: 16px 18px; border-radius: 12px; background: #f6f7f2; }
+.legal-footer { margin-top: 42px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.8125rem; }
+@media (max-width: 620px) {
+  .legal-nav { flex-wrap: wrap; gap: 4px 8px; padding: 4px 0; }
+  .brand { gap: 6px; font-size: 0.875rem; }
+  .brand-mark { width: 28px; height: 28px; border-radius: 9px; }
+  .document-nav { flex-wrap: wrap; justify-content: flex-end; gap: 0 8px; margin-left: auto; font-size: 0.75rem; }
+  .legal-main { margin-top: 14px; padding: 28px 20px 40px; border-radius: 16px; }
+  h2 { margin-top: 28px; }
+  .legal-toc ul { columns: 1; }
+}
+@media print {
+  .legal-header, .skip-link, .legal-toc { display: none; }
+  .legal-main { width: auto; margin: 0; padding: 0; border: 0; box-shadow: none; }
+  h2, h3 { break-after: avoid; }
+  p, li { orphans: 3; widows: 3; }
+}

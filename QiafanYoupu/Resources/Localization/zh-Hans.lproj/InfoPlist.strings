@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "扫描食材包装上的商品条形码，以填写采购明细。";
+"NSMicrophoneUsageDescription" = "录入语音消息并转换为文字。";
+"NSSpeechRecognitionUsageDescription" = "将语音消息转换为文字后发送给饮食助手。";
+"NSPhotoLibraryUsageDescription" = "选择食材、菜谱或商品条码图片。";

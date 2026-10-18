@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "식품 포장의 상품 바코드를 스캔하여 구매 내역을 입력합니다.";
+"NSMicrophoneUsageDescription" = "음성 메시지를 녹음하고 텍스트로 변환합니다.";
+"NSSpeechRecognitionUsageDescription" = "음성을 텍스트로 변환한 후 식단 도우미에게 보냅니다.";
+"NSPhotoLibraryUsageDescription" = "식재료, 레시피 또는 상품 바코드 사진을 선택합니다.";

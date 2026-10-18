@@ -1,0 +1,29 @@
+{
+  "package": "QFOrbRenderer",
+  "threeVersion": "0.186.1",
+  "esbuildVersion": "0.28.2",
+  "format": "single classic IIFE for file URL; no module fetch/CORS bypass",
+  "source": "WebSource/orb.js; approved orb with native lifecycle, deeper colors and slow rotation",
+  "heartbeatSeconds": 3.4,
+  "shaderReimplemented": false,
+  "files": {
+    "LICENSE-three.txt": {
+      "bytes": 1081,
+      "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
+    },
+    "index.html": {
+      "bytes": 1681,
+      "sha256": "382113f871017e3039df17afa154ada046b8e1bf38764ff427e9ace2f4ef0806"
+    },
+    "orb.bundle.js": {
+      "bytes": 544830,
+      "sha256": "7089315ba56bb98018111eba91654f5bb04bed6a7df0472a40a5df9c7206f336"
+    }
+  },
+  "runtimeBytes": 547592,
+  "sourceSHA256": "516257940dde2f625587fccfde645fc75254cd4abac9f455f11329d99c8bc32c",
+  "rotationSeconds": 48,
+  "primaryColor": "#078f8b",
+  "secondaryColor": "#2344a6",
+  "effectSelector": false
+}

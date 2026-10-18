@@ -415,6 +415,99 @@ final class QFSessionRaceTests: XCTestCase {
     }
   }
 
+  @MainActor
+  func testAccountDeletionTimeoutKeepsDraftAndReplaysSameOperationBeforeCleanup() async throws {
+    let requestKey = "qf.account.deletion.request.test.123"
+    let draftKey = "qf.profile.draft.test.123.erasure-test"
+    UserDefaults.standard.removeObject(forKey: requestKey)
+    UserDefaults.standard.removeObject(forKey: draftKey)
+    defer {
+      UserDefaults.standard.removeObject(forKey: requestKey)
+      UserDefaults.standard.removeObject(forKey: draftKey)
+    }
+    router.setHandler { request in
+      if self.handleCommon(request) { return }
+      if request.request.url!.path.hasSuffix("me/account") {
+        if self.router.matching("me/account").count == 1 {
+          request.fail(URLError(.timedOut))
+        } else {
+          request.respond(self.envelope(["appleAuthorizationRevocation": "NOT_LINKED"]))
+        }
+      } else { request.fail(URLError(.unsupportedURL)) }
+    }
+    let session = makeSession()
+    await session.start()
+    try await session.login(agreementAccepted: true)
+    XCTAssertTrue(QFContentDraftStore.save(["note": "keep on failure"], app: session, kind: "erasure-test"))
+    do {
+      _ = try await session.deleteAccount()
+      XCTFail("The first deletion response should be ambiguous")
+    } catch is URLError {}
+    let first = try XCTUnwrap(router.matching("me/account").first)
+    let operationID = try XCTUnwrap(first.request.value(forHTTPHeaderField: "Idempotency-Key"))
+    XCTAssertEqual(UserDefaults.standard.string(forKey: requestKey), operationID)
+    XCTAssertNotNil(UserDefaults.standard.data(forKey: draftKey))
+    XCTAssertNotNil(try QFKeychainStore(service: service).read("current"))
+    XCTAssertNotNil(session.user)
+    let outcome = try await session.deleteAccount()
+    let second = try XCTUnwrap(router.matching("me/account").last)
+    XCTAssertEqual(second.request.value(forHTTPHeaderField: "Idempotency-Key"), operationID)
+    XCTAssertEqual(second.request.value(forHTTPHeaderField: "Authorization"),
+      first.request.value(forHTTPHeaderField: "Authorization"))
+    XCTAssertEqual(outcome.appleAuthorizationRevocation, "NOT_LINKED")
+    XCTAssertTrue(outcome.localCleanupComplete)
+    XCTAssertNil(UserDefaults.standard.data(forKey: draftKey))
+    XCTAssertNil(UserDefaults.standard.string(forKey: requestKey))
+    XCTAssertNil(try QFKeychainStore(service: service).read("current"))
+    XCTAssertNil(try QFKeychainStore(service: service).read("credential-test"))
+    XCTAssertNil(session.user)
+  }
+
+  @MainActor
+  func testPendingAccountDeletionReplaysBeforeSessionRestoreAfterRestart() async throws {
+    let requestKey = "qf.account.deletion.request.test.123"
+    let draftKey = "qf.profile.draft.test.123.erasure-restart"
+    UserDefaults.standard.removeObject(forKey: requestKey)
+    UserDefaults.standard.removeObject(forKey: draftKey)
+    defer {
+      UserDefaults.standard.removeObject(forKey: requestKey)
+      UserDefaults.standard.removeObject(forKey: draftKey)
+    }
+    router.setHandler { request in
+      if self.handleCommon(request) { return }
+      if request.request.url!.path.hasSuffix("me/account") {
+        if self.router.matching("me/account").count == 1 {
+          request.fail(URLError(.timedOut))
+        } else {
+          request.respond(self.envelope(["appleAuthorizationRevocation": "NOT_LINKED"]))
+        }
+      } else { request.fail(URLError(.unsupportedURL)) }
+    }
+    let original = makeSession()
+    await original.start()
+    try await original.login(agreementAccepted: true)
+    XCTAssertTrue(QFContentDraftStore.save(["note": "retain until confirmation"], app: original,
+      kind: "erasure-restart"))
+    do {
+      _ = try await original.deleteAccount()
+      XCTFail("The lost response must remain ambiguous")
+    } catch is URLError {}
+    let first = try XCTUnwrap(router.matching("me/account").first)
+    let restarted = makeSession()
+    await restarted.start()
+    let second = try XCTUnwrap(router.matching("me/account").last)
+    XCTAssertEqual(router.matching("me/account").count, 2)
+    XCTAssertEqual(second.request.value(forHTTPHeaderField: "Idempotency-Key"),
+      first.request.value(forHTTPHeaderField: "Idempotency-Key"))
+    XCTAssertEqual(second.request.value(forHTTPHeaderField: "Authorization"),
+      first.request.value(forHTTPHeaderField: "Authorization"))
+    XCTAssertTrue(router.matching("me").isEmpty, "A revoked session must not be refreshed first")
+    XCTAssertNil(UserDefaults.standard.string(forKey: requestKey))
+    XCTAssertNil(UserDefaults.standard.data(forKey: draftKey))
+    XCTAssertNil(try QFKeychainStore(service: service).read("current"))
+    XCTAssertNil(restarted.user)
+  }
+
   private func assertTransportFailure(_ task: Task<Void, Error>) async {
     do {
       try await task.value

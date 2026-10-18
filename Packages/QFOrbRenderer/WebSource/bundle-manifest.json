@@ -1,0 +1,55 @@
+{
+  "inputs": {
+    "Packages/QFOrbRenderer/WebSource/vendor/three.core.js": {
+      "bytes": 1458113,
+      "imports": [],
+      "format": "esm"
+    },
+    "Packages/QFOrbRenderer/WebSource/vendor/three.module.js": {
+      "bytes": 662772,
+      "imports": [
+        {
+          "path": "Packages/QFOrbRenderer/WebSource/vendor/three.core.js",
+          "kind": "import-statement",
+          "original": "./three.core.js"
+        },
+        {
+          "path": "Packages/QFOrbRenderer/WebSource/vendor/three.core.js",
+          "kind": "import-statement",
+          "original": "./three.core.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "Packages/QFOrbRenderer/WebSource/orb.js": {
+      "bytes": 14686,
+      "imports": [
+        {
+          "path": "Packages/QFOrbRenderer/WebSource/vendor/three.module.js",
+          "kind": "import-statement",
+          "original": "./vendor/three.module.js"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "Packages/QFOrbRenderer/Sources/QFOrbRenderer/Web/orb.bundle.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "Packages/QFOrbRenderer/WebSource/orb.js",
+      "inputs": {
+        "Packages/QFOrbRenderer/WebSource/vendor/three.core.js": {
+          "bytesInOutput": 179878
+        },
+        "Packages/QFOrbRenderer/WebSource/vendor/three.module.js": {
+          "bytesInOutput": 354998
+        },
+        "Packages/QFOrbRenderer/WebSource/orb.js": {
+          "bytesInOutput": 9850
+        }
+      },
+      "bytes": 544830
+    }
+  }
+}

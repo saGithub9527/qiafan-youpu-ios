@@ -4,7 +4,26 @@ options:
   deploymentTarget:
     iOS: "15.0"
   xcodeVersion: "26.3"
+  # Xcode 26.3 cannot load local packages when their directory is also a Folder.
+  postGenCommand: python3 scripts/remove_duplicate_local_package_folders.py
 packages:
+  QFSSE:
+    path: Packages/QFSSE
+  QFLocalLLM:
+    path: Packages/QFLocalLLM
+  QFOrbRenderer:
+    path: Packages/QFOrbRenderer
+  QFFilament:
+    path: Packages/QFFilament
+  DGCharts:
+    url: https://github.com/ChartsOrg/Charts.git
+    exactVersion: 5.1.0
+  MJRefresh:
+    url: https://github.com/CoderMJLee/MJRefresh.git
+    exactVersion: 3.7.9
+  MBProgressHUD:
+    url: https://github.com/jdg/MBProgressHUD.git
+    revision: 4a7c5f3e53cdea77c5dcb8578c2ee5acacdf6781
   Alamofire:
     url: https://github.com/Alamofire/Alamofire.git
     exactVersion: 5.12.2
@@ -17,6 +36,17 @@ packages:
   PLCrashReporter:
     url: https://github.com/microsoft/plcrashreporter.git
     exactVersion: 1.12.2
+  JXSegmentedView:
+    url: https://github.com/pujiaxin33/JXSegmentedView.git
+    exactVersion: 1.4.1
+  GetuiSDK:
+    url: https://github.com/GetuiLaboratory/getui-sdk-ios-cocoapods.git
+    revision: 464c86e453c9c06e23d71bcad3958d1f1b7a68ab
+  GetuiCommonSDK:
+    url: https://github.com/GetuiLaboratory/getui-gtcsdk-ios-cocoapods.git
+    # The no-IDFA binary is API-compatible with GTCommonSDK and avoids adding an
+    # advertising identifier dependency to an app that does not use advertising.
+    revision: 80d402955ea0980730984c3d2d349dff9c2fe649
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -42,22 +72,55 @@ targets:
     platform: iOS
     sources:
       - path: QiafanYoupu
-        excludes: ["**/*.md", "Info.plist", "*.entitlements"]
+        # Base.lproj anchors the eight app-owned translations as one Xcode
+        # Localizable.strings variant group under Resources/Localization.
+        excludes: ["**/*.md", "Info.plist", "*.entitlements", "Resources/Legal"]
+      - path: QiafanYoupu/Resources/Legal
+        type: folder
+        buildPhase: resources
     dependencies:
+      - package: QFSSE
+      - package: QFLocalLLM
+      - package: QFOrbRenderer
+      - package: QFFilament
+        product: QFFilamentBridge
+      - package: DGCharts
+      - package: MJRefresh
+      - package: MBProgressHUD
       - package: Alamofire
       - package: Kingfisher
       - package: SnapKit
+      - package: JXSegmentedView
+      - package: GetuiSDK
+        product: GTSDK
+      - package: GetuiCommonSDK
+        product: GTCommonSDK
+      # GTCommonSDK's binary SPM target omits its required system linker libraries.
+      - sdk: libresolv.tbd
+      - sdk: libz.tbd
+      - sdk: libsqlite3.tbd
+      - sdk: libc++.tbd
       - package: PLCrashReporter
         product: CrashReporter
+    configFiles:
+      Debug: Configuration/Getui.xcconfig
+      Release: Configuration/Getui.xcconfig
     entitlements:
       path: QiafanYoupu/QiafanYoupu.entitlements
       properties:
+        com.apple.developer.kernel.extended-virtual-addressing: true
         com.apple.developer.applesignin: [Default]
+        aps-environment: $(APS_ENVIRONMENT)
     info:
       path: QiafanYoupu/Info.plist
       properties:
         QFAPIBaseURL: $(QF_API_BASE_URL)
         QFAPIEnvironment: $(QF_API_ENVIRONMENT)
+        QFGetuiAppID: $(QF_GETUI_APP_ID)
+        QFGetuiAppKey: $(QF_GETUI_APP_KEY)
+        QFGetuiAppSecret: $(QF_GETUI_APP_SECRET)
+        GT_MinimumOSVersion: "15.0"
+        NSCameraUsageDescription: 扫描小票上的二维码以录入采购明细。
         CFBundleDisplayName: 恰饭有谱
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -83,11 +146,21 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: 恰饭有谱
         GENERATE_INFOPLIST_FILE: NO
+        OTHER_LDFLAGS: "$(inherited) -ObjC"
+      configs:
+        Debug:
+          APS_ENVIRONMENT: development
+        Release:
+          APS_ENVIRONMENT: production
   QiafanYoupuTests:
     type: bundle.unit-test
     platform: iOS
     sources:
       - path: QiafanYoupuTests
+        excludes: [FilamentFixtures]
+      - path: QiafanYoupuTests/FilamentFixtures
+        type: folder
+        buildPhase: resources
     dependencies:
       - target: QiafanYoupu
     settings:

@@ -2,7 +2,7 @@
 
 Swift + UIKit + SnapKit；iOS 15 起，iPhone 竖屏及 iPad 横竖屏，Xcode 26.3 / Swift 5 语言模式。原 OC 实现保存在 Git 标签 `oc-uikit-baseline`。
 
-已接入启动配置、快速登录、原生 Apple 授权、会话刷新、退出、基本资料恢复和设置页；菜谱、计划、食材仍为已确认的一级 UI 与本地样例。[实现范围](docs/实现范围.md)与[验证记录](docs/验证记录.md)分别记录边界和实测结果。
+已接入启动配置、快速登录、原生 Apple 授权、会话刷新、退出、基本资料恢复和设置页；菜谱首页、搜索与详情，以及个人／家庭计划、备菜、库存、采购单、提醒、家庭管理、库存扣减任务和个人 AI 周计划均已调用服务端接口。个推客户端薄适配和设备登记调用已实现，十语隐私政策本地副本也已升级；真实个推参数、APNs 控制台配置、线上 H5/服务端协议激活、SPM 在线解析与真机推送链路仍未完成。因此当前是“客户端接口代码已接入，外部服务尚未完成端到端配置”，不能写成已可真实推送。[实现范围](docs/实现范围.md)、[个推接入记录](docs/getui-ios-integration-20260928.md)与[验证记录](docs/验证记录.md)分别记录边界和实测结果。
 
 ## 打开与运行
 
@@ -22,14 +22,14 @@ xcodebuild -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 
 模拟器也要保留 ad-hoc 签名；`CODE_SIGNING_ALLOWED=NO` 会导致 Keychain 缺少应用标识，返回 `-34018`。真机不要使用上述模拟器签名覆盖。
 
-`project.yml` 是工程配置来源，修改后执行 `xcodegen generate --spec project.yml`；提交工程、共享 scheme 和 SPM 的 `Package.resolved`。
+`project.yml` 是工程配置来源，修改后执行 `xcodegen generate --spec project.yml`；提交工程、共享 scheme 和 SPM 的 `Package.resolved`。生成后的挂钩会移除两个本地包在导航中的重复 Folder 引用，保留 SwiftPM 依赖，避免 Xcode 26.3 的包加载冲突；可用 `python3 scripts/remove_duplicate_local_package_folders.py --check` 检查。
 
 ## 接口与环境
 
 - Debug：`https://test-api.yzsalingo.com/api/v1`，国内公网 HTTPS 测试服务。
 - Release：`QF_API_BASE_URL` 暂留空、环境为 `production`，拒绝请求。正式 HTTPS 地址与正式协议确认后再配置；不会自动回退到测试环境。
 - 测试与正式的设备登录凭证和会话分别保存在 Keychain。`Device-Id` 是本 App 生成并保存在 Keychain 的 UUID，每次请求携带；不是硬件序列号，也不能替代登录凭证。卸载、恢复设备或 Keychain 丢失后不保证恢复同一身份。
-- 当前测试协议正文明确标注内部开发测试用途，不是正式上线法律文本。正文由服务端配置文件提供，管理后台的编辑页面尚未实现。
+- 用户协议、隐私政策、图片授权和图片权利规则使用有版本号的完整正文，并随 App 提供离线副本；服务端启动配置应指向同版本公开 H5。协议内容仍需运营者在实际发布前完成法律审阅和部署核对。
 
 | 请求 | 使用时机 |
 | --- | --- |
@@ -38,8 +38,10 @@ xcodebuild -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 | `POST /auth/apple/sessions` | 系统 Apple 授权成功后，提交授权码和设备凭证 |
 | `POST /auth/sessions/refresh` | 受保护请求的会话需要刷新时，集中执行一次刷新 |
 | `GET /me` | 启动时恢复已保存会话的基本用户资料 |
-| `GET /me/settings` | 登录用户首次打开设置页时读取服务端偏好 |
-| `PUT /me/settings` | 同步主题、界面语言和两类通知偏好 |
+| `GET /me/settings` | 登录用户首次打开设置页时读取两类通知偏好；忽略服务端历史主题值 |
+| `PUT /me/settings` | 同步两类通知偏好，不上传本机主题或界面语言 |
+| `PATCH /me` | 保存昵称、国家代码、地区和个人简介 |
+| `POST /me/feedback` | 提交登录用户的分类反馈 |
 | `DELETE /auth/sessions/current` | 从设置页或 Debug 菜单退出当前会话 |
 
 所有请求由 `QFAPIClient` 统一设置 `App-Platform`、`App-Version`、`Accept-Language`、`Device-Id` 和 `Authorization`。未登录时 Authorization 为空；登录后为 Bearer accessToken。JSON 请求带 Content-Type，登录及刷新带 Idempotency-Key。
@@ -99,7 +101,9 @@ QiafanYoupu/
 
 网络使用 Alamofire 5.12.2；远程头像使用 Kingfisher 8.12.0；全部页面约束使用 SnapKit 6.0.0，欢迎、登录、四 Tab 和日志均迁移到 UIKit。凭证用 Security Keychain，Apple 授权用 AuthenticationServices；所有页面使用 UIKit，约束使用 SnapKit，欢迎分页使用系统 UIScrollView。窗口按可用宽高适配，主内容宽屏居中、窄屏换行，iPad 支持横竖屏。完整规则见 [第三方框架与布局适配](docs/第三方框架与布局适配.md)。崩溃采集复用 [Microsoft PLCrashReporter](https://github.com/microsoft/plcrashreporter/tree/1.12.2)，固定 1.12.2，并提交锁文件和完整许可证。素材映射见 [ASSET-SOURCES](QiafanYoupu/Resources/ASSET-SOURCES.md)。
 
-设置页按已确认的 `04-设置` 和 `05-主题设置` 实现。经典橙、自然绿、深色使用同一套语义颜色；应用主题后重建四个一级页面并保留登录会话。未登录设置保存在本机，登录用户与 `/me/settings` 同步。清缓存只清除可重新下载的图片与 URL 缓存，不清除账号、设备凭证、请求/崩溃日志或未发布草稿。协议入口优先打开服务端返回的 HTTPS H5 地址，用户协议和隐私政策在地址缺失时回退到启动配置中的正文。
+设置页按已确认的 `04-设置` 和 `05-主题设置` 实现。经典橙、自然绿、深色使用同一套语义颜色；应用主题后重建四个一级页面并保留登录会话。主题和界面语言只通过 `UserDefaults` 保存在本机，切换语言不请求设置接口；业务内容请求通过 `Accept-Language` 携带当前 code。界面支持简体中文、繁體中文、English、日本語、한국어、Русский、Español、Français、Deutsch 和 Português (Brasil)。两类通知偏好与 `/me/settings` 同步。编辑资料、账号与隐私、帮助与反馈和界面语言均使用独立页面。清缓存只清除可重新下载的图片与 URL 缓存，不清除账号、设备凭证、请求/崩溃日志或未发布草稿。设置与登录入口统一打开当前应用语言的内置完整协议，服务端启动配置只控制协议可用状态和同意修订。
+
+新增或修改用户可见文案时必须同时提供简中和英文源文，并补齐另外八种语言资源。运行 `python3 scripts/validate_localizations.py --write-source` 更新源清单，再运行 `python3 scripts/validate_localizations.py` 检查缺键、空译文和格式参数一致性。
 
 ## 测试
 
@@ -119,3 +123,5 @@ xcodebuild test -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 隐私清单已对应当前 Device-Id、账号标识、服务诊断及本 App 文件时间戳访问同步声明；本地崩溃未上传。发布归档时仍需核对 Xcode 聚合报告，并在 App Store Connect 按最终数据流填写。声明依据见 [Apple 数据类型定义](https://developer.apple.com/app-store/app-privacy-details/)和[Required Reason API](https://developer.apple.com/documentation/bundleresources/app-privacy-configuration/nsprivacyaccessedapitypes/nsprivacyaccessedapitype)。
 
 2026-09-11 调整：协议复选框与整段文字垂直居中；快速/Apple 登录、配置重试、调试菜单的网络动作均显示对应按钮内 Loading，结束后恢复并防止重复点击。旧日志已保存的 `[REDACTED]` 不会自动还原，需使用更新后的 App 重新发起请求。
+
+当前悬浮助手已改为离线动态光球，保留原聊天入口；接入与验收记录见 [光球接入](docs/assistant-light-orb-20261014.md)。

@@ -16,9 +16,11 @@ final class QFSafetyNoticeViewController: UIViewController {
   private let bodyContent = UIView()
   private let agreementSection = UIView()
   private let actions = UIView()
-  private let agreement = QFAuthAgreementControl(identifier: "notice.agreement", noticeStyle: true)
-  private let continueButton = QFAuthLoadingButton(
-    "同意并继续", background: QFUI.primary, textColor: QFUI.onPrimary)
+  private lazy var agreement = QFAuthAgreementControl(
+    app: app, identifier: "notice.agreement", noticeStyle: true)
+  private lazy var continueButton = QFAuthLoadingButton(
+    app.text("同意并继续", "Agree and continue"), background: QFUI.primary,
+    textColor: QFUI.onPrimary)
   private var handleHeight: Constraint?
   private var actionsBottom: Constraint?
   private var mode: Int?
@@ -138,18 +140,18 @@ final class QFSafetyNoticeViewController: UIViewController {
     icon.layer.cornerRadius = 12
     icon.clipsToBounds = true
     icon.snp.makeConstraints { $0.width.height.equalTo(40) }
-    let title = QFUI.label("安全与使用须知", size: 22, weight: .bold)
+    let title = QFUI.label(app.text("安全与使用须知", "Safety and use notice"), size: 22, weight: .bold)
     title.accessibilityTraits.insert(.header)
     let header = QFUI.stack([icon, title], axis: .horizontal, spacing: 13)
     header.alignment = .center
     let content = QFUI.stack([
-      header, QFUI.label("开始之前，请先了解这些说明。", size: 14, color: QFUI.secondary)
+      header, QFUI.label(app.text("开始之前，请先了解这些说明。", "Please review these notes before you begin."), size: 14, color: QFUI.secondary)
     ], spacing: 15)
     let items = [
-      ("食材与饮食安全", "请留意过敏原和个人饮食需求，\n并确认食材新鲜、适合食用。"),
-      ("烹饪与设备安全", "使用刀具、热油及电器时请注意安全，\n未成年人应在成人指导下操作。"),
-      ("内容仅供烹饪参考", "份量、时间与做法请结合实际调整，\n菜谱内容不能替代专业健康建议。"),
-      ("使用范围与限制", "请勿恶意抓取、干扰服务或滥用内容，\n具体使用规则以用户协议为准。"),
+      (app.text("食材与饮食安全", "Food and dietary safety"), app.text("请留意过敏原和个人饮食需求，\n并确认食材新鲜、适合食用。", "Check allergens and your dietary needs,\nand make sure ingredients are fresh and safe to eat.")),
+      (app.text("烹饪与设备安全", "Cooking and appliance safety"), app.text("使用刀具、热油及电器时请注意安全，\n未成年人应在成人指导下操作。", "Take care with knives, hot oil, and appliances.\nChildren should cook with adult supervision.")),
+      (app.text("内容仅供烹饪参考", "Cooking guidance only"), app.text("份量、时间与做法请结合实际调整，\n菜谱内容不能替代专业健康建议。", "Adjust portions, timing, and methods as needed.\nRecipes do not replace professional health advice.")),
+      (app.text("使用范围与限制", "Acceptable use"), app.text("请勿恶意抓取、干扰服务或滥用内容，\n具体使用规则以用户协议为准。", "Do not scrape, disrupt, or misuse the service.\nSee the Terms of Service for full rules.")),
     ]
     for (index, item) in items.enumerated() {
       let number = QFUI.label("\(index + 1)", size: 11, weight: .medium, color: QFUI.onTint, lines: 1)
@@ -188,7 +190,10 @@ final class QFSafetyNoticeViewController: UIViewController {
     }
     agreement.onReadDocument = { [weak self] document in
       guard let self, !self.resolved, self.presentedViewController == nil else { return }
-      self.present(QFAuthAgreementViewController(app: self.app, document: document), animated: true)
+      self.qfPush(
+        QFLocalLegalViewController(
+          document: document == .privacy ? "privacy-policy" : "user-agreement",
+          title: document.title(app: self.app), language: self.app.interfaceLanguage))
     }
   }
 
@@ -200,7 +205,7 @@ final class QFSafetyNoticeViewController: UIViewController {
       self.finish(accepted: true)
     }, for: .touchUpInside)
     let decline = UIButton(type: .system)
-    decline.setTitle("暂不同意", for: .normal)
+    decline.setTitle(app.text("暂不同意", "Not now"), for: .normal)
     decline.setTitleColor(QFUI.secondary, for: .normal)
     decline.titleLabel?.font = .systemFont(ofSize: 15)
     decline.accessibilityIdentifier = "notice.decline"

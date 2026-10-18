@@ -16,6 +16,7 @@
     private let errorContainer = UIView()
     private let errorLabel = QFUI.label("", size: 12, color: .systemRed, lines: 0)
     private let menuButton = UIButton(type: .system)
+    private let closeButton = UIButton(type: .system)
     private let previousButton = UIButton(type: .system)
     private let nextButton = UIButton(type: .system)
     private let pageLabel = QFUI.label("", size: 14)
@@ -25,10 +26,13 @@
       case reloadConfiguration
       case logout
 
-      var title: String {
+      @MainActor
+      func title(app: QFAppSession) -> String {
         switch self {
-        case .reloadConfiguration: return "正在重取配置"
-        case .logout: return "正在退出会话"
+        case .reloadConfiguration:
+          return app.text("正在重取配置", "Reloading configuration")
+        case .logout:
+          return app.text("正在退出会话", "Signing out")
         }
       }
     }
@@ -43,7 +47,7 @@
 
     override func viewDidLoad() {
       super.viewDidLoad()
-      title = "接口日志"
+      title = app.text("接口日志", "API logs")
       navigationItem.largeTitleDisplayMode = .never
       view.backgroundColor = QFUI.background
       view.accessibilityIdentifier = "diagnostics.requests"
@@ -59,14 +63,16 @@
       app.objectWillChange.receive(on: DispatchQueue.main)
         .sink { [weak self] _ in self?.updateMenu() }
         .store(in: &subscriptions)
+      app.$interfaceLanguage.removeDuplicates().dropFirst().receive(on: DispatchQueue.main)
+        .sink { [weak self] _ in self?.applyLanguage() }
+        .store(in: &subscriptions)
     }
 
     private func configureNavigation() {
       menuButton.accessibilityIdentifier = "diagnostics.menu"
       menuButton.showsMenuAsPrimaryAction = true
       navigationItem.leftBarButtonItem = UIBarButtonItem(customView: menuButton)
-      let closeButton = UIButton(type: .system)
-      closeButton.setTitle("关闭", for: .normal)
+      closeButton.setTitle(app.text("关闭", "Close"), for: .normal)
       closeButton.tintColor = QFUI.orange
       closeButton.accessibilityIdentifier = "diagnostics.requests.close"
       closeButton.addAction(
@@ -104,9 +110,9 @@
     private func makePagination() -> UIView {
       let container = UIView()
       container.backgroundColor = QFUI.surface
-      previousButton.setTitle("上一页", for: .normal)
+      previousButton.setTitle(app.text("上一页", "Previous"), for: .normal)
       previousButton.accessibilityIdentifier = "diagnostics.requests.previousPage"
-      nextButton.setTitle("下一页", for: .normal)
+      nextButton.setTitle(app.text("下一页", "Next"), for: .normal)
       nextButton.accessibilityIdentifier = "diagnostics.requests.nextPage"
       [previousButton, nextButton].forEach { button in
         button.titleLabel?.font = .systemFont(ofSize: 14)
@@ -145,9 +151,12 @@
       image.tintColor = QFUI.secondary
       image.contentMode = .scaleAspectFit
       image.snp.makeConstraints { make in make.size.equalTo(32) }
-      let title = QFUI.label("暂无请求日志", size: 17, weight: .semibold)
+      let title = QFUI.label(app.text("暂无请求日志", "No request logs"), size: 17, weight: .semibold)
       let subtitle = QFUI.label(
-        "Debug 模式下，应用发起请求后会显示在这里。", size: 14, color: QFUI.secondary, lines: 0)
+        app.text(
+          "Debug 模式下，应用发起请求后会显示在这里。",
+          "Requests made by the app in Debug mode appear here."),
+        size: 14, color: QFUI.secondary, lines: 0)
       title.textAlignment = .center
       subtitle.textAlignment = .center
       let stack = QFUI.stack([image, title, subtitle], axis: .vertical, spacing: 12)
@@ -165,12 +174,15 @@
     private func reloadFromStore() {
       guard isViewLoaded else { return }
       entries = store.entries
-      errorLabel.text = store.storageError
-      errorContainer.isHidden = store.storageError == nil
+      errorLabel.text = store.storageErrorCode.map {
+        app.format("请求日志文件读写失败（错误码 %d）", "Could not read or write request logs (error %d).", $0)
+      }
+      errorContainer.isHidden = store.storageErrorCode == nil
       tableView.backgroundView = store.totalCount == 0 ? makeEmptyState() : nil
       tableView.reloadData()
-      pageLabel.text = "第 \(store.page + 1) / \(store.totalPages) 页"
-      countLabel.text = "共 \(store.totalCount) 条 · 每页 \(store.pageSize) 条"
+      pageLabel.text = app.format("第 %d / %d 页", "Page %d of %d", store.page + 1, store.totalPages)
+      countLabel.text = app.format(
+        "共 %d 条 · 每页 %d 条", "%d total · %d per page", store.totalCount, store.pageSize)
       previousButton.isEnabled = store.page > 0
       nextButton.isEnabled = store.page + 1 < store.totalPages
     }
@@ -186,7 +198,7 @@
     private func updateMenu() {
       guard isViewLoaded else { return }
       var configuration = UIButton.Configuration.plain()
-      configuration.title = displayedAction?.title ?? "调试"
+      configuration.title = displayedAction?.title(app: app) ?? app.text("调试", "Debug")
       configuration.baseForegroundColor = QFUI.orange
       configuration.contentInsets = .zero
       configuration.imagePadding = 6
@@ -201,19 +213,21 @@
       }
       menuButton.configuration = configuration
       menuButton.isEnabled = !actionsDisabled
-      menuButton.accessibilityLabel = displayedAction?.title ?? "调试"
+      menuButton.accessibilityLabel = displayedAction?.title(app: app) ?? app.text("调试", "Debug")
       var items = [
-        UIAction(title: "重新获取启动配置") { [weak self] _ in
+        UIAction(title: app.text("重新获取启动配置", "Reload startup configuration")) { [weak self] _ in
           self?.perform(.reloadConfiguration)
         },
-        UIAction(title: "查看沙盒日志目录") { [weak self] _ in
+        UIAction(title: app.text("查看沙盒日志目录", "Show sandbox log directory")) { [weak self] _ in
           self?.showMessage(
             QFCrashRecorder.shared.reportsDirectory.deletingLastPathComponent().path)
         },
       ]
       if app.user != nil {
         items.append(
-          UIAction(title: "退出当前测试会话") { [weak self] _ in self?.perform(.logout) })
+          UIAction(title: app.text("退出当前测试会话", "Sign out of the test session")) {
+            [weak self] _ in self?.perform(.logout)
+          })
       }
       menuButton.menu = UIMenu(children: items)
     }
@@ -229,7 +243,11 @@
           await app.loadConfiguration()
           message = app.configurationError
         case .logout:
-          do { try await app.logout() } catch { message = error.localizedDescription }
+          await QFGetuiPushService.shared.unregisterBeforeSignOut()
+          do { try await app.logout() } catch {
+            QFGetuiPushService.shared.signOutDidFail()
+            message = QFProfileContentController.errorText(error, app: app)
+          }
         }
         guard let self else { return }
         self.activeAction = nil
@@ -240,8 +258,10 @@
 
     private func showMessage(_ message: String) {
       guard viewIfLoaded?.window != nil, presentedViewController == nil else { return }
-      let alert = UIAlertController(title: "调试信息", message: message, preferredStyle: .alert)
-      alert.addAction(UIAlertAction(title: "知道了", style: .cancel))
+      let alert = UIAlertController(
+        title: app.text("调试信息", "Debug information"), message: message,
+        preferredStyle: .alert)
+      alert.addAction(UIAlertAction(title: app.text("知道了", "OK"), style: .cancel))
       present(alert, animated: true)
     }
 
@@ -255,7 +275,7 @@
           withIdentifier: QFRequestLogCell.reuseID, for: indexPath) as? QFRequestLogCell
       else { return UITableViewCell() }
       let entry = entries[indexPath.row]
-      cell.configure(entry)
+      cell.configure(entry, app: app)
       cell.onOpen = { [weak self] in self?.open(entry.id) }
       return cell
     }
@@ -267,7 +287,17 @@
 
     private func open(_ id: UUID) {
       navigationController?.pushViewController(
-        QFRequestLogDetailViewController(store: store, id: id), animated: true)
+        QFRequestLogDetailViewController(app: app, store: store, id: id), animated: true)
+    }
+
+    private func applyLanguage() {
+      guard isViewLoaded else { return }
+      title = app.text("接口日志", "API logs")
+      closeButton.setTitle(app.text("关闭", "Close"), for: .normal)
+      previousButton.setTitle(app.text("上一页", "Previous"), for: .normal)
+      nextButton.setTitle(app.text("下一页", "Next"), for: .normal)
+      reloadFromStore()
+      updateMenu()
     }
   }
 
@@ -315,32 +345,35 @@
       onOpen = nil
     }
 
-    func configure(_ entry: QFRequestLogEntry) {
+    func configure(_ entry: QFRequestLogEntry, app: QFAppSession) {
       methodLabel.text = entry.method
-      statusLabel.text = QFRequestLogPresentation.status(entry)
+      statusLabel.text = QFRequestLogPresentation.status(entry, app: app)
       statusLabel.textColor = QFRequestLogPresentation.color(entry.status)
-      timeLabel.text = entry.startedAt.formatted(date: .omitted, time: .standard)
+      timeLabel.text = QFRequestLogPresentation.time(
+        entry.startedAt, dateStyle: .none, timeStyle: .medium, app: app)
       urlLabel.text = entry.url
       durationLabel.text = entry.duration.map { String(format: "%.0f ms", $0 * 1000) }
       durationLabel.isHidden = entry.duration == nil
       openButton.accessibilityIdentifier = "diagnostics.request.\(entry.id.uuidString)"
       openButton.accessibilityLabel =
-        "\(entry.method)，\(QFRequestLogPresentation.status(entry))，\(entry.url)，\(timeLabel.text ?? "")"
+        "\(entry.method), \(QFRequestLogPresentation.status(entry, app: app)), \(entry.url), \(timeLabel.text ?? "")"
     }
   }
 
   @MainActor
   private final class QFRequestLogDetailViewController: UIViewController {
+    private let app: QFAppSession
     private let store: QFRequestLogStore
     private let id: UUID
     private let scrollView = UIScrollView()
     private let content = UIView()
     private let stack = QFUI.stack([], axis: .vertical, spacing: 16)
-    private var subscription: AnyCancellable?
+    private var subscriptions = Set<AnyCancellable>()
     private var entry: QFRequestLogEntry?
     private var rendered = false
 
-    init(store: QFRequestLogStore, id: UUID) {
+    init(app: QFAppSession, store: QFRequestLogStore, id: UUID) {
+      self.app = app
       self.store = store
       self.id = id
       super.init(nibName: nil, bundle: nil)
@@ -350,7 +383,7 @@
 
     override func viewDidLoad() {
       super.viewDidLoad()
-      title = "请求详情"
+      title = app.text("请求详情", "Request details")
       navigationItem.largeTitleDisplayMode = .never
       view.backgroundColor = QFUI.background
       scrollView.accessibilityIdentifier = "diagnostics.request.detail"
@@ -372,13 +405,23 @@
         make.trailing.lessThanOrEqualToSuperview().inset(16)
       }
       reloadEntry()
-      subscription = store.$revision.dropFirst().receive(on: DispatchQueue.main)
+      store.$revision.dropFirst().receive(on: DispatchQueue.main)
         .sink { [weak self] _ in self?.reloadEntry() }
+        .store(in: &subscriptions)
+      app.$interfaceLanguage.removeDuplicates().dropFirst().receive(on: DispatchQueue.main)
+        .sink { [weak self] _ in
+          guard let self else { return }
+          self.title = self.app.text("请求详情", "Request details")
+          self.reloadEntry(force: true)
+        }
+        .store(in: &subscriptions)
     }
 
-    private func reloadEntry() {
+    private func reloadEntry(force: Bool = false) {
       let updated = store.entry(id: id)
-      if rendered, entry?.finishedAt == updated?.finishedAt, (entry == nil) == (updated == nil) {
+      if !force, rendered, entry?.finishedAt == updated?.finishedAt,
+        (entry == nil) == (updated == nil)
+      {
         return
       }
       rendered = true
@@ -389,25 +432,31 @@
       }
       guard let entry else {
         stack.addArrangedSubview(
-          QFUI.label("这条日志已被轮转清理。", size: 14, color: QFUI.secondary, lines: 0))
+          QFUI.label(
+            app.text("这条日志已被轮转清理。", "This log was removed during rotation."),
+            size: 14, color: QFUI.secondary, lines: 0))
         return
       }
       stack.addArrangedSubview(timeSection(entry))
-      stack.addArrangedSubview(field(title: "URL / 接口", value: "\(entry.method)\n\(entry.url)"))
-      stack.addArrangedSubview(field(title: "请求参数", value: parameters(entry)))
-      stack.addArrangedSubview(field(title: "请求头", value: headers(entry.requestHeaders)))
-      stack.addArrangedSubview(field(title: "返回内容", value: response(entry)))
+      stack.addArrangedSubview(
+        field(title: app.text("URL / 接口", "URL / API"), value: "\(entry.method)\n\(entry.url)"))
+      stack.addArrangedSubview(field(title: app.text("请求参数", "Request parameters"), value: parameters(entry)))
+      stack.addArrangedSubview(field(title: app.text("请求头", "Request headers"), value: headers(entry.requestHeaders)))
+      stack.addArrangedSubview(field(title: app.text("返回内容", "Response"), value: response(entry)))
     }
 
     private func timeSection(_ entry: QFRequestLogEntry) -> UIView {
-      let title = QFUI.label("请求时间", size: 17, weight: .semibold)
-      let time = selectableText(entry.startedAt.formatted(date: .numeric, time: .complete))
+      let title = QFUI.label(app.text("请求时间", "Request time"), size: 17, weight: .semibold)
+      let time = selectableText(
+        QFRequestLogPresentation.time(
+          entry.startedAt, dateStyle: .short, timeStyle: .long, app: app))
       let status = QFUI.label(
-        QFRequestLogPresentation.status(entry), size: 14,
+        QFRequestLogPresentation.status(entry, app: app), size: 14,
         color: QFRequestLogPresentation.color(entry.status))
       var labels: [UIView] = [title, time, status]
       if let duration = entry.duration {
-        labels.append(QFUI.label(String(format: "耗时 %.0f ms", duration * 1000), size: 14))
+        labels.append(
+          QFUI.label(app.format("耗时 %.0f ms", "Duration: %.0f ms", duration * 1000), size: 14))
       }
       return card(QFUI.stack(labels, axis: .vertical, spacing: 8))
     }
@@ -449,32 +498,54 @@
         URLComponents(string: entry.url)?.queryItems?.map {
           "\($0.name): \($0.value ?? "")"
         }.joined(separator: "\n") ?? ""
-      let body = entry.requestBody.isEmpty ? "（无请求体）" : entry.requestBody
-      return "Query\n\(query.isEmpty ? "（无查询参数）" : query)\n\nBody\n\(body)"
+      let body = entry.requestBody.isEmpty ? app.text("（无请求体）", "(No request body)") : entry.requestBody
+      return "Query\n\(query.isEmpty ? app.text("（无查询参数）", "(No query parameters)") : query)\n\nBody\n\(body)"
     }
 
     private func headers(_ headers: [String: String]) -> String {
-      guard !headers.isEmpty else { return "（无）" }
+      guard !headers.isEmpty else { return app.text("（无）", "(None)") }
       return headers.keys.sorted().map { "\($0): \(headers[$0] ?? "")" }.joined(separator: "\n")
     }
 
     private func response(_ entry: QFRequestLogEntry) -> String {
-      if entry.status == .inProgress { return "请求进行中，尚无返回内容。" }
-      var parts = ["HTTP 状态码：\(entry.statusCode.map(String.init) ?? "无响应")"]
-      if let error = entry.errorDescription { parts.append("错误：\(error)") }
-      parts.append("响应头\n\(headers(entry.responseHeaders))")
-      parts.append("Body\n\(entry.responseBody.isEmpty ? "（无响应体）" : entry.responseBody)")
+      if entry.status == .inProgress {
+        return app.text("请求进行中，尚无返回内容。", "The request is still in progress.")
+      }
+      let status = entry.statusCode.map(String.init) ?? app.text("无响应", "No response")
+      var parts = [app.format("HTTP 状态码：%@", "HTTP status: %@", status)]
+      if let error = entry.errorDescription {
+        parts.append(app.format("错误：%@", "Error: %@", error))
+      }
+      parts.append(app.text("响应头", "Response headers") + "\n" + headers(entry.responseHeaders))
+      let body = entry.responseBody.isEmpty ? app.text("（无响应体）", "(No response body)") : entry.responseBody
+      parts.append("Body\n\(body)")
       return parts.joined(separator: "\n\n")
     }
   }
 
   private enum QFRequestLogPresentation {
-    static func status(_ entry: QFRequestLogEntry) -> String {
+    @MainActor
+    static func status(_ entry: QFRequestLogEntry, app: QFAppSession) -> String {
       switch entry.status {
-      case .inProgress: return "进行中"
-      case .succeeded: return "成功 · \(entry.statusCode ?? 0)"
-      case .failed: return entry.statusCode.map { "失败 · \($0)" } ?? "请求失败"
+      case .inProgress: return app.text("进行中", "In progress")
+      case .succeeded: return app.format("成功 · %d", "Succeeded · %d", entry.statusCode ?? 0)
+      case .failed:
+        return entry.statusCode.map { app.format("失败 · %d", "Failed · %d", $0) }
+          ?? app.text("请求失败", "Request failed")
       }
+    }
+
+    @MainActor
+    static func time(
+      _ date: Date, dateStyle: DateFormatter.Style, timeStyle: DateFormatter.Style,
+      app: QFAppSession
+    ) -> String {
+      let formatter = DateFormatter()
+      formatter.locale = Locale(
+        identifier: QFInterfaceLanguage.normalized(app.interfaceLanguage).localeIdentifier)
+      formatter.dateStyle = dateStyle
+      formatter.timeStyle = timeStyle
+      return formatter.string(from: date)
     }
 
     static func color(_ status: QFRequestLogStatus) -> UIColor {

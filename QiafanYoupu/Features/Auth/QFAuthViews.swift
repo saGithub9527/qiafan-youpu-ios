@@ -7,9 +7,10 @@ import UIKit
 /// The same local UI choice used by the previous Objective-C screens, never an authentication record.
 enum QFAuthConsentStore {
   private static let key = "qfyp.login.consent"
+  static let fallbackRevision = "bundled-legal-1.3-2026-09-15"
 
   static func isAgreementChecked(
-    revision: String = "ui-placeholder-v1", defaults: UserDefaults = .standard
+    revision: String = fallbackRevision, defaults: UserDefaults = .standard
   ) -> Bool {
     guard let record = defaults.object(forKey: key) as? [String: Any] else {
       return false
@@ -28,7 +29,7 @@ enum QFAuthConsentStore {
   }
 
   static func setAgreementChecked(
-    _ checked: Bool, revision: String = "ui-placeholder-v1", defaults: UserDefaults = .standard
+    _ checked: Bool, revision: String = fallbackRevision, defaults: UserDefaults = .standard
   ) {
     let record: [String: Any] = [
       "schemaVersion": 1,
@@ -37,7 +38,7 @@ enum QFAuthConsentStore {
       "uiDocumentRevision": revision,
       "uiOnly": true,
     ]
-    // Formal document versions remain absent: no real agreement text has been supplied.
+    // Callers combine this bundled document revision with the server's active consent revision.
     defaults.set(record, forKey: key)
   }
 }
@@ -47,7 +48,10 @@ enum QFAuthDocument: String, Identifiable {
   case terms
 
   var id: String { rawValue }
-  var title: String { self == .privacy ? "隐私政策" : "用户协议" }
+  @MainActor
+  func title(app: QFAppSession) -> String {
+    self == .privacy ? app.text("隐私政策", "Privacy Policy") : app.text("用户协议", "Terms of Service")
+  }
 }
 
 // UIKit-only components shared by the welcome, login and agreement controllers.
@@ -115,12 +119,18 @@ final class QFAuthLoadingButton: UIButton {
   override var isEnabled: Bool { didSet { refreshAppearance() } }
   override var isHighlighted: Bool { didSet { alpha = isHighlighted ? 0.82 : 1 } }
 
-  func setLoading(_ value: Bool) {
+  func setLoading(_ value: Bool, accessibilityText: String? = nil) {
+    accessibilityValue = value ? accessibilityText : nil
     guard loading != value else { return }
     loading = value
     spinner.isHidden = !value
     if value { spinner.startAnimating() } else { spinner.stopAnimating() }
     refreshAppearance()
+  }
+
+  func setTitle(_ title: String) {
+    copy.text = title
+    accessibilityLabel = title
   }
 
   private func refreshAppearance() {
@@ -133,18 +143,22 @@ final class QFAuthLoadingButton: UIButton {
 
 @MainActor
 final class QFAuthAgreementControl: UIView, UITextViewDelegate {
-  private let checkbox = UIButton(type: .system)
+  private let app: QFAppSession
+  private let noticeStyle: Bool
+  private let checkbox = UIButton(type: .custom)
   private let textView = UITextView()
   private var textHeight: Constraint?
   private var measuredHeight: CGFloat = 36
+  private var languageSubscription: AnyCancellable?
   var onCheckedChange: ((Bool) -> Void)?
   var onReadDocument: ((QFAuthDocument) -> Void)?
   var checked = false { didSet { renderCheckmark() } }
 
-  init(identifier: String, noticeStyle: Bool) {
+  init(app: QFAppSession, identifier: String, noticeStyle: Bool) {
+    self.app = app
+    self.noticeStyle = noticeStyle
     super.init(frame: .zero)
     checkbox.accessibilityIdentifier = identifier
-    checkbox.accessibilityLabel = "我已阅读并同意隐私政策和用户协议"
     checkbox.addAction(UIAction { [weak self] _ in
       guard let self else { return }
       self.checked.toggle()
@@ -160,25 +174,9 @@ final class QFAuthAgreementControl: UIView, UITextViewDelegate {
     textView.delegate = self
     textView.accessibilityIdentifier = "\(identifier).text"
     textView.accessibilityTraits = .staticText
-    let copy = noticeStyle
-      ? "我已阅读并同意 《用户协议》\n和《隐私政策》"
-      : "我已阅读并同意《隐私政策》和《用户协议》"
-    let paragraph = NSMutableParagraphStyle()
-    paragraph.lineSpacing = 4
-    let attributed = NSMutableAttributedString(string: copy, attributes: [
-      .font: UIFont.systemFont(ofSize: 13), .foregroundColor: QFUI.secondary,
-      .paragraphStyle: paragraph,
-    ])
-    for document in [QFAuthDocument.privacy, .terms] {
-      let range = (copy as NSString).range(of: "《\(document.title)》")
-      if range.location != NSNotFound {
-        attributed.addAttribute(.link, value: "qfyp-document://\(document.rawValue)", range: range)
-      }
-    }
-    textView.attributedText = attributed
-    textView.linkTextAttributes = [
-      .foregroundColor: noticeStyle ? QFAuthPalette.color(0xA83212) : QFUI.green
-    ]
+    renderText()
+    languageSubscription = app.$interfaceLanguage.dropFirst().receive(on: DispatchQueue.main)
+      .sink { [weak self] _ in self?.renderText() }
     addSubview(textView)
     checkbox.snp.makeConstraints {
       $0.leading.equalToSuperview()
@@ -196,6 +194,43 @@ final class QFAuthAgreementControl: UIView, UITextViewDelegate {
       textHeight = $0.height.equalTo(measuredHeight).constraint
     }
     snp.makeConstraints { $0.height.greaterThanOrEqualTo(55) }
+    renderCheckmark()
+  }
+
+  private func renderText() {
+    checkbox.accessibilityLabel = app.text(
+      "我已阅读并同意隐私政策和用户协议",
+      "I have read and agree to the Privacy Policy and Terms of Service")
+    let terms = QFAuthDocument.terms.title(app: app)
+    let privacy = QFAuthDocument.privacy.title(app: app)
+    let copy = noticeStyle
+      ? app.format(
+        "我已阅读并同意《%@》\n和《%@》", "I have read and agree to the %@\nand %@", terms,
+        privacy)
+      : app.format(
+        "我已阅读并同意《%@》和《%@》", "I have read and agree to the %@ and %@", privacy,
+        terms)
+    let paragraph = NSMutableParagraphStyle()
+    paragraph.lineSpacing = 4
+    let attributed = NSMutableAttributedString(string: copy, attributes: [
+      .font: UIFont.systemFont(ofSize: 13), .foregroundColor: QFUI.secondary,
+      .paragraphStyle: paragraph,
+    ])
+    for document in [QFAuthDocument.privacy, .terms] {
+      let title = document.title(app: app)
+      let range = (copy as NSString).range(of: title)
+      if range.location != NSNotFound {
+        attributed.addAttribute(.link, value: "qfyp-document://\(document.rawValue)", range: range)
+      }
+    }
+    textView.attributedText = attributed
+    textView.linkTextAttributes = [
+      .foregroundColor: noticeStyle ? QFAuthPalette.color(0xA83212) : QFUI.green
+    ]
+    measuredHeight = 36
+    textHeight?.update(offset: measuredHeight)
+    setNeedsLayout()
+    invalidateIntrinsicContentSize()
     renderCheckmark()
   }
 
@@ -231,90 +266,16 @@ final class QFAuthAgreementControl: UIView, UITextViewDelegate {
 
   private func renderCheckmark() {
     let configuration = UIImage.SymbolConfiguration(pointSize: 21)
+    checkbox.configuration = nil
     checkbox.backgroundColor = .clear
     checkbox.setImage(UIImage(systemName: checked ? "checkmark.square" : "square",
                              withConfiguration: configuration), for: .normal)
     checkbox.tintColor = checked ? QFUI.green : QFAuthPalette.color(0x93A18B)
     checkbox.isSelected = checked
-    checkbox.accessibilityValue = checked ? "已勾选" : "未勾选"
+    checkbox.accessibilityValue = checked
+      ? app.text("已勾选", "Checked") : app.text("未勾选", "Not checked")
     var traits: UIAccessibilityTraits = checked ? [.button, .selected] : [.button]
     if !checkbox.isEnabled { traits.insert(.notEnabled) }
     checkbox.accessibilityTraits = traits
-  }
-}
-
-@MainActor
-final class QFAuthAgreementViewController: UIViewController {
-  private let app: QFAppSession
-  private let document: QFAuthDocument
-  private let bodyLabel = QFUI.label("", size: 17)
-  private var subscriptions = Set<AnyCancellable>()
-
-  init(app: QFAppSession, document: QFAuthDocument) {
-    self.app = app
-    self.document = document
-    super.init(nibName: nil, bundle: nil)
-    modalPresentationStyle = .fullScreen
-  }
-  required init?(coder: NSCoder) { return nil }
-
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    view.backgroundColor = QFUI.background
-    let header = UIView()
-    view.addSubview(header)
-    header.snp.makeConstraints {
-      $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-      $0.centerX.equalToSuperview()
-      $0.width.equalTo(view.safeAreaLayoutGuide.snp.width).priority(.high)
-      $0.width.lessThanOrEqualTo(760)
-      $0.leading.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.leading)
-      $0.trailing.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.trailing)
-      $0.height.equalTo(52)
-    }
-    let back = UIButton(type: .system)
-    back.setTitle("返回", for: .normal)
-    back.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-    back.tintColor = QFUI.green
-    back.accessibilityIdentifier = "agreement.back"
-    back.addAction(UIAction { [weak self] _ in self?.dismiss(animated: true) }, for: .touchUpInside)
-    header.addSubview(back)
-    back.snp.makeConstraints { $0.leading.equalToSuperview().offset(20); $0.centerY.equalToSuperview(); $0.height.equalTo(44) }
-    let title = QFUI.label(document.title, size: 17, weight: .semibold, lines: 1)
-    header.addSubview(title)
-    title.snp.makeConstraints { $0.center.equalToSuperview(); $0.leading.greaterThanOrEqualTo(back.snp.trailing).offset(8) }
-    let divider = UIView()
-    divider.backgroundColor = QFUI.border
-    view.addSubview(divider)
-    divider.snp.makeConstraints { $0.top.equalTo(header.snp.bottom); $0.leading.trailing.equalToSuperview(); $0.height.equalTo(1) }
-    let scroll = UIScrollView()
-    scroll.accessibilityIdentifier = "agreement.document"
-    view.addSubview(scroll)
-    scroll.snp.makeConstraints {
-      $0.top.equalTo(divider.snp.bottom); $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-      $0.centerX.equalToSuperview()
-      $0.width.equalTo(view.safeAreaLayoutGuide.snp.width).priority(.high)
-      $0.width.lessThanOrEqualTo(760)
-      $0.leading.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.leading)
-      $0.trailing.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.trailing)
-    }
-    let heading = QFUI.label(document.title, size: 26, weight: .bold)
-    heading.accessibilityTraits.insert(.header)
-    let stack = QFUI.stack([heading, bodyLabel], spacing: 24)
-    scroll.addSubview(stack)
-    stack.snp.makeConstraints {
-      $0.edges.equalTo(scroll.contentLayoutGuide).inset(UIEdgeInsets(top: 28, left: 24, bottom: 28, right: 24))
-      $0.width.equalTo(scroll.frameLayoutGuide.snp.width).offset(-48)
-    }
-    render(app.configuration)
-    app.$configuration.receive(on: DispatchQueue.main).sink { [weak self] configuration in
-      self?.render(configuration)
-    }.store(in: &subscriptions)
-  }
-
-  private func render(_ configuration: QFServerConfig?) {
-    let text = document == .privacy ? configuration?.agreements.privacyPolicy : configuration?.agreements.userAgreement
-    bodyLabel.text = text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
-      ? text : "协议暂未配置，请稍后重试。"
   }
 }

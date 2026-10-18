@@ -6,18 +6,33 @@ import UIKit
 final class QFAppleAuthorization: NSObject, ASAuthorizationControllerDelegate,
   ASAuthorizationControllerPresentationContextProviding
 {
+  private unowned let app: QFAppSession
   private var continuation: CheckedContinuation<String, Error>?
   private var controller: ASAuthorizationController?
   private var state: String?
   private var anchor: UIWindow?
 
+  init(app: QFAppSession) {
+    self.app = app
+    super.init()
+  }
+
   func authorize() async throws -> String {
-    guard continuation == nil else { throw QFAPIError(code: 40900, message: "Apple 授权正在进行。") }
+    guard continuation == nil else {
+      throw QFAPIError(
+        code: 40900, message: app.text("Apple 授权正在进行。", "Apple authorization is already in progress."))
+    }
     guard
       let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene })
         .filter({ $0.activationState == .foregroundActive }).flatMap({ $0.windows }).first(
           where: \.isKeyWindow)
-    else { throw QFAPIError(code: 50300, message: "当前无法展示 Apple 授权，请稍后重试。") }
+    else {
+      throw QFAPIError(
+        code: 50300,
+        message: app.text(
+          "当前无法展示 Apple 授权，请稍后重试。",
+          "Apple authorization cannot be shown right now. Try again later."))
+    }
     anchor = window
     let state = try QFCredentials.generate()
     self.state = state
@@ -53,7 +68,10 @@ final class QFAppleAuthorization: NSObject, ASAuthorizationControllerDelegate,
       let data = credential.authorizationCode,
       let code = String(data: data, encoding: .utf8), !code.isEmpty
     else {
-      complete(.failure(QFAPIError(code: 40100, message: "Apple 授权结果无效，请重新尝试。")))
+      complete(.failure(QFAPIError(
+        code: 40100,
+        message: app.text(
+          "Apple 授权结果无效，请重新尝试。", "The Apple authorization result is invalid. Try again."))))
       return
     }
     complete(.success(code))

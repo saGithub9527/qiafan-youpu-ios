@@ -1,0 +1,34 @@
+{
+  "source": {
+    "endpoint": "https://test-api.yzsalingo.com/api/v1/home/recipes/fc501baa-0a7f-53f0-929a-b391cd4c4342",
+    "language": "zh-Hans",
+    "responseSha256": "e6a2edc7edf98735daf3fad9da675c3b058af82b0887f8118e1e2bdadfecd39b",
+    "sourceName": "HowToCook",
+    "sourceURL": "https://github.com/Anduin2017/HowToCook/blob/master/dishes/meat_dish/%E5%B9%BF%E5%BC%8F%E8%90%9D%E5%8D%9C%E7%89%9B%E8%85%A9/%E5%B9%BF%E5%BC%8F%E8%90%9D%E5%8D%9C%E7%89%9B%E8%85%A9.md",
+    "license": "Unlicense",
+    "attribution": "HowToCook contributors",
+    "purpose": "Regression fixture for read-only projection; original published section text is unchanged."
+  },
+  "data": {
+    "id": "fc501baa-0a7f-53f0-929a-b391cd4c4342",
+    "title": "广式萝卜牛腩",
+    "steps": [
+      {
+        "title": "来源原文 · 必备原料和工具",
+        "body": "- 牛腩\n- 白萝卜\n- 姜片\n- 蒜瓣\n- 葱\n- 八角\n- 桂皮\n- 干辣椒\n- 香叶\n- 南乳\n- 柱侯酱\n- 蚝油\n- 酱油\n- 冰糖\n- 盐\n- 老抽"
+      },
+      {
+        "title": "来源原文 · 计算",
+        "body": "一份正好够 3-4 人吃。\n\n- 牛腩 500g\n- 白萝卜 1 根\n- 姜片 8 片\n- 蒜瓣 5 片\n- 葱结 一把\n- 八角 2 片\n- 桂皮 1 小块\n- 干辣椒 2 个\n- 香叶 2 片\n- 南乳 1 块\n- 柱侯酱 30g\n- 蚝油 15g\n- 酱油 15g\n- 冰糖 10g\n- 盐 5g\n- 老抽 15g"
+      },
+      {
+        "title": "来源原文 · 操作",
+        "body": "### 开始制作\n\n1. 萝卜滚到切块备用\n2. 牛腩整块焯水，加入 2 片姜和一把葱结，等水开之后煮 5-10 分钟，然后捞出切件\n3. 将牛腩切块，切成自己喜欢的大小（牛腩焯过水，待会儿焖的时候基本不会缩水了，大块的会焖相对就一点的时间）\n4. 准备焖牛腩的酱料，将南乳、柱侯酱、酱油、蚝油、糖、盐按上面的量调和（冰糖刚刚没了换成了白糖）\n5. 热锅下油，将姜蒜爆香，放入牛腩，炒至干身，加入调好的酱料，炒香，如果喜欢色泽浓一点的可以加一点老抽润色一下\n6. 调料充分混合之后倒入热水\n7. 将牛腩换到汤锅中，放入桂皮、八角、香叶和干辣椒，焖大概 2 个小时\n8. 牛腩焖到半软之后加入白萝卜继续焖 30 分钟\n9. 等到萝卜焖软之后就完成，一锅浓香的萝卜牛腩就完成了"
+      },
+      {
+        "title": "资料来源",
+        "body": "HowToCook 社区食谱；按来源原文整理，未声明本项目已试做。原始配比与适量表述未换算。\nhttps://github.com/Anduin2017/HowToCook/blob/master/dishes/meat_dish/%E5%B9%BF%E5%BC%8F%E8%90%9D%E5%8D%9C%E7%89%9B%E8%85%A9/%E5%B9%BF%E5%BC%8F%E8%90%9D%E5%8D%9C%E7%89%9B%E8%85%A9.md\n许可：Unlicense。归档日期：2026-09-07"
+      }
+    ]
+  }
+}

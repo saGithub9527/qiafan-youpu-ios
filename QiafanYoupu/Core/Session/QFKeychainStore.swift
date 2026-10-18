@@ -47,9 +47,12 @@ struct QFKeychainStore {
   }
 }
 
-struct QFKeychainError: LocalizedError {
+struct QFKeychainError: Error {
   let status: OSStatus
-  var errorDescription: String? { "无法访问本机安全凭证，请解锁设备后重试（\(status)）。" }
+}
+
+enum QFCredentialError: Error {
+  case invalidStoredCredential
 }
 
 enum QFCredentials {
@@ -98,7 +101,7 @@ final class QFDeviceIdentity {
     let key = "credential-\(environment)"
     if let data = try keychain.read(key) {
       guard let value = String(data: data, encoding: .utf8), QFCredentials.isValid(value) else {
-        throw QFAPIError(code: 40101, message: "本机登录凭证损坏，请联系支持处理，避免生成重复账号。")
+        throw QFCredentialError.invalidStoredCredential
       }
       return value
     }
@@ -106,5 +109,11 @@ final class QFDeviceIdentity {
     // Persist before the first network request; a failed request must reuse this credential.
     try keychain.write(Data(value.utf8), account: key)
     return value
+  }
+
+  /// Remove quick-login material only after the server confirms account erasure.
+  func forgetDeletedAccount(environment: String) throws {
+    try keychain.remove("credential-\(environment)")
+    try keychain.remove("device-id")
   }
 }

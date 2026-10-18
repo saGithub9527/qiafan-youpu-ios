@@ -1,7 +1,9 @@
 import Foundation
 
 enum QFLaunchPolicy {
-  static let completedKey = "qfyp.onboarding.completed"
+  /// Changing this key makes an existing installation review the materially updated privacy
+  /// policy before an SDK with a new remote recipient can start.
+  static let completedKey = "qfyp.onboarding.completed.privacy-1.4-2026-09-28"
 
   static func shouldShowWelcome(isDebug: Bool, completed: Bool) -> Bool {
     isDebug || !completed

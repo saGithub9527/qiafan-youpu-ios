@@ -1,0 +1,43 @@
+{
+  "name": "three",
+  "version": "0.186.1",
+  "license": "MIT",
+  "dist": {
+    "shasum": "6d50f70c2c437f844179bbb56d6f5b774e1ca38a",
+    "tarball": "https://registry.npmjs.org/three/-/three-0.186.1.tgz",
+    "fileCount": 1263,
+    "integrity": "sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==",
+    "signatures": [
+      {
+        "sig": "MEUCICldcpbcHhT4cNN5FeIhlbfekATi/CJUpk7mUDtPas5yAiEA/apNIzYS5sOdYRaeAK5Uae2O23E0Hl7Mo5TqNt9GWxA=",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      },
+      {
+        "sig": "MEUCIQCR0d1POSyDcCWApl93klyA2uB9zYBro/9ru2SUGgXSkAIgVdc8c/NKCiqjo3zmTooBB+GimZ+6BwK/1VLTO83itr4=",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "unpackedSize": 20443256
+  },
+  "files": [
+    {
+      "name": "three.module.js",
+      "bytes": 662772,
+      "sha256": "9052042d676cb0fdc1ddfefe193053f34b7ac0513a616fdac4535d49987812ea",
+      "source": "https://raw.githubusercontent.com/mrdoob/three.js/r186/build/three.module.js"
+    },
+    {
+      "name": "three.core.js",
+      "bytes": 1458113,
+      "sha256": "9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6",
+      "source": "https://raw.githubusercontent.com/mrdoob/three.js/r186/build/three.core.js"
+    },
+    {
+      "name": "LICENSE-three.txt",
+      "bytes": 1081,
+      "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
+      "source": "https://raw.githubusercontent.com/mrdoob/three.js/r186/LICENSE"
+    }
+  ],
+  "fileIntegrityVerifiedAgainstNpmVersion": "0.186.1"
+}

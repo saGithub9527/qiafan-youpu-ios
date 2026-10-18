@@ -8,18 +8,26 @@ enum QFThemeKind: String, Codable, CaseIterable, Hashable {
   case dark
 
   var title: String {
+    title(language: .simplifiedChinese)
+  }
+
+  func title(language: QFInterfaceLanguage) -> String {
     switch self {
-    case .classic: return "经典橙"
-    case .forest: return "自然绿"
-    case .dark: return "深色"
+    case .classic: return language.text(chinese: "经典橙", english: "Classic orange")
+    case .forest: return language.text(chinese: "自然绿", english: "Natural green")
+    case .dark: return language.text(chinese: "深色", english: "Dark")
     }
   }
 
   var subtitle: String {
+    subtitle(language: .simplifiedChinese)
+  }
+
+  func subtitle(language: QFInterfaceLanguage) -> String {
     switch self {
-    case .classic: return "温暖、明快"
-    case .forest: return "自然、舒缓"
-    case .dark: return "适合暗光环境"
+    case .classic: return language.text(chinese: "温暖、明快", english: "Warm and bright")
+    case .forest: return language.text(chinese: "自然、舒缓", english: "Natural and calm")
+    case .dark: return language.text(chinese: "适合暗光环境", english: "Comfortable in low light")
     }
   }
 
@@ -231,8 +239,10 @@ class QFPageViewController: UIViewController {
   }
 
   func showUnavailable(_ title: String) {
-    let alert = UIAlertController(title: title, message: "该功能暂未开放", preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "知道了", style: .default))
+    let alert = UIAlertController(
+      title: title, message: app.text("该功能暂未开放", "This feature is not available yet."),
+      preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: app.text("知道了", "OK"), style: .default))
     present(alert, animated: true)
   }
 }
