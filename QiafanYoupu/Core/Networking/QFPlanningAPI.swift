@@ -359,6 +359,23 @@ struct QFInventoryLot: Codable, Equatable {
   var packageContentUnit: String? = nil
   var hasMultipleCostSources: Bool? = nil
   var iconKey: String? = nil
+  // Read-only summaries. currentQuantity and revision always belong to the real lot.
+  var groupQuantity: String? = nil
+  var groupLotCount: Int? = nil
+  private var summedQuantity: String {
+    guard (groupLotCount ?? 0) > 1, let total = groupQuantity,
+      let sum = QFPurchaseNumber.decimal(total), let own = QFPurchaseNumber.decimal(currentQuantity), sum >= own else { return currentQuantity }
+    return total
+  }
+  private var packageCount: Decimal? {
+    guard hasMultipleCostSources != true, let packageUnit, ["bottle", "bag", "box", "pack"].contains(packageUnit),
+      packageContentUnit == unitCode, let size = packageSize.flatMap(QFPurchaseNumber.decimal), size > 0,
+      let amount = QFPurchaseNumber.decimal(summedQuantity) else { return nil }
+    let count = amount / size
+    return QFPurchaseNumber.decimal(QFPurchaseNumber.string(count)) == nil ? nil : count
+  }
+  var displayedQuantity: String { packageCount.map(QFPurchaseNumber.string) ?? summedQuantity }
+  var displayedUnitCode: String { packageCount != nil ? packageUnit ?? unitCode : unitCode }
 }
 
 struct QFInventoryLedgerEntry: Codable, Equatable {
@@ -820,13 +837,15 @@ extension QFAppSession {
   }
 
   func inventoryLots(
-    householdID: String? = nil, category: String? = nil, query: String = "", page: Int = 0, expiry: String? = nil
+    householdID: String? = nil, category: String? = nil, query: String = "", page: Int = 0, expiry: String? = nil,
+    groupByProduct: Bool = false, ingredientID: String? = nil
   ) async throws -> QFContentPage<QFInventoryLot> {
     try await contentRequest(
       path: "me/inventory",
       query: planningQuery(
         ("householdId", householdID), ("category", category), ("q", query),
-        ("page", String(page)), ("expiry", expiry), ("timeZone", TimeZone.current.identifier)))
+        ("page", String(page)), ("expiry", expiry), ("timeZone", TimeZone.current.identifier),
+        ("groupByProduct", groupByProduct ? "true" : nil), ("ingredientId", ingredientID)))
   }
 
   func inventoryLedger(

@@ -1,3 +1,4 @@
+// Device-local interface translations.
 " 次" = "vezes";
 "%@ %d 篇" = "%1$@ · %2$d";
 "%@ · %@ · %d 份" = "%@ · %@ · %d porções";
@@ -163,6 +164,7 @@
 "保存失败" = "Não foi possível salvar";
 "保存密码" = "Salvar senha";
 "保存密码中" = "Salvando senha";
+"保存并放入冰箱" = "Salvar na geladeira";
 "保存当前修改" = "Salvar alterações";
 "保存当天 %d 道菜" = "Salvar %1$d pratos para este dia";
 "保存当天记录" = "Salvar registros deste dia";
@@ -213,6 +215,7 @@
 "入库" = "Entrada";
 "入库 %@" = "Adicionado em %@";
 "入库、使用和调整会显示在这里。" = "Entradas, uso e ajustes aparecem aqui.";
+"入库批次" = "Lotes de entrada";
 "入库日期未知" = "Data de entrada desconhecida";
 "全球" = "Global";
 "全部" = "Todos";
@@ -240,6 +243,7 @@
 "内容超过本地模型上下文，请缩短本次问题。" = "O conteúdo excede o limite de contexto do modelo local. Encurte sua pergunta.";
 "再次输入新密码" = "Digite a nova senha novamente";
 "再跟着清晰步骤，一步步开做。" = "depois cozinhe com instruções claras.";
+"冰箱" = "Geladeira";
 "准备上下文" = "Preparação do contexto";
 "准备好，开饭啦" = "Pronto? Vamos comer!";
 "准备媒体中" = "Preparando mídia";
@@ -288,7 +292,6 @@
 "助手响应无法解析，请稍后重试。" = "Não foi possível interpretar a resposta do assistente. Tente novamente mais tarde.";
 "助手记忆" = "Memória do assistente";
 "包" = "Pacote";
-"包装标注：%@" = "Informação na embalagem: %@";
 "午餐" = "Almoço";
 "协议和图片规则在哪里？" = "Onde estão as políticas e regras de imagens?";
 "单一数量" = "Quantidade exata";
@@ -297,7 +300,6 @@
 "单位列表尚未加载，请稍后重试。" = "A lista de unidades ainda está carregando. Tente novamente em instantes.";
 "单位：%@" = "Unidade: %@";
 "单日" = "Um dia";
-"卖方编号 %@，请核对商家名称。" = "ID do vendedor %@; confira o nome da loja.";
 "危险操作" = "Ações críticas";
 "历史库存依据待确认" = "Verificar histórico do estoque";
 "原因：%@" = "Motivo: %1$@";
@@ -352,13 +354,10 @@
 "和小狗厨师一起，" = "Cozinhe com nosso chef filhote";
 "响应头" = "Cabeçalhos de resposta";
 "商品名称" = "Nome do produto";
-"商品条码：%@" = "Código de barras do produto: %@";
 "商品查询失败，请检查网络后重试。" = "Não foi possível consultar o produto. Verifique a conexão e tente novamente.";
 "商品查询暂时受限，请稍后重试。" = "A consulta do produto está temporariamente limitada. Tente novamente mais tarde.";
-"商品资料来源：Open Food Facts（ODbL）" = "Fonte dos dados do produto: Open Food Facts (ODbL)";
-"商品资料来源：极速数据（阿里云市场）" = "Fonte dos dados do produto: Jisu Data (Alibaba Cloud Marketplace)";
+"商品资料来源" = "Fonte dos dados do produto";
 "商品金额" = "Subtotal dos itens";
-"商家" = "Estabelecimento";
 "回到今天" = "Hoje";
 "回到最新消息" = "Ir à mensagem mais recente";
 "回来继续规划饮食" = "Continuar planejando as refeições";
@@ -436,7 +435,6 @@
 "家里已有：%@" = "Em casa: %@";
 "家里有" = "Em estoque";
 "对准食材包装上的条形码\n联网查询名称和净含量，照片不会上传" = "Aponte para o código de barras da embalagem do alimento\nO nome e o conteúdo líquido serão consultados on-line; nenhuma foto será enviada";
-"对应食材" = "Ingrediente associado";
 "将这份周计划加入日历？" = "Adicionar este plano semanal ao calendário?";
 "尊重原创，也支持依法授权的图片" = "Respeite o trabalho original e imagens devidamente licenciadas";
 "小满的厨房" = "Cozinha do Xiaoman";
@@ -456,7 +454,6 @@
 "已入库" = "Adicionado ao estoque";
 "已全部加载" = "Tudo carregado";
 "已关联目录食材 · 更改" = "Vinculado ao catálogo · Alterar";
-"已关联食材" = "Ingrediente associado";
 "已准备计划草稿入口，尚未保存。请打开后核对日期、餐次、菜谱、份数和家庭，再由你保存。" = "O rascunho do plano está pronto para revisão e ainda não foi salvo. Abra-o, confira a data, a refeição, a receita, as porções e a família e salve-o por conta própria.";
 "已切换到本地千问模型。" = "Modelo Qwen local selecionado.";
 "已加入家庭" = "Você entrou na família";
@@ -478,6 +475,7 @@
 "已提交" = "Enviado";
 "已撤回" = "Retirado";
 "已收藏 · 取消" = "Salvo · Remover";
+"已放入冰箱" = "Adicionado à geladeira";
 "已有计划会保留，重新生成采购单时将按剩余库存计算。" = "Os planos serão mantidos. Ao gerar novamente a lista de compras, as quantidades serão calculadas com base no estoque restante.";
 "已有采购草稿" = "Já existe um rascunho de compra";
 "已添加 %d 项，已存在 %d 项" = "%d adicionados; %d já existentes";
@@ -491,7 +489,6 @@
 "已联网获取商品资料，请与包装核对。" = "Dados do produto obtidos on-line. Confira-os na embalagem.";
 "已被新采购单替代" = "Substituída por uma nova lista";
 "已计入合计" = "Incluído no total";
-"已识别条码，正在联网查询商品资料…\n也可直接点击手动填写" = "Código de barras detectado. Consultando dados do produto on-line…\nVocê também pode preenchê-los manualmente";
 "已购买" = "Comprado";
 "已跳过" = "Ignorado";
 "已过期" = "Vencidos";
@@ -535,7 +532,6 @@
 "当前主题" = "Tema atual";
 "当前分类 %d 项 · 按收藏时间" = "%1$d nesta categoria · Data salva";
 "当前分类中没有作品。" = "Não há postagens nesta categoria.";
-"当前商品库未收录此条码，请填写商品名称和净含量。" = "Este código de barras não está na base de produtos atual. Informe o nome e o conteúdo líquido.";
 "当前密码" = "Senha atual";
 "当前封面" = "Capa atual";
 "当前库存" = "Estoque atual";
@@ -704,7 +700,6 @@
 "放弃未保存的修改？" = "Descartar alterações não salvas?";
 "放弃未保存的提醒设置？" = "Descartar as configurações de lembrete não salvas?";
 "数量" = "Quantidade";
-"数量1是可修改的默认值，价格需手动填写；包装净含量不代表购买数量。" = "A quantidade inicial é 1 e pode ser alterada. Informe o preço manualmente; o conteúdo líquido da embalagem não é a quantidade comprada.";
 "数量待确认" = "Quantidade a confirmar";
 "数量范围" = "Faixa de quantidade";
 "文件过大，图片最多8MB，视频最多20MB。" = "O arquivo é muito grande. Fotos podem ter até 8 MB e vídeos até 20 MB.";
@@ -757,6 +752,7 @@
 "暂时无法绑定 Apple 身份，请稍后重试。" = "Não foi possível vincular seu ID Apple agora. Tente novamente mais tarde.";
 "暂时无法获取云端额度。" = "Os créditos na nuvem estão indisponíveis.";
 "暂时无法获取订阅状态" = "Status da assinatura indisponível";
+"暂时无法读取入库批次" = "Não foi possível carregar os lotes";
 "暂未找到可核对的资料。可开启联网查询，或换一个更具体的问题。" = "Nenhuma referência verificável encontrada. Ative a rede ou detalhe a pergunta.";
 "暂未设置" = "Não definido";
 "更换" = "Alterar";
@@ -795,13 +791,13 @@
 "未命名食材" = "Ingrediente sem nome";
 "未填写菜名 · 继续编辑" = "Nome do prato ausente · Continue editando";
 "未找到可用库存" = "Nenhum estoque utilizável encontrado";
+"未找到商品名称，可直接手动填写。" = "Nome não encontrado. Você pode digitá-lo.";
 "未提交的作品会保存在这台设备。" = "Postagens não enviadas estão salvas neste dispositivo.";
 "未来日期还不能补记做菜，请先选择今天或过去的日期。" = "Não é possível adicionar histórico de culinária para uma data futura. Escolha hoje ou uma data anterior.";
 "未来日期还不能记录实际采购，请先选择今天或过去的日期。" = "Não é possível registrar compras para uma data futura. Escolha hoje ou uma data anterior.";
 "未来计划还不能打卡。" = "Planos futuros ainda não podem ser marcados como preparados.";
 "未标注日期" = "Sem data indicada";
 "未能打开这条计划提醒。" = "Não foi possível abrir este lembrete do plano.";
-"未获取到可靠名称，请手动填写并选择对应食材。" = "Não foi possível obter um nome confiável. Preencha manualmente e selecione o ingrediente correspondente.";
 "未设置" = "Não definido";
 "未识别到商品条码" = "Nenhum código de produto encontrado";
 "未选择" = "Não selecionado";
@@ -809,14 +805,9 @@
 "未通过" = "Não aprovado";
 "未采用" = "Não aceito";
 "本周" = "Esta semana";
+"本商品本次实付总额，未知可留空" = "Total pago por este produto; deixe em branco se não souber";
 "本地千问模型" = "Modelo Qwen no dispositivo";
 "本地模型未能完成回答，请检查模型或稍后重试。" = "O modelo local não conseguiu concluir a resposta. Confira o modelo ou tente novamente mais tarde.";
-"查询中…" = "Consultando…";
-"瓶" = "Garrafa";
-"盒" = "Caixa";
-"联网查询商品资料" = "Consultar produto on-line";
-"袋" = "Saco";
-"设备内存不足，本次回答已停止，已保留现有内容。请稍后重试。" = "Não há memória suficiente no dispositivo, por isso esta resposta foi interrompida. O texto já exibido foi mantido. Tente novamente mais tarde.";
 "本地模式当前支持文字，请移除图片或选择云端模式。" = "O modo local aceita texto no momento. Remova as imagens ou escolha o modo na nuvem.";
 "本地生成超时，请稍后重试或缩短问题。" = "A geração local excedeu o tempo limite. Tente novamente mais tarde ou encurte a pergunta.";
 "本月" = "Este mês";
@@ -857,6 +848,7 @@
 "查看沙盒日志目录" = "Mostrar diretório de logs do sandbox";
 "查看账号与登录安全" = "Segurança da conta e login";
 "查看这餐计划和备菜" = "Ver o plano desta refeição e o preparo";
+"查询中…" = "Consultando…";
 "标注到期日期" = "Informar data de validade";
 "标记为已购买" = "Marcar como comprado";
 "校正" = "Correção";
@@ -889,6 +881,7 @@
 "正在撤销邀请" = "Revogando convite";
 "正在整理文字…" = "Finalizando a transcrição…";
 "正在更新成员" = "Atualizando membro";
+"正在查询商品名称…" = "Buscando o nome do produto…";
 "正在校验模型完整性…" = "Verificando a integridade do modelo…";
 "正在检查云端额度…" = "Verificando créditos na nuvem…";
 "正在注销账号" = "Excluindo conta";
@@ -973,6 +966,7 @@
 "点击重新加载" = "Toque para recarregar";
 "烹饪与设备安全" = "Segurança em cozinha e eletrodomésticos";
 "状态暂不可用" = "Status indisponível";
+"瓶" = "Garrafa";
 "生成 AI 周计划" = "Gerar plano semanal com IA";
 "生成任务已提交" = "Solicitação de geração enviada";
 "生成后可在这里查看状态并确认加入计划" = "Depois de gerado, revise o status aqui e confirme a inclusão no plano";
@@ -1014,6 +1008,7 @@
 "登录提示" = "Aviso de login";
 "登录状态已失效，请重新登录。" = "Sua sessão expirou. Por favor, faça login novamente.";
 "登录状态正在更新，请稍候。" = "O estado de login está sendo atualizado. Por favor, aguarde.";
+"盒" = "Caixa";
 "目标日期存在冲突内容，或本机暂时无法写入。原内容仍保留，请先保存或整理该日草稿，再重试。" = "A data alvo contém conteúdo conflitante ou este dispositivo não pôde salvá-la. O conteúdo original ainda está mantido. Salve ou organize o rascunho desse dia e tente novamente.";
 "相册" = "Fotos";
 "省份或地区" = "Estado ou região";
@@ -1035,7 +1030,6 @@
 "确认注销" = "Confirmar exclusão";
 "确认转让" = "Confirmar transferência";
 "确认采购单" = "Confirmar lista de compras";
-"票面总额 %@，请核对商品与优惠。" = "Total do comprovante: %@. Confira os produtos e descontos.";
 "移出" = "Remover";
 "移出后会保留已经发生的做菜记录。" = "Os registros de preparo existentes serão mantidos.";
 "移出家庭" = "Remover da família";
@@ -1089,6 +1083,7 @@
 "网络连接失败，请稍后重试。" = "Falha na conexão de rede. Por favor, tente novamente mais tarde.";
 "网络连接失败，请重试。未提交的内容会保留。" = "Falha na conexão de rede. Por favor, tente novamente; alterações não enviadas foram preservadas.";
 "耗时 %.0f ms" = "Duração: %1$.0f ms";
+"联网查询商品资料" = "Consultar produto on-line";
 "联网检索暂不可用，未取得可引用的资料。请稍后重试。" = "A busca de rede está indisponível; nenhuma referência para citar foi obtida. Tente mais tarde.";
 "联网检索未取得可引用的资料。请稍后重试或把问题说得更具体。" = "A busca não obteve referências para citar. Tente mais tarde ou detalhe a pergunta.";
 "肉蛋" = "Carnes e ovos";
@@ -1128,13 +1123,13 @@
 "菜谱草稿暂时无法保存在本机，请精简内容后重试。" = "Não foi possível salvar o rascunho de receita neste dispositivo. Reduza o conteúdo e tente novamente.";
 "菜谱详情" = "Detalhes da receita";
 "蔬菜" = "Vegetais";
-"行金额" = "Valor do item";
 "补充图片" = "Contribuir com uma foto";
 "补充材料或对本案申诉" = "Adicionar evidência ou recorrer deste caso";
 "补全食材成本" = "Completar custos dos ingredientes";
 "补记" = "Adicionar registro";
 "补记做菜" = "Registrar preparo";
 "补记菜品" = "Adicionar prato ao registro";
+"袋" = "Saco";
 "裁剪头像" = "Cortar foto do perfil";
 "规格与有效期" = "Formato e validade";
 "视频不能超过20MB。" = "Vídeos devem ter 20 MB ou menos.";
@@ -1170,6 +1165,7 @@
 "记录需要重新载入后才能修改。" = "Recarregue o registro antes de editar.";
 "记忆管理" = "Gerenciar memória";
 "设为封面" = "Definir como capa";
+"设备内存不足，本次回答已停止，已保留现有内容。请稍后重试。" = "Não há memória suficiente no dispositivo, por isso esta resposta foi interrompida. O texto já exibido foi mantido. Tente novamente mais tarde.";
 "设置" = "Configurações";
 "设置密码" = "Definir senha";
 "设置每餐提醒" = "Definir lembretes para cada refeição";
@@ -1217,7 +1213,7 @@
 "请填写 10 到 1000 字" = "Insira de 10 a 1.000 caracteres";
 "请填写 10 到 1000 字的反馈内容。" = "Insira de 10 a 1.000 caracteres de feedback.";
 "请填写80字以内的菜品名称。" = "Insira um nome de prato com até 80 caracteres.";
-"请填写商品名称，并为每一项选择对应食材。" = "Preencha o nome de cada produto e associe cada item a um ingrediente.";
+"请填写商品名称" = "Digite o nome do produto";
 "请填写完整密码；新密码需为8–128位，且两次输入一致。" = "Complete todos os campos de senha. A nova senha deve ter de 8 a 128 caracteres e ambas as entradas devem coincidir.";
 "请填写完整的做法步骤。" = "Preencha todas as etapas do preparo.";
 "请填写有效币种，以及每项的名称、数量、单位和实际小计。" = "Insira uma moeda válida e o nome, quantidade, unidade e subtotal real de cada item.";
@@ -1228,7 +1224,6 @@
 "请拍清包装条形码，或手动填写商品信息。不会再从小票文字猜测数量和价格。" = "Tire uma foto nítida do código da embalagem ou preencha os dados manualmente. Quantidades e preços não serão mais deduzidos do texto do recibo.";
 "请描述遇到的问题或建议（10–1000 字）" = "Descreva o problema ou sugestão (10–1.000 caracteres).";
 "请提供具体菜名，或打开菜谱页查找可核对的做法。" = "Informe um prato específico ou abra receitas para encontrar um método verificável.";
-"请核对商家、币种及每项商品的名称、数量、单位和价格，再选择对应食材；保存前不会入库。" = "Confira loja, moeda, nome, quantidade, unidade e preço de cada produto e escolha o ingrediente. O estoque só muda ao salvar.";
 "请核对食材、实际用量和单位。" = "Confira os ingredientes, as quantidades utilizadas e as unidades.";
 "请核对食材使用状态。" = "Confira o estado de uso do ingrediente.";
 "请根据图片内容给出饮食建议或生成待确认草稿。" = "Dê sugestões de alimentação ou crie um rascunho para revisão com base na imagem.";
@@ -1282,6 +1277,7 @@
 "调整库存" = "Ajustar estoque";
 "调整当餐计划" = "Editar plano de refeições";
 "调整数量" = "Quantidade do ajuste";
+"调整此批次数量" = "Editar a quantidade deste lote";
 "调整采购数量" = "Editar quantidade de compra";
 "调试" = "Depuração";
 "调试信息" = "Informações de depuração";
@@ -1301,11 +1297,11 @@
 "账号绑定后不可修改。" = "O nome da conta não pode ser alterado após o vínculo.";
 "账号资料在哪里修改？" = "Onde posso editar meu perfil?";
 "账号需为1–64位小写字母、数字或下划线，不能以 sys_ 开头。" = "Use de 1 a 64 letras minúsculas, números ou sublinhados; a conta não pode começar com sys_.";
+"购买价格" = "Valor da compra";
 "购买数量" = "Quantidade";
 "购买日期" = "Data da compra";
 "购买食材" = "Ingredientes comprados";
 "资料尚未修改" = "Nenhuma alteração";
-"资料源标价：%@（计价单位未注明，请核对）" = "Preço na fonte: %@ (unidade de preço não informada; confira)";
 "跟着步骤做" = "então siga cada passo";
 "跳过介绍" = "Pular introdução";
 "跳过本次" = "Pular desta vez";
@@ -1364,7 +1360,6 @@
 "选择其他菜品" = "Escolher outro prato";
 "选择单位" = "Selecionar unidade";
 "选择图片 · 每次1张" = "Escolher uma foto";
-"选择对应食材" = "Associar um ingrediente";
 "选择新成员权限" = "Selecione o acesso do novo membro";
 "选择日期范围" = "Escolher período";
 "选择日期补记" = "Escolher data para registrar";

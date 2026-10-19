@@ -44,6 +44,7 @@ private final class QFProductBarcodeCamera: NSObject, AVCaptureMetadataOutputObj
   private var scanRect = CGRect(x: 0, y: 0, width: 1, height: 1)
   var found: (([QFProductBarcode]) -> Void)?
   var failed: (() -> Void)?
+  var running: (() -> Void)?
   func start() {
     queue.async { [weak self] in
       guard let self else { return }
@@ -62,14 +63,21 @@ private final class QFProductBarcodeCamera: NSObject, AVCaptureMetadataOutputObj
         self.session.commitConfiguration(); self.device = device; self.output = output; self.configured = true
         if (try? device.lockForConfiguration()) != nil {
           if device.isFocusModeSupported(.continuousAutoFocus) { device.focusMode = .continuousAutoFocus }
+          if device.isSmoothAutoFocusSupported { device.isSmoothAutoFocusEnabled = false }
+          if device.isExposureModeSupported(.continuousAutoExposure) { device.exposureMode = .continuousAutoExposure }
+          device.isSubjectAreaChangeMonitoringEnabled = true
           device.unlockForConfiguration()
         }
       }
       if !self.session.isRunning { self.session.startRunning() }
+      DispatchQueue.main.async { [weak self] in self?.running?() }
     }
   }
   func stop() { queue.async { [self] in if session.isRunning { session.stopRunning() }; setTorch(false) } }
-  func setScanRect(_ rect: CGRect) { queue.async { [weak self] in self?.scanRect = rect; self?.output?.rectOfInterest = rect } }
+  func setScanRect(_ rect: CGRect) {
+    let safe = QFBarcodeCaptureRegion.effective(rect, previewing: true)
+    queue.async { [weak self] in self?.scanRect = safe; self?.output?.rectOfInterest = safe }
+  }
   func toggleTorch() { queue.async { [weak self] in guard let self else { return }; self.setTorch(self.device?.torchMode != .on) } }
   private func setTorch(_ enabled: Bool) {
     guard let device, device.hasTorch else { return }
@@ -100,11 +108,12 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   private let camera = QFProductBarcodeCamera()
   private var preview: AVCaptureVideoPreviewLayer!
   private let canvas = UIView(), target = UIView()
+  private let scanLine = UIView()
+  private var previewObservation: NSKeyValueObservation?
   private let message = UILabel()
   private var active = false, handlingResult = false
   private var selectedBarcode: QFProductBarcode?
   private var operation = UUID()
-  private var lookup: Task<Void, Never>?
   private var observers: [NSObjectProtocol] = []
   var onChanged: (() -> Void)?
   var onScannedProduct: ((QFPurchaseReceiptLine) -> Void)?
@@ -114,7 +123,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
     super.init(nibName: nil, bundle: nil)
   }
   required init?(coder: NSCoder) { nil }
-  deinit { observers.forEach(NotificationCenter.default.removeObserver); camera.stop(); lookup?.cancel() }
+  deinit { observers.forEach(NotificationCenter.default.removeObserver); camera.stop() }
   private var sameScope: Bool { QFAssistantAgent.scope(app) == binding && app.planningHouseholdID == householdID }
   override func viewDidLoad() {
     super.viewDidLoad(); view.backgroundColor = UIColor(red: 0.06, green: 0.10, blue: 0.08, alpha: 1)
@@ -128,6 +137,9 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
     view.addSubview(canvas); canvas.backgroundColor = UIColor(white: 0.10, alpha: 1)
     canvas.snp.makeConstraints { $0.top.equalTo(header.snp.bottom); $0.leading.trailing.equalToSuperview(); $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-36) }
     preview = AVCaptureVideoPreviewLayer(session: camera.session); preview.videoGravity = .resizeAspectFill; canvas.layer.addSublayer(preview)
+    previewObservation = preview.observe(\.isPreviewing, options: [.new]) { [weak self] _, _ in
+      DispatchQueue.main.async { self?.updateCaptureRegion() }
+    }
     canvas.addSubview(target); target.isUserInteractionEnabled = false
     target.snp.makeConstraints { $0.centerX.equalToSuperview(); $0.centerY.equalToSuperview().multipliedBy(0.85); $0.width.equalToSuperview().multipliedBy(0.70); $0.height.equalTo(target.snp.width) }
     for index in 0..<4 {
@@ -138,8 +150,9 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
       vertical.snp.makeConstraints { m in m.top.bottom.equalToSuperview(); m.width.equalTo(2); if index % 2 == 0 { m.leading.equalToSuperview() } else { m.trailing.equalToSuperview() } }
       horizontal.snp.makeConstraints { m in m.leading.trailing.equalToSuperview(); m.height.equalTo(2); if index < 2 { m.top.equalToSuperview() } else { m.bottom.equalToSuperview() } }
     }
-    let line = UIView(); line.backgroundColor = QFUI.orange; target.addSubview(line)
-    line.snp.makeConstraints { $0.leading.trailing.equalToSuperview().inset(10); $0.centerY.equalToSuperview(); $0.height.equalTo(2) }
+    scanLine.backgroundColor = .black; scanLine.accessibilityIdentifier = "product.scan-line"
+    target.addSubview(scanLine)
+    scanLine.snp.makeConstraints { $0.leading.trailing.equalToSuperview().inset(10); $0.centerY.equalToSuperview(); $0.height.equalTo(2) }
     resetHint(); message.textColor = .white; message.font = .preferredFont(forTextStyle: .subheadline)
     message.adjustsFontForContentSizeCategory = true; message.textAlignment = .center; message.numberOfLines = 0
     canvas.addSubview(message); message.snp.makeConstraints { $0.top.equalTo(target.snp.bottom).offset(24); $0.leading.trailing.equalToSuperview().inset(24) }
@@ -149,18 +162,39 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
     let controls = QFTabUI.stack([torch, manual, photos], axis: .horizontal, spacing: 20); controls.distribution = .fillEqually
     canvas.addSubview(controls); controls.snp.makeConstraints { $0.centerX.equalToSuperview(); $0.bottom.equalToSuperview().inset(25); $0.top.greaterThanOrEqualTo(message.snp.bottom).offset(16); $0.width.equalTo(320).priority(750); $0.leading.greaterThanOrEqualToSuperview().offset(24); $0.trailing.lessThanOrEqualToSuperview().inset(24) }
     camera.found = { [weak self] in self?.decoded($0) }; camera.failed = { [weak self] in self?.showCameraUnavailable() }
+    camera.running = { [weak self] in self?.updateCaptureRegion(); self?.updateScanAnimation() }
     for name in [UIApplication.didEnterBackgroundNotification, UIApplication.willResignActiveNotification] {
-      observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in self?.cancelWork(); self?.camera.stop() } })
+      observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in self?.cancelWork(); self?.camera.stop(); self?.updateScanAnimation() } })
     }
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in self?.startCamera() } })
   }
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews(); preview.frame = canvas.bounds
-    camera.setScanRect(preview.metadataOutputRectConverted(fromLayerRect: target.convert(target.bounds, to: canvas)))
+    updateCaptureRegion(); updateScanAnimation()
   }
   override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); active = true; handlingResult = false; selectedBarcode = nil; resetHint(); startCamera() }
-  override func viewWillDisappear(_ animated: Bool) { super.viewWillDisappear(animated); active = false; cancelWork(); camera.stop() }
-  private func cancelWork() { operation = UUID(); lookup?.cancel(); lookup = nil; handlingResult = false }
+  override func viewWillDisappear(_ animated: Bool) { super.viewWillDisappear(animated); active = false; cancelWork(); camera.stop(); updateScanAnimation() }
+  private func updateCaptureRegion() {
+    guard preview != nil else { return }
+    if let connection = preview.connection, connection.isVideoOrientationSupported { connection.videoOrientation = .portrait }
+    let converted = preview.isPreviewing && !canvas.bounds.isEmpty
+      ? preview.metadataOutputRectConverted(fromLayerRect: target.convert(target.bounds, to: canvas)) : .zero
+    camera.setScanRect(QFBarcodeCaptureRegion.effective(converted, previewing: preview.isPreviewing))
+  }
+  private func updateScanAnimation() {
+    guard active, !handlingResult, UIApplication.shared.applicationState == .active, target.bounds.height > 24 else {
+      scanLine.layer.removeAnimation(forKey: "barcode.scan"); return
+    }
+    let distance = target.bounds.height - 24
+    if let old = scanLine.layer.animation(forKey: "barcode.scan") as? CABasicAnimation,
+      (old.toValue as? CGFloat) == distance / 2 { return }
+    let sweep = CABasicAnimation(keyPath: "transform.translation.y")
+    sweep.fromValue = -distance / 2; sweep.toValue = distance / 2
+    sweep.duration = 1.8; sweep.autoreverses = true; sweep.repeatCount = .infinity
+    sweep.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+    scanLine.layer.add(sweep, forKey: "barcode.scan")
+  }
+  private func cancelWork() { operation = UUID(); handlingResult = false }
   private func resetHint() { message.text = app.text("对准食材包装上的条形码\n联网查询名称和净含量，照片不会上传", "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device") }
   private func control(_ symbol: String, title: String, action: @escaping () -> Void) -> UIView {
     let button = UIButton(type: .system)
@@ -173,7 +207,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   private func startCamera() {
     guard active, sameScope, !handlingResult, presentedViewController == nil, UIApplication.shared.applicationState == .active else { return }
     switch AVCaptureDevice.authorizationStatus(for: .video) {
-    case .authorized: camera.start()
+    case .authorized: updateCaptureRegion(); camera.start(); updateScanAnimation()
     case .notDetermined: AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in DispatchQueue.main.async { if granted { self?.startCamera() } else { self?.showCameraUnavailable() } } }
     default: showCameraUnavailable()
     }
@@ -215,6 +249,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   private func decoded(_ values: [QFProductBarcode]) {
     guard active, sameScope, !handlingResult, !values.isEmpty else { return }
     handlingResult = true; camera.stop()
+    updateScanAnimation()
     let distinct = Array(Dictionary(grouping: values, by: \.value).values.compactMap(\.first)).sorted { $0.value < $1.value }
     guard distinct.count > 1 else { resolve(distinct[0]); return }
     let alert = UIAlertController(title: app.text("选择要添加的商品条码", "Choose the product barcode to add"), message: nil, preferredStyle: .actionSheet)
@@ -225,24 +260,11 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   }
   private func resolve(_ barcode: QFProductBarcode) {
     guard active, sameScope else { return }
-    selectedBarcode = barcode; operation = UUID(); let token = operation
+    selectedBarcode = barcode; operation = UUID()
     guard barcode.lookupCode != nil else { openProduct(.scannedProduct(barcode: barcode, lookupState: .localOnly)); return }
-    message.text = app.text("已识别条码，正在联网查询商品资料…\n也可直接点击手动填写", "Barcode detected. Looking up product data online…\nYou can also enter it manually")
-    lookup = Task { [weak self] in
-      guard let self else { return }
-      var info: QFBarcodeProductInfo?
-      var state: QFBarcodeLookupState = .notFound
-      do {
-        info = try await QFBarcodeProductLookup.shared.product(for: barcode, language: self.binding.language, app: self.app)
-        if info != nil { state = .found }
-      } catch {
-        if Task.isCancelled { return }
-        state = (error as? QFBarcodeProductLookup.Failure) == .rateLimited ? .rateLimited : .unavailable
-      }
-      guard !Task.isCancelled, self.active, self.sameScope, self.operation == token else { return }
-      self.lookup = nil
-      self.openProduct(.scannedProduct(barcode: barcode, info: info, lookupState: state))
-    }
+    // Recognizing a barcode is immediate. Product lookup belongs to the editable
+    // purchase draft and must not hold the user on the camera page.
+    openProduct(.scannedProduct(barcode: barcode, lookupState: .loading))
   }
   private func manualEntry() {
     guard sameScope else { return }

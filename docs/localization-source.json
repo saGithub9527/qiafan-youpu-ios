@@ -1004,6 +1004,12 @@
         "Saving password"
       ]
     },
+    "保存并放入冰箱": {
+      "english": "Save to fridge",
+      "englishVariants": [
+        "Save to fridge"
+      ]
+    },
     "保存当前修改": {
       "english": "Save changes",
       "englishVariants": [
@@ -1307,6 +1313,12 @@
         "Receipts, usage, and adjustments appear here."
       ]
     },
+    "入库批次": {
+      "english": "Stock batches",
+      "englishVariants": [
+        "Stock batches"
+      ]
+    },
     "入库日期未知": {
       "english": "Date added unknown",
       "englishVariants": [
@@ -1468,6 +1480,12 @@
       "english": "then cook with clear instructions.",
       "englishVariants": [
         "then cook with clear instructions."
+      ]
+    },
+    "冰箱": {
+      "english": "Fridge",
+      "englishVariants": [
+        "Fridge"
       ]
     },
     "准备上下文": {
@@ -1758,12 +1776,6 @@
         "Pack"
       ]
     },
-    "包装标注：%@": {
-      "english": "Package label: %@",
-      "englishVariants": [
-        "Package label: %@"
-      ]
-    },
     "午餐": {
       "english": "Lunch",
       "englishVariants": [
@@ -1810,12 +1822,6 @@
       "english": "Single day",
       "englishVariants": [
         "Single day"
-      ]
-    },
-    "卖方编号 %@，请核对商家名称。": {
-      "english": "Seller ID %@; check the merchant name.",
-      "englishVariants": [
-        "Seller ID %@; check the merchant name."
       ]
     },
     "危险操作": {
@@ -2144,12 +2150,6 @@
         "Product name"
       ]
     },
-    "商品条码：%@": {
-      "english": "Product barcode: %@",
-      "englishVariants": [
-        "Product barcode: %@"
-      ]
-    },
     "商品查询失败，请检查网络后重试。": {
       "english": "Product lookup failed. Check your connection and retry.",
       "englishVariants": [
@@ -2162,28 +2162,16 @@
         "Product lookup is temporarily rate limited. Please try again later."
       ]
     },
-    "商品资料来源：Open Food Facts（ODbL）": {
-      "english": "Product data: Open Food Facts (ODbL)",
+    "商品资料来源": {
+      "english": "Product data source",
       "englishVariants": [
-        "Product data: Open Food Facts (ODbL)"
-      ]
-    },
-    "商品资料来源：极速数据（阿里云市场）": {
-      "english": "Product data: Jisu Data (Alibaba Cloud Marketplace)",
-      "englishVariants": [
-        "Product data: Jisu Data (Alibaba Cloud Marketplace)"
+        "Product data source"
       ]
     },
     "商品金额": {
       "english": "Items subtotal",
       "englishVariants": [
         "Items subtotal"
-      ]
-    },
-    "商家": {
-      "english": "Merchant",
-      "englishVariants": [
-        "Merchant"
       ]
     },
     "回到今天": {
@@ -2651,12 +2639,6 @@
         "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device"
       ]
     },
-    "对应食材": {
-      "english": "Matched ingredient",
-      "englishVariants": [
-        "Matched ingredient"
-      ]
-    },
     "将这份周计划加入日历？": {
       "english": "Add this weekly plan to your calendar?",
       "englishVariants": [
@@ -2769,12 +2751,6 @@
       "english": "Linked to catalog · Change",
       "englishVariants": [
         "Linked to catalog · Change"
-      ]
-    },
-    "已关联食材": {
-      "english": "Ingredient matched",
-      "englishVariants": [
-        "Ingredient matched"
       ]
     },
     "已准备计划草稿入口，尚未保存。请打开后核对日期、餐次、菜谱、份数和家庭，再由你保存。": {
@@ -2904,6 +2880,12 @@
         "Saved · Remove"
       ]
     },
+    "已放入冰箱": {
+      "english": "Added to fridge",
+      "englishVariants": [
+        "Added to fridge"
+      ]
+    },
     "已有计划会保留，重新生成采购单时将按剩余库存计算。": {
       "english": "Your plans will stay. Regenerating the shopping list will use the remaining stock.",
       "englishVariants": [
@@ -2980,12 +2962,6 @@
       "english": "Included in total",
       "englishVariants": [
         "Included in total"
-      ]
-    },
-    "已识别条码，正在联网查询商品资料…\n也可直接点击手动填写": {
-      "english": "Barcode detected. Looking up product data online…\nYou can also enter it manually",
-      "englishVariants": [
-        "Barcode detected. Looking up product data online…\nYou can also enter it manually"
       ]
     },
     "已购买": {
@@ -3247,12 +3223,6 @@
         "There are no posts in this category."
       ]
     },
-    "当前商品库未收录此条码，请填写商品名称和净含量。": {
-      "english": "This barcode is not in the current product database. Enter its name and net contents.",
-      "englishVariants": [
-        "This barcode is not in the current product database. Enter its name and net contents."
-      ]
-    },
     "当前密码": {
       "english": "Current password",
       "englishVariants": [
@@ -3414,8 +3384,7 @@
     "待补全": {
       "english": "Missing",
       "englishVariants": [
-        "Missing",
-        "To complete"
+        "Missing"
       ]
     },
     "待采购 · %d": {
@@ -4269,12 +4238,6 @@
         "Quantity"
       ]
     },
-    "数量1是可修改的默认值，价格需手动填写；包装净含量不代表购买数量。": {
-      "english": "1 is an editable starting count. Enter the price yourself; package contents are not the quantity bought.",
-      "englishVariants": [
-        "1 is an editable starting count. Enter the price yourself; package contents are not the quantity bought."
-      ]
-    },
     "数量待确认": {
       "english": "Quantity to confirm",
       "englishVariants": [
@@ -4589,6 +4552,12 @@
         "Subscription status is unavailable"
       ]
     },
+    "暂时无法读取入库批次": {
+      "english": "Stock batches are temporarily unavailable",
+      "englishVariants": [
+        "Stock batches are temporarily unavailable"
+      ]
+    },
     "暂未找到可核对的资料。可开启联网查询，或换一个更具体的问题。": {
       "english": "No checkable reference was found. Enable network lookups or ask a more specific question.",
       "englishVariants": [
@@ -4712,7 +4681,8 @@
     "有效期": {
       "english": "Expiry",
       "englishVariants": [
-        "Expiry"
+        "Expiry",
+        "Expiry date"
       ]
     },
     "有效期至：%@": {
@@ -4817,6 +4787,12 @@
         "No usable stock found"
       ]
     },
+    "未找到商品名称，可直接手动填写。": {
+      "english": "Product name not found. You can enter it manually.",
+      "englishVariants": [
+        "Product name not found. You can enter it manually."
+      ]
+    },
     "未提交的作品会保存在这台设备。": {
       "english": "Unsubmitted posts are saved on this device.",
       "englishVariants": [
@@ -4851,12 +4827,6 @@
       "english": "Could not open this plan reminder.",
       "englishVariants": [
         "Could not open this plan reminder."
-      ]
-    },
-    "未获取到可靠名称，请手动填写并选择对应食材。": {
-      "english": "No reliable name was retrieved. Enter it and match the ingredient yourself.",
-      "englishVariants": [
-        "No reliable name was retrieved. Enter it and match the ingredient yourself."
       ]
     },
     "未设置": {
@@ -4899,6 +4869,12 @@
       "english": "This week",
       "englishVariants": [
         "This week"
+      ]
+    },
+    "本商品本次实付总额，未知可留空": {
+      "english": "Total paid for this item; leave blank if unknown",
+      "englishVariants": [
+        "Total paid for this item; leave blank if unknown"
       ]
     },
     "本地千问模型": {
@@ -5349,6 +5325,12 @@
       "english": "Updating member",
       "englishVariants": [
         "Updating member"
+      ]
+    },
+    "正在查询商品名称…": {
+      "english": "Looking up the product name…",
+      "englishVariants": [
+        "Looking up the product name…"
       ]
     },
     "正在校验模型完整性…": {
@@ -6246,12 +6228,6 @@
         "Confirm shopping list"
       ]
     },
-    "票面总额 %@，请核对商品与优惠。": {
-      "english": "Invoice total %@; check items and discounts.",
-      "englishVariants": [
-        "Invoice total %@; check items and discounts."
-      ]
-    },
     "移出": {
       "english": "Remove",
       "englishVariants": [
@@ -6818,12 +6794,6 @@
         "Vegetables"
       ]
     },
-    "行金额": {
-      "english": "Line amount",
-      "englishVariants": [
-        "Line amount"
-      ]
-    },
     "补充图片": {
       "english": "Contribute photo",
       "englishVariants": [
@@ -7365,10 +7335,10 @@
         "Enter a dish name of up to 80 characters."
       ]
     },
-    "请填写商品名称，并为每一项选择对应食材。": {
-      "english": "Enter each product name and match every item to an ingredient.",
+    "请填写商品名称": {
+      "english": "Enter the product name",
       "englishVariants": [
-        "Enter each product name and match every item to an ingredient."
+        "Enter the product name"
       ]
     },
     "请填写完整密码；新密码需为8–128位，且两次输入一致。": {
@@ -7429,12 +7399,6 @@
       "english": "Provide a specific dish name, or open recipes to find a checkable method.",
       "englishVariants": [
         "Provide a specific dish name, or open recipes to find a checkable method."
-      ]
-    },
-    "请核对商家、币种及每项商品的名称、数量、单位和价格，再选择对应食材；保存前不会入库。": {
-      "english": "Review the merchant, currency, and each item's name, quantity, unit and price, then match its ingredient. Nothing is stocked until you save.",
-      "englishVariants": [
-        "Review the merchant, currency, and each item's name, quantity, unit and price, then match its ingredient. Nothing is stocked until you save."
       ]
     },
     "请核对食材、实际用量和单位。": {
@@ -7755,6 +7719,12 @@
         "Adjustment quantity"
       ]
     },
+    "调整此批次数量": {
+      "english": "Edit this batch",
+      "englishVariants": [
+        "Edit this batch"
+      ]
+    },
     "调整采购数量": {
       "english": "Edit shopping quantity",
       "englishVariants": [
@@ -7869,6 +7839,12 @@
         "Use 1–64 lowercase letters, numbers, or underscores; the account cannot start with sys_."
       ]
     },
+    "购买价格": {
+      "english": "Purchase price",
+      "englishVariants": [
+        "Purchase price"
+      ]
+    },
     "购买数量": {
       "english": "Quantity",
       "englishVariants": [
@@ -7892,12 +7868,6 @@
       "english": "No changes",
       "englishVariants": [
         "No changes"
-      ]
-    },
-    "资料源标价：%@（计价单位未注明，请核对）": {
-      "english": "Source price: %@ (pricing unit unspecified; please check)",
-      "englishVariants": [
-        "Source price: %@ (pricing unit unspecified; please check)"
       ]
     },
     "跟着步骤做": {
@@ -8247,12 +8217,6 @@
       "english": "Choose one photo",
       "englishVariants": [
         "Choose one photo"
-      ]
-    },
-    "选择对应食材": {
-      "english": "Match an ingredient",
-      "englishVariants": [
-        "Match an ingredient"
       ]
     },
     "选择新成员权限": {

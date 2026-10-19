@@ -425,6 +425,11 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
   private func reloadCurrent(force: Bool = false) {
     if shopping { loadShopping(force: force) } else { loadInventory(reset: true, force: force) }
   }
+  func showFridgeAfterPurchase() {
+    loadViewIfNeeded()
+    shopping = false; segment.selectedSegmentIndex = 0
+    applyLanguage(); renderCurrent(); loadInventory(reset: true, force: true)
+  }
 
   private func loadInventory(reset: Bool, force: Bool = false) {
     guard inventoryMutation == nil, inventoryEdit == nil || !inventoryLoaded || !inventoryItems.contains(where: { $0.id == inventoryEdit?.lot.id }) else { refreshControl.endRefreshing(); loadMoreFooter.endRefreshing(); return }
@@ -467,7 +472,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
         let response: QFContentPage<QFInventoryLot> = try await
           QFContentLoadingContext.$forceRefresh.withValue(force || self.refreshControl.isRefreshing) {
             try await self.app.inventoryLots(
-              householdID: householdID, category: category, query: query, page: page, expiry: expiry)
+              householdID: householdID, category: category, query: query, page: page, expiry: expiry, groupByProduct: true)
           }
         try Task.checkCancellation()
         guard self.requestID == id, !self.shopping,
@@ -649,12 +654,17 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
   private func renderInventory(_ items: [QFInventoryLot]) {
     list.beginUpdates()
     for item in items {
-      let version = [
+      var versionParts: [String] = [
         String(item.revision), item.ingredientName ?? "", item.mediaId ?? "", item.categoryCode ?? "",
         item.currentQuantity, item.unitCode, item.expiresOn ?? "", item.location,
-        app.interfaceLanguage, String(inventoryEdit?.lot.id == item.id),
-        String(inventoryEdit?.lot.id == item.id && inventoryMutation != nil), inventoryEdit?.lot.id == item.id ? inventoryEditingError ?? "" : "", item.createdAt ?? "",
-      ].joined(separator: "|")
+      ]
+      let isEditing = inventoryEdit?.lot.id == item.id
+      versionParts.append(contentsOf: [
+        item.groupQuantity ?? "", String(item.groupLotCount ?? 1), app.interfaceLanguage,
+        String(isEditing), String(isEditing && inventoryMutation != nil),
+        isEditing ? inventoryEditingError ?? "" : "", item.createdAt ?? "",
+      ])
+      let version = versionParts.joined(separator: "|")
       list.row("inventory.\(item.id)", version: version) { [weak self] in
         guard let self else { return UIView() }
         return self.inventoryEdit?.lot.id == item.id ? self.makeInventoryEditor(item) : self.makeInventoryCard(item)
@@ -754,14 +764,29 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     let details = QFTabUI.stack(
       [
         QFTabUI.label(name, size: 17, weight: .semibold, lines: 2),
-        QFTabUI.label(inventoryQuantity(ingredient.currentQuantity, unit: ingredient.unitCode), size: 16, lines: 0),
+        QFTabUI.label(inventoryQuantity(ingredient.displayedQuantity, unit: ingredient.displayedUnitCode), size: 16, lines: 0),
         QFTabUI.label(preparationDates == nil ? expiryText(ingredient.expiresOn) : inventoryAddedDate(ingredient.createdAt), size: 12, color: isNearExpiry(ingredient.expiresOn) ? QFUI.warning : QFUI.secondary, lines: 0),
       ], spacing: 9)
     let more = QFTabUI.iconButton(
       "ellipsis", label: app.format("%@，更多操作", "More actions for %@", name), size: 18
     ) { [weak self] in
       guard let self else { return }
-      self.beginInventoryEdit(ingredient)
+      if (ingredient.groupLotCount ?? 1) > 1 {
+        let binding = QFAssistantAgent.scope(self.app), household = self.app.planningHouseholdID
+        let batches = QFInventoryBatchesViewController(app: self.app, ingredient: ingredient) { [weak self] lot in
+          guard let self, QFAssistantAgent.scope(self.app) == binding, self.app.planningHouseholdID == household else { return }
+          // Only a real ungrouped lot can enter the editor. Never write the
+          // displayed aggregate into the representative lot.
+          if let index = self.inventoryItems.firstIndex(where: { $0.id == lot.id }) { self.inventoryItems[index] = lot }
+          else if let index = self.inventoryItems.firstIndex(where: {
+            $0.ingredientId == lot.ingredientId && $0.householdId == lot.householdId && $0.unitCode == lot.unitCode
+              && $0.location == lot.location && $0.packageSize == lot.packageSize && $0.packageContentUnit == lot.packageContentUnit
+          }) { self.inventoryItems[index] = lot }
+          else { self.inventoryItems.insert(lot, at: 0); self.recoveryOnlyInventoryID = lot.id }
+          self.beginInventoryEdit(lot)
+        }
+        self.qfPush(batches)
+      } else { self.beginInventoryEdit(ingredient) }
     }
     let top = QFTabUI.stack([], axis: .horizontal, spacing: 5)
     top.alignment = .center
@@ -775,7 +800,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       storage.clipsToBounds = true
       storage.layer.cornerRadius = 12
       storage.layer.cornerCurve = .continuous
-      let storageLabel = QFTabUI.label(ingredient.location, size: 10.5, color: QFUI.green)
+      let storageLabel = QFTabUI.label(ingredient.location == "fridge" ? app.text("冰箱", "Fridge") : ingredient.location, size: 10.5, color: QFUI.green)
       storageLabel.textAlignment = .center
       storageLabel.lineBreakMode = .byTruncatingTail
       storageLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -1178,7 +1203,15 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
   }
 
   private func inventoryQuantity(_ value: String, unit: String) -> String {
-    let symbol = inventoryUnits.first { $0.code == unit }?.name ?? unit
+    let symbol = inventoryUnits.first { $0.code == unit }?.name ?? {
+      switch unit {
+      case "bottle": return app.text("瓶", "Bottle")
+      case "pack": return app.text("包", "Pack")
+      case "bag": return app.text("袋", "Bag")
+      case "box": return app.text("盒", "Box")
+      default: return unit
+      }
+    }()
     return "\(value) \(symbol)"
   }
 
@@ -1229,8 +1262,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     let cancel = QFTabUI.button(app.text("取消", "Cancel"), background: QFUI.surfaceAlt) { [weak self] in
       guard let self, self.inventoryMutation == nil, self.inventoryEdit?.isFrozen != true else { return }
       self.view.endEditing(true); self.inventoryEdit = nil; self.inventoryEditingError = nil; _ = self.persistInventoryEdit()
-      if let recoveryID = self.recoveryOnlyInventoryID { self.inventoryItems.removeAll { $0.id == recoveryID }; self.recoveryOnlyInventoryID = nil; self.loadInventory(reset: true, force: true) }
-      self.renderCurrent()
+      self.reloadGroupedInventoryAfterEditing()
     }
     cancel.isEnabled = !frozen; cancel.accessibilityIdentifier = "inventory.cancel"
     let delete = QFTabUI.iconButton("trash", label: app.text("删除", "Delete"), size: 20) { [weak self] in
@@ -1310,15 +1342,15 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       }
     }
     let contextID = shoppingContextID, key = inventoryDraftKey
-    let requiresReconciliation = recoveryOnlyInventoryID == draft.lot.id
     inventoryEditingError = nil
     inventoryMutation = Task { [weak self] in
       guard let self else { return }
       self.operationHUD.show(in: self.view, text: self.app.text("正在保存", "Saving"))
       var succeeded = false
       defer { if self.shoppingContextID == contextID {
-        self.inventoryMutation = nil; self.operationHUD.hide(); self.renderCurrent()
-        if succeeded && requiresReconciliation { self.loadInventory(reset: true, force: true) }
+        self.inventoryMutation = nil; self.operationHUD.hide()
+        if succeeded { self.reloadGroupedInventoryAfterEditing() }
+        else { self.renderCurrent() }
       } }
       do {
         let saved: QFInventoryLot
@@ -1326,18 +1358,13 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
         else if let request = draft.pendingEdit { saved = try await self.app.editInventoryLot(draft.lot.id, draft: request) }
         else { return }
         try Task.checkCancellation(); guard self.shoppingContextID == contextID else { return }
+        guard saved.id == draft.lot.id else { throw QFAPIError(code: 50300, message: "Inventory receipt mismatch") }
         self.inventoryEdit = nil; QFContentDraftStore.remove(app: self.app, kind: key)
-        if saved.status == "ARCHIVED" {
-          self.inventoryItems.removeAll { $0.id == saved.id }
-          if self.recoveryOnlyInventoryID != saved.id { self.inventoryTotal = max(0, self.inventoryTotal - 1) }
-          // Offset pages shift after a deletion. Overlap one page and merge IDs to avoid skipping a row.
-          self.inventoryNextPage = max(0, self.inventoryNextPage - 1)
-        } else { self.replaceInventoryLot(saved, preservingDisplayFrom: self.inventoryItems.first { $0.id == saved.id } ?? draft.lot) }
-        self.recoveryOnlyInventoryID = nil
-        self.inventoryHasMore = self.inventoryItems.count < self.inventoryTotal
+        // A mutation response describes one real batch. Product groups can gain
+        // a new representative or merge after a unit/location change, so only
+        // a new grouped read may determine the card total and pagination.
         succeeded = true
         self.shoppingLoaded = false
-        self.applyLanguage(); self.renderCurrent(); self.updateLoadMoreFooter()
       } catch is CancellationError {
       } catch {
         guard self.shoppingContextID == contextID else { return }
@@ -1353,6 +1380,13 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     renderCurrent()
   }
 
+  private func reloadGroupedInventoryAfterEditing() {
+    recoveryOnlyInventoryID = nil
+    inventoryItems = []; inventoryTotal = 0; inventoryNextPage = 0
+    inventoryHasMore = false; inventoryLoaded = false
+    applyLanguage(); renderCurrent(); loadInventory(reset: true, force: true)
+  }
+
   private func showInventoryActions(_ item: QFInventoryLot, displayName: String) {
     guard app.user != nil else { return }
     let sheet = UIAlertController(
@@ -1363,7 +1397,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
         guard let self else { return }
         self.qfPush(
           QFInventoryAdjustmentViewController(app: self.app, lot: item) { [weak self] saved in
-            self?.replaceInventoryLot(saved, preservingDisplayFrom: item)
+            self?.reloadGroupedInventoryAfterEditing()
           })
       })
     sheet.addAction(
@@ -1384,34 +1418,8 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
   }
 
   private func mergeCreatedInventoryLot(_ item: QFInventoryLot) {
-    inventoryLoaded = true
-    inventoryTotal += 1
-    let matchesSearch = searchText.isEmpty
-      || (item.ingredientName ?? "").localizedCaseInsensitiveContains(searchText)
-    if selectedCategoryIndex == 0, matchesSearch {
-      inventoryItems.removeAll { $0.id == item.id }
-      inventoryItems.insert(item, at: 0)
-    }
-    applyLanguage()
-    renderCurrent()
-    updateLoadMoreFooter()
-  }
-
-  private func replaceInventoryLot(
-    _ value: QFInventoryLot, preservingDisplayFrom previous: QFInventoryLot
-  ) {
-    let displayed = QFInventoryLot(
-      id: value.id, ingredientId: value.ingredientId,
-      ingredientName: previous.ingredientName, mediaId: previous.mediaId,
-      contentAvailable: previous.contentAvailable, categoryCode: previous.categoryCode,
-      unitCode: value.unitCode, initialQuantity: value.initialQuantity,
-      currentQuantity: value.currentQuantity, expiresOn: value.expiresOn,
-      location: value.location, householdId: value.householdId, status: value.status,
-      revision: value.revision, createdAt: value.createdAt ?? previous.createdAt)
-    if let index = inventoryItems.firstIndex(where: { $0.id == displayed.id }) {
-      inventoryItems[index] = displayed
-      renderCurrent()
-    }
+    // New stock may join an existing group instead of adding a visible card.
+    reloadGroupedInventoryAfterEditing()
   }
 
   private func updateLoadMoreFooter() {

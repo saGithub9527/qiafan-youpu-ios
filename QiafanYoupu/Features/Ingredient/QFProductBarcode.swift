@@ -1,4 +1,15 @@
 import Foundation
+import CoreGraphics
+
+enum QFBarcodeCaptureRegion {
+  static let fullFrame = CGRect(x: 0, y: 0, width: 1, height: 1)
+  static func effective(_ rect: CGRect, previewing: Bool) -> CGRect {
+    guard previewing, [rect.origin.x, rect.origin.y, rect.width, rect.height].allSatisfy(\.isFinite) else { return fullFrame }
+    if !rect.isEmpty, fullFrame.contains(rect) { return rect }
+    let clipped = rect.intersection(fullFrame)
+    return clipped.isNull || clipped.isEmpty ? fullFrame : clipped
+  }
+}
 
 /// A scanned identifier, never a source of a purchase quantity or price.
 /// `lookupCode` is only an eligible GTIN, not proof that a product exists or is food.

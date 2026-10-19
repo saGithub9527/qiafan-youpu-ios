@@ -133,7 +133,7 @@ struct QFPurchaseReceiptDraft: Codable, Equatable {
     guard QFManualPlanDraft.date(date) != nil, TimeZone(identifier: timeZone) != nil else { throw Validation.date }
     guard NSLocale.commonISOCurrencyCodes.contains(currency) else { throw Validation.currency }
     guard (1...40).contains(items.count), Set(items.map(\.id)).count == items.count,
-      items.allSatisfy({ UUID(uuidString: $0.id) != nil && UUID(uuidString: $0.ingredientId ?? "") != nil
+      items.allSatisfy({ UUID(uuidString: $0.id) != nil && ($0.ingredientId == nil || UUID(uuidString: $0.ingredientId ?? "") != nil)
         && !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         && $0.name.trimmingCharacters(in: .whitespacesAndNewlines).utf16.count <= 100
         && (QFPurchaseNumber.decimal($0.quantity) ?? 0) > 0 && !$0.unitCode.isEmpty }) else { throw Validation.items }

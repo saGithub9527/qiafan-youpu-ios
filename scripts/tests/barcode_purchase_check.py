@@ -28,6 +28,8 @@ import Foundation
  var draft=QFPurchaseReceiptDraft(date:"2026-10-17",householdId:nil)
  precondition(draft.addScannedProduct(item) == .added)
  precondition(draft.addScannedProduct(item) == .duplicate && draft.items.count==1 && draft.items[0].quantity=="1")
+ let privateRequest=try draft.request()
+ precondition(privateRequest.items[0].ingredientId==nil && privateRequest.items[0].name=="榛子酱" && privateRequest.items[0].location=="fridge")
  let ingredient=UUID().uuidString.lowercased();draft.items[0].ingredientId=ingredient;draft.items[0].name="我改过的商品名称"
  let restored=try JSONDecoder().decode(QFPurchaseReceiptDraft.self,from:JSONEncoder().encode(draft))
  precondition(restored.items[0].name=="我改过的商品名称" && restored.items[0].ingredientId==ingredient && restored.items[0].lineAmount==nil)
@@ -83,11 +85,18 @@ import Foundation
  var drink=QFPurchaseReceiptLine.scannedProduct(barcode:drinkBarcode,info:domesticInfo)
  precondition(drink.name=="统一绿茶 茉莉味茶饮料" && drink.quantity=="1" && drink.unitCode=="bottle" && drink.packageUnit=="bottle")
  precondition(drink.packageSize=="1" && drink.packageContentUnit=="l" && drink.lineAmount==nil)
+ drink.lineAmount="4"
+ drink.applyBarcodeInfo(domesticInfo,status:.found)
+ precondition(drink.lineAmount=="4" && drink.quantity=="1","Provider reference price must never replace actual payment")
  precondition(drink.scanReferencePrice=="￥40.00" && drink.scanProductSource=="JISU_ALIYUN")
  drink.quantity="3";drink.unitCode="bag";drink.name="User edit";drink.lineAmount="9.50"
  drink.applyBarcodeInfo(domesticInfo,status:.found)
  precondition(drink.quantity=="3" && drink.unitCode=="bag" && drink.name=="User edit" && drink.lineAmount=="9.50")
  precondition(domesticResult.metadata(for:barcode.value)==nil)
+ var chosenBox=QFPurchaseReceiptLine.scannedProduct(barcode:drinkBarcode,lookupState:.loading)
+ chosenBox.unitCode="box";chosenBox.packageUnit="box"
+ chosenBox.applyBarcodeInfo(domesticInfo,status:.found)
+ precondition(chosenBox.packageSize==nil && chosenBox.packageContentUnit==nil && chosenBox.unitCode=="box","A bottle capacity cannot be assigned to a user-selected box")
  let unsafeDomestic=domestic.replacingOccurrences(of:"JISU_ALIYUN",with:"UNKNOWN")
  let unsafeMetadata=try JSONDecoder().decode(QFBarcodeProductInfo.ServerResult.self,from:Data(unsafeDomestic.utf8)).metadata(for:drinkBarcode.value)
  precondition(unsafeMetadata==nil)

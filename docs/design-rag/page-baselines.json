@@ -1752,6 +1752,264 @@
       },
       "supersedes": "purchase-product-entry-r3",
       "approvedException": "2026-10-18 用户指定国内联网商品资料源，并要求区分瓶/箱包装参考；采用明确包装单位，源标价与实付分开。"
+    },
+    {
+      "id": "product-barcode-scanner-r4",
+      "supersedes": "product-barcode-scanner-r3",
+      "productPage": "PLAN-19",
+      "title": "商品包装条形码扫描",
+      "keywords": [
+        "小票",
+        "二维码",
+        "商品",
+        "数量",
+        "价格",
+        "文字识别",
+        "OCR",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/19-小票二维码扫描.png",
+          "sha256": "078a204a4250657316ed32f50045d1a80cbd553ef8f2c99dd2d2db14e83342f2"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r3.md",
+          "sha256": "896efb8615f56c869db93e6060ef3a80f2bbdcbdd166f67472b5c35a6ac97137"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r4.md",
+          "sha256": "501bf26b7fad5ec64663fff19a9abd1a17c35ef85d03d15da0f33432966c5228"
+        }
+      ],
+      "approvedException": "2026-10-19 用户明确提出黑色往返扫描线、四字段采购、保存进冰箱与同物品数量叠加。",
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "background": "dark green",
+        "navigation": "fixed top back and centered title",
+        "scanner": "centered corner frame, scan line, one hint",
+        "footer": "flashlight, manual entry and photo library"
+      },
+      "interactionContract": [
+        "Push with camera permission; stop capture offscreen/background.",
+        "Decode product EAN/UPC only; no receipt QR/OCR.",
+        "One item per selected barcode, anonymous optional fixed-provider name lookup with manual fallback.",
+        "Editable product name independent from ingredient ID; default count1, unknown price nil.",
+        "Only final purchase Save writes stock; drafts and existing receipts stay readable.",
+        "Request online product name and package net content; show product-not-found, network failure and rate-limit distinctly.",
+        "Editable purchase count starts at one package; explicit package mass/volume is separate and unknown paid price stays empty.",
+        "Retry only fills missing fields, preserves current edits and draft, and is scoped to account/household/language.",
+        "Domestic provider credentials stay server-side; initial verified bottle packaging suggests 1 bottle, retry preserves user units/count, and source price never becomes actual payment.",
+        "Ready-preview ROI conversion with a full-frame fallback; first entry needs no navigation reset.",
+        "Black scan line moves vertically and stops offscreen/background.",
+        "Barcode recognition immediately opens the editable draft; metadata resolves there."
+      ]
+    },
+    {
+      "id": "purchase-product-entry-r5",
+      "productPage": "PLAN-11-12-13-14-15-20",
+      "title": "采购商品名称编辑与条码录入",
+      "keywords": [
+        "采购",
+        "成本",
+        "花销",
+        "账单",
+        "入库",
+        "价格补全",
+        "退款",
+        "规格",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/11-备菜花销与采购账单.png",
+          "sha256": "fb834621842aa7d2753c0eefbc4616fba481c519571d88f21827c2cb406a0303"
+        },
+        {
+          "path": "04-计划与备菜/12-采购账单详情与编辑入口.png",
+          "sha256": "891715f66c40d75bbfe2622a55f1cfe3b4cddb0846345faf49ff33ae84b4c43b"
+        },
+        {
+          "path": "04-计划与备菜/13-食材实际消耗成本.png",
+          "sha256": "840d273c0ed6fe36a74b96f7a91d351350bcf645958cc6bf4f47ecd47663ac41"
+        },
+        {
+          "path": "04-计划与备菜/14-采购账单原位编辑.png",
+          "sha256": "05f098cc8279eb3de4887f7e7369d34da657545c90a51ad29696ee5dcc4e0664"
+        },
+        {
+          "path": "04-计划与备菜/15-补全缺失的食材成本.png",
+          "sha256": "2f490ae6f837522e7380f97a971a6d31df5deb8580e720109277b66a1e7e2c08"
+        },
+        {
+          "path": "04-计划与备菜/20-采购明细确认入库.png",
+          "sha256": "26d4c8f8250643f6535c5bfd175637f8501c3791cf071b864e186b193f171296"
+        },
+        {
+          "path": "04-计划与备菜/设计交付说明.md",
+          "sha256": "7c397f7ee26e41833be467c85e611e035d60e4390367ab8a191696395d79fc18"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r3.md",
+          "sha256": "896efb8615f56c869db93e6060ef3a80f2bbdcbdd166f67472b5c35a6ac97137"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r4.md",
+          "sha256": "501bf26b7fad5ec64663fff19a9abd1a17c35ef85d03d15da0f33432966c5228"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "cardCornerRadius": 18,
+        "minimumActionHeight": 48,
+        "chartHeight": 150
+      },
+      "interactionContract": [
+        "Pages push and preserve edge-back; fixed navigation and save footer are outside the scrolling form.",
+        "Week/month/custom expense filters use business dates; chart currencies remain separate.",
+        "Bill detail edits in place; local drafts do not make write requests until Save.",
+        "First receipt save creates expense and inventory exactly once; uncertain retry retains the frozen UUID/body.",
+        "Unknown price is not zero; missing old-source price completion never creates purchase expense.",
+        "Changing old purchase facts revalidates event-time stock and recalculates later costs.",
+        "Tables support pull-to-refresh and automatic upward pagination; forms do not pull-refresh away edits.",
+        "Product name is a text field, ingredient mapping separate; manual amount/quantity confirmation.",
+        "Barcode hints remain local; same-code repeats never increment quantity automatically; frozen pending drafts cannot append.",
+        "Request online product name and package net content; show product-not-found, network failure and rate-limit distinctly.",
+        "Editable purchase count starts at one package; explicit package mass/volume is separate and unknown paid price stays empty.",
+        "Retry only fills missing fields, preserves current edits and draft, and is scoped to account/household/language.",
+        "Domestic provider credentials stay server-side; initial verified bottle packaging suggests 1 bottle, retry preserves user units/count, and source price never becomes actual payment.",
+        "Four independently editable purchase fields: name, date, quantity with unit, actual amount paid. No source price or manual public-ingredient mapping in new entry.",
+        "Saving atomically records the bill and stock, then shows the fridge; confirmed names resolve only within the current private scope."
+      ],
+      "allowedDynamicChanges": [
+        "localized content",
+        "real money and quantities",
+        "unknown price and date states",
+        "safe-area and accessibility resizing"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Plan/QFPurchaseReceiptViewController.swift",
+        "enum": "QFPurchaseLayout",
+        "constants": {
+          "pageInset": 20,
+          "cardRadius": 18,
+          "actionHeight": 48,
+          "chartHeight": 150
+        }
+      },
+      "supersedes": "purchase-product-entry-r4",
+      "approvedException": "2026-10-19 用户明确提出黑色往返扫描线、四字段采购、保存进冰箱与同物品数量叠加。"
+    },
+    {
+      "id": "inventory-preparation-r3",
+      "productPage": "PLAN-17-21-22 / INGREDIENT-04-05-06",
+      "title": "备菜库存与商品条码入口",
+      "keywords": [
+        "库存",
+        "备菜",
+        "冰箱",
+        "原位编辑",
+        "删除确认",
+        "食材",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "05-食材/04-备菜-冰箱已有.png",
+          "sha256": "be9481bdcbaa1e666451e48dcdbd3180665e5ffe338808520b1d75c14e4d1d53"
+        },
+        {
+          "path": "05-食材/05-备菜-原位编辑.png",
+          "sha256": "b2e69bd47165cbee1407bd488fac7e98c57175f99475e155b6af11e0f82f57b3"
+        },
+        {
+          "path": "05-食材/06-备菜-删除确认.png",
+          "sha256": "bb31d25d245ddd0b7d1b2740cb549079202fbcc08588b9dd1c94585205c8684e"
+        },
+        {
+          "path": "05-食材/设计说明.md",
+          "sha256": "699779e57f2820460559eff3273231f634224e580e5a941615e7377031e61517"
+        },
+        {
+          "path": "05-食材/食材图标全局规范.json",
+          "sha256": "dbf9522b4c25741c32f56cc3b27a29e162799638243d35041a15a036241dce88"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r1.md",
+          "sha256": "24a428344465b29d90999e20d336ab9092e500254e24b357ad5f97c87abc06fb"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r4.md",
+          "sha256": "501bf26b7fad5ec64663fff19a9abd1a17c35ef85d03d15da0f33432966c5228"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "fixedNavigation": "返回、居中备菜、手动添加；内容滚动不带动导航",
+        "scrollOrder": [
+          "扫描商品条码",
+          "冰箱已有/待采购",
+          "搜索",
+          "单列库存卡片"
+        ],
+        "pageInset": 20,
+        "cardRadius": 16,
+        "iconSize": 48,
+        "editFields": "食材名称/存放位置；库存数量/单位，2x2；取消/删除/保存",
+        "deletion": "底部确认sheet，带取消和红色删除"
+      },
+      "interactionContract": [
+        "库存卡片原位展开，编辑不调用写接口；提交数量与位置原子保存",
+        "列表按批次ID增量替换；列表下拉与MJRefresh上拉，编辑中不覆盖草稿",
+        "删除需明确确认；服务端归档，不删除流水，不自动复活归档库存",
+        "草稿按账号及个人/家庭scope隔离；请求不确定时冻结原body/key重试",
+        "食材身份和基础单位本阶段只读，不能把跨食材替换当成改名；此为尚未完成的设计能力，不宣称设计已全量实现",
+        "扫码、采购自动重算与成本日期/规格/价格不在本次完成范围",
+        "扫描入口改为商品包装条形码；不扫描小票QR/OCR，库存卡片编辑合同保持。",
+        "Same product stock is grouped across the full filtered scope before pagination; different units/specification/location stay separate.",
+        "Aggregate quantity is read-only; select a real intake batch before editing. Earlier consumed batches cannot supply the remaining stock expiry."
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Ingredient/QFInventoryInlineDraft.swift",
+        "constants": {
+          "cardRadius": 16,
+          "iconSize": 48,
+          "fieldHeight": 44,
+          "sheetRadius": 26
+        }
+      },
+      "supersedes": "inventory-preparation-r2",
+      "approvedException": "2026-10-19 用户明确提出黑色往返扫描线、四字段采购、保存进冰箱与同物品数量叠加。"
     }
   ]
 }

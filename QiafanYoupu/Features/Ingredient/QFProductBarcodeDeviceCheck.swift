@@ -169,7 +169,7 @@ enum QFProductBarcodeDeviceCheck {
       }
       try require(field.text == "Nutella", "metadataNamePrefilled", run)
       let netContent = descendant(in: controller.view, id: "purchase.net-content." + line.id) as? UILabel
-      try require(netContent?.text == "400 g", "netContentVisibleOnPurchaseCard", run)
+      try require(netContent == nil, "purchaseCardKeepsOnlyEditablePurchaseFields", run)
       try require(field.isEnabled && field.isUserInteractionEnabled && field.window === window,
         "productNameFieldEnabled", run)
       try require(field.becomeFirstResponder(), "productNameFieldAcceptsEditing", run)
@@ -191,20 +191,26 @@ enum QFProductBarcodeDeviceCheck {
       let drinkBarcode = QFProductBarcode(value: "6925303723934", symbology: "EAN13")!
       let beforeActivation = try await productLookup.product(for: drinkBarcode, language: "en", app: app)
       try require(beforeActivation == nil, "disabledDomesticAndOffMissHandled", run)
-      let drinkMetadata = try await productLookup.product(for: drinkBarcode, language: "en", app: app)
-      let drinkLine = QFPurchaseReceiptLine.scannedProduct(barcode: drinkBarcode, info: drinkMetadata)
+      let drinkLine = QFPurchaseReceiptLine.scannedProduct(barcode: drinkBarcode, lookupState: .loading)
       controller.appendScannedProduct(drinkLine)
       let drinkName = descendant(in: controller.view, id: "purchase.name." + drinkLine.id) as? UITextField
+      try require(drinkName != nil && drinkName?.text == "", "purchaseFormAvailableBeforeNetworkCompletes", run)
+      let paid = descendant(in: controller.view, id: "purchase.amount." + drinkLine.id) as? UITextField
+      try require(paid?.text == "", "purchasePriceStartsUnknown", run)
+      paid?.text = "4"; paid?.sendActions(for: .editingChanged)
+      try await Task.sleep(nanoseconds: 200_000_000); try check(run)
       let drinkContent = descendant(in: controller.view, id: "purchase.net-content." + drinkLine.id) as? UILabel
       let drinkPrice = descendant(in: controller.view, id: "purchase.reference-price." + drinkLine.id) as? UILabel
       try require(drinkName?.text == "统一绿茶 茉莉味茶饮料", "domesticBackendNameVisible", run)
-      try require(drinkContent?.text == "1 l", "domesticNetContentVisible", run)
-      try require(drinkPrice?.text?.contains("￥40.00") == true && drinkPrice?.text?.contains("pricing unit unspecified") == true,
-        "sourcePriceClearlySeparate", run)
+      try require(drinkContent == nil && drinkPrice == nil, "sourcePriceAndPackageDetailsNotShown", run)
       let drinkDraft = QFContentDraftStore.load(QFPurchaseReceiptDraft.self, app: app, kind: run.draftKind)
       let storedDrink = drinkDraft?.items.first { $0.id == drinkLine.id }
-      try require(storedDrink?.unitCode == "bottle" && storedDrink?.quantity == "1" && storedDrink?.lineAmount == nil,
-        "oneBottleSuggestedWithoutInferringPaidAmount", run)
+      try require(storedDrink?.unitCode == "bottle" && storedDrink?.quantity == "1" && storedDrink?.lineAmount == "4",
+        "oneBottleKeepsIndependentlyEditedFourYuanPrice", run)
+      try require(storedDrink?.packageSize == "1" && storedDrink?.packageContentUnit == "l" && storedDrink?.location == "fridge",
+        "sourceSpecificationKeptBehindSimpleForm", run)
+      try require((descendant(in: controller.view, id: "purchase.receipt.save") as? UIButton)?.title(for: .normal) == "Save to fridge",
+        "primaryActionSavesToFridge", run)
       try require(network.summary().reads["/api/v1/me/product-barcodes/6925303723934"] == 2,
         "domesticActivationNotHiddenByOldOffMiss", run)
       let unavailable = QFProductBarcode(value: "4006381333931", symbology: "EAN13")!
@@ -213,9 +219,9 @@ enum QFProductBarcodeDeviceCheck {
       let missingLine = QFPurchaseReceiptLine.scannedProduct(barcode: unavailable, lookupState: .notFound)
       controller.appendScannedProduct(missingLine)
       let status = descendant(in: controller.view, id: "purchase.barcode-status." + missingLine.id) as? UILabel
-      try require(status?.text?.contains("not in the current product database") == true, "unlistedProductExplained", run)
+      try require(status?.text?.contains("Product name not found") == true, "unlistedProductExplained", run)
       let missingContent = descendant(in: controller.view, id: "purchase.net-content." + missingLine.id) as? UILabel
-      try require(missingContent?.text == "To complete", "unknownNetContentsExplicit", run)
+      try require(missingContent == nil, "unknownPackageDoesNotAddExtraFields", run)
       try require(descendant(in: controller.view, id: "purchase.barcode-retry." + missingLine.id) is UIButton,
         "onlineRetryAvailable", run)
       let summary = network.summary()

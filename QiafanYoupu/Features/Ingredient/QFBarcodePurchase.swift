@@ -2,7 +2,7 @@ import CoreFoundation
 import Foundation
 
 enum QFBarcodeLookupState: String {
-  case found, notFound, unavailable, rateLimited, localOnly, skipped
+  case loading, found, notFound, unavailable, rateLimited, localOnly, skipped
 }
 
 struct QFBarcodeProductInfo: Equatable {
@@ -102,18 +102,19 @@ extension QFPurchaseReceiptLine {
     info: QFBarcodeProductInfo? = nil, lookupState: QFBarcodeLookupState = .skipped) -> Self {
     var line = Self(ingredientId: nil, name: name ?? "")
     line.quantity = "1" // Editable starting count, never extracted from code/pack size.
+    line.location = "fridge"
     line.unitCode = "pack"
     line.packageUnit = "pack"
     line.scanBarcode = barcode.value
     line.scanBarcodeSymbology = barcode.symbology
     line.scanProductSource = source
-    line.applyBarcodeInfo(info, status: info == nil ? lookupState : .found)
     // Only the initial scan adopts a verified packaging reference. A retry must
     // preserve the unit/count already chosen by the user.
     if let unit = info?.packageUnit { line.unitCode = unit; line.packageUnit = unit }
+    line.applyBarcodeInfo(info, status: info == nil ? lookupState : .found)
     return line
   }
-  mutating func applyBarcodeInfo(_ info: QFBarcodeProductInfo?, status: QFBarcodeLookupState) {
+  mutating func applyBarcodeInfo(_ info: QFBarcodeProductInfo?, status: QFBarcodeLookupState, allowPackageDetails: Bool = true) {
     scanLookupState = status.rawValue
     guard let info else { return }
     scanProductSource = info.source
@@ -121,7 +122,8 @@ extension QFPurchaseReceiptLine {
     scanReferencePrice = info.referencePrice
     scanPackageType = info.packageType
     if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { name = info.name ?? "" }
-    if packageSize == nil, packageContentUnit == nil,
+    if allowPackageDetails, info.packageUnit == nil || info.packageUnit == unitCode,
+      packageSize == nil, packageContentUnit == nil,
       ["box", "bottle", "bag", "pack"].contains(unitCode), let contents = info.netContent {
       packageSize = contents.value; packageContentUnit = contents.unit; packageUnit = unitCode
     }
