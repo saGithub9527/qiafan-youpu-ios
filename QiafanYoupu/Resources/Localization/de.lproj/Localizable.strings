@@ -1481,3 +1481,8 @@
 "请先处理采购草稿，再添加本批食材。" = "Bearbeite zuerst den Einkaufsentwurf, bevor du diese Zutaten hinzufügst.";
 "请开启联网后再生成周计划，需要读取你的实际库存、已发布菜谱和现有餐次。" = "Aktiviere den Netzwerkzugriff, damit der Wochenplan deine tatsächlichen Vorräte, veröffentlichte Rezepte und vorhandene Mahlzeiten lesen kann.";
 "这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。" = "Diese Anfrage enthält Vorgaben, die ausdrücklich geprüft werden müssen. Bestätige Portionen, Budget und ausgeschlossene Zutaten in den Wochenplaneinstellungen. In diesem Schritt wurde kein Plan gespeichert.";
+
+
+"开启新对话？" = "Neues Gespräch beginnen?";
+"当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "Die Kontextkapazität ist erreicht; es wurde noch nichts gesendet. Der Verlauf bleibt erhalten und diese Nachricht beginnt einen neuen Kontext. Nenne wichtige Bedingungen wie Allergien erneut.";
+"开启并发送" = "Beginnen und senden";

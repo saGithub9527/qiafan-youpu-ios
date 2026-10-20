@@ -48,6 +48,11 @@ struct QFAssistantStreamHTTPUnauthorized: Error {
   let failure: QFAPIError
 }
 
+/// Local transport is permanently abandoned; never decoded from a server error payload.
+struct QFAssistantStreamTransportExhausted: Error {
+  let failure: QFAPIError
+}
+
 /// One producer. Reconnects only to an advertised same-job replay protocol.
 @MainActor
 final class QFAssistantStreamRun {
@@ -114,7 +119,13 @@ final class QFAssistantStreamRun {
                   guard errorBody.count + data.count <= 65_536 else { throw URLError(.dataLengthExceedsMaximum) }
                   errorBody.append(data)
                 }
-              } catch { finish(.failure(error)) }
+              } catch {
+                // The decoder's bounded-buffer rejection is a local protocol
+                // failure, not a terminal error sent by the original producer.
+                let failure = error is QFSSEDecoder.Failure
+                  ? URLError(.dataLengthExceedsMaximum, userInfo: [NSUnderlyingErrorKey: error]) : error
+                finish(.failure(failure))
+              }
             }
           case .complete(let completion):
             httpResponse = completion.response ?? httpResponse
@@ -129,7 +140,8 @@ final class QFAssistantStreamRun {
               let message = status == 404
                 ? text("当前服务器尚未提供流式问答，请更新服务端后重试。", "Streaming chat is not available on this server. Update the server and retry.")
                 : text("连接中断，已保留收到的内容。请手动重试。", "The connection ended. Received content was kept. Retry manually.")
-              finish(.failure(QFAPIError(code: code, message: message)))
+              let failure = QFAPIError(code: code, message: message)
+              finish(.failure(terminalTransportFailure(failure, status: status)))
             }
           }
         }
@@ -175,18 +187,37 @@ final class QFAssistantStreamRun {
     default: break // forward-compatible optional events; never an implicit completion
     }
   }
+  // Called only after checking authoritative error payloads and available recovery.
+  private func terminalTransportFailure(_ failure: QFAPIError, status: Int) -> Error {
+    guard [0, 200, 502, 503, 504].contains(status) else { return failure }
+    return QFAssistantStreamTransportExhausted(failure: failure)
+  }
   private func finish(_ result: Result<QFAssistantStreamResult, Error>) {
     guard !completed else { return }
     let delivered: Result<QFAssistantStreamResult, Error>
-    if case .failure(let error) = result, let failure = error as? QFAPIError,
+    if case .failure(let error) = result, let exhausted = error as? QFAssistantStreamTransportExhausted {
+      delivered = .failure(exhausted.failure)
+    } else if case .failure(let error) = result, let failure = error as? QFAPIError,
       httpResponse?.statusCode == 401, !receivedSSEEvent, resumeAttempts == 0 {
       delivered = .failure(QFAssistantStreamHTTPUnauthorized(failure: failure))
     } else { delivered = result }
     completed = true; timeout?.cancel(); timeout = nil
     reconnectTask?.cancel(); reconnectTask = nil
-    // Explicit stop must reach the original operation even before response headers arrive.
-    // Only resubscribing to generation is gated by the server's replay advertisement.
-    if case .failure(let error) = result, (error is CancellationError || (error as? URLError)?.code == .timedOut),
+    // Once a producer was accepted, invalid framing/payload must stop that
+    // same operation. Closing only this HTTP stream could leave paid work alive.
+    // Local exhaustion also abandons that producer, including when the last
+    // reconnect lost its HTTP response. Authoritative server errors remain distinct.
+    let stopProducer: Bool
+    if case .failure(let error) = result {
+      let code = (error as? URLError)?.code
+      let invalidProtocol = error is DecodingError
+        || code == .cannotParseResponse || code == .dataLengthExceedsMaximum
+      let acceptedProtocolFailure = invalidProtocol
+        && (200..<300).contains(httpResponse?.statusCode ?? 0)
+      stopProducer = error is QFAssistantStreamTransportExhausted
+        || error is CancellationError || code == .timedOut || acceptedProtocolFailure
+    } else { stopProducer = false }
+    if stopProducer,
       var stop = originalRequest, let operation = stop.value(forHTTPHeaderField: "Idempotency-Key"),
       !operation.isEmpty, let transport {
       stop.httpMethod = "DELETE"; stop.httpBody = nil

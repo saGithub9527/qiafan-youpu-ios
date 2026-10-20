@@ -58,8 +58,9 @@ enum QFAssistantAgent {
   /// must not change with a provider's self-description.
   static func productHelp(text: String, history: [QFOnDeviceInference.Turn],
     knownSources: [QFAgentSource], hasImage: Bool, app: QFAppSession) async throws -> Response? {
+    let greeting = app.text("你好，我可以帮你规划饮食、整理食材和生成待确认草稿。", "Hi. I can help plan meals, organize ingredients and make drafts for your review.")
     if QFAgentPlan.isGreetingOnly(text) {
-      return .init(answer: app.text("你好，我可以帮你规划饮食、整理食材和生成待确认草稿。", "Hi. I can help plan meals, organize ingredients and make drafts for your review."),
+      return .init(answer: greeting,
         sources: [], actions: ["RECIPES", "PLAN", "INVENTORY", "MODEL_SETTINGS"].map {
           .init(type: "NAVIGATE_" + $0, recipeID: nil, date: nil)
         }, notice: "", toolStatuses: ["conversation.greeting": "SUCCEEDED"], nativeInferenceUsed: false)
@@ -67,7 +68,13 @@ enum QFAssistantAgent {
     // Editorial text answers a standalone reviewed question, never an omitted
     // earlier constraint, referenced result or attached image. Other cases keep
     // the normal history/evidence path below rather than discarding the source.
-    if history.isEmpty, knownSources.isEmpty, !hasImage,
+    // Only the app's exact greeting and pure user salutations are irrelevant
+    // context. Any other content, source or image keeps the evidence/model path.
+    let onlyGreetings = history.allSatisfy {
+      ($0.role == "user" && QFAgentPlan.isGreetingOnly($0.content))
+        || ($0.role == "assistant" && $0.content == greeting)
+    }
+    if onlyGreetings, knownSources.isEmpty, !hasImage,
       let direct = try await QFAssistantKnowledge.shared.directAnswer(for: text, language: app.interfaceLanguage) {
       return .init(answer: direct.body, sources: [direct.source], actions: [], notice: "",
         toolStatuses: ["knowledge.search": "SUCCEEDED"], nativeInferenceUsed: false)
@@ -230,7 +237,7 @@ enum QFAssistantAgent {
     let businessQuestion = !liveReads.isEmpty || !requestedMutations.isEmpty || QFAgentPlan.mayNeedBusinessTools(text)
     if network && businessQuestion && remoteRecipeQuery == nil {
       let date = QFContentDate.day(Date())
-      let recent = history.suffix(8).map { ["role": $0.role, "text": $0.content] }
+      let recent = history.map { ["role": $0.role, "text": $0.content] }
       let known = knownSources.filter { $0.id.hasPrefix("recipe:") }.suffix(6)
       var knownIDs = Set(known.map { String($0.id.dropFirst(7)).lowercased() })
       let input = try json(["question": text, "recent": recent, "today": date,
@@ -315,7 +322,7 @@ enum QFAssistantAgent {
       QFAgentText.limit(result.evidence, utf8: budget)
     }.joined(separator: "\n")
     let input = notes.isEmpty ? text : "<reference_notes>\n" + notes + "\n</reference_notes>\n" + text
-    let recent = Array(history.suffix(8))
+    let recent = history
     let prompt = answerSystemPrompt(language: binding.language)
     progress?("answer")
     let answer = try await QFOnDeviceInference.answer(model: QFLocalModelStore.shared.modelURL,

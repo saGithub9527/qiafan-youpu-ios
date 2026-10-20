@@ -1481,3 +1481,8 @@
 "请先处理采购草稿，再添加本批食材。" = "Traitez d’abord le brouillon d’achat avant d’ajouter ce lot d’ingrédients.";
 "请开启联网后再生成周计划，需要读取你的实际库存、已发布菜谱和现有餐次。" = "Activez l’accès réseau pour créer un programme hebdomadaire à partir de votre stock réel, des recettes publiées et des repas existants.";
 "这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。" = "Cette demande contient des contraintes à vérifier explicitement. Confirmez les portions, le budget et les ingrédients exclus dans les réglages du programme hebdomadaire avant de le générer. Aucun programme n’a été enregistré.";
+
+
+"开启新对话？" = "Commencer une nouvelle conversation ?";
+"当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "La limite du contexte est atteinte ; rien n’a été envoyé. L’historique sera conservé et ce message commencera un nouveau contexte. Rappelez les contraintes importantes, comme les allergies.";
+"开启并发送" = "Commencer et envoyer";

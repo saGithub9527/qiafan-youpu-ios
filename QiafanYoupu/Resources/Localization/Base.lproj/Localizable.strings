@@ -279,3 +279,8 @@
 
 
 "饮食助手形象" = "Diet assistant character";
+
+
+"开启新对话？" = "Start a new conversation?";
+"当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "This conversation has reached its context capacity; nothing was sent. Starting a new conversation keeps existing chat and begins a new context with this message. Restate important requirements such as allergies.";
+"开启并发送" = "Start and send";

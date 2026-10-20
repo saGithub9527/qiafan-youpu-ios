@@ -3223,6 +3223,18 @@
         "Suggestion"
       ]
     },
+    "开启并发送": {
+      "english": "Start and send",
+      "englishVariants": [
+        "Start and send"
+      ]
+    },
+    "开启新对话？": {
+      "english": "Start a new conversation?",
+      "englishVariants": [
+        "Start a new conversation?"
+      ]
+    },
     "开始之前，请先了解这些说明。": {
       "english": "Please review these notes before you begin.",
       "englishVariants": [
@@ -3287,6 +3299,12 @@
       "english": "Current password",
       "englishVariants": [
         "Current password"
+      ]
+    },
+    "当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。": {
+      "english": "This conversation has reached its context capacity; nothing was sent. Starting a new conversation keeps existing chat and begins a new context with this message. Restate important requirements such as allergies.",
+      "englishVariants": [
+        "This conversation has reached its context capacity; nothing was sent. Starting a new conversation keeps existing chat and begins a new context with this message. Restate important requirements such as allergies."
       ]
     },
     "当前封面": {

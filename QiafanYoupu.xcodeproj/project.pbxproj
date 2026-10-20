@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A8F5A2B6E77644D790001001 /* QFAssistantConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F5A2B6E77644D790001002 /* QFAssistantConversationStore.swift */; };
 		007514E2FCE587C31D9712C9 /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 795ECE56F395DDBFD8485C31 /* JXSegmentedView */; };
 		025AA2CDF05BA636010304E0 /* QFAssistantNetworkPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9C993E48F45BAF1A698A2E /* QFAssistantNetworkPreference.swift */; };
 		02D070EEC5D9749D570D5689 /* QFManualPlanDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EBF2BAF07AAF1ECD91F6B56 /* QFManualPlanDraft.swift */; };
@@ -199,6 +200,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A8F5A2B6E77644D790001002 /* QFAssistantConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantConversationStore.swift; sourceTree = "<group>"; };
 		012EB0BECF377C21EE5439E4 /* QFBarcodeProductLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFBarcodeProductLookup.swift; sourceTree = "<group>"; };
 		017311C6C4D30D3E222CF37D /* QFContentCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFContentCacheTests.swift; sourceTree = "<group>"; };
 		07FC09DA4DB3C5D3C0C58F9D /* QFContentListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFContentListsView.swift; sourceTree = "<group>"; };
@@ -616,6 +618,7 @@
 			children = (
 				759C7EB855880752F643A219 /* QFAssistantAgent.swift */,
 				EAD3C1E9130B368BFD2B619D /* QFAssistantAgentContract.swift */,
+				A8F5A2B6E77644D790001002 /* QFAssistantConversationStore.swift */,
 				71CCF79DF7AB2D4F40F4D5F8 /* QFAssistantAgentDeviceCheck.swift */,
 				623652862028121F882EA25D /* QFAssistantBusinessTools.swift */,
 				4EE21B2B8F3B3299FA678831 /* QFAssistantCapabilityPolicy.swift */,
@@ -1006,6 +1009,7 @@
 				86FD9CD7883CE7A479601E89 /* QFAppleAuthorization.swift in Sources */,
 				C7E344E719D333EE73E2DFE4 /* QFAssistantAgent.swift in Sources */,
 				63B17C2E805B48E358989DE6 /* QFAssistantAgentContract.swift in Sources */,
+				A8F5A2B6E77644D790001001 /* QFAssistantConversationStore.swift in Sources */,
 				33959D1AB232652F2F5F3501 /* QFAssistantAgentDeviceCheck.swift in Sources */,
 				EADFEC673EC25ADE8286D84B /* QFAssistantBusinessTools.swift in Sources */,
 				79CCC7337129B9628C2948CE /* QFAssistantCapabilityPolicy.swift in Sources */,

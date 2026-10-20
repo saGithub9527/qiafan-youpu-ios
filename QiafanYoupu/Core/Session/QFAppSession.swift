@@ -638,7 +638,9 @@ final class QFAppSession: ObservableObject {
     guard saved != nil else { throw QFAPIError(code: 40100, message: self.text("请先登录。", "Sign in first.")) }
     try checkGeneration(currentGeneration)
     if let stored = saved, stored.accessExpiresAt <= Date() || stored.pendingRefreshOperationID != nil || refreshTask != nil { try await refresh() }
-    let turns = Array(history.suffix(8))
+    let turns = try QFAgentConversationContext.preserving(history.map {
+      .init(role: $0.role, content: $0.content)
+    }).map { QFOnDeviceInference.Turn(role: $0.role, content: $0.content) }
     let payload = QFAssistantChatRequest(text: text, allowCloud: true,
       allowWeb: configuration?.assistantCapabilities?.chatWebConsent == true ? allowWeb : nil, history: turns,
       householdId: binding.household, timeZone: TimeZone.current.identifier)

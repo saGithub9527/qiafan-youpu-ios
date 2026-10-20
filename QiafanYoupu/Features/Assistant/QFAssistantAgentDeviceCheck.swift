@@ -914,6 +914,7 @@ enum QFAssistantAgentDeviceCheck {
     let i = arguments.firstIndex(of: "-QFCheckRun")
     let supplied = i.flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil }
     let run = supplied.flatMap(UUID.init(uuidString:))?.uuidString.lowercased()
+    let neutralityOnly = arguments.contains("-QFVerifyNoDefaultConstraints")
     let ramValidation = arguments.contains("-QFNativeRAMValidation") && run != nil
     let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
       .appendingPathComponent("qwen-native-validation.json")
@@ -921,7 +922,7 @@ enum QFAssistantAgentDeviceCheck {
     var assertions: [String: Bool] = [:]
     var report: [String: Any] = ["runID": run ?? "invalid", "status": "IN_PROGRESS", "phase": "starting",
       "createdAt": ISO8601DateFormatter().string(from: Date()),
-      "processID": ProcessInfo.processInfo.processIdentifier, "maximumNativeCalls": 4,
+      "processID": ProcessInfo.processInfo.processIdentifier, "maximumNativeCalls": neutralityOnly ? 1 : 4,
       "nativeCallsStarted": 0, "nativeForegroundLimitSecondsPerCall": 180, "wallBudgetSeconds": 600,
       "cancellationRequestedAtSeconds": 590, "probeNetworkCalls": 0, "probeBusinessWrites": 0,
       "preferencesChanged": false, "chatPersisted": false, "manualAnswerReviewRequired": true,
@@ -965,20 +966,34 @@ enum QFAssistantAgentDeviceCheck {
       report["modelSHA256"] = QFLocalModelStore.shared.descriptor.sha256
       QFOnDeviceInference.releaseIdleCache()
       let prompt = QFAssistantAgent.answerSystemPrompt(language: "zh-Hans")
+      if neutralityOnly {
+        try beginCall("no-user-allergy-default")
+        let answer = try await QFOnDeviceInference.answer(model: QFLocalModelStore.shared.modelURL,
+          turns: [.init(role: "user", content: "花生可以做什么家常菜？只给一个菜名。")],
+          language: "zh-Hans", systemPrompt: prompt, contextTokens: 1024,
+          maxOutputTokens: 24, memoryMapped: true)
+        rows.append(["id": "no-user-allergy-default", "answer": answer,
+          "allergyConstraintsSupplied": false, "historyTurns": 0, "requiresManualReview": true,
+          "metrics": QFOnDeviceInference.latestMetrics ?? [:]])
+        report["status"] = "NEUTRAL_CONSTRAINT_ANSWER_COLLECTED"
+        report["phase"] = "requires-manual-answer-review"
+        try save(); return
+      }
 
       try beginCall("early-allergy-retained")
-      let allergy = try await QFOnDeviceInference.answer(model: QFLocalModelStore.shared.modelURL, turns: [
+      let completeHistory: [QFAgentConversationContext.Turn] = [
         .init(role: "user", content: "我对花生过敏，这是本段对话的限制，不要保存到资料。"),
-        .init(role: "assistant", content: "了解，这段对话会避开花生。"),
-        .init(role: "user", content: "现在聊家常菜。"), .init(role: "assistant", content: "可以聊食材与烹饪方法。"),
-        .init(role: "user", content: "先聊蔬菜。"), .init(role: "assistant", content: "蔬菜可以搭配不同主食。"),
-        .init(role: "user", content: "再聊主食。"), .init(role: "assistant", content: "主食有米饭和面条。"),
-        .init(role: "user", content: "我最早说对哪种食材过敏？准确只回复食材名称，不加其他内容。")
-      ], language: "zh-Hans", systemPrompt: prompt, contextTokens: ramValidation ? 4096 : 1024,
+        .init(role: "assistant", content: "了解，这段对话会避开花生。")
+      ] + (0..<8).map { .init(role: $0 % 2 == 0 ? "user" : "assistant", content: "继续聊公开的家常烹饪话题。") }
+      let packed = try QFAgentConversationContext.preserving(completeHistory)
+      let allergy = try await QFOnDeviceInference.answer(model: QFLocalModelStore.shared.modelURL,
+        turns: packed.map { .init(role: $0.role, content: $0.content) } + [
+          .init(role: "user", content: "我最早说对哪种食材过敏？准确只回复食材名称，不加其他内容。")
+        ], language: "zh-Hans", systemPrompt: prompt, contextTokens: ramValidation ? 4096 : 1024,
         maxOutputTokens: 16, memoryMapped: !ramValidation)
       assertions["earlyAllergyNameOnly"] = allergy.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters)) == "花生"
       assertions["defaultMicroBatch128"] = QFOnDeviceInference.latestMetrics?["microBatchTokens"] == 128
-      rows.append(["id": "early-allergy-retained", "historyTurns": 9, "answer": allergy,
+      rows.append(["id": "early-allergy-retained", "historyTurns": completeHistory.count, "wireHistoryTurns": packed.count, "answer": allergy,
         "metrics": QFOnDeviceInference.latestMetrics ?? [:]]); try save()
 
       try beginCall("unknown-inventory-manual-review")
@@ -1452,7 +1467,9 @@ enum QFAssistantAgentDeviceCheck {
       let candidate: Int32 = batchIndex.flatMap { arguments.indices.contains($0 + 1) ? Int32(arguments[$0 + 1]) : nil } ?? 32
       let compact = arguments.contains("-QFPerformanceCompactPrompt")
       guard [16, 32, 64, 128].contains(candidate), candidate != 16 || compact else { throw NSError(domain: "PerformanceInvalidBatch", code: 1) }
-      for (sample, batch) in [Int32(16), candidate, candidate, Int32(16)].enumerated() {
+      let productionBatch: Int32 = 128
+      report["baselineMicroBatchTokens"] = productionBatch
+      for (sample, batch) in [productionBatch, candidate, candidate, productionBatch].enumerated() {
         try Task.checkCancellation()
         report["phase"] = "sample-\(sample + 1)-batch-\(batch)"; save()
         QFOnDeviceInference.releaseIdleCache()

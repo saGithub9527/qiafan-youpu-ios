@@ -3,7 +3,7 @@
 
 No HTTP, app, model, service, simulator or package resolution is used. The test
 replaces only surrounding continuation/cancellation handles and unrelated DTOs.
-The gate function and its HTTP-only marker are extracted from production Swift.
+The terminal classifier, finish gate and error markers come from production Swift.
 Run this check only after the project-wide heavy-work slot is available.
 """
 from pathlib import Path
@@ -34,6 +34,8 @@ def main() -> None:
     stream = STREAM.read_text()
     session = SESSION.read_text()
     marker = balanced_block(stream, "struct QFAssistantStreamHTTPUnauthorized: Error")
+    exhausted_marker = balanced_block(stream, "struct QFAssistantStreamTransportExhausted: Error")
+    transport_failure = balanced_block(stream, "private func terminalTransportFailure(_ failure: QFAPIError, status: Int) -> Error")
     finish = balanced_block(stream, "private func finish(_ result: Result<QFAssistantStreamResult, Error>)")
 
     # Ensure the tested gate is wired before interpretation of every SSE event,
@@ -55,7 +57,8 @@ struct QFAPIError: Error { let code: Int; let message: String }
 struct QFAssistantStreamResult { let answer: String }
 final class CancelHandle { var calls = 0; func cancel() { calls += 1 } }
 final class TransportHandle {
-  func request(_ request: URLRequest) -> TransportHandle { self }
+  var requests: [URLRequest] = []
+  func request(_ request: URLRequest) -> TransportHandle { requests.append(request); return self }
   func response(_ callback: (Bool) -> Void) { callback(true) }
 }
 final class ContinuationHandle {
@@ -63,7 +66,7 @@ final class ContinuationHandle {
   var result: Result<QFAssistantStreamResult, Error>?
   func resume(with value: Result<QFAssistantStreamResult, Error>) { calls += 1; result = value }
 }
-''' + marker + r'''
+''' + marker + "\n" + exhausted_marker + r'''
 
 final class Host {
   var completed = false
@@ -86,7 +89,8 @@ final class Host {
     self.request = request; self.timeout = timeout
   }
   func deliver(_ value: Result<QFAssistantStreamResult, Error>) { finish(value) }
-''' + finish + r'''
+  func endTransport(_ failure: QFAPIError, status: Int) { finish(.failure(terminalTransportFailure(failure, status: status))) }
+''' + transport_failure + "\n" + finish + r'''
 }
 
 @main enum ReplayCheck {
@@ -122,12 +126,92 @@ final class Host {
       failure: URLError(.timedOut))
     verify("cancellation cannot trigger refresh", status: 401, event: false, refresh: false,
       failure: CancellationError())
+    verify("local exhaustion never grants authentication replay", status: 401, event: false, refresh: false,
+      failure: QFAssistantStreamTransportExhausted(failure: QFAPIError(code: 40100, message: "local boundary fixture")))
     let capture = ContinuationHandle(), request = CancelHandle(), timer = CancelHandle()
     let success = Host(status: 200, event: true, continuation: capture, request: request, timeout: timer)
     success.deliver(.success(.init(answer: "complete")))
     success.deliver(.failure(QFAPIError(code: 40100, message: "late error")))
     guard case .success(let answer)? = capture.result else { fatalError("Successful done was replaced") }
     precondition(answer.answer == "complete" && capture.calls == 1 && request.calls == 1 && timer.calls == 1)
+    // Invalid framing or JSON is a client abandonment of an accepted task.
+    func verifyProducerStop(_ label: String, status: Int?, error: Error, expected: Bool,
+      resumes: Int = 0, event: Bool? = nil, forwardedFailure: QFAPIError? = nil,
+      terminalTransportStatus: Int? = nil, supported: Bool = false, expectedRefresh: Bool? = nil) {
+      let capture = ContinuationHandle(), request = CancelHandle(), timer = CancelHandle()
+      let host = Host(status: status, event: event ?? (status == 200), continuation: capture, request: request, timeout: timer)
+      host.resumeAttempts = resumes
+      host.resumeSupported = supported
+      let transport = TransportHandle()
+      var initial = URLRequest(url: URL(string: "https://fixture.invalid/chat/stream")!)
+      initial.httpMethod = "POST"; initial.httpBody = Data("frozen-request".utf8)
+      initial.setValue("00000000-0000-4000-8000-000000000007", forHTTPHeaderField: "Idempotency-Key")
+      initial.setValue("application/json", forHTTPHeaderField: "Content-Type")
+      host.originalRequest = initial; host.transport = transport
+      if let status = terminalTransportStatus, let failure = error as? QFAPIError {
+        host.endTransport(failure, status: status)
+      } else { host.deliver(.failure(error)) }
+      host.deliver(.failure(error))
+      precondition(transport.requests.count == (expected ? 1 : 0), label)
+      if let stop = transport.requests.first {
+        precondition(stop.httpMethod == "DELETE" && stop.httpBody == nil, "No second POST: " + label)
+        precondition(stop.url == initial.url && stop.value(forHTTPHeaderField: "Idempotency-Key") == initial.value(forHTTPHeaderField: "Idempotency-Key"), "Same operation: " + label)
+      }
+      if let expectedFailure = forwardedFailure {
+        guard case .failure(let delivered)? = capture.result, let failure = delivered as? QFAPIError else {
+          fatalError("Preserve the public transport failure without granting an auth replay: " + label)
+        }
+        precondition(failure.code == expectedFailure.code && failure.message == expectedFailure.message,
+          "Preserve the original public failure: " + label)
+      }
+      if let expectedRefresh {
+        guard case .failure(let delivered)? = capture.result else { fatalError("Missing failure: " + label) }
+        precondition((delivered is QFAssistantStreamHTTPUnauthorized) == expectedRefresh, "Authentication boundary: " + label)
+      }
+      precondition(capture.calls == 1 && request.calls == 1, "One terminal receipt: " + label)
+      count += 1
+    }
+    for code in [URLError.Code.cannotParseResponse, .dataLengthExceedsMaximum] {
+      verifyProducerStop("accepted invalid stream: \(code)", status: 200, error: URLError(code), expected: true)
+      verifyProducerStop("pre-acceptance denial: \(code)", status: 400, error: URLError(code), expected: false)
+    }
+    verifyProducerStop("accepted invalid JSON", status: 200,
+      error: DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "public synthetic malformed event")), expected: true)
+    verifyProducerStop("authoritative server terminal error", status: 200,
+      error: QFAPIError(code: 50300, message: "terminal server event"), expected: false)
+    verifyProducerStop("explicit stop before headers", status: nil, error: CancellationError(), expected: true)
+    verifyProducerStop("deadline before headers", status: nil, error: URLError(.timedOut), expected: true)
+    for (status, code) in [(400, 40000), (403, 40300), (429, 42900)] {
+      let failure = QFAPIError(code: code, message: "authoritative HTTP rejection")
+      verifyProducerStop("HTTP\(status) remains authoritative after attempted recovery", status: status,
+        error: failure, expected: false, resumes: 2, forwardedFailure: failure)
+    }
+    // An earlier accepted producer can survive a later 503 or a lost response.
+    // Exhaustion is explicitly local; a bare server error above is never recast.
+    let exhaustedStatuses: [Int?] = [200, 503, nil]
+    for status in exhaustedStatuses {
+      let failure = QFAPIError(code: 50300, message: "recovery exhausted; received content kept")
+      verifyProducerStop("local recovery exhausted after accepted events; last HTTP \(String(describing: status))",
+        status: status, error: QFAssistantStreamTransportExhausted(failure: failure), expected: true,
+        resumes: 2, event: true, forwardedFailure: failure)
+    }
+    for status in [0, 200, 502, 503, 504] {
+      let failure = QFAPIError(code: 50300, message: "local transport permanently abandoned")
+      verifyProducerStop("unsupported recovery must stop, status \(status)", status: status == 0 ? nil : status,
+        error: failure, expected: true, resumes: 0, event: status == 200, forwardedFailure: failure,
+        terminalTransportStatus: status, supported: false)
+      verifyProducerStop("exhausted recovery must stop, status \(status)", status: status == 0 ? nil : status,
+        error: failure, expected: true, resumes: 2, event: true, forwardedFailure: failure,
+        terminalTransportStatus: status, supported: true)
+    }
+    for (status, code) in [(400, 40000), (403, 40300), (429, 42900)] {
+      let failure = QFAPIError(code: code, message: "authoritative HTTP rejection")
+      verifyProducerStop("terminal classifier preserves HTTP\(status)", status: status,
+        error: failure, expected: false, forwardedFailure: failure, terminalTransportStatus: status)
+    }
+    verifyProducerStop("terminal classifier preserves initial HTTP401 refresh", status: 401,
+      error: QFAPIError(code: 40100, message: "authoritative HTTP401"), expected: false,
+      terminalTransportStatus: 401, expectedRefresh: true)
     print("PASS production finish gate: \(count) failure cases + success; exactly-once cancellation/receipt; production SSE/session bindings")
   }
 }

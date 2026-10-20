@@ -9,22 +9,6 @@ import UIKit
 import UserNotifications
 @preconcurrency import Vision
 
-struct QFAssistantLocalMessage: Codable {
-  let id: UUID
-  let role: String
-  var text: String
-  let createdAt: Date
-  var sources: [QFAgentSource]? = nil
-  var actions: [QFAgentAction]? = nil
-  var notice: String? = nil
-  var state: String? = nil
-  var process: [QFAssistantProcessStep]? = nil
-  var reasoning: String? = nil
-  var retryText: String? = nil
-  var analysis: [String]? = nil
-  var imageID: String? = nil
-}
-
 /// Scene intent is deliberately broader than a single canned gesture. The rig
 /// chooses a compatible clip/pose variant at runtime, so the same intent can
 /// read differently across conversations and screens.
@@ -54,59 +38,6 @@ enum QFAssistantCharacterIntent: Equatable {
 
 private extension String {
   func containsAny(_ values: [String]) -> Bool { values.contains { contains($0) } }
-}
-
-/// Small, device-local conversation cache. It is deliberately capped and keyed by account;
-/// server memory is opt-in and is never inferred from this cache.
-private final class QFAssistantConversationStore {
-  private let key: String
-  private let persistent: Bool
-  let mediaScope: String
-  private var ownedImages = Set<String>()
-  init(scope: QFAgentScope, persistent: Bool = true) {
-    self.persistent = persistent
-    mediaScope = "assistant-chat|" + scope.cacheKey
-    key = "qf.assistant.conversation.v2.\(scope.cacheKey)"
-  }
-  func load() -> [QFAssistantLocalMessage] {
-    guard persistent else { return [] }
-    guard let data = UserDefaults.standard.data(forKey: key),
-      let value = try? JSONDecoder().decode([QFAssistantLocalMessage].self, from: data)
-    else { return [] }
-    let registered = Set(UserDefaults.standard.stringArray(forKey: key + ".images") ?? value.compactMap(\.imageID))
-    let visible = Set(value.suffix(40).compactMap(\.imageID))
-    for id in registered.subtracting(visible) { QFLocalMediaStore.remove(id, scope: mediaScope) }
-    ownedImages = visible
-    UserDefaults.standard.set(Array(visible), forKey: key + ".images")
-    return Array(value.filter { $0.role != "thinking" }.suffix(40)).map { original in
-      var item = original
-      if item.state == "streaming" { item.state = "stopped"; item.process = item.process?.map { step in
-        var step = step; if step.state == "running" { step.state = "stopped" }; return step
-      } }
-      return item
-    }
-  }
-  func save(_ messages: [QFAssistantLocalMessage]) {
-    guard persistent else { return }
-    let value = Array(messages.suffix(40))
-    guard let data = try? JSONEncoder().encode(value) else { return }
-    UserDefaults.standard.set(data, forKey: key)
-    let retained = Set(messages.compactMap(\.imageID))
-    // Only files created for this conversation and aged out of its existing
-    // 40-message retention. Never clear another draft/account media directory.
-    for id in ownedImages.subtracting(retained) { QFLocalMediaStore.remove(id, scope: mediaScope) }
-    ownedImages = retained
-    UserDefaults.standard.set(Array(retained), forKey: key + ".images")
-  }
-  func saveImage(_ data: Data) throws -> String {
-    let id = try QFLocalMediaStore.save(data, video: false, scope: mediaScope).id
-    ownedImages.insert(id)
-    if persistent { UserDefaults.standard.set(Array(ownedImages), forKey: key + ".images") }
-    return id
-  }
-  func imageURL(_ id: String?) -> URL? {
-    guard let id else { return nil }; return try? QFLocalMediaStore.url(id, scope: mediaScope)
-  }
 }
 
 /// Local-only assistant nudges. Remote Getui delivery remains a separate,
@@ -1898,13 +1829,35 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
         return
       }
     }
+    if !cloud, value.utf8.count > 1200 {
+      QFOperationHUD.toast(app.text("内容超过本地模型上下文，请缩短本次问题。", "The message exceeds the local context. Please shorten your question."), in: view)
+      return
+    }
     stopCapture()
     QFDigitalAssistantNudgeScheduler.recordAppUse(for: app)
     let imageQuestion = app.text("请根据图片内容给出饮食建议或生成待确认草稿。", "Analyze this image and give diet advice or make a reviewable draft.")
-    let history = messages.filter { ["user", "assistant"].contains($0.role) && !["streaming", "stopped", "failed"].contains($0.state ?? "") }.suffix(8).map {
-      QFOnDeviceInference.Turn(role: $0.role, content: $0.text.isEmpty && $0.imageID != nil ? imageQuestion : $0.text)
+    let history: [QFOnDeviceInference.Turn]
+    do {
+      if !cloud, conversationStore.nativeCapacityReached { throw QFAgentConversationContext.Invalid.capacity }
+      let previous = try conversationStore.history(messages, imageQuestion: imageQuestion)
+      history = try QFAgentConversationContext.preserving(previous).map {
+        .init(role: $0.role, content: $0.content)
+      }
+    } catch {
+      let alert = UIAlertController(title: app.text("开启新对话？", "Start a new conversation?"),
+        message: app.text("当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。", "This conversation has reached its context capacity; nothing was sent. Starting a new conversation keeps existing chat and begins a new context with this message. Restate important requirements such as allergies."), preferredStyle: .alert)
+      alert.addAction(UIAlertAction(title: app.text("取消", "Cancel"), style: .cancel))
+      let contextBinding = conversationBinding
+      alert.addAction(UIAlertAction(title: app.text("开启并发送", "Start and send"), style: .default) { [weak self] _ in
+        guard let self, self.conversationBinding == contextBinding,
+          QFAssistantAgent.scope(self.app) == contextBinding else { return }
+        self.conversationStore.beginNewContext(after: self.messages.last?.id)
+        self.sendMessageAfterSend(cloud: cloud)
+      })
+      present(alert, animated: true)
+      return
     }
-    let known = messages.last(where: { $0.role == "assistant" && !["streaming", "failed", "stopped"].contains($0.state ?? "") })?.sources ?? []
+    let known = conversationStore.knownSources(messages)
     let imageData = selectedImageData, mimeType = selectedImageMimeType
     let imageID: String?
     do { imageID = try imageData.map { try conversationStore.saveImage($0) } }
@@ -1993,7 +1946,9 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
         let copy: String
         if let failure = error as? QFOnDeviceInference.Failure {
           switch failure {
-          case .contextTooLong: copy = self.app.text("内容超过本地模型上下文，请缩短本次问题。", "The message exceeds the local context. Please shorten your question.")
+          case .contextTooLong:
+            self.conversationStore.markNativeCapacityReached()
+            copy = self.app.text("内容超过本地模型上下文，请缩短本次问题。", "The message exceeds the local context. Please shorten your question.")
           case .outputLimit: copy = self.app.text("回答达到本地长度上限，已保留现有内容。请缩小问题范围后重试。", "The local answer reached its length limit. Existing text is kept. Narrow your question and try again.")
           case .timeout: copy = self.app.text("本地生成超时，请稍后重试或缩短问题。", "Local generation timed out. Try again later or shorten the question.")
           case .generation(code: 8, diagnostic: _): copy = self.app.text("设备内存不足，本次回答已停止，已保留现有内容。请稍后重试。", "The device is low on memory, so this answer has stopped. Existing text is kept. Please try again later.")

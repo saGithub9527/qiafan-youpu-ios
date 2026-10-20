@@ -236,9 +236,7 @@ enum QFAssistantChatLayout {
   static let composerMaxHeight: CGFloat = 132
 }
 
-struct QFAssistantProcessStep: Codable {
-  let stage: String
-  var state: String
+extension QFAssistantProcessStep {
   @MainActor func title(_ app: QFAppSession) -> String {
     switch stage {
     case "knowledge", "tool:knowledge.search", "tool:web.search": return app.text("知识检索", "Knowledge retrieval")

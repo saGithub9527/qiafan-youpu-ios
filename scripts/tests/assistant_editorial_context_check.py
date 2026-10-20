@@ -13,6 +13,11 @@ import tempfile
 
 def main():
     root = Path(__file__).resolve().parents[2]
+    # Compile shipping Foundation DTOs as well. Weekly routing is part of the
+    # Agent file even when these cases exercise only knowledge/conversation.
+    planning = (root / "QiafanYoupu/Core/Networking/QFPlanningAPI.swift").read_text()
+    weekly_models = planning[planning.index("struct QFWeeklyPlanProposalDraft:"):
+                             planning.index("private struct QFWeeklyPlanAcceptDraft:")]
     sources = [
         "QiafanYoupu/Features/Assistant/QFAssistantAgentContract.swift",
         "QiafanYoupu/Features/Assistant/QFAssistantCapabilityPolicy.swift",
@@ -38,6 +43,10 @@ enum UnexpectedBoundary: Error { case network, business }
     String(format: chinese, arguments: arguments)
   }
   func contentRequest<T: Decodable>(path: String, method: String, body: Data) async throws -> T {
+    networkCalls += 1
+    throw UnexpectedBoundary.network
+  }
+  func createWeeklyPlanProposal(_ draft: QFWeeklyPlanProposalDraft) async throws -> QFWeeklyPlanProposal {
     networkCalls += 1
     throw UnexpectedBoundary.network
   }
@@ -79,7 +88,7 @@ enum QFContentDate {
     return "HOST_MODEL_BOUNDARY_REACHED"
   }
 }
-''')
+''' + weekly_models)
         fixture = root / "QiafanYoupu/Resources/AI/assistant-knowledge.json"
         for phase, flags in [
             ("local", []),

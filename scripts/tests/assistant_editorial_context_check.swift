@@ -23,6 +23,10 @@ enum EditorialContextCheck {
     let body = (document["languages"] as! [String: [String: String]])["zh-Hans"]!["body"]!
     let sourceID = "knowledge:food-leftovers"
     let question = "剩菜怎么保存？"
+    let greetingHistory: [QFOnDeviceInference.Turn] = [
+      .init(role: "user", content: "你好"),
+      .init(role: "assistant", content: "你好，我可以帮你规划饮食、整理食材和生成待确认草稿。"),
+    ]
     let earlier: [QFOnDeviceInference.Turn] = [
       .init(role: "user", content: "这是公开合成测试：我对花生过敏，本段对话不要丢掉这个限制。"),
       .init(role: "assistant", content: "本段对话会保留这个限制。"),
@@ -63,6 +67,12 @@ enum EditorialContextCheck {
       && direct?.sources.first?.url == (document["sourceURL"] as? String)
       && direct?.sources.first?.revision == (document["revision"] as? String), "helper-clean-citation")
     expect(direct?.nativeInferenceUsed == false && QFOnDeviceInference.calls.isEmpty, "helper-clean-no-model")
+    reset()
+    let afterGreeting = try await QFAssistantAgent.productHelp(text: question, history: greetingHistory,
+      knownSources: [], hasImage: false, app: app)
+    expect(afterGreeting?.answer == body, "helper-reviewed-answer-after-only-app-greeting")
+    expect(afterGreeting?.sources.first?.id == sourceID && QFOnDeviceInference.calls.isEmpty,
+      "helper-greeting-preserves-citation-without-model")
     for text in ["我怀孕了，" + question, "根据刚才的条件，" + question, question + "请只回答一个词。"] {
       let help = try await QFAssistantAgent.productHelp(text: text, history: [],
         knownSources: [], hasImage: false, app: app)
@@ -84,10 +94,21 @@ enum EditorialContextCheck {
       && direct.sources.first?.url == (document["sourceURL"] as? String)
       && direct.sources.first?.revision == (document["revision"] as? String), "local-clean-citation")
     expect(direct.nativeInferenceUsed == false && QFOnDeviceInference.calls.isEmpty, "local-clean-no-model")
+    reset()
+    let afterGreeting = try await QFAssistantAgent.answer(text: question, history: greetingHistory, knownSources: [], app: app)
+    expect(afterGreeting.answer == body && afterGreeting.nativeInferenceUsed == false,
+      "local-reviewed-answer-after-only-app-greeting")
+    expect(afterGreeting.sources.first?.id == sourceID && QFOnDeviceInference.calls.isEmpty
+      && app.networkCalls == 0, "local-greeting-skips-model-and-network")
 
     let localCases: [(String, [QFOnDeviceInference.Turn], [QFAgentSource], String)] = [
       ("history", earlier, [QFAgentSource](), question),
+      ("early-history", earlier + (0..<8).map { .init(role: $0 % 2 == 0 ? "user" : "assistant", content: "Public synthetic context \($0)") }, [], question),
       ("assistant-history", [.init(role: "assistant", content: "Earlier synthetic constraint.")], [], question),
+      ("greeting-with-other-assistant-content", [.init(role: "user", content: "你好"),
+        .init(role: "assistant", content: "Earlier synthetic allergy constraint must be retained.")], [], question),
+      ("greeting-with-user-constraint", [.init(role: "user", content: "你好，我对花生过敏"),
+        .init(role: "assistant", content: "你好，我可以帮你规划饮食、整理食材和生成待确认草稿。")], [], question),
       ("reference", [], [reference], question),
       ("combined", earlier, [reference], question),
       ("inline-condition", [], [], "我怀孕了，" + question),
