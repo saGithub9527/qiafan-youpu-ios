@@ -123,8 +123,16 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   var onScannedProducts: (([QFPurchaseReceiptLine]) -> Bool)?
   #if DEBUG
   var debugWithoutCamera = false
+  private var debugDismissCompletions = 0
   var debugBatchState: (count: Int, ready: Bool, hasNext: Bool) {
     (batch.items.count, active && !handlingResult && presentedViewController == nil, nextButton?.isHidden == false)
+  }
+  var debugBatchLifecycle: [String: Any] {
+    ["active": active, "handlingResult": handlingResult, "sameScope": sameScope,
+      "presented": presentedViewController.map { String(describing: type(of: $0)) } ?? "none",
+      "dismissing": presentedViewController?.isBeingDismissed ?? false,
+      "hasWindow": viewIfLoaded?.window != nil, "applicationActive": UIApplication.shared.applicationState == .active,
+      "dismissCompletions": debugDismissCompletions]
   }
   func debugCollect(_ barcode: QFProductBarcode) { decoded([barcode]) }
   func debugContinueCollecting() { resumeScanning() }
@@ -247,7 +255,14 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   private func afterPrompt(_ action: @escaping () -> Void) {
     // UIAlertAction handlers run during dismissal. Starting the camera or
     // presenting a second review sheet before it finishes can strand the page.
-    if let prompt = presentedViewController as? UIAlertController { prompt.dismiss(animated: true, completion: action) }
+    if let prompt = presentedViewController as? UIAlertController {
+      prompt.dismiss(animated: true) { [weak self] in
+        #if DEBUG
+        self?.debugDismissCompletions += 1
+        #endif
+        action()
+      }
+    }
     else { action() }
   }
   private func resumeScanning() {

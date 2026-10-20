@@ -226,7 +226,7 @@ enum QFProductBarcodeDeviceCheck {
         "onlineRetryAvailable", run)
       // Use the shipping scan state/dismissal/navigation, with camera permission
       // and capture explicitly bypassed. No product lookup or business save.
-      let scanner = QFProductBarcodeScannerViewController(app: app, householdID: run.householdID)
+      let scanner = QFProductBarcodeScannerViewController(app: app, householdID: nil)
       scanner.debugWithoutCamera = true; scanner.collectionID = run.nonce
       var batchReceived: [QFPurchaseReceiptLine] = []
       scanner.onScannedProducts = { batchReceived = $0; return true }
@@ -237,7 +237,10 @@ enum QFProductBarcodeDeviceCheck {
       try require(scanner.debugBatchState.count == 1 && scanner.debugBatchState.hasNext,
         "firstScanShowsPersistentNextButton", run)
       scanner.debugContinueCollecting()
-      try await Task.sleep(nanoseconds: 450_000_000); try check(run)
+      // Await the real dismissal callback/state rather than guessing the XR's
+      // animation duration. The existing orchestration deadline still applies.
+      try await wait(run) { scanner.debugBatchState.ready }
+      run.report["batchLifecycleAfterContinue"] = scanner.debugBatchLifecycle
       try require(scanner.debugBatchState.ready, "continueResumesOnlyAfterPromptDismissal", run)
       scanner.debugCollect(drinkBarcode)
       try require(scanner.debugBatchState.count == 1 && scanner.debugBatchState.ready,
@@ -246,7 +249,7 @@ enum QFProductBarcodeDeviceCheck {
       try await Task.sleep(nanoseconds: 350_000_000); try check(run)
       try require(scanner.debugBatchState.count == 2, "differentPackagesCollectedBeforeEditing", run)
       scanner.debugReviewCollection()
-      try await Task.sleep(nanoseconds: 700_000_000); try check(run)
+      try await wait(run) { navigation.topViewController === controller && batchReceived.count == 2 }
       try require(batchReceived.count == 2 && batchReceived.allSatisfy { $0.quantity == "1" && $0.lineAmount == nil },
         "reviewReturnsWholeBatchWithUnknownActualPrices", run)
       try require(navigation.topViewController === controller, "batchReviewReturnsToOriginalParent", run)
@@ -266,6 +269,15 @@ enum QFProductBarcodeDeviceCheck {
     guard active === run, ProcessInfo.processInfo.systemUptime - run.startedAt < 18 else {
       throw Failure("Run binding or deadline expired")
     }
+  }
+  private static func wait(_ run: Run, until condition: () -> Bool) async throws {
+    let began = ProcessInfo.processInfo.systemUptime
+    while !condition() {
+      try check(run)
+      guard ProcessInfo.processInfo.systemUptime - began < 3 else { return }
+      try await Task.sleep(nanoseconds: 50_000_000)
+    }
+    try check(run)
   }
   private static func require(_ condition: Bool, _ name: String, _ run: Run) throws {
     run.assertions[name] = condition
@@ -355,7 +367,7 @@ enum QFProductBarcodeDeviceCheck {
     var service: String { "com.talka.qiafanyoupu.debug.barcode." + nonce }
     var draftKind: String { "receipt." + householdID + ".new" }
     var draftStorageKey: String { "qf.profile.draft.\(environment).\(userID).\(draftKind)" }
-    var batchKind: String { "barcode-collection." + householdID + "." + nonce }
+    var batchKind: String { "barcode-collection.personal." + nonce }
     var batchStorageKey: String { "qf.profile.draft.\(environment).\(userID).\(batchKind)" }
     let reportURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
       .appendingPathComponent("product-barcode-check.json")
