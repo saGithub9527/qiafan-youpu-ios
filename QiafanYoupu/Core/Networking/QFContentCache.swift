@@ -195,7 +195,7 @@ final class QFContentCache {
       prefixes = ["me/push-devices"]
     } else if path.hasPrefix("me/weekly-plan-proposals/") {
       prefixes = path.hasSuffix("/accept")
-        ? ["me/weekly-plan-proposals", "me/planned-meals", "me/planned-meal-slots"]
+        ? ["me/weekly-plan-proposals", "me/planned-meals", "me/planned-meal-slots", "me/shopping-lists"]
         : ["me/weekly-plan-proposals"]
     } else {
       prefixes = [path]

@@ -1,4 +1,5 @@
 import Combine
+import CryptoKit
 import Foundation
 @preconcurrency import GTSDK
 import UIKit
@@ -7,6 +8,98 @@ import UserNotifications
 extension Notification.Name {
   static let qfLocalSettingsDidChange = Notification.Name("com.talka.qiafanyoupu.local-settings-changed")
   static let qfDidReceiveRemoteNotification = Notification.Name("com.talka.qiafanyoupu.remote-notification")
+}
+
+/// Native fallback for builds without a configured remote push provider. Only
+/// real, future, unfinished meals are scheduled; no background timer is needed.
+@MainActor
+private final class QFLocalMealReminderScheduler {
+  private static let prefix = "qfyp.meal.local.v1."
+  private var generation = UUID()
+  private var binding: QFAgentScope?
+
+  func cancel() {
+    binding = nil
+    let token = UUID(); generation = token
+    Task { [weak self] in
+      let center = UNUserNotificationCenter.current()
+      let pending = await center.pendingNotificationRequests()
+      guard self?.generation == token else { return }
+      center.removePendingNotificationRequests(withIdentifiers: pending.map(\.identifier).filter { $0.hasPrefix(Self.prefix) })
+      let delivered = await center.deliveredNotifications()
+      guard self?.generation == token else { return }
+      center.removeDeliveredNotifications(withIdentifiers: delivered.map { $0.request.identifier }.filter { $0.hasPrefix(Self.prefix) })
+    }
+  }
+
+  func refresh(app: QFAppSession, enabled: Bool, now: Date = Date()) async {
+    guard enabled, app.user != nil else { cancel(); return }
+    let token = UUID(); generation = token
+    let binding = QFAssistantAgent.scope(app)
+    let changedScope = self.binding != binding
+    let center = UNUserNotificationCenter.current()
+    func current() -> Bool { !Task.isCancelled && generation == token && QFAssistantAgent.scope(app) == binding }
+    do {
+      if changedScope {
+        let old = await center.pendingNotificationRequests()
+        guard current() else { return }
+        center.removePendingNotificationRequests(withIdentifiers: old.map(\.identifier).filter { $0.hasPrefix(Self.prefix) })
+        let delivered = await center.deliveredNotifications()
+        guard current() else { return }
+        center.removeDeliveredNotifications(withIdentifiers: delivered.map { $0.request.identifier }.filter { $0.hasPrefix(Self.prefix) })
+        self.binding = binding
+      }
+      var authorization = await center.notificationSettings()
+      if authorization.authorizationStatus == .notDetermined {
+        _ = try await center.requestAuthorization(options: [.alert, .sound])
+        authorization = await center.notificationSettings()
+      }
+      guard current() else { return }
+      guard [.authorized, .provisional, .ephemeral].contains(authorization.authorizationStatus) else { cancel(); return }
+      let settings = try await app.reminderSettings(householdID: binding.household)
+      guard current() else { return }
+      guard settings.enabled, settings.householdId == binding.household, let zone = settings.timezone,
+        let dates = QFNextMealReminderSelection.dates(now: now, timezone: zone, count: 8) else { cancel(); return }
+      var days: [QFNextMealReminderSelection.Day] = []
+      for date in dates {
+        let day = try await app.planDay(date: date, householdID: binding.household)
+        guard current() else { return }
+        guard day.date == date, Set(day.slots.map(\.meal)).count == day.slots.count,
+          day.slots.allSatisfy({ slot in slot.items.allSatisfy { $0.date == date && $0.meal == slot.meal && $0.householdId == binding.household } }) else { cancel(); return }
+        days.append(.init(date: date, slots: day.slots.map { slot in
+          .init(meal: slot.meal, plans: slot.items.map {
+            .init(id: $0.id, recipeID: $0.recipeId, title: $0.title, servings: $0.servings,
+              revision: $0.revision, contentAvailable: $0.contentAvailable, completed: $0.completed, skipped: $0.skipped)
+          })
+        }))
+      }
+      let rules = settings.meals.map { QFNextMealReminderSelection.Rule(meal: $0.meal, enabled: $0.enabled, localTime: $0.localTime, advanceMinutes: $0.advanceMinutes) }
+      let nodes = QFNextMealReminderSelection.nodes(now: now, timezone: zone, rules: rules, days: days, horizon: 8)
+        .filter { $0.reminderAt > now && $0.plans.allSatisfy({ UUID(uuidString: $0.id) != nil }) }
+      let old = await center.pendingNotificationRequests()
+      guard current() else { return }
+      center.removePendingNotificationRequests(withIdentifiers: old.map(\.identifier).filter { $0.hasPrefix(Self.prefix) })
+      let scope = SHA256.hash(data: Data(binding.cacheKey.utf8)).map { String(format: "%02x", $0) }.joined()
+      var calendar = Calendar(identifier: .gregorian); calendar.timeZone = TimeZone(identifier: zone)!
+      for node in nodes.prefix(32) {
+        guard current(), let first = node.plans.first else { return }
+        let content = UNMutableNotificationContent()
+        content.title = app.text("用餐计划提醒", "Meal plan reminder")
+        let names = node.plans.compactMap { $0.contentAvailable ? $0.title : nil }.joined(separator: "、")
+        content.body = names.isEmpty ? app.text("你的用餐计划即将开始，打开查看备菜和库存。", "Your planned meal starts soon. Open the app to check preparation and stock.")
+          : app.format("即将准备：%@。打开查看备菜和库存。", "Prepare soon: %@. Open the app to check preparation and stock.", String(names.prefix(180)))
+        content.sound = .default
+        content.userInfo = ["type": "PLAN_REMINDER", "plannedMealId": first.id]
+        let id = Self.prefix + scope + "." + token.uuidString + "." + node.date + "." + node.meal
+        let trigger = UNCalendarNotificationTrigger(dateMatching: calendar.dateComponents([.timeZone, .year, .month, .day, .hour, .minute, .second], from: node.reminderAt), repeats: false)
+        try await center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
+        if !current() { center.removePendingNotificationRequests(withIdentifiers: [id]); center.removeDeliveredNotifications(withIdentifiers: [id]); return }
+      }
+    } catch {
+      // Retain an already scheduled reminder on a transient network failure.
+      // Explicit opt-out/sign-out calls cancel(), which removes only this owner.
+    }
+  }
 }
 
 private struct QFGetuiConfiguration {
@@ -78,7 +171,7 @@ struct QFOnlinePushContent {
 /// Owns the SDK lifecycle and bridges one Getui CID to the authenticated API device.
 /// The SDK is not initialized until the app privacy agreement has been accepted.
 @MainActor
-final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate {
+final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate, @preconcurrency UNUserNotificationCenterDelegate {
   static let shared = QFGetuiPushService()
 
   private static let registrationKey = "qfyp.getui.registration.v1"
@@ -99,6 +192,7 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate {
   private var lastSynchronizedFingerprint: String?
   private var displayedOnlineNotifications = Set<String>()
   private var onlineNotificationOrder: [String] = []
+  private let localMeals = QFLocalMealReminderScheduler()
 
   private override init() { super.init() }
 
@@ -115,8 +209,17 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate {
       self?.userDidChange()
     }.store(in: &subscriptions)
     app.$interfaceLanguage.dropFirst().removeDuplicates().receive(on: DispatchQueue.main).sink {
-      [weak self] _ in self?.scheduleReconcile()
+      [weak self] _ in self?.localMeals.cancel(); self?.scheduleReconcile()
     }.store(in: &subscriptions)
+    app.$planningScope.dropFirst().removeDuplicates().receive(on: DispatchQueue.main).sink { [weak self] _ in
+      self?.localMeals.cancel(); self?.scheduleReconcile()
+    }.store(in: &subscriptions)
+    NotificationCenter.default.publisher(for: Notification.Name("qf.planningReminderDataDidChange"))
+      .receive(on: DispatchQueue.main).sink { [weak self] notification in
+        guard let self, notification.userInfo?["scope"] as? String == self.app?.contentScope else { return }
+        self.localMeals.cancel()
+        self.scheduleReconcile()
+      }.store(in: &subscriptions)
     app.$userSettings.dropFirst().receive(on: DispatchQueue.main).sink { [weak self] settings in
       guard let self, let app = self.app else { return }
       if let settings {
@@ -161,6 +264,7 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate {
 
   /// Called before revoking the app session so the authenticated device row can be disabled.
   func unregisterBeforeSignOut() async {
+    localMeals.cancel()
     reconcileTask?.cancel()
     settingsTask?.cancel()
     await unregisterDeviceIfPossible()
@@ -184,8 +288,10 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate {
   }
 
   private func userDidChange() {
+    localMeals.cancel()
     lastSynchronizedFingerprint = nil
     guard app?.user != nil else {
+      localMeals.cancel()
       settingsTask?.cancel()
       stopSDK()
       return
@@ -214,12 +320,24 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate {
 
   private func reconcile() async {
     guard privacyConsentAccepted, let app, app.user != nil else {
+      localMeals.cancel()
       stopSDK()
       return
     }
     // A missing server setting is an unknown state. Do not interpret it as opt-out
     // and issue a second DELETE while a failed sign-out is being recovered.
     guard app.userSettings != nil else { return }
+    // One delivery owner per build. Local timers cover builds without Getui
+    // configuration; configured remote builds keep their existing APNs flow.
+    if QFGetuiConfiguration.load() == nil {
+      if storedRegistration()?.isActive == true { await unregisterDeviceIfPossible() }
+      guard !Task.isCancelled, storedRegistration()?.isActive != true else { return }
+      let center = UNUserNotificationCenter.current()
+      if center.delegate == nil || center.delegate === self { center.delegate = self }
+      await QFContentLoadingContext.$forceRefresh.withValue(true) {
+        await localMeals.refresh(app: app, enabled: app.userSettings?.planReminders == true && !isLocallyDisabled(scope: app.contentScope))
+      }
+    } else { localMeals.cancel() }
     guard remindersEnabled(app: app) else {
       await unregisterDeviceIfPossible()
       if sdkStarted { GeTuiSdk.setPushModeForOff(true) }
@@ -361,6 +479,19 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate {
   }
 
   // MARK: - GeTuiSdkDelegate
+
+  nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    completionHandler([.banner, .list, .sound])
+  }
+
+  nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void) {
+    Task { @MainActor [weak self] in
+      self?.postNotification(response.notification.request.content.userInfo, response: response)
+      completionHandler()
+    }
+  }
 
   func geTuiSdkDidRegisterClient(_ clientId: String) {
     cid = normalizedCID(clientId)

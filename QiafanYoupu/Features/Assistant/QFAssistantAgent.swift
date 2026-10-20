@@ -15,6 +15,44 @@ enum QFAssistantAgent {
     .init(account: app.contentScope, household: app.planningHouseholdID, language: app.interfaceLanguage)
   }
 
+  static func weeklyPlan(text: String, cloud: Bool, requestID: UUID, app: QFAppSession,
+    progress: (String) -> Void) async throws -> Response? {
+    guard QFAssistantWeeklyPlanIntent.matches(text) else { return nil }
+    if text.utf16.count > 500 || text.range(of: "过敏|過敏|不吃|不能吃|不要吃|素食|预算|預算|[2-9二三四五六七八九两兩]+[人份]|allerg|vegan|vegetarian|budget|for [2-9]", options: [.regularExpression, .caseInsensitive]) != nil {
+      return .init(answer: app.text("这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。", "This request includes constraints that need explicit review. Confirm servings, budget and excluded ingredients in weekly plan settings before generating. No meal plan was saved."), sources: [], actions: [.init(type: "NAVIGATE_PLAN", recipeID: nil, date: nil)], notice: "", nativeInferenceUsed: false)
+    }
+    guard cloud || QFLocalModelViewController.networkEnabled(app) else {
+      return .init(answer: app.text("请开启联网后再生成周计划，需要读取你的实际库存、已发布菜谱和现有餐次。", "Enable network access to build a weekly plan from your actual inventory, published recipes and existing meals."),
+        sources: [], actions: [.init(type: "NAVIGATE_MODEL_SETTINGS", recipeID: nil, date: nil)], notice: "", nativeInferenceUsed: false)
+    }
+    let binding = scope(app)
+    progress("tool:plan.weekly")
+    var draft = QFWeeklyPlanProposalDraft(weekStart: QFAssistantWeeklyPlanIntent.startDate(for: text),
+      householdId: binding.household, meals: ["BREAKFAST", "LUNCH", "DINNER"], servings: 1,
+      budget: nil, currency: nil, maxMinutesPerDay: nil, excludedIngredientIds: [],
+      mustUseInventory: true, preference: text, idempotencyKey: requestID.uuidString.lowercased())
+    draft.generationMode = cloud ? "CLOUD" : "LOCAL_RULES"; draft.allowCloud = cloud; draft.goal = "BALANCED"
+    if text.range(of: "减肥|減肥|减脂|減脂|weight.?loss|fat.?loss", options: [.regularExpression, .caseInsensitive]) != nil { draft.goal = "BALANCED_FAT_LOSS" }
+    let proposal = try await app.createWeeklyPlanProposal(draft)
+    try Task.checkCancellation()
+    guard binding == scope(app), proposal.householdId == binding.household, proposal.language == binding.language else { throw CancellationError() }
+    progress("answer")
+    var answer: String
+    if proposal.status == "READY" {
+      answer = app.text("已根据库存和可补购食材整理未来七天的三餐方案，默认每餐 1 份。打开方案可逐餐核对；确认后会加入计划，并按实际库存生成补购清单。", "A seven-day, three-meal proposal is ready, using inventory plus ingredients you can buy. Each meal defaults to one serving. Review it, then confirm to add meals and create a shopping list based on actual stock.")
+      answer += "\n\n" + proposal.items.map { item in
+        let meal = item.meal == "BREAKFAST" ? app.text("早餐", "Breakfast") : item.meal == "LUNCH" ? app.text("午餐", "Lunch") : app.text("晚餐", "Dinner")
+        return "- " + item.date + " · " + meal + "：" + (item.contentAvailable ? item.title ?? app.text("未命名菜谱", "Untitled recipe") : app.text("当前语言内容不可用", "Content unavailable in this language"))
+      }.joined(separator: "\n")
+    } else {
+      answer = app.text("周计划生成任务已提交，会同时考虑现有食材和合理补购。打开方案查看进度，核对后一次加入未来七天的计划。", "Your weekly proposal is being prepared using available stock and reasonable purchases. Open it to follow progress, then review and add the seven days together.")
+    }
+    var action = QFAgentAction(type: "WEEKLY_PLAN_PROPOSAL", recipeID: nil, date: proposal.weekStart)
+    action.proposalID = proposal.id
+    return .init(answer: answer, sources: [], actions: [action], notice: "",
+      toolStatuses: ["plan.weekly": proposal.status], nativeInferenceUsed: false)
+  }
+
   /// Shared by local and cloud entry points. App capabilities and navigation
   /// must not change with a provider's self-description.
   static func productHelp(text: String, history: [QFOnDeviceInference.Turn],

@@ -1684,6 +1684,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
 
   private func actionTitle(_ action: QFAgentAction) -> String {
     switch action.type {
+    case "WEEKLY_PLAN_PROPOSAL": return app.text("核对七天方案与补购清单", "Review seven-day plan and shopping list")
     case "PLAN_DRAFT": return app.text("核对计划草稿（尚未保存）", "Review plan draft (not saved)")
     case "NAVIGATE_PLAN": return app.text("打开饮食计划", "Open meal plans")
     case "NAVIGATE_INVENTORY": return app.text("打开食材库存", "Open ingredient stock")
@@ -1720,6 +1721,28 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   private func openAgentAction(_ action: QFAgentAction) {
     stopCapture()
     switch action.type {
+    case "WEEKLY_PLAN_PROPOSAL":
+      guard let id = action.proposalID, UUID(uuidString: id) != nil else { return }
+      let binding = QFAssistantAgent.scope(app)
+      navigationTask?.cancel()
+      navigationTask = Task { [weak self] in
+        guard let self else { return }
+        do {
+          let proposal = try await self.app.weeklyPlanProposal(id)
+          try Task.checkCancellation()
+          guard QFAssistantAgent.scope(self.app) == binding,
+            proposal.householdId == binding.household, proposal.language == binding.language else { return }
+          self.qfPush(QFWeeklyPlanProposalViewController(app: self.app, proposal: proposal, appendAndShop: true, onUpdate: { _ in }, onAccepted: { [weak self] in
+            guard let self, QFAssistantAgent.scope(self.app) == binding else { return }
+            if let index = self.messages.firstIndex(where: { $0.actions?.contains(where: { $0.proposalID == id }) == true }) {
+              self.messages[index].text = self.app.text("七天方案已保存到饮食计划，补购清单已按库存生成。已有餐次和完成记录已保留。", "The seven-day proposal is saved and its shopping list has been generated from inventory. Existing meals and completed records are preserved.")
+              self.messages[index].actions = [.init(type: "NAVIGATE_PLAN", recipeID: nil, date: proposal.weekStart)]
+              self.conversationStore.save(self.messages); self.renderMessages()
+            }
+          }))
+        } catch is CancellationError { }
+        catch { QFOperationHUD.toast(QFProfileContentController.errorText(error, app: self.app), in: self.view) }
+      }
     case "NAVIGATE_RECIPES": navigateToTab(0)
     case "NAVIGATE_PLAN": navigateToTab(1)
     case "NAVIGATE_INVENTORY": navigateToTab(2)
@@ -1866,7 +1889,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     guard !voice.isBusy else { return }
     guard !value.isEmpty || selectedImage != nil else { return }
     if !cloud {
-      guard QFLocalModelStore.shared.state == .ready else {
+      guard QFLocalModelStore.shared.state == .ready || QFAssistantWeeklyPlanIntent.matches(value) else {
         QFOperationHUD.toast(app.text("请先在模型管理中下载并校验千问模型。", "Download and verify Qwen in Manage model first."), in: view)
         return
       }
@@ -1908,7 +1931,13 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
         return self.messages.firstIndex(where: { $0.id == id })
       }
       do {
-        if cloud, imageData == nil, let help = try await QFAssistantAgent.productHelp(text: question, history: history,
+        if imageData == nil, let plan = try await QFAssistantAgent.weeklyPlan(text: question, cloud: cloud, requestID: id, app: self.app,
+          progress: { [weak self] stage in guard let self, let index = currentIndex() else { return }; self.setProcess(stage: stage, index: index) }) {
+          guard let index = currentIndex() else { return }
+          self.messages[index].text = plan.answer; self.messages[index].sources = plan.sources
+          self.messages[index].actions = plan.actions; self.messages[index].notice = plan.notice
+          self.completeMessage(index: index)
+        } else if cloud, imageData == nil, let help = try await QFAssistantAgent.productHelp(text: question, history: history,
           knownSources: known, hasImage: imageData != nil, app: self.app) {
           guard let index = currentIndex() else { return }
           self.messages[index].text = help.answer

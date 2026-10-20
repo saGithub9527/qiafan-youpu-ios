@@ -28,21 +28,25 @@ enum QFNextMealReminderSelection {
     let plans: [Plan]
   }
 
-  static func dates(now: Date, timezone: String) -> [String]? {
-    guard let calendar = calendar(timezone: timezone),
-      let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) else { return nil }
+  static func dates(now: Date, timezone: String, count: Int = 2) -> [String]? {
+    guard (1...8).contains(count), let calendar = calendar(timezone: timezone) else { return nil }
     let formatter = formatter(calendar: calendar)
-    return [formatter.string(from: now), formatter.string(from: tomorrow)]
+    return (0..<count).compactMap { calendar.date(byAdding: .day, value: $0, to: now).map(formatter.string(from:)) }
   }
 
   static func select(now: Date, timezone: String, rules: [Rule], days: [Day]) -> Node? {
+    nodes(now: now, timezone: timezone, rules: rules, days: days).first
+  }
+
+  static func nodes(now: Date, timezone: String, rules: [Rule], days: [Day], horizon: Int = 2) -> [Node] {
     guard let calendar = calendar(timezone: timezone),
-      let allowedDates = dates(now: now, timezone: timezone) else { return nil }
+      let allowedDates = dates(now: now, timezone: timezone, count: horizon) else { return [] }
     let formatter = formatter(calendar: calendar)
     let meals = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"]
     var nodes: [Node] = []
     // A malformed/duplicated rule set cannot safely determine the next node.
-    guard Set(rules.map(\.meal)).count == rules.count else { return nil }
+    guard Set(rules.map(\.meal)).count == rules.count,
+      Set(days.map(\.date)).count == days.count else { return [] }
     for day in days where allowedDates.contains(day.date) {
       guard let date = formatter.date(from: day.date), formatter.string(from: date) == day.date else { continue }
       for rule in rules where rule.enabled && meals.contains(rule.meal) {
@@ -61,7 +65,7 @@ enum QFNextMealReminderSelection {
           reminderAt: scheduled.addingTimeInterval(-Double(rule.advanceMinutes) * 60), plans: plans))
       }
     }
-    return nodes.min {
+    return nodes.sorted {
       if $0.scheduledAt != $1.scheduledAt { return $0.scheduledAt < $1.scheduledAt }
       return (meals.firstIndex(of: $0.meal) ?? 4) < (meals.firstIndex(of: $1.meal) ?? 4)
     }

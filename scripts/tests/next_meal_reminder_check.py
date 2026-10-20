@@ -140,6 +140,14 @@ func availability(_ ids: [String], revision: Int = 3) -> QFPlanAvailability {
    days:[.init(date:"2026-03-08",slots:[.init(meal:"BREAKFAST",plans:[dstPlan])])])
   precondition(past == nil, "Unfinished past node is not a future reminder")
   precondition(QFNextMealReminderSelection.select(now:now,timezone:"invalid",rules:dstRules,days:[]) == nil)
+  let horizonDates = QFNextMealReminderSelection.dates(now:now, timezone:"Asia/Shanghai", count:8)!
+  precondition(horizonDates.count == 8 && horizonDates.last == "2026-10-24")
+  let futureDays = horizonDates.map { date in QFNextMealReminderSelection.Day(date:date, slots:[.init(meal:"DINNER", plans:[
+   .init(id:"one-"+date,recipeID:"recipe-a",title:"A",servings:1,revision:0,contentAvailable:true,completed:false,skipped:false),
+   .init(id:"two-"+date,recipeID:"recipe-b",title:"B",servings:1,revision:0,contentAvailable:true,completed:false,skipped:false)])]) }
+  let scheduled = QFNextMealReminderSelection.nodes(now:now,timezone:"Asia/Shanghai",rules:[.init(meal:"DINNER",enabled:true,localTime:"18:00",advanceMinutes:30)],days:futureDays,horizon:8)
+  precondition(scheduled.count == 8 && scheduled.allSatisfy { $0.plans.count == 2 }, "One notification node groups dishes per future meal")
+  precondition(QFNextMealReminderSelection.nodes(now:now,timezone:"Asia/Shanghai",rules:dstRules,days:[futureDays[0],futureDays[0]],horizon:8).isEmpty, "Duplicate dates must not create duplicate lock-screen reminders")
   print("PASS next-meal group, same-scope stock, disabled master, midnight, DST, cancellation and revisions")
  }
 }

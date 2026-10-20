@@ -1091,24 +1091,57 @@ private final class QFWeeklyPlanViewController: QFProfileContentController {
 }
 
 @MainActor
-private final class QFWeeklyPlanProposalViewController: QFProfileContentController {
+final class QFWeeklyPlanProposalViewController: QFProfileContentController {
   private var proposal: QFWeeklyPlanProposal
   private let onUpdate: (QFWeeklyPlanProposal) -> Void
   private let onAccepted: () -> Void
   private var secondaryButton: UIButton!
   private var primaryButton: UIButton!
+  private let appendAndShop: Bool
+  private let scopeBinding: QFAgentScope
+  private var refreshTask: Task<Void, Never>?
+  private var shoppingReceipt: QFShoppingList?
 
   init(
-    app: QFAppSession, proposal: QFWeeklyPlanProposal,
+    app: QFAppSession, proposal: QFWeeklyPlanProposal, appendAndShop: Bool = false,
     onUpdate: @escaping (QFWeeklyPlanProposal) -> Void, onAccepted: @escaping () -> Void
   ) {
     self.proposal = proposal
+    self.appendAndShop = appendAndShop || QFAssistantWeeklyPlanIntent.requiresAppendAndShopping(generationMode: proposal.generationMode, goal: proposal.goal)
+    self.scopeBinding = QFAssistantAgent.scope(app)
     self.onUpdate = onUpdate
     self.onAccepted = onAccepted
     super.init(app: app, title: app.text("周计划详情", "Weekly plan details"))
   }
 
   required init?(coder: NSCoder) { nil }
+
+  deinit { refreshTask?.cancel() }
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated); scheduleRefresh()
+    if proposal.status == "ACCEPTED", shoppingReceipt == nil, proposal.shoppingListId != nil { load() }
+  }
+  override func viewWillDisappear(_ animated: Bool) { super.viewWillDisappear(animated); refreshTask?.cancel(); refreshTask = nil }
+
+  private func scheduleRefresh() {
+    guard refreshTask == nil, ["QUEUED", "PROCESSING", "RETRY"].contains(proposal.status) else { return }
+    refreshTask = Task { [weak self] in
+      // Bounded polling only while this visible proposal is being generated.
+      for _ in 0..<8 {
+        do { try await Task.sleep(nanoseconds: 15_000_000_000) } catch { return }
+        guard let self, self.viewIfLoaded?.window != nil,
+          QFAssistantAgent.scope(self.app) == self.scopeBinding else { return }
+        do {
+          let current = try await QFContentLoadingContext.$forceRefresh.withValue(true) { try await self.app.weeklyPlanProposal(self.proposal.id) }
+          try Task.checkCancellation()
+          guard QFAssistantAgent.scope(self.app) == self.scopeBinding else { return }
+          self.proposal = current; self.onUpdate(current); self.render()
+          if !["QUEUED", "PROCESSING", "RETRY"].contains(current.status) { break }
+        } catch { break }
+      }
+      self?.refreshTask = nil
+    }
+  }
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -1120,8 +1153,11 @@ private final class QFWeeklyPlanProposalViewController: QFProfileContentControll
 
   private func load() {
     execute(reloadOnFailure: true) { [self] in
-      proposal = try await app.weeklyPlanProposal(proposal.id)
+      proposal = try await QFContentLoadingContext.$forceRefresh.withValue(true) { try await app.weeklyPlanProposal(proposal.id) }
       try Task.checkCancellation()
+      guard QFAssistantAgent.scope(app) == scopeBinding else { throw CancellationError() }
+      if let id = proposal.shoppingListId { shoppingReceipt = try? await app.shoppingList(id) }
+      guard QFAssistantAgent.scope(app) == scopeBinding else { throw CancellationError() }
       onUpdate(proposal)
       render()
     }
@@ -1152,6 +1188,11 @@ private final class QFWeeklyPlanProposalViewController: QFProfileContentControll
           detail: app.text("下拉刷新可获取最新状态", "Pull down to refresh the latest status."))
       }
     } else {
+      if appendAndShop {
+        bodyStack.row("shopping-explanation", version: app.interfaceLanguage + proposal.status) { [app] in
+          QFTabUI.card(QFTabUI.label(app.text("优先利用库存，缺少的食材可补购。默认每餐 1 份；这是一般饮食安排，不含个人热量处方。确认后将保留已有餐次，并生成扣除库存后的补购清单。", "Existing stock is preferred and missing ingredients can be purchased. Meals default to one serving. This is a general menu, without a personal calorie prescription. Confirmation preserves existing meals and creates a shopping list after subtracting stock."), size: 14, color: QFUI.secondary, lines: 0), padding: 14)
+        }
+      }
       for (index, item) in proposal.items.enumerated() {
         let version = [
           item.date, item.meal, item.recipeId, item.title ?? "", String(item.servings),
@@ -1160,6 +1201,19 @@ private final class QFWeeklyPlanProposalViewController: QFProfileContentControll
         bodyStack.row("item.\(index).\(item.date).\(item.meal)", version: version) { [weak self] in
           self?.itemCard(item) ?? UIView()
         }
+      }
+    }
+    if let shoppingReceipt, shoppingReceipt.householdId == scopeBinding.household, shoppingReceipt.language == scopeBinding.language {
+      bodyStack.row("shopping-receipt", version: shoppingReceipt.id + String(shoppingReceipt.revision) + app.interfaceLanguage) { [app] in
+        let text = shoppingReceipt.items.map { item in
+          let quantity = item.quantityText ?? [item.quantityMax ?? item.quantityMin, item.unitCode].compactMap { $0 }.joined(separator: " ")
+          return "• " + item.name + (quantity.isEmpty ? "" : " · " + quantity)
+        }.joined(separator: "\n")
+        return QFTabUI.card(QFTabUI.stack([
+          QFTabUI.label(app.text("补购清单", "Shopping list"), size: 18, weight: .semibold),
+          QFTabUI.label(text.isEmpty ? app.text("没有需要补购的食材", "No additional ingredients to buy") : text, size: 15, lines: 0),
+          QFTabUI.label(app.text("数量不明确的食材请在食材页核对。", "Review ingredients with uncertain quantities on the Ingredients page."), size: 12, color: QFUI.secondary, lines: 0)
+        ], spacing: 8), padding: 14, background: QFUI.paleGreen)
       }
     }
     bodyStack.endUpdates()
@@ -1172,10 +1226,17 @@ private final class QFWeeklyPlanProposalViewController: QFProfileContentControll
       : app.text("当前语言内容不可用", "Content unavailable in this language")
     let detail = app.format(
       "%@ · %@ · %d 份", "%@ · %@ · %d servings", item.date, mealTitle(item.meal), item.servings)
+    let recipe = QFTabUI.button(title, size: 16, weight: .semibold, color: QFUI.primary) { [weak self] in
+      guard let self, QFAssistantAgent.scope(self.app) == self.scopeBinding,
+        item.contentAvailable, UUID(uuidString: item.recipeId) != nil else { return }
+      self.qfPush(QFHomeRecipeDetailViewController(app: self.app, recipeID: item.recipeId))
+    }
+    recipe.titleLabel?.numberOfLines = 2; recipe.contentHorizontalAlignment = .leading
+    recipe.isEnabled = item.contentAvailable
     return QFTabUI.card(
       QFTabUI.stack(
         [
-          QFTabUI.label(title, size: 16, weight: .semibold, lines: 2),
+          recipe,
           QFTabUI.label(detail, size: 12, color: QFUI.secondary, lines: 0),
         ], spacing: 5), padding: 14, border: true)
   }
@@ -1188,7 +1249,7 @@ private final class QFWeeklyPlanProposalViewController: QFProfileContentControll
       ready ? app.text("取消提案", "Cancel proposal") : app.text("取消生成", "Cancel generation"),
       for: .normal)
     primaryButton.isHidden = !ready
-    primaryButton.setTitle(app.text("加入计划", "Add to plan"), for: .normal)
+    primaryButton.setTitle(appendAndShop ? app.text("保存七天计划与补购清单", "Save seven-day plan and shopping list") : app.text("加入计划", "Add to plan"), for: .normal)
   }
 
   private func secondaryAction() {
@@ -1199,9 +1260,10 @@ private final class QFWeeklyPlanProposalViewController: QFProfileContentControll
   }
 
   private func confirmAccept() {
+    guard QFAssistantAgent.scope(app) == scopeBinding else { return }
     confirm(
       app.text("将这份周计划加入日历？", "Add this weekly plan to your calendar?"),
-      detail: app.text(
+      detail: appendAndShop ? app.text("确认当前日期、餐次和份数后，一次加入计划并生成补购清单。不会替换已有餐次；库存不足部分列入补购，不会自动下单。", "Confirm the dates, meals and servings to save the plan and generate its shopping list. Existing meals are preserved. Missing stock is listed for purchase; no order is placed.") : app.text(
         "若相关餐次已被修改，系统会要求刷新后重新确认。",
         "If a related meal slot changed, refresh and review the proposal again."),
       actionTitle: app.text("加入计划", "Add to plan")
@@ -1209,18 +1271,27 @@ private final class QFWeeklyPlanProposalViewController: QFProfileContentControll
   }
 
   private func accept() {
+    guard QFAssistantAgent.scope(app) == scopeBinding else { return }
     execute(label: app.text("正在加入计划", "Adding to plan")) { [self] in
       proposal = try await app.acceptWeeklyPlanProposal(
-        proposal.id, expectedRevision: proposal.revision)
+        proposal.id, expectedRevision: proposal.revision, mode: appendAndShop ? "APPEND" : "REPLACE", createShoppingList: appendAndShop)
       try Task.checkCancellation()
+      guard QFAssistantAgent.scope(app) == scopeBinding, proposal.status == "ACCEPTED",
+        !appendAndShop || proposal.shoppingListId != nil else { throw CancellationError() }
       onUpdate(proposal)
       onAccepted()
       render()
       message(app.text("已加入计划", "Added to plan"))
+      if let id = proposal.shoppingListId {
+        shoppingReceipt = try? await app.shoppingList(id)
+        guard QFAssistantAgent.scope(app) == scopeBinding else { return }
+        render()
+      }
     }
   }
 
   private func confirmCancel() {
+    guard QFAssistantAgent.scope(app) == scopeBinding else { return }
     confirm(
       app.text("取消这份提案？", "Cancel this proposal?"),
       detail: app.text("取消后不会写入饮食计划。", "The proposal will not be added to your meal plan."),
@@ -1396,7 +1467,7 @@ private final class QFWeeklyPlanEditorViewController: QFProfileContentController
           [
             QFTabUI.label(app.text("优先使用现有库存", "Prioritize current inventory"), size: 16),
             QFTabUI.label(
-              app.text("仅推荐至少使用一种现有食材的菜谱", "Each recipe must use at least one ingredient in stock."),
+              app.text("优先利用已有食材，也允许为合理搭配补购", "Prefer ingredients in stock and allow purchases for a suitable menu."),
               size: 12, color: QFUI.secondary, lines: 0),
           ], spacing: 4),
         UIView(), inventory,

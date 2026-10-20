@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-18",
+  "updatedAt": "2026-10-20",
   "sourceRoot": "../../../../../全球菜谱APP-设计档案/01-当前设计",
   "precedence": [
     "approved PNG and page interaction JSON",
@@ -2010,6 +2010,141 @@
       },
       "supersedes": "inventory-preparation-r2",
       "approvedException": "2026-10-19 用户明确提出黑色往返扫描线、四字段采购、保存进冰箱与同物品数量叠加。"
+    },
+    {
+      "id": "product-barcode-scanner-r5",
+      "supersedes": "product-barcode-scanner-r4",
+      "productPage": "PLAN-19",
+      "title": "商品条码连续采集与统一核对",
+      "keywords": [
+        "小票",
+        "二维码",
+        "商品",
+        "数量",
+        "价格",
+        "文字识别",
+        "OCR",
+        "商品条码",
+        "条形码",
+        "名称修改",
+        "EAN",
+        "UPC"
+      ],
+      "sources": [
+        {
+          "path": "04-计划与备菜/19-小票二维码扫描.png",
+          "sha256": "078a204a4250657316ed32f50045d1a80cbd553ef8f2c99dd2d2db14e83342f2"
+        },
+        {
+          "path": "04-计划与备菜/二维码接入说明.md",
+          "sha256": "dfbd31c6ef761e8cec430e1e1ab15d62e49f059ac7d19873fdd153d47e04e47f"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r3.md",
+          "sha256": "896efb8615f56c869db93e6060ef3a80f2bbdcbdd166f67472b5c35a6ac97137"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r4.md",
+          "sha256": "501bf26b7fad5ec64663fff19a9abd1a17c35ef85d03d15da0f33432966c5228"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/product-barcode-r5.md",
+          "sha256": "8cbdd0485823a099aacc75af6aab05190e2e7229232fc8f50de3be0aa9c66391"
+        }
+      ],
+      "approvedException": "2026-10-19 用户明确提出黑色往返扫描线、四字段采购、保存进冰箱与同物品数量叠加。",
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "background": "dark green",
+        "navigation": "fixed top back and centered title",
+        "scanner": "centered corner frame, scan line, one hint",
+        "footer": "flashlight, manual entry and photo library",
+        "batchNextButtonHeight": 48
+      },
+      "interactionContract": [
+        "Push with camera permission; stop capture offscreen/background.",
+        "Decode product EAN/UPC only; no receipt QR/OCR.",
+        "One item per selected barcode, anonymous optional fixed-provider name lookup with manual fallback.",
+        "Editable product name independent from ingredient ID; default count1, unknown price nil.",
+        "Only final purchase Save writes stock; drafts and existing receipts stay readable.",
+        "Request online product name and package net content; show product-not-found, network failure and rate-limit distinctly.",
+        "Editable purchase count starts at one package; explicit package mass/volume is separate and unknown paid price stays empty.",
+        "Retry only fills missing fields, preserves current edits and draft, and is scoped to account/household/language.",
+        "Domestic provider credentials stay server-side; initial verified bottle packaging suggests 1 bottle, retry preserves user units/count, and source price never becomes actual payment.",
+        "Ready-preview ROI conversion with a full-frame fallback; first entry needs no navigation reset.",
+        "Black scan line moves vertically and stops offscreen/background.",
+        "Barcode recognition immediately opens the editable draft; metadata resolves there.",
+        "用户2026-10-20明确变更以最新 product-barcode-r5.md 为准。"
+      ]
+    },
+    {
+      "id": "assistant-chat-r5",
+      "productPage": "ASSISTANT-CHAT",
+      "title": "聊天七天计划与真实餐次提醒",
+      "keywords": [
+        "智能体",
+        "聊天",
+        "全屏",
+        "SSE",
+        "DeepSeek",
+        "千问",
+        "过程",
+        "语音",
+        "按住说话",
+        "实时转写",
+        "渐现",
+        "菜谱详情",
+        "默认联网",
+        "计划提醒",
+        "库存",
+        "下一餐",
+        "首页光球"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r4.md",
+          "sha256": "101566bf411fbfdb826f9c9fcc9011c030ffdcab0760763389b21e1114f6e159"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r5.md",
+          "sha256": "e62c7d9b7625a6f73a78979dfb09dcf3674d5d3c2e6ab6d46b27797e99ef77fa"
+        }
+      ],
+      "layoutContract": {
+        "presentation": "fullScreen",
+        "horizontalInset": 16,
+        "composerMaxHeight": 132,
+        "navigation": "safe area fixed",
+        "list": "UITableView reuse",
+        "composer": "keyboard layout guide"
+      },
+      "interactionContract": [
+        "本地默认，可显式切换云端",
+        "发送同步显示扫光思考与即时问题理解",
+        "真实正文逐字显示，气泡宽度按内容适配",
+        "导航和关闭不取消，返回复用同一任务",
+        "短暂断网仅恢复已声明协议的同一任务，最多两次",
+        "明确停止或账号家庭语言切换取消并隔离",
+        "语音与发送各自独立；按住实时转写，松手可编辑，上滑取消",
+        "随显示刷新追加真实文字，仅新增字渐现，手动阅读不拉到底部",
+        "两个菜谱入口共享原文结构投影，不把原料和计算编号为步骤",
+        "联网偏好缺省开启，显式关闭持久保留且账号隔离",
+        "首页光球显示真实下一餐与库存，点击既有计划路由",
+        "真实提醒优先，范围切换清理，未知库存明确提示",
+        "单条计划先冻结幂等正文，保留原计划",
+        "用户2026-10-20明确变更以最新 assistant-chat-r5.md 为准。"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Assistant/QFAssistantChatUI.swift",
+        "constants": {
+          "chatHorizontalInset": 16,
+          "composerMaxHeight": 132
+        }
+      },
+      "supersedes": "assistant-chat-r4"
     }
   ]
 }

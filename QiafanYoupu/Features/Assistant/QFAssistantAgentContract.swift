@@ -12,6 +12,37 @@ struct QFAgentAction: Codable, Equatable, Sendable {
   let recipeID: String?
   let date: String?
   var meal: String? = nil
+  var proposalID: String? = nil
+}
+
+/// Recognizes an explicit week-planning request, never an instruction obtained
+/// from a retrieved page. The server remains authoritative for scope and recipes.
+enum QFAssistantWeeklyPlanIntent {
+  static func requiresAppendAndShopping(generationMode: String?, goal: String?) -> Bool {
+    generationMode == "LOCAL_RULES" || ["BALANCED", "BALANCED_FAT_LOSS"].contains(goal ?? "")
+  }
+  static func matches(_ text: String) -> Bool {
+    let value = text.lowercased()
+    let week = "一[个個]?星期|一[个個]?周|一週|一周|7[天日]|七[天日]|下[周週]|next week|(?:next|coming) (?:7|seven) days|week(?:ly)?"
+    let food = "饮食|飲食|食[谱譜]|餐|减肥|減肥|减脂|減脂|meal|diet|menu|献立|식단|питани|menú|repas|speise|refei"
+    let request = "制定|安排|规划|規劃|帮我|幫我|生成|做[一份个個]|create|make|plan|prepare|build|安排|作って|계획|состав|prépare|erstelle|planeje"
+    let refusal = "(?:不要|不需要|别|別).{0,6}(?:制定|安排|规划|規劃|生成|帮|幫)|取消|停止|已经|已經|查[看询詢]|是否|有没有|有沒有|don't (?:create|make|plan)|do not (?:create|make|plan)|cancel|stop|already|show my"
+    return [week, food, request].allSatisfy { value.range(of: $0, options: .regularExpression) != nil }
+      && value.range(of: refusal, options: .regularExpression) == nil
+  }
+
+  static func startDate(for text: String, now: Date = Date(), calendar: Calendar = .current) -> String {
+    let start = calendar.startOfDay(for: now)
+    let offset: Int
+    if text.range(of: "从今天|從今天|starting today|from today", options: [.regularExpression, .caseInsensitive]) != nil { offset = 0 }
+    else if text.range(of: "下[周週]|next week", options: [.regularExpression, .caseInsensitive]) != nil {
+      offset = (9 - calendar.component(.weekday, from: start)) % 7 == 0 ? 7 : (9 - calendar.component(.weekday, from: start)) % 7
+    } else { offset = 1 }
+    let date = calendar.date(byAdding: .day, value: offset, to: start) ?? start
+    let formatter = DateFormatter(); formatter.calendar = calendar; formatter.timeZone = calendar.timeZone
+    formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "yyyy-MM-dd"
+    return formatter.string(from: date)
+  }
 }
 
 struct QFAgentToolCall: Codable, Equatable, Sendable {

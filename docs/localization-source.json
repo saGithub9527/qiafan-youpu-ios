@@ -390,6 +390,12 @@
         ". Account data, drafts, and unsubmitted media are kept."
       ]
     },
+    "七天方案已保存到饮食计划，补购清单已按库存生成。已有餐次和完成记录已保留。": {
+      "english": "The seven-day proposal is saved and its shopping list has been generated from inventory. Existing meals and completed records are preserved.",
+      "englishVariants": [
+        "The seven-day proposal is saved and its shopping list has been generated from inventory. Existing meals and completed records are preserved."
+      ]
+    },
     "上一个月": {
       "english": "Previous month",
       "englishVariants": [
@@ -442,6 +448,12 @@
       "english": "Next month",
       "englishVariants": [
         "Next month"
+      ]
+    },
+    "下一步（%d 种食材）": {
+      "english": "Next (%d food items)",
+      "englishVariants": [
+        "Next (%d food items)"
       ]
     },
     "下一页": {
@@ -679,12 +691,6 @@
         "Only reviewed content in the selected language is shown"
       ]
     },
-    "仅推荐至少使用一种现有食材的菜谱": {
-      "english": "Each recipe must use at least one ingredient in stock.",
-      "englishVariants": [
-        "Each recipe must use at least one ingredient in stock."
-      ]
-    },
     "仅显示部分记录，请打开来源查看完整内容。": {
       "english": "Only part of the records is shown. Open the source for the full content.",
       "englishVariants": [
@@ -782,6 +788,18 @@
         "Prioritize current inventory"
       ]
     },
+    "优先利用已有食材，也允许为合理搭配补购": {
+      "english": "Prefer ingredients in stock and allow purchases for a suitable menu.",
+      "englishVariants": [
+        "Prefer ingredients in stock and allow purchases for a suitable menu."
+      ]
+    },
+    "优先利用库存，缺少的食材可补购。默认每餐 1 份；这是一般饮食安排，不含个人热量处方。确认后将保留已有餐次，并生成扣除库存后的补购清单。": {
+      "english": "Existing stock is preferred and missing ingredients can be purchased. Meals default to one serving. This is a general menu, without a personal calorie prescription. Confirmation preserves existing meals and creates a shopping list after subtracting stock.",
+      "englishVariants": [
+        "Existing stock is preferred and missing ingredients can be purchased. Meals default to one serving. This is a general menu, without a personal calorie prescription. Confirmation preserves existing meals and creates a shopping list after subtracting stock."
+      ]
+    },
     "优惠": {
       "english": "Discount",
       "englishVariants": [
@@ -866,6 +884,12 @@
         "Your complaints and appeals will appear here."
       ]
     },
+    "你的用餐计划即将开始，打开查看备菜和库存。": {
+      "english": "Your planned meal starts soon. Open the app to check preparation and stock.",
+      "englishVariants": [
+        "Your planned meal starts soon. Open the app to check preparation and stock."
+      ]
+    },
     "你的订阅状态已记录；具体权益将在方案确定后公布。": {
       "english": "Your subscription is recorded. Benefits will be published when the plans are finalized.",
       "englishVariants": [
@@ -948,6 +972,12 @@
       "english": "Save",
       "englishVariants": [
         "Save"
+      ]
+    },
+    "保存七天计划与补购清单": {
+      "english": "Save seven-day plan and shopping list",
+      "englishVariants": [
+        "Save seven-day plan and shopping list"
       ]
     },
     "保存中": {
@@ -1830,6 +1860,12 @@
         "Danger zone"
       ]
     },
+    "即将准备：%@。打开查看备菜和库存。": {
+      "english": "Prepare soon: %@. Open the app to check preparation and stock.",
+      "englishVariants": [
+        "Prepare soon: %@. Open the app to check preparation and stock."
+      ]
+    },
     "历史库存依据待确认": {
       "english": "Historical inventory needs verification",
       "englishVariants": [
@@ -2036,10 +2072,10 @@
         "Only dishes for the selected date can be saved. Go back and reopen that day's records."
       ]
     },
-    "可以将这件商品加入当前草稿，或先编辑原草稿。": {
-      "english": "Add this item to the current draft, or edit the existing draft first.",
+    "可以继续扫描其他商品，最后一起核对数量和实付价格。": {
+      "english": "Keep scanning other packages, then review quantities and actual prices together.",
       "englishVariants": [
-        "Add this item to the current draft, or edit the existing draft first."
+        "Keep scanning other packages, then review quantities and actual prices together."
       ]
     },
     "可用": {
@@ -2124,6 +2160,12 @@
       "english": "Tell AI what to add. A cloud-processing notice is shown before sending.",
       "englishVariants": [
         "Tell AI what to add. A cloud-processing notice is shown before sending."
+      ]
+    },
+    "周计划生成任务已提交，会同时考虑现有食材和合理补购。打开方案查看进度，核对后一次加入未来七天的计划。": {
+      "english": "Your weekly proposal is being prepared using available stock and reasonable purchases. Open it to follow progress, then review and add the seven days together.",
+      "englishVariants": [
+        "Your weekly proposal is being prepared using available stock and reasonable purchases. Open it to follow progress, then review and add the seven days together."
       ]
     },
     "周计划详情": {
@@ -2633,10 +2675,10 @@
         "In stock"
       ]
     },
-    "对准食材包装上的条形码\n联网查询名称和净含量，照片不会上传": {
-      "english": "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device",
+    "对准食材包装上的条形码\n可连续添加，最后统一核对入库": {
+      "english": "Point at the barcode on the food package\nAdd multiple items, then review them together",
       "englishVariants": [
-        "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device"
+        "Point at the barcode on the food package\nAdd multiple items, then review them together"
       ]
     },
     "将这份周计划加入日历？": {
@@ -2896,6 +2938,24 @@
       "english": "Purchase draft exists",
       "englishVariants": [
         "Purchase draft exists"
+      ]
+    },
+    "已根据库存和可补购食材整理未来七天的三餐方案，默认每餐 1 份。打开方案可逐餐核对；确认后会加入计划，并按实际库存生成补购清单。": {
+      "english": "A seven-day, three-meal proposal is ready, using inventory plus ingredients you can buy. Each meal defaults to one serving. Review it, then confirm to add meals and create a shopping list based on actual stock.",
+      "englishVariants": [
+        "A seven-day, three-meal proposal is ready, using inventory plus ingredients you can buy. Each meal defaults to one serving. Review it, then confirm to add meals and create a shopping list based on actual stock."
+      ]
+    },
+    "已添加 %d 种食材": {
+      "english": "%d food items added",
+      "englishVariants": [
+        "%d food items added"
+      ]
+    },
+    "已添加 %d 种食材，继续扫描下一件": {
+      "english": "%d food items added. Scan the next package",
+      "englishVariants": [
+        "%d food items added. Scan the next package"
       ]
     },
     "已添加 %d 项，已存在 %d 项": {
@@ -4238,6 +4298,12 @@
         "Quantity"
       ]
     },
+    "数量不明确的食材请在食材页核对。": {
+      "english": "Review ingredients with uncertain quantities on the Ingredients page.",
+      "englishVariants": [
+        "Review ingredients with uncertain quantities on the Ingredients page."
+      ]
+    },
     "数量待确认": {
       "english": "Quantity to confirm",
       "englishVariants": [
@@ -4901,6 +4967,12 @@
         "Local generation timed out. Try again later or shorten the question."
       ]
     },
+    "本批扫描已保留，可以加入当前草稿或先处理原草稿。": {
+      "english": "This scan batch is saved. Add it to the current draft, or resolve the existing draft first.",
+      "englishVariants": [
+        "This scan batch is saved. Add it to the current draft, or resolve the existing draft first."
+      ]
+    },
     "本月": {
       "english": "This month",
       "englishVariants": [
@@ -5159,6 +5231,12 @@
         "A correction may be negative"
       ]
     },
+    "核对七天方案与补购清单": {
+      "english": "Review seven-day plan and shopping list",
+      "englishVariants": [
+        "Review seven-day plan and shopping list"
+      ]
+    },
     "核对后打开作品编辑器": {
       "english": "Review and open post editor",
       "englishVariants": [
@@ -5175,6 +5253,12 @@
       "english": "Confirm actual quantities",
       "englishVariants": [
         "Confirm actual quantities"
+      ]
+    },
+    "核对并入库": {
+      "english": "Review and save to fridge",
+      "englishVariants": [
+        "Review and save to fridge"
       ]
     },
     "核对并添加食材": {
@@ -5289,6 +5373,12 @@
       "english": "Answering",
       "englishVariants": [
         "Answering"
+      ]
+    },
+    "正在安排七天饮食": {
+      "english": "Preparing seven days of meals",
+      "englishVariants": [
+        "Preparing seven days of meals"
       ]
     },
     "正在思考": {
@@ -5645,6 +5735,12 @@
         "No inventory ingredients were recognized. Try a clearer photo."
       ]
     },
+    "没有需要补购的食材": {
+      "english": "No additional ingredients to buy",
+      "englishVariants": [
+        "No additional ingredients to buy"
+      ]
+    },
     "注销后会发生什么": {
       "english": "What happens after deletion",
       "englishVariants": [
@@ -5954,6 +6050,12 @@
         "Servings"
       ]
     },
+    "用餐计划提醒": {
+      "english": "Meal plan reminder",
+      "englishVariants": [
+        "Meal plan reminder"
+      ]
+    },
     "申请撤回": {
       "english": "Request withdrawal",
       "englishVariants": [
@@ -6178,6 +6280,12 @@
       "english": "Confirm cooking completion",
       "englishVariants": [
         "Confirm cooking completion"
+      ]
+    },
+    "确认当前日期、餐次和份数后，一次加入计划并生成补购清单。不会替换已有餐次；库存不足部分列入补购，不会自动下单。": {
+      "english": "Confirm the dates, meals and servings to save the plan and generate its shopping list. Existing meals are preserved. Missing stock is listed for purchase; no order is placed.",
+      "englishVariants": [
+        "Confirm the dates, meals and servings to save the plan and generate its shopping list. Existing meals are preserved. Missing stock is listed for purchase; no order is placed."
       ]
     },
     "确认所选购买日期": {
@@ -6460,6 +6568,12 @@
       "english": "Continue scanning",
       "englishVariants": [
         "Continue scanning"
+      ]
+    },
+    "继续添加": {
+      "english": "Add more",
+      "englishVariants": [
+        "Add more"
       ]
     },
     "继续编辑": {
@@ -6831,6 +6945,12 @@
         "Add dish"
       ]
     },
+    "补购清单": {
+      "english": "Shopping list",
+      "englishVariants": [
+        "Shopping list"
+      ]
+    },
     "袋": {
       "english": "Bag",
       "englishVariants": [
@@ -7191,6 +7311,12 @@
         "Finish the current draft before retrying this question."
       ]
     },
+    "请先处理采购草稿，再添加本批食材。": {
+      "english": "Resolve the purchase draft before adding this batch.",
+      "englishVariants": [
+        "Resolve the purchase draft before adding this batch."
+      ]
+    },
     "请先完成当前编辑": {
       "english": "Finish the current edit first",
       "englishVariants": [
@@ -7381,6 +7507,12 @@
       "english": "Complete the record",
       "englishVariants": [
         "Complete the record"
+      ]
+    },
+    "请开启联网后再生成周计划，需要读取你的实际库存、已发布菜谱和现有餐次。": {
+      "english": "Enable network access to build a weekly plan from your actual inventory, published recipes and existing meals.",
+      "englishVariants": [
+        "Enable network access to build a weekly plan from your actual inventory, published recipes and existing meals."
       ]
     },
     "请拍清包装条形码，或手动填写商品信息。不会再从小票文字猜测数量和价格。": {
@@ -8043,6 +8175,12 @@
       "english": "This barcode is already in the draft. Edit the existing item's quantity.",
       "englishVariants": [
         "This barcode is already in the draft. Edit the existing item's quantity."
+      ]
+    },
+    "这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。": {
+      "english": "This request includes constraints that need explicit review. Confirm servings, budget and excluded ingredients in weekly plan settings before generating. No meal plan was saved.",
+      "englishVariants": [
+        "This request includes constraints that need explicit review. Confirm servings, budget and excluded ingredients in weekly plan settings before generating. No meal plan was saved."
       ]
     },
     "这会删除个人记录并退出所有设备，操作无法撤销。": {

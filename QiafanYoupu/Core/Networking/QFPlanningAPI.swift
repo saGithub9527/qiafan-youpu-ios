@@ -473,6 +473,9 @@ struct QFWeeklyPlanProposalDraft: Encodable {
   let mustUseInventory: Bool
   let preference: String
   let idempotencyKey: String
+  var generationMode: String? = nil
+  var allowCloud: Bool? = nil
+  var goal: String? = nil
 }
 
 struct QFWeeklyPlanProposalItem: Decodable, Equatable {
@@ -498,6 +501,16 @@ struct QFWeeklyPlanProposal: Decodable, Equatable {
   let createdAt: String
   let updatedAt: String
   let acceptedAt: String?
+  var generationMode: String? = nil
+  var goal: String? = nil
+  var shoppingListId: String? = nil
+  var acceptedMode: String? = nil
+}
+
+private struct QFWeeklyPlanAcceptDraft: Encodable {
+  let expectedRevision: Int
+  let mode: String
+  let createShoppingList: Bool
 }
 
 struct QFAssistantPreviewRequest: Encodable {
@@ -961,11 +974,11 @@ extension QFAppSession {
   }
 
   func acceptWeeklyPlanProposal(
-    _ id: String, expectedRevision: Int
+    _ id: String, expectedRevision: Int, mode: String = "REPLACE", createShoppingList: Bool = false
   ) async throws -> QFWeeklyPlanProposal {
     try await contentRequest(
       path: "me/weekly-plan-proposals/\(id)/accept", method: "POST",
-      body: try planningBody(QFRevisionDraft(expectedRevision: expectedRevision)))
+      body: try planningBody(QFWeeklyPlanAcceptDraft(expectedRevision: expectedRevision, mode: mode, createShoppingList: createShoppingList)))
   }
 
   func cancelWeeklyPlanProposal(_ id: String, expectedRevision: Int) async throws {

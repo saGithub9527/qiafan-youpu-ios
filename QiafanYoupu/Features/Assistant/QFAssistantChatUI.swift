@@ -96,6 +96,7 @@ enum QFAssistantMessageLinks {
     switch action.type {
     case "NAVIGATE_RECIPES", "NAVIGATE_PLAN", "NAVIGATE_INVENTORY", "NAVIGATE_MODEL_SETTINGS", "NAVIGATE_MEMORY": return true
     case "OPEN_RECIPE": return action.recipeID.flatMap(UUID.init(uuidString:)) != nil
+    case "WEEKLY_PLAN_PROPOSAL": return action.proposalID.flatMap(UUID.init(uuidString:)) != nil
     case "PLAN_DRAFT":
       return action.recipeID.flatMap(UUID.init(uuidString:)) != nil
         && action.date.map(QFAgentPlan.validDate) == true
@@ -117,7 +118,7 @@ enum QFAssistantMessageLinks {
       append(source.title, target: .source(index), kind: "source", index: index, identity: "source:" + source.id)
     }
     for (index, action) in actions.enumerated() where actionIsNavigable(action) && actionTitles.indices.contains(index) {
-      let identity = [action.type, action.recipeID ?? "", action.date ?? "", action.meal ?? ""].joined(separator: "|")
+      let identity = [action.type, action.recipeID ?? "", action.date ?? "", action.meal ?? "", action.proposalID ?? ""].joined(separator: "|")
       append(actionTitles[index], target: .action(index), kind: "action", index: index, identity: "action:" + identity)
     }
     // A repeated title with different destinations is ambiguous: keep its source
@@ -244,6 +245,7 @@ struct QFAssistantProcessStep: Codable {
     case "planner": return app.text("工具选择", "Tool selection")
     case "tool:recipe.search", "tool:recipe.detail": return app.text("菜谱查询", "Recipe lookup")
     case "tool:plan.read": return app.text("饮食计划查询", "Meal plan lookup")
+    case "tool:plan.weekly": return app.text("正在安排七天饮食", "Preparing seven days of meals")
     case "tool:inventory.read": return app.text("库存查询", "Stock lookup")
     case "answer", "generating": return app.text("正在生成回答", "Generating answer")
     default: return app.text("准备上下文", "Context preparation")
