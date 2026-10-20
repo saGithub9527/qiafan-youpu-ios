@@ -25,6 +25,17 @@ import Foundation
   expect(QFAssistantWeeklyPlanIntent.startDate(for: "从今天", now: now, calendar: calendar) == "2026-10-20")
   let monday = ISO8601DateFormatter().date(from: "2026-10-26T02:30:00Z")!
   expect(QFAssistantWeeklyPlanIntent.startDate(for: "next week", now: monday, calendar: calendar) == "2026-11-02")
+  // Cloud chat is consent to fetch business records, not consent to enqueue a
+  // paid weekly-generation job. The verified synchronous planner is shared.
+  for (cloud, network, permitted) in [(false, false, false), (false, true, true),
+                                    (true, false, true), (true, true, true)] {
+   let policy = QFAssistantWeeklyPlanIntent.chatRequestPolicy(cloud: cloud, networkEnabled: network)
+   expect((policy != nil) == permitted)
+   if let policy {
+    expect(policy.generationMode == "LOCAL_RULES")
+    expect(policy.allowCloud == false)
+   }
+  }
   let old = try JSONDecoder().decode(QFAgentAction.self, from: Data(#"{"type":"NAVIGATE_PLAN","recipeID":null,"date":null}"#.utf8))
   expect(old.proposalID == nil)
   expect(QFAssistantWeeklyPlanIntent.requiresAppendAndShopping(generationMode: "CLOUD", goal: "BALANCED"))

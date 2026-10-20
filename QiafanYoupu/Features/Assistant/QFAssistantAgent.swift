@@ -21,7 +21,8 @@ enum QFAssistantAgent {
     if text.utf16.count > 500 || text.range(of: "过敏|過敏|不吃|不能吃|不要吃|素食|预算|預算|[2-9二三四五六七八九两兩]+[人份]|allerg|vegan|vegetarian|budget|for [2-9]", options: [.regularExpression, .caseInsensitive]) != nil {
       return .init(answer: app.text("这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。", "This request includes constraints that need explicit review. Confirm servings, budget and excluded ingredients in weekly plan settings before generating. No meal plan was saved."), sources: [], actions: [.init(type: "NAVIGATE_PLAN", recipeID: nil, date: nil)], notice: "", nativeInferenceUsed: false)
     }
-    guard cloud || QFLocalModelViewController.networkEnabled(app) else {
+    guard let policy = QFAssistantWeeklyPlanIntent.chatRequestPolicy(
+      cloud: cloud, networkEnabled: QFLocalModelViewController.networkEnabled(app)) else {
       return .init(answer: app.text("请开启联网后再生成周计划，需要读取你的实际库存、已发布菜谱和现有餐次。", "Enable network access to build a weekly plan from your actual inventory, published recipes and existing meals."),
         sources: [], actions: [.init(type: "NAVIGATE_MODEL_SETTINGS", recipeID: nil, date: nil)], notice: "", nativeInferenceUsed: false)
     }
@@ -31,7 +32,7 @@ enum QFAssistantAgent {
       householdId: binding.household, meals: ["BREAKFAST", "LUNCH", "DINNER"], servings: 1,
       budget: nil, currency: nil, maxMinutesPerDay: nil, excludedIngredientIds: [],
       mustUseInventory: true, preference: text, idempotencyKey: requestID.uuidString.lowercased())
-    draft.generationMode = cloud ? "CLOUD" : "LOCAL_RULES"; draft.allowCloud = cloud; draft.goal = "BALANCED"
+    draft.generationMode = policy.generationMode; draft.allowCloud = policy.allowCloud; draft.goal = "BALANCED"
     if text.range(of: "减肥|減肥|减脂|減脂|weight.?loss|fat.?loss", options: [.regularExpression, .caseInsensitive]) != nil { draft.goal = "BALANCED_FAT_LOSS" }
     let proposal = try await app.createWeeklyPlanProposal(draft)
     try Task.checkCancellation()

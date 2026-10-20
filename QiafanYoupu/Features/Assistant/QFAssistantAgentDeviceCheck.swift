@@ -31,6 +31,37 @@ private final class QFAssistantStreamProbe: @unchecked Sendable {
 enum QFAssistantAgentDeviceCheck {
   private static var started = false
   private static var task: Task<Void, Never>?
+  /// Read only the current conversation's bounded failure metadata. Never use
+  /// ConversationStore.load(), export prose/media/auth, or trigger an answer.
+  static func collectRecentFailureMetadataIfRequested(app: QFAppSession) {
+    let args = ProcessInfo.processInfo.arguments
+    guard args.contains("-QFReadRecentAssistantFailures"),
+      let index = args.firstIndex(of: "-QFCheckRun"), args.indices.contains(index + 1),
+      let id = UUID(uuidString: args[index + 1]) else { return }
+    let key = "qf.assistant.conversation.v2." + QFAssistantAgent.scope(app).cacheKey
+    let data = UserDefaults.standard.data(forKey: key)
+    let messages = data.flatMap { try? JSONDecoder().decode([QFAssistantLocalMessage].self, from: $0) } ?? []
+    let apiCodes = [40000, 40100, 40300, 40301, 40400, 40900, 42203, 42900, 50000, 50300]
+    let stages = Set(["preparing", "knowledge", "planner", "answer", "generating", "tool:plan.weekly",
+      "tool:knowledge.search", "tool:web.search", "tool:recipe.search", "tool:recipe.detail",
+      "tool:inventory.read", "tool:plan.read"])
+    let entries: [[String: Any]] = messages.filter { $0.role == "assistant" }.suffix(6).map { message in
+      let code = apiCodes.first { QFProfileContentController.errorText(QFAPIError(code: $0, message: ""), app: app) == message.notice }
+      return ["createdAt": ISO8601DateFormatter().string(from: message.createdAt),
+        "state": ["streaming", "stopped", "failed", "complete"].contains(message.state ?? "") ? message.state! : "other",
+        "noticePresent": !(message.notice ?? "").isEmpty,
+        "mappedAPIError": code as Any? ?? NSNull(), "answerPresent": !message.text.isEmpty,
+        "stages": (message.process ?? []).map { stages.contains($0.stage) ? $0.stage : "other" }]
+    }
+    let result: [String: Any] = ["runID": id.uuidString.lowercased(), "status": "READ_ONLY_METADATA",
+      "signedIn": app.user != nil, "conversationFound": data != nil, "recentAssistantMessages": entries,
+      "modelCalls": 0, "businessWrites": 0, "conversationWrites": 0]
+    let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("assistant-failures-" + id.uuidString.lowercased() + ".json")
+    if let encoded = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) {
+      try? encoded.write(to: url, options: .atomic)
+    }
+  }
   static func startIfRequested(app: QFAppSession) {
     let arguments = ProcessInfo.processInfo.arguments
     if !started, arguments.contains("-QFVerifyNativeCPUFeatures") {

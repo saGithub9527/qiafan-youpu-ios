@@ -18,6 +18,16 @@ struct QFAgentAction: Codable, Equatable, Sendable {
 /// Recognizes an explicit week-planning request, never an instruction obtained
 /// from a retrieved page. The server remains authoritative for scope and recipes.
 enum QFAssistantWeeklyPlanIntent {
+  struct ChatRequestPolicy {
+    let generationMode: String
+    let allowCloud: Bool
+  }
+  static func chatRequestPolicy(cloud: Bool, networkEnabled: Bool) -> ChatRequestPolicy? {
+    guard cloud || networkEnabled else { return nil }
+    // Chat mode only controls the existing network-consent gate. Weekly meals
+    // use the synchronous business planner; ordinary model chat is unchanged.
+    return .init(generationMode: "LOCAL_RULES", allowCloud: false)
+  }
   static func requiresAppendAndShopping(generationMode: String?, goal: String?) -> Bool {
     generationMode == "LOCAL_RULES" || ["BALANCED", "BALANCED_FAT_LOSS"].contains(goal ?? "")
   }
