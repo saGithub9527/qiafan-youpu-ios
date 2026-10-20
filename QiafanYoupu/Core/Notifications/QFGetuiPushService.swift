@@ -203,17 +203,24 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate, @pre
     let settings = await center.notificationSettings()
     let pending = await center.pendingNotificationRequests()
     let registration = storedRegistration()
-    return ["authorization": settings.authorizationStatus.rawValue,
+    let currentDevice = registration.flatMap { registration in
+      registration.isActive && registration.environment == app.api.environment.name
+        && registration.userID == app.user?.userId ? registration : nil
+    }
+    var result: [String: Any] = ["authorization": settings.authorizationStatus.rawValue,
       "lockScreenSetting": settings.lockScreenSetting.rawValue,
       "alertSetting": settings.alertSetting.rawValue,
       "deliveryOwner": QFGetuiConfiguration.load() == nil ? "LOCAL" : "GETUI",
       "masterEnabled": app.userSettings?.planReminders as Any? ?? NSNull(),
       "locallyDisabled": isLocallyDisabled(scope: app.contentScope),
       "sdkStarted": sdkStarted,
-      "currentDeviceRegistered": registration.map {
-        $0.isActive && $0.environment == app.api.environment.name && $0.userID == app.user?.userId
-      } ?? false,
+      "currentDeviceRegistered": currentDevice != nil,
       "pendingLocalMealCount": pending.filter { $0.identifier.hasPrefix("qfyp.meal.local.v1.") }.count]
+    if let currentDevice {
+      result["registeredDeviceSHA256"] = SHA256.hash(data: Data(currentDevice.deviceID.utf8))
+        .map { String(format: "%02x", $0) }.joined()
+    }
+    return result
   }
   #endif
 
