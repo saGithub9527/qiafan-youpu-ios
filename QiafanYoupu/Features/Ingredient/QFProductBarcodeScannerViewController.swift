@@ -111,12 +111,25 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   private let scanLine = UIView()
   private var previewObservation: NSKeyValueObservation?
   private let message = UILabel()
+  private var batch = QFBarcodeScanBatch()
+  private var nextButton: UIButton!
+  var collectionID = "new"
+  private var collectionKey: String { "barcode-collection." + (householdID ?? "personal") + "." + collectionID }
   private var active = false, handlingResult = false
   private var selectedBarcode: QFProductBarcode?
   private var operation = UUID()
   private var observers: [NSObjectProtocol] = []
   var onChanged: (() -> Void)?
-  var onScannedProduct: ((QFPurchaseReceiptLine) -> Void)?
+  var onScannedProducts: (([QFPurchaseReceiptLine]) -> Bool)?
+  #if DEBUG
+  var debugWithoutCamera = false
+  var debugBatchState: (count: Int, ready: Bool, hasNext: Bool) {
+    (batch.items.count, active && !handlingResult && presentedViewController == nil, nextButton?.isHidden == false)
+  }
+  func debugCollect(_ barcode: QFProductBarcode) { decoded([barcode]) }
+  func debugContinueCollecting() { resumeScanning() }
+  func debugReviewCollection() { afterPrompt { [weak self] in self?.reviewBatch() } }
+  #endif
   override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
   init(app: QFAppSession, householdID: String?) {
     self.app = app; self.householdID = householdID; binding = QFAssistantAgent.scope(app)
@@ -127,6 +140,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   private var sameScope: Bool { QFAssistantAgent.scope(app) == binding && app.planningHouseholdID == householdID }
   override func viewDidLoad() {
     super.viewDidLoad(); view.backgroundColor = UIColor(red: 0.06, green: 0.10, blue: 0.08, alpha: 1)
+    if let saved = QFContentDraftStore.load(QFBarcodeScanBatch.self, app: app, kind: collectionKey), saved.items.count <= 40 { batch = saved }
     view.accessibilityIdentifier = "product.barcode-scanner"
     let back = QFTabUI.iconButton("chevron.left", label: app.text("返回", "Back"), size: 24) { [weak self] in self?.qfClose() }; back.tintColor = .white
     let title = QFTabUI.label(app.text("扫描商品条码", "Scan product barcode"), size: 22, weight: .semibold, color: .white)
@@ -134,8 +148,12 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
     let header = UIView(); view.addSubview(header); header.snp.makeConstraints { $0.top.leading.trailing.equalTo(view.safeAreaLayoutGuide); $0.height.equalTo(56) }
     header.addSubview(back); back.snp.makeConstraints { $0.leading.equalToSuperview().offset(16); $0.centerY.equalToSuperview(); $0.size.equalTo(44) }
     header.addSubview(title); title.snp.makeConstraints { $0.center.equalToSuperview(); $0.leading.greaterThanOrEqualTo(back.snp.trailing).offset(8); $0.trailing.lessThanOrEqualToSuperview().inset(16) }
+    nextButton = QFTabUI.button("", color: .white, background: QFUI.primary) { [weak self] in self?.reviewBatch() }
+    nextButton.accessibilityIdentifier = "product.batch.next"
+    view.addSubview(nextButton)
+    nextButton.snp.makeConstraints { $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20); $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(12); $0.height.equalTo(batch.items.isEmpty ? 0 : 48) }
     view.addSubview(canvas); canvas.backgroundColor = UIColor(white: 0.10, alpha: 1)
-    canvas.snp.makeConstraints { $0.top.equalTo(header.snp.bottom); $0.leading.trailing.equalToSuperview(); $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-36) }
+    canvas.snp.makeConstraints { $0.top.equalTo(header.snp.bottom); $0.leading.trailing.equalToSuperview(); $0.bottom.equalTo(nextButton.snp.top).offset(-12) }
     preview = AVCaptureVideoPreviewLayer(session: camera.session); preview.videoGravity = .resizeAspectFill; canvas.layer.addSublayer(preview)
     previewObservation = preview.observe(\.isPreviewing, options: [.new]) { [weak self] _, _ in
       DispatchQueue.main.async { self?.updateCaptureRegion() }
@@ -167,6 +185,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
       observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in self?.cancelWork(); self?.camera.stop(); self?.updateScanAnimation() } })
     }
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in self?.startCamera() } })
+    updateBatchFooter()
   }
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews(); preview.frame = canvas.bounds
@@ -195,7 +214,17 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
     scanLine.layer.add(sweep, forKey: "barcode.scan")
   }
   private func cancelWork() { operation = UUID(); handlingResult = false }
-  private func resetHint() { message.text = app.text("对准食材包装上的条形码\n联网查询名称和净含量，照片不会上传", "Point at the barcode on the food package\nLook up its name and net contents online; photos stay on your device") }
+  private func resetHint() {
+    message.text = batch.items.isEmpty
+      ? app.text("对准食材包装上的条形码\n可连续添加，最后统一核对入库", "Point at the barcode on the food package\nAdd multiple items, then review them together")
+      : app.format("已添加 %d 种食材，继续扫描下一件", "%d food items added. Scan the next package", batch.items.count)
+  }
+  private func updateBatchFooter() {
+    nextButton?.setTitle(app.format("下一步（%d 种食材）", "Next (%d food items)", batch.items.count), for: .normal)
+    nextButton?.isHidden = batch.items.isEmpty
+    nextButton?.snp.updateConstraints { $0.height.equalTo(batch.items.isEmpty ? 0 : 48) }
+    resetHint()
+  }
   private func control(_ symbol: String, title: String, action: @escaping () -> Void) -> UIView {
     let button = UIButton(type: .system)
     button.setImage(UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 26)), for: .normal)
@@ -205,11 +234,25 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
     let stack = QFTabUI.stack([button, QFTabUI.label(title, size: 15, color: .white, lines: 0)], spacing: 12); stack.alignment = .center; return stack
   }
   private func startCamera() {
+    #if DEBUG
+    if debugWithoutCamera { return }
+    #endif
     guard active, sameScope, !handlingResult, presentedViewController == nil, UIApplication.shared.applicationState == .active else { return }
     switch AVCaptureDevice.authorizationStatus(for: .video) {
     case .authorized: updateCaptureRegion(); camera.start(); updateScanAnimation()
     case .notDetermined: AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in DispatchQueue.main.async { if granted { self?.startCamera() } else { self?.showCameraUnavailable() } } }
     default: showCameraUnavailable()
+    }
+  }
+  private func afterPrompt(_ action: @escaping () -> Void) {
+    // UIAlertAction handlers run during dismissal. Starting the camera or
+    // presenting a second review sheet before it finishes can strand the page.
+    if let prompt = presentedViewController as? UIAlertController { prompt.dismiss(animated: true, completion: action) }
+    else { action() }
+  }
+  private func resumeScanning() {
+    afterPrompt { [weak self] in
+      self?.handlingResult = false; self?.selectedBarcode = nil; self?.startCamera()
     }
   }
   private func showCameraUnavailable() { message.text = app.text("无法使用相机，可从相册选择条码或手动填写。", "Camera unavailable. Choose a barcode photo or enter it manually.") }
@@ -242,19 +285,21 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
     guard active, sameScope, operation == token else { return }
     handlingResult = true
     let alert = UIAlertController(title: app.text("未识别到商品条码", "No product barcode found"), message: app.text("请拍清包装条形码，或手动填写商品信息。不会再从小票文字猜测数量和价格。", "Use a clear photo of the package barcode, or enter the item manually. Receipt text is not used to guess quantities or prices."), preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: app.text("手动填写", "Enter manually"), style: .default) { [weak self] _ in self?.manualEntry() })
-    alert.addAction(UIAlertAction(title: app.text("继续扫描", "Continue scanning"), style: .cancel) { [weak self] _ in self?.handlingResult = false; self?.startCamera() })
+    alert.addAction(UIAlertAction(title: app.text("手动填写", "Enter manually"), style: .default) { [weak self] _ in self?.afterPrompt { [weak self] in self?.manualEntry() } })
+    alert.addAction(UIAlertAction(title: app.text("继续扫描", "Continue scanning"), style: .cancel) { [weak self] _ in self?.resumeScanning() })
     present(alert, animated: true)
   }
   private func decoded(_ values: [QFProductBarcode]) {
     guard active, sameScope, !handlingResult, !values.isEmpty else { return }
+    let fresh = values.filter { code in !batch.items.contains(where: { $0.scanBarcode == code.value }) }
+    guard !fresh.isEmpty else { resetHint(); if !camera.session.isRunning { startCamera() }; return }
     handlingResult = true; camera.stop()
     updateScanAnimation()
-    let distinct = Array(Dictionary(grouping: values, by: \.value).values.compactMap(\.first)).sorted { $0.value < $1.value }
+    let distinct = Array(Dictionary(grouping: fresh, by: \.value).values.compactMap(\.first)).sorted { $0.value < $1.value }
     guard distinct.count > 1 else { resolve(distinct[0]); return }
     let alert = UIAlertController(title: app.text("选择要添加的商品条码", "Choose the product barcode to add"), message: nil, preferredStyle: .actionSheet)
-    for barcode in distinct.prefix(10) { alert.addAction(UIAlertAction(title: barcode.value, style: .default) { [weak self] _ in self?.resolve(barcode) }) }
-    alert.addAction(UIAlertAction(title: app.text("继续扫描", "Continue scanning"), style: .cancel) { [weak self] _ in self?.handlingResult = false; self?.startCamera() })
+    for barcode in distinct.prefix(10) { alert.addAction(UIAlertAction(title: barcode.value, style: .default) { [weak self] _ in self?.afterPrompt { [weak self] in self?.resolve(barcode) } }) }
+    alert.addAction(UIAlertAction(title: app.text("继续扫描", "Continue scanning"), style: .cancel) { [weak self] _ in self?.resumeScanning() })
     alert.popoverPresentationController?.sourceView = target; alert.popoverPresentationController?.sourceRect = target.bounds
     present(alert, animated: true)
   }
@@ -268,6 +313,7 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   }
   private func manualEntry() {
     guard sameScope else { return }
+    if !batch.items.isEmpty { reviewBatch(); return }
     let barcode = selectedBarcode; cancelWork(); camera.stop(); handlingResult = true
     if let barcode { openProduct(.scannedProduct(barcode: barcode)); return }
     let editor = QFPurchaseReceiptViewController(app: app, householdID: householdID)
@@ -275,26 +321,73 @@ final class QFProductBarcodeScannerViewController: UIViewController, PHPickerVie
   }
   private func openProduct(_ line: QFPurchaseReceiptLine) {
     guard active, sameScope else { return }
-    if let onScannedProduct { onScannedProduct(line); qfClose(); return }
+    let original = batch
+    switch batch.append(line) {
+    case .duplicate: handlingResult = false; startCamera(); return
+    case .full:
+      reviewBatch(); return
+    case .locked: return
+    case .added: break
+    }
+    guard QFContentDraftStore.save(batch, app: app, kind: collectionKey) else {
+      batch = original
+      QFOperationHUD.toast(app.text("无法保存草稿，请重试", "Unable to save draft. Try again."), in: view)
+      handlingResult = false; startCamera(); return
+    }
+    updateBatchFooter()
+    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    let alert = UIAlertController(
+      title: app.format("已添加 %d 种食材", "%d food items added", batch.items.count),
+      message: app.text("可以继续扫描其他商品，最后一起核对数量和实付价格。", "Keep scanning other packages, then review quantities and actual prices together."), preferredStyle: .alert)
+    let more = UIAlertAction(title: app.text("继续添加", "Add more"), style: .default) { [weak self] _ in
+      self?.resumeScanning()
+    }
+    more.isEnabled = batch.items.count < 40
+    alert.addAction(more)
+    alert.addAction(UIAlertAction(title: app.text("核对并入库", "Review and save to fridge"), style: .default) { [weak self] _ in self?.afterPrompt { [weak self] in self?.reviewBatch() } })
+    alert.preferredAction = more.isEnabled ? more : alert.actions.last
+    present(alert, animated: true)
+  }
+  private func reviewBatch() {
+    guard active, sameScope, !batch.items.isEmpty else { return }
+    camera.stop(); handlingResult = true; updateScanAnimation()
+    if let onScannedProducts {
+      guard onScannedProducts(batch.items) else {
+        QFOperationHUD.toast(app.text("请先处理采购草稿，再添加本批食材。", "Resolve the purchase draft before adding this batch."), in: view)
+        handlingResult = false; startCamera(); return
+      }
+      consumeCollection(); qfClose(); return
+    }
     let key = "receipt." + (householdID ?? "personal") + ".new"
     if let existing = QFContentDraftStore.load(QFPurchaseReceiptDraft.self, app: app, kind: key), !existing.items.isEmpty || existing.pending != nil {
-      let alert = UIAlertController(title: app.text("已有采购草稿", "Purchase draft exists"), message: app.text("可以将这件商品加入当前草稿，或先编辑原草稿。", "Add this item to the current draft, or edit the existing draft first."), preferredStyle: .alert)
-      if existing.pending == nil && existing.items.count < 40 && !existing.items.contains(where: { $0.scanBarcode == line.scanBarcode && line.scanBarcode != nil }) {
-        alert.addAction(UIAlertAction(title: app.text("加入当前草稿", "Add to current draft"), style: .default) { [weak self] _ in
-          guard let self, self.sameScope else { return }
-          let editor = QFPurchaseReceiptViewController(app: self.app, householdID: self.householdID)
-          editor.appendScannedProduct(line); editor.onChanged = self.onChanged; self.qfPush(editor)
-        })
+      let alert = UIAlertController(title: app.text("已有采购草稿", "Purchase draft exists"),
+        message: app.text("本批扫描已保留，可以加入当前草稿或先处理原草稿。", "This scan batch is saved. Add it to the current draft, or resolve the existing draft first."), preferredStyle: .alert)
+      if existing.pending == nil {
+        alert.addAction(UIAlertAction(title: app.text("加入当前草稿", "Add to current draft"), style: .default) { [weak self] _ in self?.afterPrompt { [weak self] in self?.openBatchEditor() } })
       }
       alert.addAction(UIAlertAction(title: app.text("编辑原草稿", "Edit existing draft"), style: .default) { [weak self] _ in
         guard let self, self.sameScope else { return }
-        let editor = QFPurchaseReceiptViewController(app: self.app, householdID: self.householdID); editor.onChanged = self.onChanged; self.qfPush(editor)
+        self.afterPrompt { [weak self] in
+          guard let self, self.sameScope else { return }
+          let editor = QFPurchaseReceiptViewController(app: self.app, householdID: self.householdID)
+          editor.onChanged = self.onChanged; self.qfPush(editor)
+        }
       })
-      alert.addAction(UIAlertAction(title: app.text("继续扫描", "Continue scanning"), style: .cancel) { [weak self] _ in self?.handlingResult = false; self?.startCamera() })
-      present(alert, animated: true); return
+      alert.addAction(UIAlertAction(title: app.text("继续扫描", "Continue scanning"), style: .cancel) { [weak self] _ in self?.resumeScanning() })
+      present(alert, animated: true)
+    } else { openBatchEditor() }
+  }
+  private func openBatchEditor() {
+    guard active, sameScope else { return }
+    let editor = QFPurchaseReceiptViewController(app: app, householdID: householdID)
+    guard editor.appendScannedProducts(batch.items) else {
+      QFOperationHUD.toast(app.text("请先处理采购草稿，再添加本批食材。", "Resolve the purchase draft before adding this batch."), in: view)
+      handlingResult = false; startCamera(); return
     }
-    let imported = QFReceiptImport(date: nil, currency: "CNY", sellerID: nil, invoiceTotal: nil, lines: [line])
-    let editor = QFPurchaseReceiptViewController(app: app, householdID: householdID, imported: imported)
-    editor.onChanged = onChanged; qfPush(editor)
+    consumeCollection(); editor.onChanged = onChanged; qfPush(editor)
+  }
+  private func consumeCollection() {
+    QFContentDraftStore.remove(app: app, kind: collectionKey)
+    batch = QFBarcodeScanBatch(); updateBatchFooter()
   }
 }

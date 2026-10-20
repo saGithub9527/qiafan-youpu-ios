@@ -133,7 +133,26 @@ extension QFPurchaseReceiptLine {
 extension QFPurchaseReceiptDraft {
   enum ScannedProductAddition { case added, duplicate, locked, full }
   mutating func addScannedProduct(_ line: QFPurchaseReceiptLine) -> ScannedProductAddition {
+    addScannedProducts([line])
+  }
+  /// Merge a reviewed scan collection once. Full/frozen drafts are never partially modified.
+  mutating func addScannedProducts(_ lines: [QFPurchaseReceiptLine]) -> ScannedProductAddition {
     guard pending == nil else { return .locked }
+    var merged = items
+    for line in lines where !merged.contains(where: { $0.id == line.id || (line.scanBarcode != nil && $0.scanBarcode == line.scanBarcode) }) {
+      guard merged.count < 40 else { return .full }
+      merged.append(line)
+    }
+    guard merged.count > items.count else { return .duplicate }
+    items = merged
+    return .added
+  }
+}
+
+/// An account-scoped camera collection, separate from any existing purchase draft.
+struct QFBarcodeScanBatch: Codable {
+  private(set) var items: [QFPurchaseReceiptLine] = []
+  mutating func append(_ line: QFPurchaseReceiptLine) -> QFPurchaseReceiptDraft.ScannedProductAddition {
     guard !items.contains(where: { $0.id == line.id || (line.scanBarcode != nil && $0.scanBarcode == line.scanBarcode) }) else { return .duplicate }
     guard items.count < 40 else { return .full }
     items.append(line)

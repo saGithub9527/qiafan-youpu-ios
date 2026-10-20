@@ -75,15 +75,24 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     if let feedback = scannedFeedback { scannedFeedback = nil; message(feedback) }
   }
   func appendScannedProduct(_ line: QFPurchaseReceiptLine) {
-    guard receipt == nil, !submitting else { return }
-    switch draft.addScannedProduct(line) {
-    case .added: _ = persist()
+    _ = appendScannedProducts([line])
+  }
+  @discardableResult func appendScannedProducts(_ lines: [QFPurchaseReceiptLine]) -> Bool {
+    guard receipt == nil, !submitting else { return false }
+    let original = draft
+    var accepted = false
+    switch draft.addScannedProducts(lines) {
+    case .added:
+      accepted = persist()
+      if !accepted { draft = original }
     case .duplicate: scannedFeedback = app.text("这个条码已在草稿中，请直接修改原商品的数量。", "This barcode is already in the draft. Edit the existing item's quantity.")
+      accepted = true
     case .locked: scannedFeedback = app.text("请先处理上次保存结果，再添加商品。", "Resolve the previous save before adding items.")
     case .full: scannedFeedback = app.text("每张采购账单最多添加40项。", "A purchase receipt can contain up to 40 items.")
     }
     if isViewLoaded { render() }
     if visible { resumeInitialProductLookup() }
+    return accepted
   }
   override func viewDidLoad() {
     super.viewDidLoad(); view.accessibilityIdentifier = "purchase.receipt"
@@ -190,7 +199,8 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
         guard let self, self.draft.pending == nil, !self.submitting, self.draft.items.count < 40 else { return }
         self.view.endEditing(true)
         let scanner = QFProductBarcodeScannerViewController(app: self.app, householdID: self.draft.householdId)
-        scanner.onScannedProduct = { [weak self] line in self?.appendScannedProduct(line) }
+        scanner.collectionID = self.draft.id
+        scanner.onScannedProducts = { [weak self] lines in self?.appendScannedProducts(lines) ?? false }
         self.open(scanner)
       }
       scan.accessibilityIdentifier = "purchase.scan-product"; scan.contentHorizontalAlignment = .leading

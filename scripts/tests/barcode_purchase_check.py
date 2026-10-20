@@ -28,6 +28,20 @@ import Foundation
  var draft=QFPurchaseReceiptDraft(date:"2026-10-17",householdId:nil)
  precondition(draft.addScannedProduct(item) == .added)
  precondition(draft.addScannedProduct(item) == .duplicate && draft.items.count==1 && draft.items[0].quantity=="1")
+ let secondCode=QFProductBarcode(value:"4006381333931",symbology:"EAN13")!
+ let secondItem=QFPurchaseReceiptLine.scannedProduct(barcode:secondCode,name:"食材二")
+ var batch=QFBarcodeScanBatch()
+ precondition(batch.append(item) == .added && batch.append(secondItem) == .added && batch.items.count==2)
+ precondition(batch.append(item) == .duplicate && batch.items[0].quantity=="1")
+ let savedBatch=try JSONDecoder().decode(QFBarcodeScanBatch.self,from:JSONEncoder().encode(batch))
+ var multi=QFPurchaseReceiptDraft(date:"2026-10-20",householdId:nil)
+ precondition(multi.addScannedProducts(savedBatch.items) == .added && multi.items.count==2)
+ precondition(multi.addScannedProducts(savedBatch.items) == .duplicate && multi.items.count==2)
+ multi.items[0].name="用户编辑过的名称";multi.items[0].lineAmount="4"
+ precondition(multi.addScannedProducts(savedBatch.items) == .duplicate && multi.items[0].name=="用户编辑过的名称" && multi.items[0].lineAmount=="4")
+ var almostFull=multi;almostFull.items=(0..<39).map { i in var x=item;x.id=UUID().uuidString;x.scanBarcode=String(i);return x }
+ let beforeFull=almostFull
+ precondition(almostFull.addScannedProducts(savedBatch.items) == .full && almostFull==beforeFull,"A batch append must be atomic")
  let privateRequest=try draft.request()
  precondition(privateRequest.items[0].ingredientId==nil && privateRequest.items[0].name=="榛子酱" && privateRequest.items[0].location=="fridge")
  let ingredient=UUID().uuidString.lowercased();draft.items[0].ingredientId=ingredient;draft.items[0].name="我改过的商品名称"

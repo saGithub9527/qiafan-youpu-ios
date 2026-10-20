@@ -224,6 +224,34 @@ enum QFProductBarcodeDeviceCheck {
       try require(missingContent == nil, "unknownPackageDoesNotAddExtraFields", run)
       try require(descendant(in: controller.view, id: "purchase.barcode-retry." + missingLine.id) is UIButton,
         "onlineRetryAvailable", run)
+      // Use the shipping scan state/dismissal/navigation, with camera permission
+      // and capture explicitly bypassed. No product lookup or business save.
+      let scanner = QFProductBarcodeScannerViewController(app: app, householdID: run.householdID)
+      scanner.debugWithoutCamera = true; scanner.collectionID = run.nonce
+      var batchReceived: [QFPurchaseReceiptLine] = []
+      scanner.onScannedProducts = { batchReceived = $0; return true }
+      navigation.pushViewController(scanner, animated: false)
+      try await Task.sleep(nanoseconds: 150_000_000); try check(run)
+      scanner.debugCollect(drinkBarcode)
+      try await Task.sleep(nanoseconds: 350_000_000); try check(run)
+      try require(scanner.debugBatchState.count == 1 && scanner.debugBatchState.hasNext,
+        "firstScanShowsPersistentNextButton", run)
+      scanner.debugContinueCollecting()
+      try await Task.sleep(nanoseconds: 450_000_000); try check(run)
+      try require(scanner.debugBatchState.ready, "continueResumesOnlyAfterPromptDismissal", run)
+      scanner.debugCollect(drinkBarcode)
+      try require(scanner.debugBatchState.count == 1 && scanner.debugBatchState.ready,
+        "sameFrameDoesNotIncrementQuantityOrPromptAgain", run)
+      scanner.debugCollect(unavailable)
+      try await Task.sleep(nanoseconds: 350_000_000); try check(run)
+      try require(scanner.debugBatchState.count == 2, "differentPackagesCollectedBeforeEditing", run)
+      scanner.debugReviewCollection()
+      try await Task.sleep(nanoseconds: 700_000_000); try check(run)
+      try require(batchReceived.count == 2 && batchReceived.allSatisfy { $0.quantity == "1" && $0.lineAmount == nil },
+        "reviewReturnsWholeBatchWithUnknownActualPrices", run)
+      try require(navigation.topViewController === controller, "batchReviewReturnsToOriginalParent", run)
+      try require(QFContentDraftStore.load(QFBarcodeScanBatch.self, app: app, kind: run.batchKind) == nil,
+        "collectionClearedOnlyAfterParentAcceptsBatch", run)
       let summary = network.summary()
       try require(summary.blockedWrites == 0 && summary.unexpected == 0, "noWriteOrUnexpectedRequest", run)
       finish(run, status: "PRODUCT_BARCODE_CHECK_COMPLETED")
@@ -274,6 +302,7 @@ enum QFProductBarcodeDeviceCheck {
     run.assertions["ownedWindowClosed"] = ownedWindow.map { $0.isHidden && $0.rootViewController == nil } ?? true
     // Exact UUID keys only. No removeAll, logout, global cache or preference clearing.
     UserDefaults.standard.removeObject(forKey: run.draftStorageKey)
+    UserDefaults.standard.removeObject(forKey: run.batchStorageKey)
     run.assertions["ownedDraftRemoved"] = UserDefaults.standard.object(forKey: run.draftStorageKey) == nil
     var cleanupErrors: [String] = []
     let keychain = QFKeychainStore(service: run.service)
@@ -326,6 +355,8 @@ enum QFProductBarcodeDeviceCheck {
     var service: String { "com.talka.qiafanyoupu.debug.barcode." + nonce }
     var draftKind: String { "receipt." + householdID + ".new" }
     var draftStorageKey: String { "qf.profile.draft.\(environment).\(userID).\(draftKind)" }
+    var batchKind: String { "barcode-collection." + householdID + "." + nonce }
+    var batchStorageKey: String { "qf.profile.draft.\(environment).\(userID).\(batchKind)" }
     let reportURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
       .appendingPathComponent("product-barcode-check.json")
     var task: Task<Void, Never>?
