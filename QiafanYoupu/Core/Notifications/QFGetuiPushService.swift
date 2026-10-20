@@ -196,6 +196,27 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate, @pre
 
   private override init() { super.init() }
 
+  #if DEBUG
+  /// Bounded metadata only: never exposes CID, tokens, account IDs or content.
+  func diagnosticStatus(app: QFAppSession) async -> [String: Any] {
+    let center = UNUserNotificationCenter.current()
+    let settings = await center.notificationSettings()
+    let pending = await center.pendingNotificationRequests()
+    let registration = storedRegistration()
+    return ["authorization": settings.authorizationStatus.rawValue,
+      "lockScreenSetting": settings.lockScreenSetting.rawValue,
+      "alertSetting": settings.alertSetting.rawValue,
+      "deliveryOwner": QFGetuiConfiguration.load() == nil ? "LOCAL" : "GETUI",
+      "masterEnabled": app.userSettings?.planReminders as Any? ?? NSNull(),
+      "locallyDisabled": isLocallyDisabled(scope: app.contentScope),
+      "sdkStarted": sdkStarted,
+      "currentDeviceRegistered": registration.map {
+        $0.isActive && $0.environment == app.api.environment.name && $0.userID == app.user?.userId
+      } ?? false,
+      "pendingLocalMealCount": pending.filter { $0.identifier.hasPrefix("qfyp.meal.local.v1.") }.count]
+  }
+  #endif
+
   func prepare(launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
     self.launchOptions = launchOptions
   }
@@ -250,7 +271,11 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate, @pre
   }
 
   func applicationDidBecomeActive() {
-    scheduleReconcile()
+    // A failed first settings read leaves the value unknown. Retry that read
+    // on the next foreground event; reconcile alone cannot recover from nil.
+    if privacyConsentAccepted, let app, app.user != nil, app.userSettings == nil {
+      scheduleSettingsLoad()
+    } else { scheduleReconcile() }
   }
 
   /// Keeps the device registration alive when the user opts into assistant

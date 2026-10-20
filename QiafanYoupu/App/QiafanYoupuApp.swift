@@ -67,6 +67,7 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
         await session.start()
         #if DEBUG
         QFAssistantAgentDeviceCheck.collectRecentFailureMetadataIfRequested(app: session)
+        await QFAssistantAgentDeviceCheck.collectReminderStatusIfRequested(app: session)
         await QFProductBarcodeDeviceCheck.verifyLiveIfRequested(app: session)
         #endif
       }

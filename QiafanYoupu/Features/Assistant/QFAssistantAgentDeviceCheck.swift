@@ -31,6 +31,62 @@ private final class QFAssistantStreamProbe: @unchecked Sendable {
 enum QFAssistantAgentDeviceCheck {
   private static var started = false
   private static var task: Task<Void, Never>?
+  static func collectReminderStatusIfRequested(app: QFAppSession) async {
+    let args = ProcessInfo.processInfo.arguments
+    guard args.contains("-QFReadMealReminderStatus"),
+      let index = args.firstIndex(of: "-QFCheckRun"), args.indices.contains(index + 1),
+      let id = UUID(uuidString: args[index + 1]) else { return }
+    let binding = QFAssistantAgent.scope(app)
+    var result: [String: Any] = [:]
+    result["runID"] = id.uuidString.lowercased(); result["signedIn"] = app.user != nil
+    result["businessWrites"] = 0; result["modelCalls"] = 0
+    if app.user != nil {
+      var phase = "master"
+      do {
+        let master = try await app.loadUserSettings()
+        result["masterReadSucceeded"] = true; result["masterEnabled"] = master.planReminders
+        phase = "profile"
+        let profile = try await app.reminderSettings(householdID: binding.household)
+        guard QFAssistantAgent.scope(app) == binding else { return }
+        result["profileReadSucceeded"] = true; result["profileEnabled"] = profile.enabled
+        result["enabledMealRules"] = profile.meals.filter(\.enabled).count
+        if let zone = profile.timezone,
+          let dates = QFNextMealReminderSelection.dates(now: Date(), timezone: zone) {
+          var days: [QFNextMealReminderSelection.Day] = []
+          phase = "plans"
+          for date in dates {
+            let day = try await app.planDay(date: date, householdID: binding.household)
+            guard QFAssistantAgent.scope(app) == binding, day.date == date,
+              day.slots.allSatisfy({ $0.items.allSatisfy { $0.householdId == binding.household } }) else { return }
+            days.append(.init(date: day.date, slots: day.slots.map { slot in
+              .init(meal: slot.meal, plans: slot.items.map {
+                .init(id: $0.id, recipeID: $0.recipeId, title: nil, servings: $0.servings,
+                  revision: $0.revision, contentAvailable: $0.contentAvailable, completed: $0.completed, skipped: $0.skipped)
+              })
+            }))
+          }
+          let rules = profile.meals.map { QFNextMealReminderSelection.Rule(meal: $0.meal, enabled: $0.enabled, localTime: $0.localTime, advanceMinutes: $0.advanceMinutes) }
+          let next = QFNextMealReminderSelection.select(now: Date(), timezone: zone, rules: rules, days: days)
+          result["plansReadSucceeded"] = true; result["lookaheadDays"] = dates.count
+          result["nextMealSnapshotFound"] = next != nil
+          if let next { result["nextMealPlanCount"] = next.plans.count; result["nextReminderAt"] = ISO8601DateFormatter().string(from: next.reminderAt) }
+        }
+      } catch {
+        result["failedReadPhase"] = phase
+        result["readErrorCode"] = (error as? QFAPIError)?.code as Any? ?? NSNull()
+        result["readErrorType"] = String(describing: type(of: error))
+      }
+    }
+    let status = await QFGetuiPushService.shared.diagnosticStatus(app: app)
+    guard QFAssistantAgent.scope(app) == binding else { return }
+    result.merge(status) { existing, _ in existing }
+    result["status"] = "READ_ONLY_REMINDER_METADATA"
+    let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("assistant-reminder-status-" + id.uuidString.lowercased() + ".json")
+    if let encoded = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) {
+      try? encoded.write(to: url, options: .atomic)
+    }
+  }
   /// Read only the current conversation's bounded failure metadata. Never use
   /// ConversationStore.load(), export prose/media/auth, or trigger an answer.
   static func collectRecentFailureMetadataIfRequested(app: QFAppSession) {
