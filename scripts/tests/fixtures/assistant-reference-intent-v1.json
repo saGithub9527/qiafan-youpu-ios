@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "revision": "2026-10-21.1",
+  "scope": "Synthetic local retrieval-scope cases;no model/search/network;not an official publisher or factual support benchmark",
+  "cases": [
+    {
+      "id": "external-zh",
+      "language": "zh-Hans",
+      "query": "请帮我联网搜索木星为什么有大红斑",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-hant",
+      "language": "zh-Hant",
+      "query": "請聯網搜尋木星為什麼有大紅斑",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-en",
+      "language": "en",
+      "query": "Please search online for orbital mechanics",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-ja",
+      "language": "ja",
+      "query": "ネットで検索 木星の嵐",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-ko",
+      "language": "ko",
+      "query": "인터넷 검색 화성의 대기",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-ru",
+      "language": "ru",
+      "query": "поиск в интернете атмосферных явлений",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-es",
+      "language": "es",
+      "query": "buscar en internet la gravedad",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-fr",
+      "language": "fr",
+      "query": "recherche sur internet la gravitation",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-de",
+      "language": "de",
+      "query": "suche im internet nach der Atmosphäre des Mars",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-pt",
+      "language": "pt-BR",
+      "query": "buscar na internet a gravidade",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-zh",
+      "language": "zh-Hans",
+      "query": "Qwen模型的官方文档",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-hant",
+      "language": "zh-Hant",
+      "query": "Fay模型的官方文檔",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-en",
+      "language": "en",
+      "query": "Find official documentation for a local model",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-ja",
+      "language": "ja",
+      "query": "Qwenモデルの公式ドキュメント",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-ko",
+      "language": "ko",
+      "query": "Qwen 모델 공식 문서",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-ru",
+      "language": "ru",
+      "query": "официальная документация локальной модели Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-es",
+      "language": "es",
+      "query": "documentación oficial del modelo local Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-fr",
+      "language": "fr",
+      "query": "documentation officielle du modèle Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-de",
+      "language": "de",
+      "query": "offizielle Dokumentation des lokalen Modells Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "documents-pt",
+      "language": "pt-BR",
+      "query": "documentação oficial do modelo Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "app-help-zh",
+      "language": "zh-Hans",
+      "query": "请联网搜索本App的模型设置",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-hant",
+      "language": "zh-Hant",
+      "query": "請聯網搜尋本App的模型設定",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-en",
+      "language": "en",
+      "query": "Search online for the local model settings in this app",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-ja",
+      "language": "ja",
+      "query": "ネットで検索 このアプリのモデル設定",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-ko",
+      "language": "ko",
+      "query": "인터넷 검색 이 앱의 모델 설정",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-ru",
+      "language": "ru",
+      "query": "найди в интернете локальная модель в этом приложении",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-es",
+      "language": "es",
+      "query": "buscar en internet modelo local en esta aplicación",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-fr",
+      "language": "fr",
+      "query": "recherche sur internet modèle local dans cette application",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-de",
+      "language": "de",
+      "query": "suche im internet lokales Modell in dieser App",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "app-help-pt",
+      "language": "pt-BR",
+      "query": "buscar na internet modelo local neste aplicativo",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "food-zh",
+      "language": "zh-Hans",
+      "query": "联网搜索生肉交叉污染",
+      "noAppGuides": true,
+      "requiredSource": "knowledge:food-separate"
+    },
+    {
+      "id": "food-en",
+      "language": "en",
+      "query": "Search online for cross contamination",
+      "noAppGuides": true,
+      "requiredSource": "knowledge:food-separate"
+    },
+    {
+      "id": "legacy-inventory",
+      "language": "zh-Hans",
+      "query": "如何添加食材",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-inventory"
+    },
+    {
+      "id": "legacy-search",
+      "language": "zh-Hans",
+      "query": "如何搜索菜谱",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-search"
+    },
+    {
+      "id": "closed-network-app-help",
+      "language": "zh-Hans",
+      "query": "不要联网，如何添加食材",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-inventory"
+    },
+    {
+      "id": "not-prefix-substring",
+      "language": "en",
+      "query": "researching local model settings in this app",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-zh-Hans",
+      "language": "zh-Hans",
+      "query": "请联网搜索本App的官方文档里关于模型设置的说明",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-zh-Hant",
+      "language": "zh-Hant",
+      "query": "請聯網搜尋本App的官方文檔裡關於模型設定的說明",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-en",
+      "language": "en",
+      "query": "Search this app's official documentation for local model settings",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-ja",
+      "language": "ja",
+      "query": "ネットで検索 このアプリの公式ドキュメントのモデル設定",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-ko",
+      "language": "ko",
+      "query": "인터넷 검색 이 앱의 공식 문서 모델 설정",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-ru",
+      "language": "ru",
+      "query": "поиск в интернете документация этого приложения локальная модель",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-es",
+      "language": "es",
+      "query": "buscar en internet documentación oficial de esta aplicación del modelo local",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-fr",
+      "language": "fr",
+      "query": "recherche sur internet documentation officielle de cette application du modèle local",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-de",
+      "language": "de",
+      "query": "suche im internet Dokumentation dieser App lokales Modell",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "owned-app-docs-pt-BR",
+      "language": "pt-BR",
+      "query": "buscar na internet documentação oficial deste aplicativo modelo local",
+      "noAppGuides": false,
+      "requiredSource": "knowledge:guide-network"
+    },
+    {
+      "id": "external-docs-in-app-zh-Hans",
+      "language": "zh-Hans",
+      "query": "在本App里查找Qwen模型的官方文档",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-zh-Hant",
+      "language": "zh-Hant",
+      "query": "在本App裡查找Qwen模型的官方文檔",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-en",
+      "language": "en",
+      "query": "Search Qwen official documentation for a local model in this app",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-ja",
+      "language": "ja",
+      "query": "このアプリでQwenモデルの公式ドキュメントを検索",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-ko",
+      "language": "ko",
+      "query": "이 앱에서 Qwen 모델 공식 문서 검색",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-ru",
+      "language": "ru",
+      "query": "поиск в этом приложении официальная документация модели Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-es",
+      "language": "es",
+      "query": "buscar en esta aplicación documentación oficial del modelo Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-fr",
+      "language": "fr",
+      "query": "recherche dans cette application documentation officielle du modèle Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-de",
+      "language": "de",
+      "query": "Suche in dieser App offizielle Dokumentation des Modells Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "external-docs-in-app-pt-BR",
+      "language": "pt-BR",
+      "query": "buscar neste aplicativo documentação oficial do modelo Qwen",
+      "noAppGuides": true,
+      "requiredSource": null
+    },
+    {
+      "id": "mixed-owned-and-external-docs",
+      "language": "en",
+      "query": "Search this app's documentation and Qwen official documentation for local model settings",
+      "noAppGuides": true,
+      "requiredSource": null
+    }
+  ]
+}

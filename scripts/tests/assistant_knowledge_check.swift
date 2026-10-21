@@ -9,6 +9,20 @@ enum KnowledgeCheck {
     let edition = try JSONDecoder().decode(QFAssistantKnowledge.Edition.self, from: data)
     let directIDs = Set(["food-separate", "food-leftovers", "food-thawing", "food-thermometer"])
     let languages = ["zh-Hans", "zh-Hant", "en", "ja", "ko", "ru", "es", "fr", "de", "pt-BR"]
+    struct ReferenceCases: Decodable {
+      struct Case: Decodable { let id: String; let language: String; let query: String; let noAppGuides: Bool; let requiredSource: String? }
+      let schemaVersion: Int
+      let cases: [Case]
+    }
+    let referenceData = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[2]))
+    let referenceCases = try JSONDecoder().decode(ReferenceCases.self, from: referenceData)
+    precondition(referenceCases.schemaVersion == 1 && referenceCases.cases.count == 57)
+    for item in referenceCases.cases {
+      try await index.load(data: data, language: item.language)
+      let ids = try await index.search(item.query, language: item.language).map(\.source.id)
+      if item.noAppGuides { precondition(!ids.contains(where: { $0.hasPrefix("knowledge:guide-") }), "Reference blocked by App guide: \(item.id) \(ids)") }
+      if let required = item.requiredSource { precondition(ids.contains(required), "Existing App/safety knowledge lost: \(item.id) \(ids)") }
+    }
     var directChecks = 0, rejectedChecks = 0
     for language in languages {
       try await index.load(data: data, language: language)
@@ -141,6 +155,6 @@ enum KnowledgeCheck {
     precondition(injectionDirect == nil, "Rejected source bodies cannot authorize a direct answer")
     do { try await index.load(data: data, language: "unsupported"); fatalError("Accepted unknown language") }
     catch { }
-    print("PASS \(directChecks) ten-language editorial direct answers, \(rejectedChecks) shortcut rejections, optional-schema/ambiguity/prewarm/citations, capability/FTS/expiry/injection checks")
+    print("PASS 57 cross-platform reference-scope cases; \(directChecks) ten-language editorial direct answers, \(rejectedChecks) shortcut rejections, optional-schema/ambiguity/prewarm/citations, capability/FTS/expiry/injection checks")
   }
 }

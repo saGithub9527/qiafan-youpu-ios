@@ -10,4 +10,4 @@ with tempfile.TemporaryDirectory(prefix='knowledge-check-',dir=root/'.build') as
            'scripts/tests/assistant_knowledge_check.swift']
     subprocess.run(['xcrun','swiftc','-j','1','-parse-as-library','-module-cache-path',str(tmp/'modules'),
                     *[str(root/path) for path in paths],'-o',str(binary)],check=True,timeout=90)
-    subprocess.run([str(binary),str(root/'QiafanYoupu/Resources/AI/assistant-knowledge.json')],check=True,timeout=30)
+    subprocess.run([str(binary),str(root/'QiafanYoupu/Resources/AI/assistant-knowledge.json'),str(root/'scripts/tests/fixtures/assistant-reference-intent-v1.json')],check=True,timeout=30)

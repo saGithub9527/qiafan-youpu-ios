@@ -161,6 +161,17 @@ actor QFAssistantKnowledge {
     indexedDay = today
   }
 
+  /// Scope only; never grants network access or treats a publisher as official.
+  private static func externalReferenceQuestion(_ query: String) -> Bool {
+    let options: String.CompareOptions = [.regularExpression, .caseInsensitive]
+    // Inspect a copy only; a second external-document clause cannot be answered by partial App help.
+    let references = query.replacingOccurrences(of: #"(?:恰[饭飯]有[谱譜]|本(?:应用|應用|app)|这个(?:应用|app)|這個(?:應用|app))(?:的)?(?:官方)?\s*文[档檔]|(?<![\p{L}\p{N}_])(?:this\s+app(?:[’\x27]s)?\s+(?:official\s+)?(?:documentation|docs)|(?:documentation|docs)(?:\s+(?:for|of))\s+this\s+app|documentación(?:\s+oficial)?\s+de\s+esta\s+aplicación|documentation(?:\s+officielle)?\s+de\s+cette\s+application|dokumentation\s+dieser\s+app|documentação(?:\s+oficial)?\s+deste\s+aplicativo|документац[\p{L}]*\s+этого\s+приложения)(?![\p{L}\p{N}_])|このアプリの(?:公式)?(?:ドキュメント|文書)|이\s*앱의\s*(?:공식\s*)?문서"#, with: "app_help", options: options)
+    if references.range(of: #"官方\s*文[档檔]|公式(?:文書|ドキュメント)|공식\s*문서|(?<![\p{L}\p{N}_])(?:docs|documentation|dokumentation|documentación|documentação|документац[\p{L}]*)(?![\p{L}\p{N}_])"#, options: options) != nil { return true }
+    if references != query || query.range(of: #"恰[饭飯]有[谱譜]|本(?:应用|應用|app)|这个(?:应用|app)|這個(?:應用|app)|(?<![\p{L}\p{N}_])(?:this\s+app|in\s+the\s+app|esta\s+aplicación|cette\s+application|dieser\s+app|(?:este|neste)\s+aplicativo)(?![\p{L}\p{N}_])|このアプリ|이\s*앱|этом\s+приложении"#, options: options) != nil { return false }
+    let subject = query.replacingOccurrences(of: #"\A(?:(?:(?:请|請)(?:你)?|帮我|幫我|麻烦你|麻煩你)\s*|(?:please|can you|could you)\s+)*"#, with: "", options: options)
+    return subject.range(of: #"\A(?:联网检索|聯網檢索|联网搜索|聯網搜索|聯網搜尋|上网查|上網查|搜索(?:一下)?|搜尋(?:一下)?|(?:search(?:\s+(?:the web|online))?(?:\s+for)?|look up(?:\s+online)?)\s+|ネットで検索|ウェブで検索|(?:(?:인터넷|웹)\s*)?검색|найди\s+в\s+интернете|поиск\s+в\s+интернете|busca(?:r)?\s+en\s+internet|recherche\s+sur\s+internet|cherche\s+sur\s+internet|suche\s+im\s+internet|buscar\s+na\s+internet|pesquise\s+na\s+internet)"#, options: options) != nil
+  }
+
   func search(_ query: String, language: String, limit: Int = 2) throws -> [Hit] {
     try index(language: language)
     if let guide = try capabilityGuide(for: query, language: language) { return [guide] }
@@ -168,6 +179,10 @@ actor QFAssistantKnowledge {
     guard !tokens.isEmpty else { return [] }
     let normalized = query.precomposedStringWithCanonicalMapping.lowercased().replacingOccurrences(of: "\u{200B}", with: "")
     let queryWords = Set(words(normalized))
+    let externalReference = Self.externalReferenceQuestion(normalized)
+    func eligible(_ document: Document) -> Bool {
+      !externalReference || document.sourceURL != nil || document.destination == nil
+    }
     func topicScore(_ value: Document.Text) -> Int {
       let aliases = value.keywords.contains("|") ? value.keywords.split(separator: "|") : value.keywords.split(whereSeparator: \.isWhitespace)
       return aliases.filter { alias in
@@ -193,7 +208,7 @@ actor QFAssistantKnowledge {
       if code == SQLITE_DONE { break }
       guard code == SQLITE_ROW, let raw = sqlite3_column_text(statement, 0) else { throw Failure.unavailable }
       let id = String(cString: raw)
-      guard let doc = documents[id], let text = doc.languages[language], topicScore(text) > 0 else { continue }
+      guard let doc = documents[id], eligible(doc), let text = doc.languages[language], topicScore(text) > 0 else { continue }
       hits.append(.init(title: text.title, body: text.body.precomposedStringWithCanonicalMapping,
         source: .init(id: "knowledge:\(id)", title: text.title, url: doc.sourceURL, revision: doc.revision), destination: doc.destination))
       if hits.count >= max(1, min(3, limit)) { break }
@@ -202,7 +217,7 @@ actor QFAssistantKnowledge {
     // A single bounded, literal-keyword fallback for segmentation misses. No
     // fuzzy expansion, other-language substitution or fabricated evidence.
     return documents.values.compactMap { document -> (Int, Hit)? in
-      guard let value = document.languages[language] else { return nil }
+      guard eligible(document), let value = document.languages[language] else { return nil }
       let score = topicScore(value)
       guard score > 0 else { return nil }
       return (score, Hit(title: value.title, body: value.body.precomposedStringWithCanonicalMapping,
