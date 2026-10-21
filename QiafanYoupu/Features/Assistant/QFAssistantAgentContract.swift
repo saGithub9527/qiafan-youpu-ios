@@ -94,10 +94,50 @@ enum QFAssistantWeeklyPlanIntent {
     let allowCloud: Bool
   }
   static func chatRequestPolicy(cloud: Bool, networkEnabled: Bool) -> ChatRequestPolicy? {
-    guard cloud || networkEnabled else { return nil }
-    // Chat mode only controls the existing network-consent gate. Weekly meals
-    // use the synchronous business planner; ordinary model chat is unchanged.
+    // Legacy saved OFF no longer gates retrieval. Weekly meals still use the
+    // synchronous business planner; automatic retrieval never opts into cloud inference.
     return .init(generationMode: "LOCAL_RULES", allowCloud: false)
+  }
+  static func requiresSettings(_ text: String) -> Bool {
+    text.utf16.count > 500 || text.range(of: "过敏|過敏|不吃|不能吃|不要吃|素食|预算|預算|[2-9二三四五六七八九两兩]+[人份]|allerg|vegan|vegetarian|budget|for [2-9]", options: [.regularExpression, .caseInsensitive]) != nil
+  }
+  /// Classify a narrow general goal, never rewrite private facts into a web query.
+  /// The returned text is a closed public request, not the original message or history.
+  static func referenceFallbackQuery(for text: String, language: String) -> String? {
+    guard matches(text), !requiresSettings(text) else { return nil }
+    var publicIntent = text.trimmingCharacters(in: .whitespacesAndNewlines)
+    publicIntent = publicIntent.replacingOccurrences(of: #"\A(?:(?:请|請)(?:你)?\s*)?(?:帮我|幫我|麻烦你|麻煩你)\s*|\A(?:can you|could you|would you|please)\s+"#,
+      with: "", options: [.regularExpression, .caseInsensitive])
+    // This complete clause expresses only the already-supported generic goal.
+    // Other first-person statements remain intact and fail the shared privacy screen.
+    publicIntent = publicIntent.replacingOccurrences(of: #"(^|[,，;；。])\s*我想(?:减肥|減肥|减脂|減脂)\s*(?=$|[,，;；。])"#,
+      with: "$1体重管理", options: .regularExpression)
+    // Accept only a complete, closed general English request. Do not strip
+    // "my"/"I" or private suffixes from arbitrary text to satisfy the screen.
+    // Account, medical, household or history clauses cannot match this grammar.
+    let closedEnglish = publicIntent.range(of: #"\Aplan my meals for (?:the )?next (?:seven|7) days(?:\s*[,，;；]\s*(?:i can buy ingredients(?:\s+and\s+(?:i\s+)?want to lose weight)?|i want to lose weight))?[.!?。！？]?\z"#,
+      options: [.regularExpression, .caseInsensitive]) != nil
+    let closedEnglishWeightGoal = closedEnglish && publicIntent.range(of: "want to lose weight", options: .caseInsensitive) != nil
+    if closedEnglish { publicIntent = "general weekly meal planning" }
+    guard QFAgentPlan.maySendReferenceQuery(publicIntent),
+      publicIntent.range(of: "家庭|家人|库存|庫存|冰箱|账号|帳號|账户|帳戶|住址|地址|电话|電話|手机|手機|身份证|身份證|根据|根據|依照|不要联网|不要聯網|\\b(?:household|inventory|fridge|account|address|phone|based on|according to|do not search|don't search)\\b", options: [.regularExpression, .caseInsensitive]) == nil else { return nil }
+    let weight = closedEnglishWeightGoal || text.range(of: "减肥|減肥|减脂|減脂|weight.?loss|fat.?loss", options: [.regularExpression, .caseInsensitive]) != nil
+    let queries: [String: (String, String)] = [
+      "zh-Hans": ("联网搜索一般均衡饮食与备餐建议", "联网搜索均衡饮食与体重管理的一般建议和餐食示例"),
+      "zh-Hant": ("搜尋一般均衡飲食與備餐建議", "搜尋均衡飲食與體重管理的一般建議和餐食示例"),
+      "en": ("Search online for general balanced eating and meal preparation guidance", "Search online for general balanced eating and weight management guidance with meal examples"),
+      "ja": ("ネットで検索 バランスの良い食事と食事の準備に関する一般的な情報", "ネットで検索 バランスの良い食事と体重管理に関する一般的な情報と食事例"),
+      "ko": ("인터넷 검색 균형 잡힌 식사와 식사 준비에 관한 일반 정보", "인터넷 검색 균형 잡힌 식사와 체중 관리에 관한 일반 정보와 식사 예시"),
+      "ru": ("найди в интернете общие рекомендации по сбалансированному питанию и подготовке еды", "найди в интернете общие рекомендации по сбалансированному питанию и контролю веса с примерами еды"),
+      "es": ("buscar en internet consejos generales de alimentación equilibrada y preparación de comidas", "buscar en internet consejos generales de alimentación equilibrada y control del peso con ejemplos de comidas"),
+      "fr": ("cherche sur internet des recommandations générales concernant une alimentation équilibrée et la préparation des repas", "cherche sur internet des recommandations générales concernant une alimentation équilibrée et la gestion du poids avec des exemples de repas"),
+      "de": ("suche im internet allgemeine Hinweise zu ausgewogener Ernährung und Essensvorbereitung", "suche im internet allgemeine Hinweise zu ausgewogener Ernährung und Gewichtsmanagement mit Mahlzeitenbeispielen"),
+      "pt-BR": ("pesquise na internet orientações gerais de alimentação equilibrada e preparo de refeições", "pesquise na internet orientações gerais de alimentação equilibrada e controle de peso com exemplos de refeições")
+    ]
+    guard let values = queries[language] else { return nil }
+    let query = weight ? values.1 : values.0
+    guard QFAgentPlan.externalKnowledgeQuery(query) != nil else { return nil }
+    return query
   }
   static func requiresAppendAndShopping(generationMode: String?, goal: String?) -> Bool {
     generationMode == "LOCAL_RULES" || ["BALANCED", "BALANCED_FAT_LOSS"].contains(goal ?? "")

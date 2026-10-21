@@ -203,7 +203,6 @@
 "做过的菜" = "Plato preparado";
 "停止生成" = "Detener generación";
 "允许云端处理？" = "¿Permitir el procesamiento en la nube?";
-"允许本地助手联网查询" = "Permitir consultas en internet del asistente local";
 "允许本次云端处理？" = "Allow this cloud request?";
 "允许本次云端识别？" = "¿Permitir este análisis en la nube?";
 "先找到要补图的条目" = "Elige un artículo primero";
@@ -229,7 +228,6 @@
 "关联目录食材（可选）" = "Vincular a un ingrediente del catálogo (opcional)";
 "关联菜谱" = "Receta relacionada";
 "关闭" = "Cerrar";
-"关闭时不查询网络数据。开启后可查询App数据；联网找资料仅发送本次问题，不发送聊天历史。模型下载需单独点击，不会自动切换云端推理。" = "Desactivado no consulta la red. Activado permite consultar datos de App; buscar referencias envía solo la pregunta actual, sin historial. El modelo se descarga por separado y no se cambia automáticamente a inferencia en la nube.";
 "关闭登录" = "Cerrar sesión";
 "兴奋" = "Entusiasmo";
 "兴趣偏好" = "Intereses y preferencias";
@@ -750,7 +748,6 @@
 "暂时无法获取云端额度。" = "No se pueden obtener los créditos en la nube.";
 "暂时无法获取订阅状态" = "El estado de la suscripción no está disponible";
 "暂时无法读取入库批次" = "No se pueden cargar los lotes";
-"暂未找到可核对的资料。可开启联网查询，或换一个更具体的问题。" = "No se encontraron referencias verificables. Activa la red o concreta la pregunta.";
 "暂未设置" = "No configurado";
 "更换" = "Cambiar";
 "更换关联菜谱" = "Cambiar receta relacionada";
@@ -813,7 +810,6 @@
 "本月记录" = "Este mes";
 "本月还没有做菜记录" = "No hay historial de cocina este mes";
 "本机登录凭证损坏，请联系支持处理，避免生成重复账号。" = "Las credenciales de inicio de sesión de este dispositivo están dañadas. Contacta con soporte para evitar crear una cuenta duplicada.";
-"本机知识库没有这道菜可核对的做法。可开启联网查询已发布菜谱，或打开菜谱页搜索。" = "La biblioteca local no tiene un método verificado para este plato. Permite la red para buscar recetas publicadas o abre recetas.";
 "本机知识模式：未查询远端菜谱、计划或库存。" = "Modo de conocimiento local: no se han consultado recetas, planes ni existencias remotos.";
 "本机草稿暂时无法保存，已保留当前页面内容，请精简后重试。" = "No se pudo guardar el borrador local. Esta página aún conserva tu contenido; acórtalo y vuelve a intentarlo.";
 "本机草稿暂时无法保存，请精简内容后重试。" = "No se pudo guardar el borrador local. Acórtalo y vuelve a intentarlo.";
@@ -1479,10 +1475,12 @@
 "继续添加" = "Añadir más";
 "补购清单" = "Lista de compras";
 "请先处理采购草稿，再添加本批食材。" = "Resuelve primero el borrador de compra antes de añadir este lote de ingredientes.";
-"请开启联网后再生成周计划，需要读取你的实际库存、已发布菜谱和现有餐次。" = "Activa el acceso a la red para crear el plan semanal con tus existencias reales, recetas publicadas y comidas existentes.";
 "这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。" = "Esta solicitud incluye restricciones que debes revisar. Confirma las raciones, el presupuesto y los ingredientes excluidos en los ajustes del plan semanal antes de generarlo. No se ha guardado ningún plan.";
 
 
 "开启新对话？" = "¿Iniciar una conversación nueva?";
 "当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "Se ha alcanzado el límite de contexto; aún no se ha enviado nada. Se conservará el historial y este mensaje iniciará un nuevo contexto. Repite requisitos importantes como las alergias.";
 "开启并发送" = "Iniciar y enviar";
+"当前目录未能生成完整七天计划，本轮没有保存计划。以下为参考回答。" = "El catálogo actual no permite crear un plan completo de siete días. No se ha guardado ningún plan. La siguiente respuesta es orientativa.";
+"本机知识库没有这道菜可核对的做法。请打开菜谱页搜索已发布菜谱。" = "La base local no tiene una preparación verificable de este plato. Abre recetas para buscar platos publicados.";
+"暂未找到可核对的资料。请换一个更具体的问题。" = "No se encontraron referencias verificables. Haz una pregunta más concreta.";

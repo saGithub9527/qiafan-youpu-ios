@@ -120,6 +120,26 @@ enum QFAssistantAgentDeviceCheck {
   }
   static func startIfRequested(app: QFAppSession) {
     let arguments = ProcessInfo.processInfo.arguments
+    // These legacy checks promised offline Agent execution by toggling a user
+    // preference. Automatic retrieval makes that promise invalid; refuse before
+    // starting a task rather than silently permit a new network request.
+    let obsoleteOfflineCheck = arguments.contains("-QFVerifyAssistantQuality")
+      || arguments.contains("-QFVerifyAssistantKnowledge")
+      || (arguments.contains("-QFVerifyAssistantDialogue")
+        && !arguments.contains("-QFDialogueNetwork"))
+    if !started, obsoleteOfflineCheck {
+      started = true
+      let index = arguments.firstIndex(of: "-QFCheckRun")
+      let run = index.flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil } ?? "manual"
+      let filename = arguments.contains("-QFVerifyAssistantDialogue") ? "qwen-dialogue-check.json" : "qwen-agent-check.json"
+      let report: [String: Any] = ["runID": run, "status": "NOT_RUN_AUTOMATIC_NETWORK_POLICY",
+        "networkCalls": 0, "modelCalls": 0, "businessWrites": 0, "preferenceWrites": 0]
+      let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+      if let data = try? JSONSerialization.data(withJSONObject: report, options: [.sortedKeys]) {
+        try? data.write(to: url, options: .atomic)
+      }
+      return
+    }
     if !started, arguments.contains("-QFVerifyNativeCPUFeatures") {
       started = true
       task = Task { await collectNativeCPUFeatures(arguments: arguments); task = nil }
@@ -231,17 +251,8 @@ enum QFAssistantAgentDeviceCheck {
           try await Task.sleep(nanoseconds: 5_000_000_000)
         }
         guard QFLocalModelStore.shared.state == .ready else { throw NSError(domain: "AgentCheckModel", code: 1) }
-        let key = QFLocalModelViewController.networkKey(app)
-        let oldNetwork = UserDefaults.standard.object(forKey: key)
-        defer {
-          if let oldNetwork { UserDefaults.standard.set(oldNetwork, forKey: key) }
-          else { UserDefaults.standard.removeObject(forKey: key) }
-        }
-        UserDefaults.standard.set(false, forKey: key)
-        let denied = try await QFAssistantBusinessTools.execute(.init(name: "recipe.search", arguments: ["query": "白切鸡"]), app: app)
-        report["networkOffReadBlocked"] = denied.status == "DENIED"
-        guard denied.status == "DENIED" else { throw NSError(domain: "AgentCheckNetworkPolicy", code: 3) }
-        UserDefaults.standard.set(!(knowledgeOnly || streamOnly), forKey: key)
+        // Network-enabled tools/reads retain their existing explicit check flags.
+        // The stream-only branch below calls native inference directly.
         let startedAt = Date()
         report["phase"] = "knowledge-planner-api-answer"; report["signedIn"] = app.user != nil; save()
         if !readsOnly {
@@ -613,20 +624,12 @@ enum QFAssistantAgentDeviceCheck {
     let oldIdle = UIApplication.shared.isIdleTimerDisabled
     UIApplication.shared.isIdleTimerDisabled = true
     defer { UIApplication.shared.isIdleTimerDisabled = oldIdle }
-    let key = QFLocalModelViewController.networkKey(app)
-    let oldNetwork = UserDefaults.standard.object(forKey: key)
     let networkForCheck = arguments.contains("-QFDialogueNetwork")
-    UserDefaults.standard.set(networkForCheck, forKey: key)
-    defer {
-      if let oldNetwork { UserDefaults.standard.set(oldNetwork, forKey: key) }
-      else { UserDefaults.standard.removeObject(forKey: key) }
-    }
     let index = arguments.firstIndex(of: "-QFCheckRun")
     let run = index.flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil } ?? "manual"
     let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("qwen-dialogue-check.json")
     var report: [String: Any] = ["runID": run, "status": "IN_PROGRESS", "cloudCalls": false,
-      "businessWrites": false, "networkEnabledDuringAnswer": networkForCheck, "phase": "model-verification",
-      "priorNetworkEnabled": oldNetwork as? Bool ?? false]
+      "businessWrites": false, "networkEnabledDuringAnswer": networkForCheck, "phase": "model-verification"]
     var rows: [[String: Any]] = []
     func save() {
       report["cases"] = rows
@@ -690,12 +693,6 @@ enum QFAssistantAgentDeviceCheck {
     let oldIdle = UIApplication.shared.isIdleTimerDisabled
     UIApplication.shared.isIdleTimerDisabled = true
     defer { UIApplication.shared.isIdleTimerDisabled = oldIdle }
-    let key = QFLocalModelViewController.networkKey(app), oldNetwork = UserDefaults.standard.object(forKey: QFLocalModelViewController.networkKey(app))
-    UserDefaults.standard.set(false, forKey: key)
-    defer {
-      if let oldNetwork { UserDefaults.standard.set(oldNetwork, forKey: key) }
-      else { UserDefaults.standard.removeObject(forKey: key) }
-    }
     var run = "manual"
     if let index = arguments.firstIndex(of: "-QFCheckRun"), arguments.indices.contains(index + 1),
       let id = UUID(uuidString: arguments[index + 1]) { run = id.uuidString.lowercased() }

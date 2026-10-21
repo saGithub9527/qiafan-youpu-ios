@@ -633,7 +633,8 @@ final class QFAppSession: ObservableObject {
     onEvent: @escaping (QFAssistantStreamEvent) -> Void) async throws -> QFAssistantStreamResult {
     let currentGeneration = generation, binding = QFAssistantAgent.scope(self)
     let networkEnabled = QFLocalModelViewController.networkEnabled(self)
-    // A caller may further restrict a single request; it can never enable a disabled preference.
+    // Product retrieval is automatic; an internal bounded probe may still
+    // restrict one request without changing user preferences or cloud consent.
     let allowWeb = networkEnabled && allowWebSearch
     guard saved != nil else { throw QFAPIError(code: 40100, message: self.text("请先登录。", "Sign in first.")) }
     try checkGeneration(currentGeneration)

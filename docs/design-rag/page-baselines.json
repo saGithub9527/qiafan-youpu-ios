@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-20",
+  "updatedAt": "2026-10-21",
   "sourceRoot": "../../../../../全球菜谱APP-设计档案/01-当前设计",
   "precedence": [
     "approved PNG and page interaction JSON",
@@ -2079,6 +2079,77 @@
         "Barcode recognition immediately opens the editable draft; metadata resolves there.",
         "用户2026-10-20明确变更以最新 product-barcode-r5.md 为准。"
       ]
+    },
+    {
+      "id": "assistant-chat-r6",
+      "productPage": "ASSISTANT-CHAT",
+      "title": "聊天自动检索与周计划参考回答",
+      "keywords": [
+        "智能体",
+        "聊天",
+        "全屏",
+        "SSE",
+        "DeepSeek",
+        "千问",
+        "过程",
+        "语音",
+        "按住说话",
+        "实时转写",
+        "渐现",
+        "菜谱详情",
+        "默认联网",
+        "计划提醒",
+        "库存",
+        "下一餐",
+        "首页光球"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r4.md",
+          "sha256": "101566bf411fbfdb826f9c9fcc9011c030ffdcab0760763389b21e1114f6e159"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r5.md",
+          "sha256": "97de641c85c4e772008f0cfb775a89471d8f8ab8651c274e42729d2bf5b08452"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/assistant-chat-r6.md",
+          "sha256": "708fd4144940609647ae0be62b4c3c4771fc2ad5a148d9d297f0e4d831689dd2"
+        }
+      ],
+      "layoutContract": {
+        "presentation": "fullScreen",
+        "horizontalInset": 16,
+        "composerMaxHeight": 132,
+        "navigation": "safe area fixed",
+        "list": "UITableView reuse",
+        "composer": "keyboard layout guide"
+      },
+      "interactionContract": [
+        "本地默认，可显式切换云端",
+        "发送同步显示扫光思考与即时问题理解",
+        "真实正文逐字显示，气泡宽度按内容适配",
+        "导航和关闭不取消，返回复用同一任务",
+        "短暂断网仅恢复已声明协议的同一任务，最多两次",
+        "明确停止或账号家庭语言切换取消并隔离",
+        "语音与发送各自独立；按住实时转写，松手可编辑，上滑取消",
+        "随显示刷新追加真实文字，仅新增字渐现，手动阅读不拉到底部",
+        "两个菜谱入口共享原文结构投影，不把原料和计算编号为步骤",
+        "首页光球显示真实下一餐与库存，点击既有计划路由",
+        "真实提醒优先，范围切换清理，未知库存明确提示",
+        "单条计划先冻结幂等正文，保留原计划",
+        "检索自动开启，无用户开关；历史关闭值不阻断，也不改写原偏好",
+        "七天计划42203仅以公共一般目标回到有来源的参考回答，不构造保存回执",
+        "用户2026-10-21明确变更以最新 assistant-chat-r6.md 为准。"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Assistant/QFAssistantChatUI.swift",
+        "constants": {
+          "chatHorizontalInset": 16,
+          "composerMaxHeight": 132
+        }
+      },
+      "supersedes": "assistant-chat-r5"
     },
     {
       "id": "assistant-chat-r5",

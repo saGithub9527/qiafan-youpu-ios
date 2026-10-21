@@ -638,8 +638,8 @@
     },
     {
       "id": "guide-network",
-      "revision": "2026-10-15.1",
-      "reviewedAt": "2026-10-15",
+      "revision": "2026-10-21.1",
+      "reviewedAt": "2026-10-21",
       "validUntil": "2027-01-15",
       "sourceURL": null,
       "license": "Project-authored summary; linked source text is not redistributed.",
@@ -648,59 +648,59 @@
         "zh-Hans": {
           "title": "本地模型与联网查询",
           "keywords": "本地 模型 千问 联网 离线 下载 云端",
-          "body": "在聊天的模式菜单打开模型管理。联网查询与云端推理独立；关闭联网时，本地助手只使用本机知识，不查询远端库存或计划。"
+          "body": "在聊天的模式菜单打开模型管理。本机资料不足时会自动联网查找公开资料；查询不会附带聊天历史或家庭记录。模型下载仍需单独点击，不会自动切换云端推理。"
         },
         "zh-Hant": {
           "title": "本地模型與連網查詢",
           "keywords": "本地 模型 千問 連網 離線 下載 雲端",
-          "body": "在聊天模式選單開啟模型管理。連網查詢與雲端推理獨立；關閉連網時只使用本機知識，不查詢遠端庫存或計畫。"
+          "body": "在聊天的模式選單開啟模型管理。本機資料不足時會自動連網查找公開資料；查詢不會附帶聊天歷史或家庭紀錄。模型下載仍需另外點選，不會自動切換雲端推理。"
         },
         "en": {
           "title": "Local model and network lookups",
           "keywords": "local model Qwen network offline download cloud",
-          "body": "Open model management from the chat mode menu. Network lookup and cloud inference are separate; with lookups off, local knowledge is used and remote stock or plans are not fetched."
+          "body": "Open model management from the chat mode menu. When local references are insufficient, public references are retrieved automatically, without attaching chat history or household records. Model download still needs a separate tap; inference never switches to the cloud automatically."
         },
         "ja": {
           "title": "端末モデルとネット検索",
           "keywords": "端末 モデル Qwen ネット オフライン ダウンロード クラウド",
-          "body": "チャットのモードからモデル管理を開きます。ネット検索とクラウド推論は別設定で、検索がオフなら端末知識のみ使い、遠隔の在庫や予定を取得しません。"
+          "body": "チャットのモードメニューからモデル管理を開きます。端末内の資料が不足している場合は公開資料を自動でネット検索します。検索にチャット履歴や家庭の記録は添付しません。モデルのダウンロードには別途操作が必要で、クラウド推論へ自動で切り替えることはありません。"
         },
         "ko": {
           "title": "기기 모델과 네트워크 조회",
           "keywords": "기기 모델 Qwen 네트워크 오프라인 다운로드 클라우드",
-          "body": "채팅 모드 메뉴에서 모델 관리를 여세요. 네트워크 조회와 클라우드 추론은 별개이며, 조회가 꺼져 있으면 기기 지식만 쓰고 원격 재고·계획을 가져오지 않습니다."
+          "body": "채팅 모드 메뉴에서 모델 관리를 여세요. 기기 내 자료가 부족하면 공개 자료를 자동으로 온라인에서 검색하며, 채팅 기록이나 가족 기록을 첨부하지 않아요. 모델은 별도로 눌러 다운로드해야 하며 클라우드 추론으로 자동 전환되지 않아요."
         },
         "ru": {
           "title": "Локальная модель и сеть",
           "keywords": "локальная модель Qwen сеть офлайн загрузка облако",
-          "body": "Откройте управление моделью в меню режима чата. Сетевой поиск и облачный вывод независимы; без сети используются знания устройства, а удалённые запасы и планы не запрашиваются."
+          "body": "Откройте управление моделью в меню режима чата. Если локальных материалов недостаточно, открытые источники ищутся автоматически, без передачи истории чата или семейных записей. Загрузку модели нужно запускать отдельно; автоматического перехода к облачной модели нет."
         },
         "es": {
           "title": "Modelo local y consultas de red",
           "keywords": "modelo local Qwen red sin conexión descarga nube",
-          "body": "Abra la gestión del modelo desde el modo de chat. Consultas de red e inferencia en la nube son independientes; sin consultas se usa conocimiento local, sin obtener existencias ni planes remotos."
+          "body": "Abra la gestión del modelo desde el menú del modo de chat. Si faltan referencias locales, se buscan fuentes públicas automáticamente sin adjuntar el historial del chat ni los registros familiares. La descarga del modelo requiere una acción aparte; no se cambia automáticamente a la inferencia en la nube."
         },
         "fr": {
           "title": "Modèle local et requêtes réseau",
           "keywords": "modèle local Qwen réseau hors ligne téléchargement cloud",
-          "body": "Ouvrez la gestion du modèle depuis le mode du chat. Requêtes réseau et inférence cloud sont distinctes; sans requêtes, seules les connaissances locales sont utilisées, sans stocks ni programmes distants."
+          "body": "Ouvrez la gestion du modèle depuis le menu du mode du chat. Si les références locales sont insuffisantes, des sources publiques sont recherchées automatiquement, sans joindre l’historique du chat ni les données du foyer. Le téléchargement du modèle nécessite une action distincte ; aucun passage automatique à l’inférence cloud n’a lieu."
         },
         "de": {
           "title": "Lokales Modell und Netzwerkabfragen",
           "keywords": "lokales Modell Qwen Netzwerk offline Download Cloud",
-          "body": "Modellverwaltung im Chatmodus öffnen. Netzwerkabfragen und Cloud-Inferenz sind getrennt; ohne Abfragen wird nur lokales Wissen genutzt, keine entfernten Vorräte oder Pläne."
+          "body": "Öffne die Modellverwaltung im Chatmodus. Reichen lokale Quellen nicht aus, werden öffentliche Quellen automatisch gesucht, ohne Chatverlauf oder Haushaltsdaten anzuhängen. Der Modelldownload muss separat gestartet werden; die Inferenz wechselt nicht automatisch in die Cloud."
         },
         "pt-BR": {
           "title": "Modelo local e consultas de rede",
           "keywords": "modelo local Qwen rede offline download nuvem",
-          "body": "Abra o gerenciamento pelo modo do chat. Consulta de rede e inferência na nuvem são separadas; sem consultas, usa-se conhecimento local, sem buscar estoques ou planos remotos."
+          "body": "Abra o gerenciamento do modelo pelo menu do modo de chat. Se as referências locais forem insuficientes, fontes públicas serão buscadas automaticamente, sem anexar o histórico do chat ou registros familiares. O download do modelo exige uma ação separada; não há mudança automática para inferência na nuvem."
         }
       }
     },
     {
       "id": "guide-assistant",
-      "revision": "2026-10-16.3",
-      "reviewedAt": "2026-10-16",
+      "revision": "2026-10-21.1",
+      "reviewedAt": "2026-10-21",
       "validUntil": "2027-01-15",
       "sourceURL": null,
       "license": "Project-authored product capability guide.",
@@ -709,52 +709,52 @@
         "zh-Hans": {
           "title": "我能帮你做什么",
           "keywords": "你能做什么|你会什么|你有哪些功能|你有什么功能|能帮我处理哪些问题|你可以帮我做什么|你能帮我做什么|你可以做什么|能帮我解决什么|你能帮我处理哪些问题|你能帮我处理哪些问题呢",
-          "body": "我能帮你找菜谱和做法、解答烹饪与食材保存问题。允许联网时，还能查询饮食计划和家庭库存、准备计划草稿。下方入口可打开相应页面；保存计划、扣减库存等更改仍由你确认，无法读取的数据会明确告知。"
+          "body": "我能帮你找菜谱和做法、解答烹饪与食材保存问题。网络可用时，还能查询饮食计划和家庭库存、准备计划草稿。下方入口可打开相应页面；保存计划、扣减库存等更改仍由你确认，无法读取的数据会明确告知。"
         },
         "zh-Hant": {
           "title": "我能幫你做什麼",
           "keywords": "你能做什麼|你會什麼|你有哪些功能|你有什麼功能|能幫我處理哪些問題|你可以幫我做什麼|你能幫我做什麼|你可以做什麼|你能幫我處理哪些問題",
-          "body": "我能幫你找食譜和做法、解答烹飪與食材保存問題。允許連網時，還能查詢飲食計畫和家庭庫存、準備計畫草稿。下方入口可開啟對應頁面；儲存計畫、扣減庫存等變更仍由你確認，無法讀取的資料會明確告知。"
+          "body": "我能幫你找食譜和做法、解答烹飪與食材保存問題。網路可用時，還能查詢飲食計畫和家庭庫存、準備計畫草稿。下方入口可開啟對應頁面；儲存計畫、扣減庫存等變更仍由你確認，無法讀取的資料會明確告知。"
         },
         "en": {
           "title": "How I can help",
           "keywords": "what can you do|what can you help me with|what problems can you help|your capabilities|what are your features",
-          "body": "I can find recipes and cooking steps, explain cooking and food storage, and show checkable sources. With network access, I can read your meal plans and household stock and prepare a plan draft. Use the links below to open those pages. You confirm saves or stock deductions; I will say when data is unavailable."
+          "body": "I can find recipes and cooking steps, explain cooking and food storage, and show checkable sources. When a network connection is available, I can read your meal plans and household stock and prepare a plan draft. Use the links below to open those pages. You confirm saves or stock deductions; I will say when data is unavailable."
         },
         "ja": {
           "title": "できること",
           "keywords": "何ができますか|何を手伝えますか|どんな機能|何をしてくれる|できることを教えて",
-          "body": "レシピや調理手順を探し、料理や食品保存を出典付きで説明できます。通信が許可されていれば食事プランや家庭の在庫を読み、プラン下書きを準備できます。下の入口から各画面を開けます。保存や在庫の差し引きはご自身で確認します。取得できない情報は明示します。"
+          "body": "レシピや調理手順を探し、料理や食品保存を出典付きで説明できます。通信が利用できれば食事プランや家庭の在庫を読み、プラン下書きを準備できます。下の入口から各画面を開けます。保存や在庫の差し引きはご自身で確認します。取得できない情報は明示します。"
         },
         "ko": {
           "title": "도와드릴 수 있는 일",
           "keywords": "무엇을 할 수|어떤 일을 도와|어떤 기능|무슨 기능|뭘 할 수",
-          "body": "레시피와 조리법을 찾고 조리·식품 보관 지식을 출처와 함께 설명해요. 네트워크가 허용되면 식단과 가족 재고를 조회하고 식단 초안을 준비해요. 아래 링크로 관련 화면을 열 수 있어요. 저장과 재고 차감은 직접 확인하며, 읽을 수 없는 정보는 알려드려요."
+          "body": "레시피와 조리법을 찾고 조리·식품 보관 지식을 출처와 함께 설명해요. 네트워크에 연결되면 식단과 가족 재고를 조회하고 식단 초안을 준비해요. 아래 링크로 관련 화면을 열 수 있어요. 저장과 재고 차감은 직접 확인하며, 읽을 수 없는 정보는 알려드려요."
         },
         "ru": {
           "title": "Чем я могу помочь",
           "keywords": "что ты умеешь|что вы умеете|чем можешь помочь|чем можете помочь|какие у тебя функции",
-          "body": "Я помогу найти рецепты и этапы приготовления, объяснить готовку и хранение с источниками. Если сеть разрешена, прочитаю планы и семейные запасы, подготовлю черновик плана. Ссылки ниже открывают нужные экраны. Сохранение и списание вы подтверждаете сами; о недоступных данных я сообщу."
+          "body": "Я помогу найти рецепты и этапы приготовления, объяснить готовку и хранение с источниками. Если подключение доступно, прочитаю планы и семейные запасы, подготовлю черновик плана. Ссылки ниже открывают нужные экраны. Сохранение и списание вы подтверждаете сами; о недоступных данных я сообщу."
         },
         "es": {
           "title": "Cómo puedo ayudarte",
           "keywords": "qué puedes hacer|en qué me puedes ayudar|con qué puedes ayudar|cuáles son tus funciones",
-          "body": "Puedo buscar recetas y pasos y explicar cocina y conservación con fuentes. Con la red permitida, puedo leer planes y existencias familiares y preparar un borrador. Los enlaces abren las pantallas correspondientes. Tú confirmas guardar o descontar existencias; avisaré si faltan datos."
+          "body": "Puedo buscar recetas y pasos y explicar cocina y conservación con fuentes. Con conexión disponible, puedo leer planes y existencias familiares y preparar un borrador. Los enlaces abren las pantallas correspondientes. Tú confirmas guardar o descontar existencias; avisaré si faltan datos."
         },
         "fr": {
           "title": "Comment je peux vous aider",
           "keywords": "que peux-tu faire|que pouvez-vous faire|comment peux-tu m’aider|quelles sont tes fonctions",
-          "body": "Je peux trouver recettes et étapes, expliquer cuisine et conservation avec des sources. Si le réseau est autorisé, je peux lire vos programmes et stocks et préparer un brouillon. Les liens ouvrent les écrans concernés. Vous confirmez tout enregistrement ou déduction ; je signale les données indisponibles."
+          "body": "Je peux trouver recettes et étapes, expliquer cuisine et conservation avec des sources. Si une connexion est disponible, je peux lire vos programmes et stocks et préparer un brouillon. Les liens ouvrent les écrans concernés. Vous confirmez tout enregistrement ou déduction ; je signale les données indisponibles."
         },
         "de": {
           "title": "Wobei ich helfen kann",
           "keywords": "was kannst du|wobei kannst du helfen|welche funktionen hast du|was können sie",
-          "body": "Ich kann Rezepte und Schritte finden und Kochen und Lagerung mit Quellen erklären. Bei erlaubtem Netzwerkzugriff kann ich Pläne und Familienvorräte lesen und einen Entwurf vorbereiten. Die Links öffnen die jeweiligen Seiten. Speichern und Abbuchen bestätigst du selbst; fehlende Daten kennzeichne ich."
+          "body": "Ich kann Rezepte und Schritte finden und Kochen und Lagerung mit Quellen erklären. Bei verfügbarer Netzwerkverbindung kann ich Pläne und Familienvorräte lesen und einen Entwurf vorbereiten. Die Links öffnen die jeweiligen Seiten. Speichern und Abbuchen bestätigst du selbst; fehlende Daten kennzeichne ich."
         },
         "pt-BR": {
           "title": "Como posso ajudar",
           "keywords": "o que você pode fazer|como você pode me ajudar|quais são suas funções|o que voce pode fazer",
-          "body": "Posso buscar receitas e etapas e explicar culinária e conservação com fontes. Se a rede estiver permitida, leio planos e estoque familiar e preparo um rascunho. Os links abrem as telas correspondentes. Você confirma salvamentos e descontos; avisarei sobre dados indisponíveis."
+          "body": "Posso buscar receitas e etapas e explicar culinária e conservação com fontes. Com uma conexão disponível, leio planos e estoque familiar e preparo um rascunho. Os links abrem as telas correspondentes. Você confirma salvamentos e descontos; avisarei sobre dados indisponíveis."
         }
       }
     }

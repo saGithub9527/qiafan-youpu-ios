@@ -16,15 +16,14 @@ enum QFAssistantAgent {
   }
 
   static func weeklyPlan(text: String, cloud: Bool, requestID: UUID, app: QFAppSession,
-    progress: (String) -> Void) async throws -> Response? {
+    progress: @escaping (String) -> Void) async throws -> Response? {
     guard QFAssistantWeeklyPlanIntent.matches(text) else { return nil }
-    if text.utf16.count > 500 || text.range(of: "过敏|過敏|不吃|不能吃|不要吃|素食|预算|預算|[2-9二三四五六七八九两兩]+[人份]|allerg|vegan|vegetarian|budget|for [2-9]", options: [.regularExpression, .caseInsensitive]) != nil {
+    if QFAssistantWeeklyPlanIntent.requiresSettings(text) {
       return .init(answer: app.text("这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。", "This request includes constraints that need explicit review. Confirm servings, budget and excluded ingredients in weekly plan settings before generating. No meal plan was saved."), sources: [], actions: [.init(type: "NAVIGATE_PLAN", recipeID: nil, date: nil)], notice: "", nativeInferenceUsed: false)
     }
     guard let policy = QFAssistantWeeklyPlanIntent.chatRequestPolicy(
       cloud: cloud, networkEnabled: QFLocalModelViewController.networkEnabled(app)) else {
-      return .init(answer: app.text("请开启联网后再生成周计划，需要读取你的实际库存、已发布菜谱和现有餐次。", "Enable network access to build a weekly plan from your actual inventory, published recipes and existing meals."),
-        sources: [], actions: [.init(type: "NAVIGATE_MODEL_SETTINGS", recipeID: nil, date: nil)], notice: "", nativeInferenceUsed: false)
+      throw QFAgentPlan.Invalid.arguments
     }
     let binding = scope(app)
     progress("tool:plan.weekly")
@@ -34,7 +33,29 @@ enum QFAssistantAgent {
       mustUseInventory: true, preference: text, idempotencyKey: requestID.uuidString.lowercased())
     draft.generationMode = policy.generationMode; draft.allowCloud = policy.allowCloud; draft.goal = "BALANCED"
     if text.range(of: "减肥|減肥|减脂|減脂|weight.?loss|fat.?loss", options: [.regularExpression, .caseInsensitive]) != nil { draft.goal = "BALANCED_FAT_LOSS" }
-    let proposal = try await app.createWeeklyPlanProposal(draft)
+    let proposal: QFWeeklyPlanProposal
+    do { proposal = try await app.createWeeklyPlanProposal(draft) }
+    catch let failure as QFAPIError where failure.code == 42203 {
+      try Task.checkCancellation()
+      guard binding == scope(app) else { throw CancellationError() }
+      guard let query = QFAssistantWeeklyPlanIntent.referenceFallbackQuery(for: text, language: binding.language) else { throw failure }
+      progress("knowledge")
+      let reference: Response
+      if cloud {
+        let result = try await app.assistantStream(text: query, history: [], imageData: nil, mimeType: "image/jpeg") { event in
+          if case .status(let stage) = event { progress(stage) }
+        }
+        reference = .init(answer: result.answer, sources: result.sources ?? [], actions: [], notice: result.notice ?? "", nativeInferenceUsed: false)
+      } else {
+        reference = try await answer(text: query, history: [], knownSources: [], app: app, progress: progress)
+      }
+      try Task.checkCancellation()
+      guard binding == scope(app) else { throw CancellationError() }
+      var statuses = reference.toolStatuses; statuses["plan.weekly"] = "NO_CANDIDATES"
+      return .init(answer: app.text("当前目录未能生成完整七天计划，本轮没有保存计划。以下为参考回答。", "The current catalog could not produce a complete seven-day plan. No plan was saved. The following is a reference answer.") + "\n\n" + reference.answer,
+        sources: reference.sources, actions: [], notice: reference.notice, toolStatuses: statuses,
+        nativeInferenceUsed: reference.nativeInferenceUsed)
+    }
     try Task.checkCancellation()
     guard binding == scope(app), proposal.householdId == binding.household, proposal.language == binding.language else { throw CancellationError() }
     progress("answer")
@@ -166,7 +187,7 @@ enum QFAssistantAgent {
       // ingredients/steps. This route works for any explicitly named dish.
       guard network else {
         progress?("answer")
-        return .init(answer: app.text("本机知识库没有这道菜可核对的做法。可开启联网查询已发布菜谱，或打开菜谱页搜索。", "The on-device knowledge library has no verified method for this dish. Enable network access to look up published recipes, or open recipes to search."),
+        return .init(answer: app.text("本机知识库没有这道菜可核对的做法。请打开菜谱页搜索已发布菜谱。", "The on-device knowledge library has no verified method for this dish. Open recipes to search published dishes."),
           sources: [], actions: [.init(type: "NAVIGATE_MODEL_SETTINGS", recipeID: nil, date: nil), .init(type: "NAVIGATE_RECIPES", recipeID: nil, date: nil)],
           notice: "", toolStatuses: ["knowledge.search": "NO_MATCH", "recipe.search": "NETWORK_DISABLED"], nativeInferenceUsed: false)
       }
@@ -204,7 +225,7 @@ enum QFAssistantAgent {
       let query = remoteRecipeQuery ?? QFAgentPlan.externalKnowledgeQuery(text) {
       guard network else {
         progress?("answer")
-        return .init(answer: app.text("暂未找到可核对的资料。可开启联网查询，或换一个更具体的问题。", "No checkable reference was found. Enable network lookups or ask a more specific question."),
+        return .init(answer: app.text("暂未找到可核对的资料。请换一个更具体的问题。", "No checkable reference was found. Ask a more specific question."),
           sources: [], actions: [.init(type: "NAVIGATE_MODEL_SETTINGS", recipeID: nil, date: nil)], notice: "", nativeInferenceUsed: false)
       }
       progress?("knowledge")
