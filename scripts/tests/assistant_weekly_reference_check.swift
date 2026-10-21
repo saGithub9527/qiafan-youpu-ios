@@ -33,7 +33,7 @@ import Darwin
         expect(reply != nil, "\(cloud)-returns-reference-reply")
         expect(reply?.sources == [source], "\(cloud)-preserves-actual-source")
         expect(reply?.actions.isEmpty == true, "\(cloud)-has-no-fabricated-plan-action")
-        expect(reply?.answer.contains("没有保存计划") == true, "\(cloud)-states-no-plan-was-saved")
+        expect(reply?.answer.hasPrefix("以下是饮食安排建议，本轮尚未加入日历计划。\n\n") == true, "\(cloud)-states-not-added-to-calendar")
         expect(value.proposalCalls == 1, "\(cloud)-does-not-retry-creation")
         expect(QFAssistantBusinessTools.calls == 0, "\(cloud)-does-not-write-business-data")
         if cloud {

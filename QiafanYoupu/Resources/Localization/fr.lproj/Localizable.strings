@@ -1481,6 +1481,6 @@
 "开启新对话？" = "Commencer une nouvelle conversation ?";
 "当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "La limite du contexte est atteinte ; rien n’a été envoyé. L’historique sera conservé et ce message commencera un nouveau contexte. Rappelez les contraintes importantes, comme les allergies.";
 "开启并发送" = "Commencer et envoyer";
-"当前目录未能生成完整七天计划，本轮没有保存计划。以下为参考回答。" = "Le catalogue actuel ne permet pas de créer un programme complet de sept jours. Aucun programme n’a été enregistré. La réponse ci-dessous est fournie à titre indicatif.";
+"以下是饮食安排建议，本轮尚未加入日历计划。" = "Voici des suggestions pour organiser vos repas. Elles n’ont pas encore été ajoutées à votre calendrier.";
 "本机知识库没有这道菜可核对的做法。请打开菜谱页搜索已发布菜谱。" = "La base locale ne contient pas de préparation vérifiable pour ce plat. Ouvrez les recettes pour rechercher un plat publié.";
 "暂未找到可核对的资料。请换一个更具体的问题。" = "Aucune référence vérifiable n’a été trouvée. Posez une question plus précise.";

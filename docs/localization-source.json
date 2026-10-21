@@ -758,6 +758,12 @@
         "Choose from ingredients"
       ]
     },
+    "以下是饮食安排建议，本轮尚未加入日历计划。": {
+      "english": "Here are some meal-planning suggestions. They have not been added to your calendar.",
+      "englishVariants": [
+        "Here are some meal-planning suggestions. They have not been added to your calendar."
+      ]
+    },
     "价格待补全": {
       "english": "Price needed",
       "englishVariants": [
@@ -3347,12 +3353,6 @@
       "english": "The HTTPS API address is not configured for this environment.",
       "englishVariants": [
         "The HTTPS API address is not configured for this environment."
-      ]
-    },
-    "当前目录未能生成完整七天计划，本轮没有保存计划。以下为参考回答。": {
-      "english": "The current catalog could not produce a complete seven-day plan. No plan was saved. The following is a reference answer.",
-      "englishVariants": [
-        "The current catalog could not produce a complete seven-day plan. No plan was saved. The following is a reference answer."
       ]
     },
     "当前设备没有可用相机": {

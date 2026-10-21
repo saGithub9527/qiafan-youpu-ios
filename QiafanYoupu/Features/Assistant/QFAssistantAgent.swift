@@ -52,7 +52,7 @@ enum QFAssistantAgent {
       try Task.checkCancellation()
       guard binding == scope(app) else { throw CancellationError() }
       var statuses = reference.toolStatuses; statuses["plan.weekly"] = "NO_CANDIDATES"
-      return .init(answer: app.text("当前目录未能生成完整七天计划，本轮没有保存计划。以下为参考回答。", "The current catalog could not produce a complete seven-day plan. No plan was saved. The following is a reference answer.") + "\n\n" + reference.answer,
+      return .init(answer: app.text("以下是饮食安排建议，本轮尚未加入日历计划。", "Here are some meal-planning suggestions. They have not been added to your calendar.") + "\n\n" + reference.answer,
         sources: reference.sources, actions: [], notice: reference.notice, toolStatuses: statuses,
         nativeInferenceUsed: reference.nativeInferenceUsed)
     }
