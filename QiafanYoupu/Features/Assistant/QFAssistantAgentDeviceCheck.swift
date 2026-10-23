@@ -120,6 +120,24 @@ enum QFAssistantAgentDeviceCheck {
   }
   static func startIfRequested(app: QFAppSession) {
     let arguments = ProcessInfo.processInfo.arguments
+    if !started, arguments.contains("-QFVerifyAssistantTabNavigation") {
+      started = true
+      task = Task {
+        defer { task = nil }
+        var result: [String: Any]
+        do { result = try await QFDigitalAssistantConversationViewController.debugCheckTabNavigation() }
+        catch { result = ["passed": false, "error": (error as NSError).localizedDescription] }
+        if let index = arguments.firstIndex(of: "-QFCheckRun"), arguments.indices.contains(index + 1) {
+          result["runID"] = arguments[index + 1]
+        }
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+          .appendingPathComponent("assistant-tab-navigation-check.json")
+        if let data = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) {
+          try? data.write(to: url, options: .atomic)
+        }
+      }
+      return
+    }
     // These legacy checks promised offline Agent execution by toggling a user
     // preference. Automatic retrieval makes that promise invalid; refuse before
     // starting a task rather than silently permit a new network request.

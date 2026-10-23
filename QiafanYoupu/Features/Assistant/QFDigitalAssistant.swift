@@ -758,6 +758,7 @@ final class QFDigitalAssistantOverlay {
       navigation = UINavigationController(rootViewController: controller)
       conversationNavigation = navigation
     }
+    controller.tabNavigationHost = host as? UITabBarController ?? host.tabBarController
     controller.onCharacterIntent = { [weak self] intent in
       self?.mascotView.playSceneAction(intent)
     }
@@ -845,6 +846,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   private var selectedProvider: QFAssistantProvider = .glmFree
   private var lifecycle = Set<AnyCancellable>()
   var onDismiss: (() -> Void)?
+  fileprivate weak var tabNavigationHost: UITabBarController?
   fileprivate var onCharacterIntent: ((QFAssistantCharacterIntent) -> Void)?
 
   private var cloudConsentKey: String { selectedProvider.consentKey(scope: app.contentScope) }
@@ -1236,6 +1238,70 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     startTextReveal()
   }
 #if DEBUG
+  /// Exercise the real footer button under the App's root -> tabs containment.
+  /// The chat uses an ephemeral store; no prompt, business request or user draft.
+  static func debugCheckTabNavigation() async throws -> [String: Any] {
+    let app = QFAppSession() // Never start/login this isolated session.
+    let root = UIViewController(), tabs = UITabBarController()
+    tabs.viewControllers = (0..<3).map { _ in UINavigationController(rootViewController: UIViewController()) }
+    root.addChild(tabs); root.view.addSubview(tabs.view)
+    tabs.view.snp.makeConstraints { $0.edges.equalToSuperview() }; tabs.didMove(toParent: root)
+    let window: UIWindow
+    if let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first {
+      window = UIWindow(windowScene: scene)
+    } else { window = UIWindow(frame: CGRect(x: 0, y: 0, width: 414, height: 896)) }
+    window.rootViewController = root; window.isHidden = false
+    defer { window.isHidden = true; window.rootViewController = nil }
+    let chat = QFDigitalAssistantConversationViewController(app: app, applicationState: { .active }, persistConversation: false)
+    chat.tabNavigationHost = tabs
+    let navigation = UINavigationController(rootViewController: chat)
+    navigation.modalPresentationStyle = .fullScreen
+    defer { chat.endScene() }
+    var checked: [String] = []
+    for (action, destination) in [("NAVIGATE_RECIPES", 0), ("NAVIGATE_PLAN", 1), ("NAVIGATE_INVENTORY", 2)] {
+      tabs.selectedIndex = (destination + 1) % 3
+      await withCheckedContinuation { continuation in root.present(navigation, animated: false) { continuation.resume() } }
+      let activeID = UUID()
+      chat.messages = [
+        .init(id: UUID(), role: "assistant", text: "Public navigation example", createdAt: Date(),
+          actions: [.init(type: action, recipeID: nil, date: nil)], state: "complete"),
+        .init(id: activeID, role: "assistant", text: "Partial reply", createdAt: Date(), state: "streaming")
+      ]
+      chat.activeMessageID = activeID
+      chat.input.text = "Unsent isolated draft"
+      let generation = chat.requestGeneration
+      var dismissed = 0
+      chat.onDismiss = { dismissed += 1 }
+      chat.renderMessages(); chat.view.layoutIfNeeded()
+      chat.messagesScroll.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+      chat.messagesScroll.layoutIfNeeded()
+      func button(in view: UIView) -> UIButton? {
+        if let value = view as? UIButton, value.accessibilityIdentifier == "assistant.action.\(action)" { return value }
+        return view.subviews.lazy.compactMap { button(in: $0) }.first
+      }
+      guard let cell = chat.messagesScroll.cellForRow(at: IndexPath(row: 0, section: 0)), let control = button(in: cell),
+        control.isEnabled, !control.isHidden else { throw NSError(domain: "AssistantTabButtonMissing", code: 1) }
+      let point = control.convert(CGPoint(x: control.bounds.midX, y: control.bounds.midY), to: window)
+      guard let hit = window.hitTest(point, with: nil), hit === control || hit.isDescendant(of: control) else {
+        throw NSError(domain: "AssistantTabButtonObstructed", code: 4)
+      }
+      control.sendActions(for: .touchUpInside)
+      control.sendActions(for: .touchUpInside) // A repeated tap must not dismiss/callback twice.
+      try await Task.sleep(nanoseconds: 700_000_000)
+      guard tabs.selectedIndex == destination, root.presentedViewController == nil, dismissed == 1 else {
+        throw NSError(domain: "AssistantTabNavigationFailed", code: 2, userInfo: [NSLocalizedDescriptionKey:
+          "action=\(action); selected=\(tabs.selectedIndex); target=\(destination); dismissed=\(dismissed); presenter=\(String(describing: navigation.presentingViewController.map { type(of: $0) }))"])
+      }
+      guard chat.activeMessageID == activeID, chat.requestGeneration == generation,
+        chat.messages.last?.text == "Partial reply", chat.input.text == "Unsent isolated draft" else {
+        throw NSError(domain: "AssistantTabNavigationLostConversation", code: 3)
+      }
+      checked.append(action)
+    }
+    return ["passed": true, "footerActions": checked, "rootContainment": true,
+      "generationAndDraftPreserved": true, "modelCalls": 0, "businessWrites": 0, "conversationWrites": 0]
+  }
+
   /// Compare the home constructor with the real assistant source-tap route for
   /// one published ID. Reads only; no model request and no persisted messages.
   static func debugCheckRecipeEntryParity(app: QFAppSession) async throws -> [String: Any] {
@@ -1721,16 +1787,20 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   private func navigateToTab(_ index: Int, date: String? = nil) {
     stopCapture()
     navigationTask?.cancel(); navigationTask = nil
-    var candidate: UIViewController? = presentingViewController
-    var tabs: UITabBarController?
-    while let controller = candidate {
+    let presentation = navigationController ?? self
+    guard !presentation.isBeingDismissed else { return }
+    // Full-screen presentation can be owned by QFRootViewController, whose
+    // child is the Tab controller. Use the host that opened this conversation.
+    var tabs = tabNavigationHost
+    var candidate = presentation.presentingViewController
+    while tabs == nil, let controller = candidate {
       if let found = controller as? UITabBarController { tabs = found; break }
       if let found = controller.tabBarController { tabs = found; break }
       candidate = controller.presentingViewController
     }
     guard let tabs, (tabs.viewControllers ?? []).indices.contains(index) else { return }
     let completion = onDismiss; onDismiss = nil
-    dismiss(animated: true) {
+    presentation.dismiss(animated: true) {
       tabs.selectedIndex = index
       if let date, index == 1, let navigation = tabs.viewControllers?[index] as? UINavigationController,
         let plan = navigation.viewControllers.first as? QFPlanViewController, !plan.openAssistantDay(date) {
