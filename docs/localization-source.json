@@ -360,6 +360,12 @@
         "Requests made by the app in Debug mode appear here."
       ]
     },
+    "GLM · 免费": {
+      "english": "GLM · Free",
+      "englishVariants": [
+        "GLM · Free"
+      ]
+    },
     "HTTP 状态码：%@": {
       "english": "HTTP status: %@",
       "englishVariants": [
@@ -504,18 +510,6 @@
         "Move down"
       ]
     },
-    "下载中：%d%%": {
-      "english": "Downloading: %d%%",
-      "englishVariants": [
-        "Downloading: %d%%"
-      ]
-    },
-    "下载模型（仅Wi-Fi）": {
-      "english": "Download model (Wi-Fi only)",
-      "englishVariants": [
-        "Download model (Wi-Fi only)"
-      ]
-    },
     "不吃的食材": {
       "english": "Excluded ingredients",
       "englishVariants": [
@@ -655,22 +649,10 @@
         "Cloud reminder settings are still loading."
       ]
     },
-    "云端模型": {
-      "english": "Cloud model",
-      "englishVariants": [
-        "Cloud model"
-      ]
-    },
     "仅使用本机通知，不会把库存或对话内容放进通知。": {
       "english": "Uses local notifications only; private inventory and chat content stay out of notifications.",
       "englishVariants": [
         "Uses local notifications only; private inventory and chat content stay out of notifications."
-      ]
-    },
-    "仅删除下载的模型文件，对话和账号数据不会删除。": {
-      "english": "Only the downloaded model is deleted. Conversations and account data are kept.",
-      "englishVariants": [
-        "Only the downloaded model is deleted. Conversations and account data are kept."
       ]
     },
     "仅发送你输入的文字和当前语言，不会直接修改库存或发布内容。": {
@@ -1324,6 +1306,18 @@
         "g"
       ]
     },
+    "免费图片理解；文字模型繁忙时也可接续回答。": {
+      "english": "Free image understanding; also answers when the text model is busy.",
+      "englishVariants": [
+        "Free image understanding; also answers when the text model is busy."
+      ]
+    },
+    "免费文字问答，默认使用。": {
+      "english": "Free text chat, selected by default.",
+      "englishVariants": [
+        "Free text chat, selected by default."
+      ]
+    },
     "入库": {
       "english": "Receive stock",
       "englishVariants": [
@@ -1618,12 +1612,6 @@
       "english": "It will no longer appear. Related recipes and cooking history are kept.",
       "englishVariants": [
         "It will no longer appear. Related recipes and cooking history are kept."
-      ]
-    },
-    "删除本地模型": {
-      "english": "Delete on-device model",
-      "englishVariants": [
-        "Delete on-device model"
       ]
     },
     "删除草稿": {
@@ -1938,12 +1926,6 @@
         "Message"
       ]
     },
-    "发送的文字或图片会传给云端助手生成建议。你可以在发送前取消，库存、作品和菜谱不会被自动修改。": {
-      "english": "Your text or image will be sent to the cloud assistant for suggestions. You can cancel before sending; inventory, works and recipes are never changed automatically.",
-      "englishVariants": [
-        "Your text or image will be sent to the cloud assistant for suggestions. You can cancel before sending; inventory, works and recipes are never changed automatically."
-      ]
-    },
     "发送语音": {
       "english": "Voice input",
       "englishVariants": [
@@ -2070,6 +2052,12 @@
       "english": "Keep scanning other packages, then review quantities and actual prices together.",
       "englishVariants": [
         "Keep scanning other packages, then review quantities and actual prices together."
+      ]
+    },
+    "可手动选择，使用云端额度或积分。": {
+      "english": "Optional; uses cloud allowance or credits.",
+      "englishVariants": [
+        "Optional; uses cloud allowance or credits."
       ]
     },
     "可用": {
@@ -2519,12 +2507,6 @@
         "Plan a weekly menu and ingredients"
       ]
     },
-    "安装未完成，请检查Wi-Fi、可用空间或重新下载。": {
-      "english": "Installation incomplete. Check Wi-Fi and free space, or download again.",
-      "englishVariants": [
-        "Installation incomplete. Check Wi-Fi and free space, or download again."
-      ]
-    },
     "完善公开资料，帮助你的收藏和作品更容易识别。": {
       "english": "Complete your public profile so your saved items and posts are easier to recognize.",
       "englishVariants": [
@@ -2795,10 +2777,10 @@
         "A plan draft is ready to review, and has not been saved. Open it, check the date, meal, recipe, servings and household, then save it yourself."
       ]
     },
-    "已切换到本地千问模型。": {
-      "english": "On-device Qwen selected.",
+    "已切换到免费 GLM。": {
+      "english": "Free GLM selected.",
       "englishVariants": [
-        "On-device Qwen selected."
+        "Free GLM selected."
       ]
     },
     "已加入家庭": {
@@ -3665,6 +3647,12 @@
         "Owner"
       ]
     },
+    "所选模型暂不可用，请稍后重试。": {
+      "english": "The selected model is unavailable. Please try again later.",
+      "englishVariants": [
+        "The selected model is unavailable. Please try again later."
+      ]
+    },
     "所需材料": {
       "english": "Ingredients",
       "englishVariants": [
@@ -4466,12 +4454,6 @@
         "Not now"
       ]
     },
-    "暂停下载": {
-      "english": "Pause download",
-      "englishVariants": [
-        "Pause download"
-      ]
-    },
     "暂无": {
       "english": "None",
       "englishVariants": [
@@ -4955,12 +4937,6 @@
         "Total paid for this item; leave blank if unknown"
       ]
     },
-    "本地千问模型": {
-      "english": "On-device Qwen model",
-      "englishVariants": [
-        "On-device Qwen model"
-      ]
-    },
     "本地模型未能完成回答，请检查模型或稍后重试。": {
       "english": "The local model could not finish. Check the model or try again later.",
       "englishVariants": [
@@ -5067,6 +5043,12 @@
       "english": "This turn only queried data or prepared a draft; no changes were saved. Results may be partial; open the original page to review.",
       "englishVariants": [
         "This turn only queried data or prepared a draft; no changes were saved. Results may be partial; open the original page to review."
+      ]
+    },
+    "本轮文字、图片、对话上下文及经授权读取的相关计划或库存会交给 %@ 处理。保存或修改仍需你确认。": {
+      "english": "Your text, images, conversation context and relevant plans or inventory read with permission will be processed by %@. Saving or changing data still requires your confirmation.",
+      "englishVariants": [
+        "Your text, images, conversation context and relevant plans or inventory read with permission will be processed by %@. Saving or changing data still requires your confirmation."
       ]
     },
     "本轮未执行请求中的保存、扣减或修改。请打开对应页面核对并自行确认操作。": {
@@ -5291,34 +5273,10 @@
         "Case %@: %@"
       ]
     },
-    "模型已校验，可离线使用": {
-      "english": "Model verified; available offline",
-      "englishVariants": [
-        "Model verified; available offline"
-      ]
-    },
-    "模型未安装或下载已暂停": {
-      "english": "Model not installed or download paused",
-      "englishVariants": [
-        "Model not installed or download paused"
-      ]
-    },
-    "模型来源与许可证": {
-      "english": "Model source and license",
-      "englishVariants": [
-        "Model source and license"
-      ]
-    },
     "模型管理": {
       "english": "Manage model",
       "englishVariants": [
         "Manage model"
-      ]
-    },
-    "模型约%.2f GB，首次使用需下载。安装后推理在手机上完成；模型不计入iCloud备份。": {
-      "english": "The model is about %.2f GB and requires an initial download. Inference then runs on your phone; the model is excluded from iCloud backup.",
-      "englishVariants": [
-        "The model is about %.2f GB and requires an initial download. Inference then runs on your phone; the model is excluded from iCloud backup."
       ]
     },
     "欢迎": {
@@ -5433,12 +5391,6 @@
       "english": "Looking up the product name…",
       "englishVariants": [
         "Looking up the product name…"
-      ]
-    },
-    "正在校验模型完整性…": {
-      "english": "Verifying model integrity…",
-      "englishVariants": [
-        "Verifying model integrity…"
       ]
     },
     "正在检查云端额度…": {
@@ -8661,6 +8613,12 @@
       "english": "Eyes closed",
       "englishVariants": [
         "Eyes closed"
+      ]
+    },
+    "问答需要联网。本地千问暂时停用，已有模型文件和聊天记录保留。": {
+      "english": "Chat requires internet. On-device Qwen is paused; existing model files and conversations are kept.",
+      "englishVariants": [
+        "Chat requires internet. On-device Qwen is paused; existing model files and conversations are kept."
       ]
     },
     "问菜谱、食材，或聊聊今天吃什么": {

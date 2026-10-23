@@ -24,6 +24,12 @@ xcodebuild -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 
 `project.yml` 是工程配置来源，修改后执行 `xcodegen generate --spec project.yml`；提交工程、共享 scheme 和 SPM 的 `Package.resolved`。生成后的挂钩会移除两个本地包在导航中的重复 Folder 引用，保留 SwiftPM 依赖，避免 Xcode 26.3 的包加载冲突；可用 `python3 scripts/remove_duplicate_local_package_folders.py --check` 检查。
 
+## AI 问答
+
+聊天默认使用免费 GLM：文字由 `glm-4.7-flash` 处理，图片由 `glm-4.6v-flash` 处理；文字模型明确返回容量繁忙、且尚未接收流式响应时，可在同一请求期限内改用免费视觉模型回答文字。DeepSeek 由用户手动选择，保留原有额度规则；免费模式失败不会自动转为付费调用。免费服务有容量限制，不承诺固定响应时间。
+
+本地千问入口暂时停用，已有模型文件、聊天和偏好保留。服务商选择随请求和断点恢复一起冻结，首次向不同服务商发送内容分别确认。知识检索、联网检索和业务工具沿用服务端 Agent；客户端不保存模型 API Key。启动配置必须公布 `assistantCapabilities.chatProviders`，未配置所选服务商时会提示暂不可用。
+
 ## 接口与环境
 
 - Debug：`https://test-api.yzsalingo.com/api/v1`，国内公网 HTTPS 测试服务。

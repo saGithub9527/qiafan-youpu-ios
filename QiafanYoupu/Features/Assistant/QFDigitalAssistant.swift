@@ -840,12 +840,14 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   private var selectedImage: UIImage?
   private var selectedImageData: Data?
   private var selectedImageMimeType = "image/jpeg"
-  private var useCloud = false
+  // Local Qwen is paused at the product entry; its files and diagnostic code are retained.
+  private var useCloud: Bool { true }
+  private var selectedProvider: QFAssistantProvider = .glmFree
   private var lifecycle = Set<AnyCancellable>()
   var onDismiss: (() -> Void)?
   fileprivate var onCharacterIntent: ((QFAssistantCharacterIntent) -> Void)?
 
-  private var cloudConsentKey: String { "qf.assistant.cloud-consent." + app.contentScope }
+  private var cloudConsentKey: String { selectedProvider.consentKey(scope: app.contentScope) }
 
   init(app: QFAppSession, applicationState: (@MainActor () -> UIApplication.State)? = nil, persistConversation: Bool = true) {
     self.app = app
@@ -920,7 +922,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     refreshImagePreview()
     conversationStore = QFAssistantConversationStore(scope: QFAssistantAgent.scope(app), persistent: persistConversation)
     conversationBinding = QFAssistantAgent.scope(app)
-    messages = conversationStore.load(); useCloud = false; expandedProcess.removeAll(); manuallyExpandedProcess.removeAll(); scrollFollow.jumpToLatest()
+    messages = conversationStore.load(); selectedProvider = .glmFree; expandedProcess.removeAll(); manuallyExpandedProcess.removeAll(); scrollFollow.jumpToLatest()
     refreshLocalizedControls(); renderMessages()
   }
 
@@ -1739,19 +1741,18 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   }
 
   private func refreshModeButton() {
-    let title = useCloud ? "DeepSeek  ▾" : "Qwen3.5-2B  ▾"
-    modeButton.setTitle(title, for: .normal)
-    modeButton.setTitleColor(useCloud ? QFUI.primary : QFUI.secondary, for: .normal)
-    modeButton.backgroundColor = useCloud ? QFUI.primary.withAlphaComponent(0.10) : QFUI.surfaceAlt
+    modeButton.setTitle(selectedProvider == .glmFree ? "GLM  ▾" : "DeepSeek  ▾", for: .normal)
+    modeButton.setTitleColor(QFUI.primary, for: .normal)
+    modeButton.backgroundColor = QFUI.primary.withAlphaComponent(0.10)
     modeButton.accessibilityLabel = app.text("切换 AI 模式", "Switch AI mode")
-    modeButton.accessibilityValue = useCloud ? "DeepSeek" : "Qwen3.5-2B"
+    modeButton.accessibilityValue = selectedProvider == .glmFree ? app.text("GLM · 免费", "GLM · Free") : "DeepSeek"
   }
 
   @objc private func toggleMode() {
     stopCapture()
     let menu = UIAlertController(title: app.text("切换 AI 模式", "Switch AI mode"), message: nil, preferredStyle: .actionSheet)
-    menu.addAction(UIAlertAction(title: app.text("本地千问模型", "On-device Qwen model"), style: .default) { [weak self] _ in self?.selectMode(cloud: false) })
-    menu.addAction(UIAlertAction(title: app.text("云端模型", "Cloud model"), style: .default) { [weak self] _ in self?.selectMode(cloud: true) })
+    menu.addAction(UIAlertAction(title: app.text("GLM · 免费", "GLM · Free"), style: .default) { [weak self] _ in self?.selectMode(provider: .glmFree) })
+    menu.addAction(UIAlertAction(title: "DeepSeek", style: .default) { [weak self] _ in self?.selectMode(provider: .deepSeek) })
     menu.addAction(UIAlertAction(title: app.text("模型管理", "Manage model"), style: .default) { [weak self] _ in
       guard let self else { return }
       let navigation = UINavigationController(rootViewController: QFLocalModelViewController(app: self.app))
@@ -1763,25 +1764,31 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     present(menu, animated: true)
   }
 
-  private func selectMode(cloud: Bool) {
-    stopCapture()
-    useCloud = cloud
-    refreshModeButton()
-    guard useCloud else {
-      QFOperationHUD.toast(app.text("已切换到本地千问模型。", "On-device Qwen selected."), in: view)
+  private func selectMode(provider: QFAssistantProvider) {
+    guard activeMessageID == nil else { return }
+    stopCapture(); selectedProvider = provider; refreshModeButton()
+    guard provider.available(in: app.configuration?.assistantCapabilities?.chatProviders) else {
+      QFOperationHUD.toast(app.text("所选模型暂不可用，请稍后重试。", "The selected model is unavailable. Please try again later."), in: view)
+      return
+    }
+    guard provider.requiresCredits else {
+      QFOperationHUD.toast(app.text("已切换到免费 GLM。", "Free GLM selected."), in: view)
       return
     }
     QFOperationHUD.toast(app.text("正在检查云端额度…", "Checking cloud credits…"), in: view)
+    let binding = conversationBinding
     Task { [weak self] in
       guard let self else { return }
       do {
         let snapshot = try await app.assistantCreditSnapshot()
-        guard self.useCloud else { return }
+        guard self.selectedProvider == provider, self.conversationBinding == binding,
+          QFAssistantAgent.scope(self.app) == binding else { return }
         let copy = snapshot.billingEnabled
           ? app.format("云端已就绪，剩余 %d 积分。", "Cloud ready; %d credits remaining.", snapshot.balanceUnits)
           : app.text("云端已就绪，当前使用测试额度。", "Cloud ready; test allowance is active.")
         QFOperationHUD.toast(copy, in: self.view)
       } catch {
+        guard self.selectedProvider == provider, self.conversationBinding == binding else { return }
         QFOperationHUD.toast(app.text("暂时无法获取云端额度。", "Cloud credits are temporarily unavailable."), in: self.view)
       }
     }
@@ -1793,22 +1800,22 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     if activeMessageID != nil { cancelRequest(); return }
     guard !voice.isBusy else { return }
     guard conversationBinding == QFAssistantAgent.scope(app) else { reloadConversationScope(); return }
-    guard useCloud else {
-      sendMessageAfterSend(cloud: false)
+    guard selectedProvider.available(in: app.configuration?.assistantCapabilities?.chatProviders) else {
+      QFOperationHUD.toast(app.text("所选模型暂不可用，请稍后重试。", "The selected model is unavailable. Please try again later."), in: view)
       return
     }
     guard !UserDefaults.standard.bool(forKey: cloudConsentKey) else {
       sendMessageAfterSend(cloud: true)
       return
     }
-    let consentBinding = conversationBinding, consentKey = cloudConsentKey
+    let consentBinding = conversationBinding, consentKey = cloudConsentKey, consentProvider = selectedProvider
     let confirm = UIAlertController(
       title: app.text("允许云端处理？", "Allow cloud processing?"),
-      message: app.text("发送的文字或图片会传给云端助手生成建议。你可以在发送前取消，库存、作品和菜谱不会被自动修改。", "Your text or image will be sent to the cloud assistant for suggestions. You can cancel before sending; inventory, works and recipes are never changed automatically."),
+      message: app.format("本轮文字、图片、对话上下文及经授权读取的相关计划或库存会交给 %@ 处理。保存或修改仍需你确认。", "Your text, images, conversation context and relevant plans or inventory read with permission will be processed by %@. Saving or changing data still requires your confirmation.", selectedProvider == .glmFree ? "GLM" : "DeepSeek"),
       preferredStyle: .alert)
     confirm.addAction(UIAlertAction(title: app.text("取消", "Cancel"), style: .cancel))
     confirm.addAction(UIAlertAction(title: app.text("同意并发送", "Agree and send"), style: .default) { [weak self] _ in
-      guard let self, self.conversationBinding == consentBinding, QFAssistantAgent.scope(self.app) == consentBinding else { return }
+      guard let self, self.selectedProvider == consentProvider, self.conversationBinding == consentBinding, QFAssistantAgent.scope(self.app) == consentBinding else { return }
       UserDefaults.standard.set(true, forKey: consentKey)
       self.sendMessageAfterSend(cloud: true)
     })
@@ -1869,7 +1876,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     selectedImage = nil; selectedImageData = nil; attachment.isHidden = true; removeAttachment.isHidden = true
     refreshImagePreview()
     requestTask?.cancel(); let generation = UUID(); requestGeneration = generation
-    let binding = conversationBinding, id = UUID()
+    let binding = conversationBinding, id = UUID(), provider = selectedProvider
     activeMessageID = id; scrollFollow.jumpToLatest()
     messages.append(.init(id: id, role: "assistant", text: "", createdAt: Date(), state: "streaming",
       process: [.init(stage: "preparing", state: "running")], retryText: imageData == nil ? value : nil,
@@ -1884,7 +1891,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
         return self.messages.firstIndex(where: { $0.id == id })
       }
       do {
-        if imageData == nil, let plan = try await QFAssistantAgent.weeklyPlan(text: question, cloud: cloud, requestID: id, app: self.app,
+        if imageData == nil, let plan = try await QFAssistantAgent.weeklyPlan(text: question, cloud: cloud, requestID: id, app: self.app, provider: provider,
           progress: { [weak self] stage in guard let self, let index = currentIndex() else { return }; self.setProcess(stage: stage, index: index) }) {
           guard let index = currentIndex() else { return }
           self.messages[index].text = plan.answer; self.messages[index].sources = plan.sources
@@ -1898,7 +1905,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
           self.messages[index].notice = help.notice
           self.completeMessage(index: index)
         } else if cloud {
-          let response = try await self.app.assistantStream(text: question, history: history, imageData: imageData, mimeType: mimeType) { [weak self] event in
+          let response = try await self.app.assistantStream(text: question, history: history, imageData: imageData, mimeType: mimeType, provider: provider) { [weak self] event in
             guard let self, let index = currentIndex() else { return }
             switch event {
             case .status(let stage): self.setProcess(stage: stage, index: index)
@@ -2263,12 +2270,9 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   private func beginSpeechRecognition(token: UUID, binding: QFAgentScope) throws {
     guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: QFInterfaceLanguage.normalized(app.interfaceLanguage).localeIdentifier)),
       recognizer.isAvailable else { throw NSError(domain: "AssistantSpeechUnavailable", code: 1) }
-    guard useCloud || recognizer.supportsOnDeviceRecognition else {
-      throw NSError(domain: "AssistantLocalSpeechUnavailable", code: 2)
-    }
     let request = SFSpeechAudioBufferRecognitionRequest()
     request.shouldReportPartialResults = true
-    request.requiresOnDeviceRecognition = !useCloud
+    request.requiresOnDeviceRecognition = recognizer.supportsOnDeviceRecognition
     request.taskHint = .dictation
     speechRequest = request
     transcription = recognizer.recognitionTask(with: request) { [weak self] result, error in

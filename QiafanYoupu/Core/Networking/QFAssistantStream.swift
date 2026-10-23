@@ -2,6 +2,15 @@ import Foundation
 import Alamofire
 import QFSSE
 
+/// Closed routing identifiers. No endpoint, API key or arbitrary model comes from the device.
+enum QFAssistantProvider: String, CaseIterable {
+  case glmFree = "GLM_FREE"
+  case deepSeek = "DEEPSEEK"
+  var requiresCredits: Bool { self == .deepSeek }
+  func available(in providers: [String]?) -> Bool { providers?.contains(rawValue) == true }
+  func consentKey(scope: String) -> String { "qf.assistant.cloud-consent." + rawValue + "." + scope }
+}
+
 /// Capture once per operation so reconnects keep the original family and timezone.
 struct QFAssistantChatRequest: Encodable {
   let text: String
@@ -10,6 +19,7 @@ struct QFAssistantChatRequest: Encodable {
   let history: [QFOnDeviceInference.Turn]
   let householdId: String?
   let timeZone: String
+  var provider: String? = nil
 
   func encoded(imageData: Data?, mimeType: String) throws -> (body: Data, contentType: String) {
     guard let imageData else { return (try JSONEncoder().encode(self), "application/json") }
@@ -23,6 +33,7 @@ struct QFAssistantChatRequest: Encodable {
     form.append(try JSONEncoder().encode(history), withName: "history")
     if let householdId { form.append(Data(householdId.utf8), withName: "householdId") }
     form.append(Data(timeZone.utf8), withName: "timeZone")
+    if let provider { form.append(Data(provider.utf8), withName: "provider") }
     form.append(imageData, withName: "image", fileName: mimeType == "image/png" ? "image.png" : "image.jpg", mimeType: mimeType)
     return (try form.encode(), form.contentType)
   }

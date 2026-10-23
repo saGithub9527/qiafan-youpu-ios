@@ -629,8 +629,11 @@ final class QFAppSession: ObservableObject {
   }
 
   func assistantStream(text: String, history: [QFOnDeviceInference.Turn], imageData: Data?, mimeType: String,
-    allowWebSearch: Bool = true,
+    allowWebSearch: Bool = true, provider: QFAssistantProvider = .glmFree,
     onEvent: @escaping (QFAssistantStreamEvent) -> Void) async throws -> QFAssistantStreamResult {
+    guard provider.available(in: configuration?.assistantCapabilities?.chatProviders) else {
+      throw QFAPIError(code: 50300, message: self.text("所选模型暂不可用，请稍后重试。", "The selected model is unavailable. Please try again later."))
+    }
     let currentGeneration = generation, binding = QFAssistantAgent.scope(self)
     let networkEnabled = QFLocalModelViewController.networkEnabled(self)
     // Product retrieval is automatic; an internal bounded probe may still
@@ -644,7 +647,7 @@ final class QFAppSession: ObservableObject {
     }).map { QFOnDeviceInference.Turn(role: $0.role, content: $0.content) }
     let payload = QFAssistantChatRequest(text: text, allowCloud: true,
       allowWeb: configuration?.assistantCapabilities?.chatWebConsent == true ? allowWeb : nil, history: turns,
-      householdId: binding.household, timeZone: TimeZone.current.identifier)
+      householdId: binding.household, timeZone: TimeZone.current.identifier, provider: provider.rawValue)
     let (body, type) = try payload.encoded(imageData: imageData, mimeType: mimeType)
     let operationID = UUID(), token = api.accessToken
     func check() throws {

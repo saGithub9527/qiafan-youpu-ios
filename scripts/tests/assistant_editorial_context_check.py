@@ -21,7 +21,8 @@ def main():
     weekly_models = planning[planning.index("struct QFWeeklyPlanProposalDraft:"):
                              planning.index("private struct QFWeeklyPlanAcceptDraft:")]
     streaming = (root / "QiafanYoupu/Core/Networking/QFAssistantStream.swift").read_text()
-    stream_models = streaming[streaming.index("struct QFAssistantStreamResult:"):
+    provider_model = streaming[streaming.index("enum QFAssistantProvider:"):streaming.index("/// Capture once per operation")]
+    stream_models = provider_model + streaming[streaming.index("struct QFAssistantStreamResult:"):
                               streaming.index("/// Only transport-confirmed")]
     sources = [
         "QiafanYoupu/Features/Assistant/QFAssistantAgentContract.swift",
@@ -71,7 +72,7 @@ struct QFAPIError: Error { let code: Int; let message: String }
     throw weeklyFailure
   }
   func assistantStream(text: String, history: [QFOnDeviceInference.Turn], imageData: Data?, mimeType: String,
-    allowWebSearch: Bool = true, onEvent: @escaping (QFAssistantStreamEvent) -> Void) async throws -> QFAssistantStreamResult {
+    allowWebSearch: Bool = true, provider: QFAssistantProvider = .glmFree, onEvent: @escaping (QFAssistantStreamEvent) -> Void) async throws -> QFAssistantStreamResult {
     streamRequests.append((text, history, allowWebSearch))
     if let scopeAfterStream { contentScope = scopeAfterStream }
     guard let streamResponse else { throw UnexpectedBoundary.network }

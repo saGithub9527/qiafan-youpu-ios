@@ -1,4 +1,3 @@
-// Device-local interface translations.
 " 次" = "mal";
 "%@ %d 篇" = "%1$@ · %2$d";
 "%@ · %@ · %d 份" = "%@ · %@ · %d Portionen";
@@ -57,11 +56,13 @@
 "Apple 登录暂未开放。" = "Anmelden mit Apple ist noch nicht verfügbar.";
 "Apple 身份" = "Apple ID";
 "Debug 模式下，应用发起请求后会显示在这里。" = "Von der App im Debug-Modus gesendete Anfragen erscheinen hier.";
+"GLM · 免费" = "GLM · Kostenlos";
 "HTTP 状态码：%@" = "HTTP-Status: %1$@";
 "URL / 接口" = "URL / API";
 "• 有做菜记录     ◦ 有待做计划" = "• Kochverlauf     ◦ Geplant";
 "✓ 已做" = "✓ Erledigt";
 "。保留账号资料、草稿和未提交图片视频。" = ". Kontodaten, Entwürfe und nicht eingereichte Medien werden aufbewahrt.";
+"七天方案已保存到饮食计划，补购清单已按库存生成。已有餐次和完成记录已保留。" = "Der Siebentageplan wurde gespeichert und die Einkaufsliste unter Berücksichtigung der Vorräte erstellt. Vorhandene Mahlzeiten und abgeschlossene Einträge bleiben erhalten.";
 "上一个月" = "Vormonat";
 "上一页" = "Vorherige";
 "上个月" = "Vormonat";
@@ -71,6 +72,7 @@
 "上拉加载更多作品" = "Nach oben ziehen, um weitere Beiträge zu laden";
 "上移" = "Nach oben bewegen";
 "下一个月" = "Nächster Monat";
+"下一步（%d 种食材）" = "Weiter (%d Zutaten)";
 "下一页" = "Nächste";
 "下个月" = "Nächster Monat";
 "下厨天数" = "Kochtage";
@@ -79,8 +81,6 @@
 "下周" = "Nächste Woche";
 "下拉刷新可获取最新状态" = "Zum Aktualisieren des Status nach unten ziehen";
 "下移" = "Nach unten bewegen";
-"下载中：%d%%" = "Wird heruntergeladen: %d%%";
-"下载模型（仅Wi-Fi）" = "Modell herunterladen (nur WLAN)";
 "不吃的食材" = "Ausgeschlossene Zutaten";
 "不设置地区" = "Keine Region festlegen";
 "不限" = "Beliebig";
@@ -104,9 +104,7 @@
 "云端已就绪，剩余 %d 积分。" = "Cloud bereit; noch %d Credits verfügbar.";
 "云端已就绪，当前使用测试额度。" = "Cloud bereit; das Testkontingent ist aktiv.";
 "云端提醒设置尚未加载。" = "Die Einstellungen für Cloud-Erinnerungen werden noch geladen.";
-"云端模型" = "Cloud-Modell";
 "仅使用本机通知，不会把库存或对话内容放进通知。" = "Es werden nur lokale Mitteilungen verwendet; Vorräte und Chats stehen nicht darin.";
-"仅删除下载的模型文件，对话和账号数据不会删除。" = "Es wird nur die heruntergeladene Modelldatei gelöscht. Gespräche und Kontodaten bleiben erhalten.";
 "仅发送你输入的文字和当前语言，不会直接修改库存或发布内容。" = "Only your text and language are sent; inventory and publishing are never changed directly.";
 "仅在已有计划时发送" = "Nur senden, wenn eine Mahlzeit geplant ist";
 "仅展示已经核对的对应语言内容" = "Es wird nur geprüfter Inhalt in der ausgewählten Sprache angezeigt";
@@ -121,11 +119,14 @@
 "从相册选择" = "Von Fotos auswählen";
 "从第一道想做的菜开始，" = "Beginne mit dem ersten Gericht, das du zubereiten möchtest";
 "从食材库选择" = "Aus Zutaten auswählen";
+"以下是饮食安排建议，本轮尚未加入日历计划。" = "Hier sind Vorschläge für deine Mahlzeiten. Sie wurden noch nicht in deinen Kalender eingetragen.";
 "价格待补全" = "Preis fehlt";
 "份数需为 1–100。" = "Die Portionszahl muss zwischen 1 und 100 liegen.";
 "份数需为1至100。" = "Die Portionen müssen zwischen 1 und 100 liegen.";
 "份量、时间与做法请结合实际调整，\n菜谱内容不能替代专业健康建议。" = "Passe Portionen, Zeitplanung und Methoden nach Bedarf an.\nRezepte ersetzen keine professionelle Gesundheitsberatung.";
 "优先使用现有库存" = "Vorhandenen Vorrat bevorzugen";
+"优先利用已有食材，也允许为合理搭配补购" = "Vorhandene Zutaten bevorzugen und bei Bedarf für den Speiseplan zukaufen.";
+"优先利用库存，缺少的食材可补购。默认每餐 1 份；这是一般饮食安排，不含个人热量处方。确认后将保留已有餐次，并生成扣除库存后的补购清单。" = "Vorräte werden bevorzugt; fehlende Zutaten können zugekauft werden. Standardmäßig ist eine Portion pro Mahlzeit vorgesehen. Dies ist ein allgemeiner Speiseplan ohne persönliche Kalorienvorgabe. Nach der Bestätigung bleiben vorhandene Mahlzeiten erhalten und die Einkaufsliste wird um die Vorräte reduziert.";
 "优惠" = "Rabatt";
 "会员订阅" = "Mitgliedschaft";
 "会员订阅尚未开放" = "Die Mitgliedschaft ist noch nicht verfügbar";
@@ -140,6 +141,7 @@
 "你好，我可以帮你规划饮食、整理食材和生成待确认草稿。" = "Ich helfe bei Essensplanung, Zutaten und prüfbaren Entwürfen.";
 "你已说明：%@" = "Deine Vorgaben: %@";
 "你提交的投诉和申诉会显示在这里。" = "Ihre Beschwerden und Einsprüche werden hier angezeigt.";
+"你的用餐计划即将开始，打开查看备菜和库存。" = "Deine geplante Mahlzeit beginnt bald. Öffne die App, um Vorbereitung und Vorräte zu prüfen.";
 "你的订阅状态已记录；具体权益将在方案确定后公布。" = "Dein Abonnement ist erfasst. Die Vorteile werden nach Festlegung der Tarife veröffentlicht.";
 "你的饮食助手还在等你，打开看看今天的安排。" = "Dein Ernährungsassistent wartet. Öffne die App und prüfe den heutigen Plan.";
 "使用刀具、热油及电器时请注意安全，\n未成年人应在成人指导下操作。" = "Vorsicht mit Messern, heißem Öl und Geräten.\nKinder sollten nur unter Aufsicht eines Erwachsenen kochen.";
@@ -154,6 +156,7 @@
 "例如：把、条、罐" = "Zum Beispiel: Bund, Streifen, Dose";
 "例如：把两把菠菜和一盒豆腐加入库存" = "For example: add two handfuls of spinach and one box of tofu to inventory";
 "保存" = "Speichern";
+"保存七天计划与补购清单" = "Siebentageplan und Einkaufsliste speichern";
 "保存中" = "Wird gespeichert";
 "保存为菜谱草稿（编辑页待设计）" = "Als Rezeptentwurf speichern (Bearbeitungsseite noch in Gestaltung)";
 "保存修改" = "Änderungen speichern";
@@ -210,6 +213,7 @@
 "先补记当天实际做菜信息。" = "Füge zuerst hinzu, was du an diesem Tag gekocht hast.";
 "先选择食材" = "Zuerst Zutaten wählen";
 "克" = "g";
+"免费文字问答，默认使用。" = "Kostenloser Textchat, standardmäßig ausgewählt.";
 "入库" = "Zugang";
 "入库 %@" = "Hinzugefügt am %@";
 "入库、使用和调整会显示在这里。" = "Zugänge, Verbrauch und Anpassungen werden hier angezeigt.";
@@ -259,7 +263,6 @@
 "删除" = "Löschen";
 "删除后可从饮食计划重新生成。" = "Die Liste kann anschließend aus dem Speiseplan neu erstellt werden.";
 "删除后将不再展示，不会删除关联菜谱或做菜记录。" = "Es wird nicht mehr angezeigt. Verwandte Rezepte und Kochverlauf werden gespeichert.";
-"删除本地模型" = "Lokales Modell löschen";
 "删除草稿" = "Entwurf löschen";
 "删除记忆" = "Speicher löschen";
 "删除评分" = "Bewertung entfernen";
@@ -298,6 +301,7 @@
 "单位：%@" = "Einheit: %@";
 "单日" = "Ein Tag";
 "危险操作" = "Kritische Aktionen";
+"即将准备：%@。打开查看备菜和库存。" = "Bald vorzubereiten: %@. Öffne die App, um Vorbereitung und Vorräte zu prüfen.";
 "历史库存依据待确认" = "Bestandshistorie prüfen";
 "原因：%@" = "Grund: %1$@";
 "原始用量：%@" = "Ursprüngliche Menge: %@";
@@ -309,9 +313,9 @@
 "发现属于你的好味道。" = "und entdecke deine eigenen Geschmäcker.";
 "发现疑似侵权图片时，请提供图片所在条目或链接、原作品、权利或授权材料，以及可以联系你的方式。投稿者也可以对处理结果提出申诉。" = "Wenn Sie ein potenziell urheberrechtsverletzendes Bild finden, geben Sie den Artikel oder Link, das Originalwerk, den Nachweis der Rechte oder Genehmigung sowie Ihre Kontaktdaten an. Mitwirkende können auch gegen eine Entscheidung Berufung einlegen.";
 "发送" = "Enviar";
+"免费图片理解；文字模型繁忙时也可接续回答。" = "Kostenlose Bilderkennung; antwortet auch, wenn das Textmodell ausgelastet ist.";
 "发送并生成草稿" = "Send and make a draft";
 "发送消息" = "Nachricht";
-"发送的文字或图片会传给云端助手生成建议。你可以在发送前取消，库存、作品和菜谱不会被自动修改。" = "Ihr Text oder Bild wird zur Erstellung von Vorschlägen an den Cloud-Assistenten gesendet. Sie können vor dem Senden abbrechen; Vorräte, Werke und Rezepte werden nicht automatisch geändert.";
 "发送语音" = "Spracheingabe";
 "取消" = "Abbrechen";
 "取消关联" = "Verknüpfung aufheben";
@@ -332,6 +336,8 @@
 "只删除该笔支出记录，不更改库存或做菜记录。" = "Nur diese Ausgabe wird gelöscht. Bestand und Kochprotokoll bleiben unverändert.";
 "只有你点击“记住”的内容会出现在这里。" = "Hier erscheinen nur Inhalte, die du mit „Merken“ bestätigt hast.";
 "只能保存所选日期的菜品，请返回后重新打开当天记录。" = "Es können nur Gerichte für das ausgewählte Datum gespeichert werden. Gehen Sie zurück und öffnen Sie die Aufzeichnungen dieses Tages erneut.";
+"可以继续扫描其他商品，最后一起核对数量和实付价格。" = "Du kannst weitere Produkte scannen und anschließend Mengen und tatsächlich gezahlte Beträge gemeinsam prüfen.";
+"可手动选择，使用云端额度或积分。" = "Optional; verbraucht Cloud-Kontingent oder Guthaben.";
 "可用" = "Verfügbar";
 "可编辑" = "Bearbeiter";
 "可联系你的邮箱或联系方式" = "E-Mail oder andere Kontaktdaten";
@@ -346,6 +352,7 @@
 "向后移动" = "Später verschieben";
 "启用餐次提醒" = "Mahlzeitenerinnerungen aktivieren";
 "告诉 AI 你想添加什么，发送前会显示云端处理提示。" = "Tell AI what to add. A cloud-processing notice is shown before sending.";
+"周计划生成任务已提交，会同时考虑现有食材和合理补购。打开方案查看进度，核对后一次加入未来七天的计划。" = "Die Erstellung des Wochenplans wurde angefordert. Vorräte und nötige Zukäufe werden berücksichtigt. Öffne den Vorschlag, um den Fortschritt und die Inhalte zu prüfen, und füge anschließend alle sieben Tage zum Plan hinzu.";
 "周计划详情" = "Details zum Wochenplan";
 "和小狗厨师一起，" = "Mit unserem Welpenkoch kochen";
 "响应头" = "Antwort-Header";
@@ -405,7 +412,6 @@
 "安排一周菜单并整理需要的食材" = "Plane ein Wochenmenü und organisiere die Zutaten, die du benötigst";
 "安排一周菜单，可以先从明天的一顿饭开始。" = "Der Wochenplan kann mit einer einzigen Mahlzeit für morgen beginnen.";
 "安排一周菜单，整理所需食材，" = "Plane ein Wochenmenü und die Zutaten";
-"安装未完成，请检查Wi-Fi、可用空间或重新下载。" = "Die Installation ist unvollständig. Prüfe WLAN und freien Speicher oder lade das Modell erneut herunter.";
 "完善公开资料，帮助你的收藏和作品更容易识别。" = "Vervollständige dein öffentliches Profil, damit deine gespeicherten Elemente und Beiträge leichter erkannt werden.";
 "完成 %d 道" = "Abgeschlossen: %1$d";
 "完成打卡" = "Als gekocht markieren";
@@ -430,6 +436,7 @@
 "家里已有 · %d" = "Zu Hause · %d";
 "家里已有：%@" = "Zu Hause vorhanden: %@";
 "家里有" = "Vorrätig";
+"对准食材包装上的条形码\n可连续添加，最后统一核对入库" = "Richte die Kamera auf den Barcode der Verpackung\nFüge mehrere Produkte hinzu und prüfe sie gemeinsam vor dem Speichern im Kühlschrank";
 "将这份周计划加入日历？" = "Diesen Wochenplan zum Kalender hinzufügen?";
 "尊重原创，也支持依法授权的图片" = "Respektiere das Originalwerk und ordnungsgemäß lizenzierte Bilder";
 "小满的厨房" = "Xiaomans Küche";
@@ -450,7 +457,7 @@
 "已全部加载" = "Alle geladen";
 "已关联目录食材 · 更改" = "Mit Katalog verknüpft · Ändern";
 "已准备计划草稿入口，尚未保存。请打开后核对日期、餐次、菜谱、份数和家庭，再由你保存。" = "Der Planentwurf ist zur Prüfung bereit und wurde noch nicht gespeichert. Öffne ihn, prüfe Datum, Mahlzeit, Rezept, Portionen und Haushalt und speichere ihn anschließend selbst.";
-"已切换到本地千问模型。" = "Lokales Qwen-Modell ausgewählt.";
+"已切换到免费 GLM。" = "Kostenloses GLM ausgewählt.";
 "已加入家庭" = "Haushalt beigetreten";
 "已加入计划" = "Zum Plan hinzugefügt";
 "已勾选" = "Geprüft";
@@ -473,6 +480,9 @@
 "已放入冰箱" = "Zum Kühlschrank hinzugefügt";
 "已有计划会保留，重新生成采购单时将按剩余库存计算。" = "Deine Pläne bleiben erhalten. Beim erneuten Erstellen der Einkaufsliste werden die verbleibenden Vorräte berücksichtigt.";
 "已有采购草稿" = "Ein Einkaufsentwurf ist vorhanden";
+"已根据库存和可补购食材整理未来七天的三餐方案，默认每餐 1 份。打开方案可逐餐核对；确认后会加入计划，并按实际库存生成补购清单。" = "Ein Vorschlag mit drei Mahlzeiten täglich für die nächsten sieben Tage ist aus Vorräten und möglichen Zukäufen vorbereitet. Standardmäßig ist eine Portion pro Mahlzeit vorgesehen. Prüfe und bestätige ihn, um die Mahlzeiten hinzuzufügen und die Einkaufsliste anhand der tatsächlichen Vorräte zu erstellen.";
+"已添加 %d 种食材" = "%d Zutaten hinzugefügt";
+"已添加 %d 种食材，继续扫描下一件" = "%d Zutaten hinzugefügt. Scanne das nächste Produkt";
 "已添加 %d 项，已存在 %d 项" = "%d hinzugefügt; %d bereits vorhanden";
 "已清理" = "Cache gelöscht";
 "已知 %@ · %d 项待补全" = "Bekannt %@ · %d offen";
@@ -517,6 +527,8 @@
 "应用主题" = "Design anwenden";
 "应用到所有页面和操作控件" = "Über Seiten und Steuerelemente hinweg angewendet";
 "建议" = "Vorschlag";
+"开启并发送" = "Beginnen und senden";
+"开启新对话？" = "Neues Gespräch beginnen?";
 "开始之前，请先了解这些说明。" = "Bitte überprüfen Sie diese Notizen, bevor Sie beginnen.";
 "开始日期" = "Startdatum";
 "开始生成" = "Erstellung starten";
@@ -528,6 +540,7 @@
 "当前分类 %d 项 · 按收藏时间" = "%1$d in dieser Kategorie · Gespeichertes Datum";
 "当前分类中没有作品。" = "Es gibt keine Beiträge in dieser Kategorie.";
 "当前密码" = "Aktuelles Passwort";
+"当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "Die Kontextkapazität ist erreicht; es wurde noch nichts gesendet. Der Verlauf bleibt erhalten und diese Nachricht beginnt einen neuen Kontext. Nenne wichtige Bedingungen wie Allergien erneut.";
 "当前封面" = "Aktuelles Cover";
 "当前库存" = "Aktueller Bestand";
 "当前库存：%@ %@" = "Aktueller Vorrat: %@ %@";
@@ -588,6 +601,7 @@
 "我的评分 %d" = "Meine Bewertung %1$d";
 "我的食材" = "Meine Zutaten";
 "所有者" = "Eigentümer";
+"所选模型暂不可用，请稍后重试。" = "Das gewählte Modell ist nicht verfügbar. Versuche es später erneut.";
 "所需材料" = "Zutaten";
 "所需食材：%@" = "Benötigte Zutaten: %@";
 "手动填写" = "Manuell eingeben";
@@ -695,6 +709,7 @@
 "放弃未保存的修改？" = "Ungespeicherte Änderungen verwerfen?";
 "放弃未保存的提醒设置？" = "Ungespeicherte Erinnerungseinstellungen verwerfen?";
 "数量" = "Menge";
+"数量不明确的食材请在食材页核对。" = "Prüfe Zutaten mit unklaren Mengen auf der Zutatenseite.";
 "数量待确认" = "Menge bestätigen";
 "数量范围" = "Mengenbereich";
 "文件过大，图片最多8MB，视频最多20MB。" = "Die Datei ist zu groß. Fotos können bis zu 8 MB und Videos bis zu 20 MB groß sein.";
@@ -720,7 +735,6 @@
 "晚餐" = "Abendessen";
 "暂不可用" = "Nicht verfügbar";
 "暂不同意" = "Jetzt nicht";
-"暂停下载" = "Download pausieren";
 "暂无" = "Keine";
 "暂无作品" = "Keine Beiträge";
 "暂无做菜记录" = "Noch keine Kochaufzeichnungen";
@@ -748,6 +762,7 @@
 "暂时无法获取云端额度。" = "Cloud-Credits sind vorübergehend nicht verfügbar.";
 "暂时无法获取订阅状态" = "Abonnementstatus nicht verfügbar";
 "暂时无法读取入库批次" = "Bestandschargen derzeit nicht verfügbar";
+"暂未找到可核对的资料。请换一个更具体的问题。" = "Es wurde keine überprüfbare Quelle gefunden. Stelle eine konkretere Frage.";
 "暂未设置" = "Nicht festgelegt";
 "更换" = "Ändern";
 "更换关联菜谱" = "Verwandtes Rezept ändern";
@@ -800,16 +815,17 @@
 "未采用" = "Nicht akzeptiert";
 "本周" = "Diese Woche";
 "本商品本次实付总额，未知可留空" = "Für diesen Artikel gezahlter Gesamtbetrag; leer lassen, wenn unbekannt";
-"本地千问模型" = "Qwen-Modell auf dem Gerät";
 "本地模型未能完成回答，请检查模型或稍后重试。" = "Das lokale Modell konnte die Antwort nicht abschließen. Prüfe das Modell oder versuche es später erneut.";
 "本地模式当前支持文字，请移除图片或选择云端模式。" = "Der lokale Modus unterstützt derzeit Text. Entferne die Bilder oder wähle den Cloud-Modus.";
 "本地生成超时，请稍后重试或缩短问题。" = "Die lokale Generierung hat das Zeitlimit überschritten. Versuche es später erneut oder kürze deine Frage.";
+"本批扫描已保留，可以加入当前草稿或先处理原草稿。" = "Dieser Scan-Stapel wurde aufbewahrt. Füge ihn zum aktuellen Entwurf hinzu oder bearbeite zuerst den bestehenden Entwurf.";
 "本月" = "Dieser Monat";
 "本月完成" = "Diesen Monat gekocht";
 "本月消耗成本" = "Zutatenkosten dieses Monats";
 "本月记录" = "Dieser Monat";
 "本月还没有做菜记录" = "Keine Kocheinträge in diesem Monat";
 "本机登录凭证损坏，请联系支持处理，避免生成重复账号。" = "Die Anmeldedaten auf diesem Gerät sind beschädigt. Wenden Sie sich an den Support, damit kein doppeltes Konto erstellt wird.";
+"本机知识库没有这道菜可核对的做法。请打开菜谱页搜索已发布菜谱。" = "Die lokale Wissensbasis enthält keine überprüfbare Anleitung für dieses Gericht. Öffne die Rezepte und suche nach veröffentlichten Gerichten.";
 "本机知识模式：未查询远端菜谱、计划或库存。" = "Lokaler Wissensmodus: Rezepte, Pläne und Vorräte auf dem Server wurden nicht abgefragt.";
 "本机草稿暂时无法保存，已保留当前页面内容，请精简后重试。" = "Der lokale Entwurf konnte nicht gespeichert werden. Diese Seite behält weiterhin Ihre Inhalte; kürzen Sie sie und versuchen Sie es erneut.";
 "本机草稿暂时无法保存，请精简内容后重试。" = "Der lokale Entwurf konnte nicht gespeichert werden. Kürzen Sie ihn und versuchen Sie es erneut.";
@@ -817,6 +833,7 @@
 "本机草稿状态同步失败" = "Der lokale Entwurfsstatus konnte nicht synchronisiert werden.";
 "本次消耗成本" = "Kosten der verbrauchten Zutaten";
 "本轮仅查询或准备草稿，未保存更改。数据可能仅含部分记录，请打开原页面核对。" = "In dieser Anfrage wurden nur Daten abgefragt oder ein Entwurf vorbereitet; Änderungen wurden nicht gespeichert. Die Daten enthalten möglicherweise nur einen Teil der Einträge. Öffne die ursprüngliche Seite zur Prüfung.";
+"本轮文字、图片、对话上下文及经授权读取的相关计划或库存会交给 %@ 处理。保存或修改仍需你确认。" = "%@ verarbeitet Text, Bilder, Gesprächskontext sowie berechtigt gelesene relevante Pläne oder Vorräte. Speichern oder Ändern erfordert weiterhin deine Bestätigung.";
 "本轮未执行请求中的保存、扣减或修改。请打开对应页面核对并自行确认操作。" = "Das angeforderte Speichern, Abbuchen vom Bestand oder Ändern wurde nicht ausgeführt. Öffne die entsprechende Seite, prüfe die Angaben und bestätige die Aktion selbst.";
 "本轮问题：%@" = "Aktuelle Frage: %@";
 "权利投诉与申诉" = "Rechtebeschwerde oder Einspruch";
@@ -846,17 +863,15 @@
 "标记为已购买" = "Als gekauft markieren";
 "校正" = "Korrektur";
 "校正时可输入负数" = "Eine Korrektur darf negativ sein";
+"核对七天方案与补购清单" = "Siebentagevorschlag und Einkaufsliste prüfen";
 "核对后打开作品编辑器" = "Review and open post editor";
 "核对后添加到库存" = "Review and add to inventory";
 "核对实际用量" = "Verwendete Mengen prüfen";
+"核对并入库" = "Prüfen und im Kühlschrank speichern";
 "核对并添加食材" = "Review and add ingredients";
 "核对计划草稿（尚未保存）" = "Planentwurf prüfen (noch nicht gespeichert)";
 "案件 %@：%@" = "Fall %1$@: %2$@";
-"模型已校验，可离线使用" = "Modell geprüft; offline verfügbar";
-"模型未安装或下载已暂停" = "Modell nicht installiert oder Download pausiert";
-"模型来源与许可证" = "Modellquelle und Lizenz";
 "模型管理" = "Modell verwalten";
-"模型约%.2f GB，首次使用需下载。安装后推理在手机上完成；模型不计入iCloud备份。" = "Das Modell ist etwa %.2f GB groß und muss vor der ersten Nutzung heruntergeladen werden. Nach der Installation läuft die Inferenz auf deinem Smartphone. Das Modell wird nicht in iCloud gesichert.";
 "欢迎" = "Begrüßung";
 "正在保存" = "Wird gespeichert";
 "正在准备麦克风…" = "Mikrofon wird vorbereitet…";
@@ -868,6 +883,7 @@
 "正在取消" = "Wird abgebrochen";
 "正在取消扣减" = "Abzug wird abgebrochen";
 "正在回答" = "Antwort wird erstellt";
+"正在安排七天饮食" = "Mahlzeiten für sieben Tage werden geplant";
 "正在思考" = "Denke nach";
 "正在扣减" = "Bestand wird abgezogen";
 "正在提交生成任务" = "Erstellungsauftrag wird gesendet";
@@ -875,7 +891,6 @@
 "正在整理文字…" = "Transkription wird abgeschlossen…";
 "正在更新成员" = "Mitglied wird aktualisiert";
 "正在查询商品名称…" = "Produktname wird gesucht…";
-"正在校验模型完整性…" = "Modellintegrität wird geprüft…";
 "正在检查云端额度…" = "Cloud-Credits werden geprüft…";
 "正在注销账号" = "Konto wird gelöscht";
 "正在生成" = "Wird erstellt";
@@ -927,6 +942,7 @@
 "没有满足当前条件的可用菜谱。" = "Keine verfügbaren Rezepte erfüllen die aktuellen Bedingungen.";
 "没有符合条件的结果。" = "Keine passenden Ergebnisse.";
 "没有识别到可入库食材，请换一张清晰照片。" = "Es wurden keine Zutaten für den Vorrat erkannt. Bitte ein schärferes Foto wählen.";
+"没有需要补购的食材" = "Es müssen keine Zutaten zugekauft werden";
 "注销后会发生什么" = "Was nach dem Löschen geschieht";
 "注销结果尚未确认，请在此页重试。" = "Die Löschung wurde nicht bestätigt. Versuchen Sie es auf dieser Seite erneut.";
 "注销结果尚未确认，请在账号与隐私中重试。" = "Die Löschung wurde nicht bestätigt. Versuchen Sie es unter „Konto und Datenschutz“ erneut.";
@@ -978,6 +994,7 @@
 "用量" = "Betrag";
 "用量待确认" = "Menge bestätigen";
 "用餐份数" = "Portionen";
+"用餐计划提醒" = "Erinnerung an den Essensplan";
 "申请撤回" = "Rücknahme beantragen";
 "电子签名（签署姓名）" = "Elektronische Unterschrift (vollständiger Name)";
 "界面语言" = "App-Sprache";
@@ -1015,6 +1032,7 @@
 "确认加入" = "Zum Plan hinzufügen";
 "确认后退出待审核队列。" = "Es wird die Überprüfungsliste nach der Bestätigung verlassen.";
 "确认完成做菜" = "Zubereitung bestätigen";
+"确认当前日期、餐次和份数后，一次加入计划并生成补购清单。不会替换已有餐次；库存不足部分列入补购，不会自动下单。" = "Bestätige Datum, Mahlzeiten und Portionen, um den Plan hinzuzufügen und die Einkaufsliste zu erstellen. Vorhandene Mahlzeiten werden nicht ersetzt. Fehlende Vorräte kommen auf die Liste; es wird nichts automatisch bestellt.";
 "确认所选购买日期" = "Kaufdatum bestätigen";
 "确认换菜" = "Austausch bestätigen";
 "确认撤回" = "Zurückziehen";
@@ -1062,6 +1080,7 @@
 "继续" = "Weiter";
 "继续使用" = "Eingeloggt bleiben";
 "继续扫描" = "Weiter scannen";
+"继续添加" = "Weitere hinzufügen";
 "继续编辑" = "Weiter bearbeiten";
 "编辑" = "Bearbeiten";
 "编辑中" = "Wird bearbeitet";
@@ -1122,6 +1141,7 @@
 "补记" = "Eintrag hinzufügen";
 "补记做菜" = "Kochen erfassen";
 "补记菜品" = "Gericht nachtragen";
+"补购清单" = "Einkaufsliste";
 "袋" = "Beutel";
 "裁剪头像" = "Profilfoto zuschneiden";
 "规格与有效期" = "Packung und Haltbarkeit";
@@ -1182,6 +1202,7 @@
 "请先在设置中退出并重新登录，再修改账号或密码。" = "Melde dich in den Einstellungen ab und wieder an, bevor du das Konto oder Passwort änderst.";
 "请先处理上次保存结果，再添加商品。" = "Vor dem Hinzufügen von Artikeln zuerst das Ergebnis des letzten Speichervorgangs prüfen.";
 "请先处理当前草稿，再重试这条问题。" = "Bearbeite zuerst den aktuellen Entwurf und versuche diese Frage dann erneut.";
+"请先处理采购草稿，再添加本批食材。" = "Bearbeite zuerst den Einkaufsentwurf, bevor du diese Zutaten hinzufügst.";
 "请先完成当前编辑" = "Schließe zuerst die aktuelle Bearbeitung ab";
 "请先完成或保留当前编辑，返回后会打开所选日期。" = "Schließe die aktuelle Bearbeitung ab oder speichere den Entwurf. Wenn du zurückkehrst, wird das ausgewählte Datum geöffnet.";
 "请先恢复其他日期的旧草稿，再继续编辑。当天已填好的菜品仍可保存。" = "Stelle die älteren Entwürfe für andere Daten wieder her, bevor du fortfährst. Du kannst bereits abgeschlossene Gerichte für diesen Tag trotzdem speichern.";
@@ -1324,6 +1345,7 @@
 "还需" = "Noch nötig";
 "这一周，" = "Plane deine Mahlzeiten";
 "这个条码已在草稿中，请直接修改原商品的数量。" = "Dieser Barcode ist bereits im Entwurf. Die Menge des vorhandenen Artikels direkt ändern.";
+"这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。" = "Diese Anfrage enthält Vorgaben, die ausdrücklich geprüft werden müssen. Bestätige Portionen, Budget und ausgeschlossene Zutaten in den Wochenplaneinstellungen. In diesem Schritt wurde kein Plan gespeichert.";
 "这会删除个人记录并退出所有设备，操作无法撤销。" = "Ihre persönlichen Einträge werden gelöscht und Sie werden auf allen Geräten abgemeldet. Dies kann nicht rückgängig gemacht werden.";
 "这天还没有做菜记录" = "Keine Kocheinträge an diesem Tag";
 "这批库存原始数量" = "Ursprüngliche Menge dieser Charge";
@@ -1403,6 +1425,7 @@
 "键盘输入" = "Tastatureingabe";
 "门店内部条码需由门店提供商品资料，请手动填写。" = "Für interne Strichcodes werden die Produktdaten des Geschäfts benötigt. Gib das Produkt manuell ein.";
 "闭眼" = "Augen geschlossen";
+"问答需要联网。本地千问暂时停用，已有模型文件和聊天记录保留。" = "Chat benötigt Internet. Lokales Qwen ist pausiert; Modelldateien und Gespräche bleiben erhalten.";
 "问菜谱、食材，或聊聊今天吃什么" = "Fragen zu Rezepten, Zutaten oder dem heutigen Essen";
 "问题" = "Problem";
 "阅读完整图片侵权保护规则" = "Gesamte Bilderrechte-Richtlinie lesen";
@@ -1451,36 +1474,3 @@
 "，有做菜记录" = ", mit Kocheintrag";
 "，没有记录" = ", keine Historie";
 "：" = ":";
-"七天方案已保存到饮食计划，补购清单已按库存生成。已有餐次和完成记录已保留。" = "Der Siebentageplan wurde gespeichert und die Einkaufsliste unter Berücksichtigung der Vorräte erstellt. Vorhandene Mahlzeiten und abgeschlossene Einträge bleiben erhalten.";
-"下一步（%d 种食材）" = "Weiter (%d Zutaten)";
-"优先利用已有食材，也允许为合理搭配补购" = "Vorhandene Zutaten bevorzugen und bei Bedarf für den Speiseplan zukaufen.";
-"优先利用库存，缺少的食材可补购。默认每餐 1 份；这是一般饮食安排，不含个人热量处方。确认后将保留已有餐次，并生成扣除库存后的补购清单。" = "Vorräte werden bevorzugt; fehlende Zutaten können zugekauft werden. Standardmäßig ist eine Portion pro Mahlzeit vorgesehen. Dies ist ein allgemeiner Speiseplan ohne persönliche Kalorienvorgabe. Nach der Bestätigung bleiben vorhandene Mahlzeiten erhalten und die Einkaufsliste wird um die Vorräte reduziert.";
-"你的用餐计划即将开始，打开查看备菜和库存。" = "Deine geplante Mahlzeit beginnt bald. Öffne die App, um Vorbereitung und Vorräte zu prüfen.";
-"保存七天计划与补购清单" = "Siebentageplan und Einkaufsliste speichern";
-"即将准备：%@。打开查看备菜和库存。" = "Bald vorzubereiten: %@. Öffne die App, um Vorbereitung und Vorräte zu prüfen.";
-"可以继续扫描其他商品，最后一起核对数量和实付价格。" = "Du kannst weitere Produkte scannen und anschließend Mengen und tatsächlich gezahlte Beträge gemeinsam prüfen.";
-"周计划生成任务已提交，会同时考虑现有食材和合理补购。打开方案查看进度，核对后一次加入未来七天的计划。" = "Die Erstellung des Wochenplans wurde angefordert. Vorräte und nötige Zukäufe werden berücksichtigt. Öffne den Vorschlag, um den Fortschritt und die Inhalte zu prüfen, und füge anschließend alle sieben Tage zum Plan hinzu.";
-"对准食材包装上的条形码\n可连续添加，最后统一核对入库" = "Richte die Kamera auf den Barcode der Verpackung\nFüge mehrere Produkte hinzu und prüfe sie gemeinsam vor dem Speichern im Kühlschrank";
-"已根据库存和可补购食材整理未来七天的三餐方案，默认每餐 1 份。打开方案可逐餐核对；确认后会加入计划，并按实际库存生成补购清单。" = "Ein Vorschlag mit drei Mahlzeiten täglich für die nächsten sieben Tage ist aus Vorräten und möglichen Zukäufen vorbereitet. Standardmäßig ist eine Portion pro Mahlzeit vorgesehen. Prüfe und bestätige ihn, um die Mahlzeiten hinzuzufügen und die Einkaufsliste anhand der tatsächlichen Vorräte zu erstellen.";
-"已添加 %d 种食材" = "%d Zutaten hinzugefügt";
-"已添加 %d 种食材，继续扫描下一件" = "%d Zutaten hinzugefügt. Scanne das nächste Produkt";
-"数量不明确的食材请在食材页核对。" = "Prüfe Zutaten mit unklaren Mengen auf der Zutatenseite.";
-"本批扫描已保留，可以加入当前草稿或先处理原草稿。" = "Dieser Scan-Stapel wurde aufbewahrt. Füge ihn zum aktuellen Entwurf hinzu oder bearbeite zuerst den bestehenden Entwurf.";
-"核对七天方案与补购清单" = "Siebentagevorschlag und Einkaufsliste prüfen";
-"核对并入库" = "Prüfen und im Kühlschrank speichern";
-"正在安排七天饮食" = "Mahlzeiten für sieben Tage werden geplant";
-"没有需要补购的食材" = "Es müssen keine Zutaten zugekauft werden";
-"用餐计划提醒" = "Erinnerung an den Essensplan";
-"确认当前日期、餐次和份数后，一次加入计划并生成补购清单。不会替换已有餐次；库存不足部分列入补购，不会自动下单。" = "Bestätige Datum, Mahlzeiten und Portionen, um den Plan hinzuzufügen und die Einkaufsliste zu erstellen. Vorhandene Mahlzeiten werden nicht ersetzt. Fehlende Vorräte kommen auf die Liste; es wird nichts automatisch bestellt.";
-"继续添加" = "Weitere hinzufügen";
-"补购清单" = "Einkaufsliste";
-"请先处理采购草稿，再添加本批食材。" = "Bearbeite zuerst den Einkaufsentwurf, bevor du diese Zutaten hinzufügst.";
-"这份请求包含需要明确核对的限制。请在周计划设置中确认人数、预算与排除食材，再生成方案；本轮没有保存计划。" = "Diese Anfrage enthält Vorgaben, die ausdrücklich geprüft werden müssen. Bestätige Portionen, Budget und ausgeschlossene Zutaten in den Wochenplaneinstellungen. In diesem Schritt wurde kein Plan gespeichert.";
-
-
-"开启新对话？" = "Neues Gespräch beginnen?";
-"当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "Die Kontextkapazität ist erreicht; es wurde noch nichts gesendet. Der Verlauf bleibt erhalten und diese Nachricht beginnt einen neuen Kontext. Nenne wichtige Bedingungen wie Allergien erneut.";
-"开启并发送" = "Beginnen und senden";
-"以下是饮食安排建议，本轮尚未加入日历计划。" = "Hier sind Vorschläge für deine Mahlzeiten. Sie wurden noch nicht in deinen Kalender eingetragen.";
-"本机知识库没有这道菜可核对的做法。请打开菜谱页搜索已发布菜谱。" = "Die lokale Wissensbasis enthält keine überprüfbare Anleitung für dieses Gericht. Öffne die Rezepte und suche nach veröffentlichten Gerichten.";
-"暂未找到可核对的资料。请换一个更具体的问题。" = "Es wurde keine überprüfbare Quelle gefunden. Stelle eine konkretere Frage.";

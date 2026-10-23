@@ -638,62 +638,62 @@
     },
     {
       "id": "guide-network",
-      "revision": "2026-10-21.1",
-      "reviewedAt": "2026-10-21",
+      "revision": "2026-10-23.1",
+      "reviewedAt": "2026-10-23",
       "validUntil": "2027-01-15",
       "sourceURL": null,
       "license": "Project-authored summary; linked source text is not redistributed.",
       "destination": "model_settings",
       "languages": {
         "zh-Hans": {
-          "title": "本地模型与联网查询",
-          "keywords": "本地 模型 千问 联网 离线 下载 云端",
-          "body": "在聊天的模式菜单打开模型管理。本机资料不足时会自动联网查找公开资料；查询不会附带聊天历史或家庭记录。模型下载仍需单独点击，不会自动切换云端推理。"
+          "title": "云端模型与联网查询",
+          "keywords": "本地 模型 千问 Qwen GLM DeepSeek 联网 离线 下载 云端",
+          "body": "本应用默认使用免费的 GLM 云端模式；DeepSeek 仅在你主动选择后使用，并按服务商规则计费。Qwen 本地入口已暂停，已下载文件保留。知识不足时会自动公网检索公开资料，检索查询不发送聊天历史、家庭记录等隐私资料。不会自动切换到付费模式。"
         },
         "zh-Hant": {
-          "title": "本地模型與連網查詢",
-          "keywords": "本地 模型 千問 連網 離線 下載 雲端",
-          "body": "在聊天的模式選單開啟模型管理。本機資料不足時會自動連網查找公開資料；查詢不會附帶聊天歷史或家庭紀錄。模型下載仍需另外點選，不會自動切換雲端推理。"
+          "title": "雲端模型與連網查詢",
+          "keywords": "本地 模型 千問 Qwen GLM DeepSeek 連網 離線 下載 雲端",
+          "body": "本應用預設使用免費的 GLM 雲端模式；DeepSeek 僅在你主動選擇後使用，並按服務商規則計費。Qwen 本地入口已暫停，已下載檔案保留。知識不足時會自動透過公網檢索公開資料，檢索查詢不傳送聊天記錄、家庭紀錄等隱私資料。不會自動切換到付費模式。"
         },
         "en": {
-          "title": "Local model and network lookups",
-          "keywords": "local model Qwen network offline download cloud",
-          "body": "Open model management from the chat mode menu. When local references are insufficient, public references are retrieved automatically, without attaching chat history or household records. Model download still needs a separate tap; inference never switches to the cloud automatically."
+          "title": "Cloud models and web lookups",
+          "keywords": "local model Qwen GLM DeepSeek network offline download cloud",
+          "body": "This app uses free GLM cloud mode by default. DeepSeek is optional, used only when you choose it and billed under the provider’s terms. The local Qwen entry is paused; downloaded files are kept. When knowledge is insufficient, the app automatically searches public web sources. Search queries never include private data such as chat history or household records. The app never automatically switches to a paid mode."
         },
         "ja": {
-          "title": "端末モデルとネット検索",
-          "keywords": "端末 モデル Qwen ネット オフライン ダウンロード クラウド",
-          "body": "チャットのモードメニューからモデル管理を開きます。端末内の資料が不足している場合は公開資料を自動でネット検索します。検索にチャット履歴や家庭の記録は添付しません。モデルのダウンロードには別途操作が必要で、クラウド推論へ自動で切り替えることはありません。"
+          "title": "クラウドモデルとネット検索",
+          "keywords": "端末 モデル Qwen GLM DeepSeek ネット オフライン ダウンロード クラウド",
+          "body": "本アプリの標準は無料の GLM クラウドモードです。DeepSeek は自分で選択した場合のみ利用し、提供元の規定に従って課金されます。端末内 Qwen の入口は休止中で、ダウンロード済みファイルは保持されます。知識が不足する場合は公開ウェブ情報を自動検索します。検索クエリにチャット履歴や家庭の記録などの個人情報は送信しません。有料モードへ自動で切り替えることはありません。"
         },
         "ko": {
-          "title": "기기 모델과 네트워크 조회",
-          "keywords": "기기 모델 Qwen 네트워크 오프라인 다운로드 클라우드",
-          "body": "채팅 모드 메뉴에서 모델 관리를 여세요. 기기 내 자료가 부족하면 공개 자료를 자동으로 온라인에서 검색하며, 채팅 기록이나 가족 기록을 첨부하지 않아요. 모델은 별도로 눌러 다운로드해야 하며 클라우드 추론으로 자동 전환되지 않아요."
+          "title": "클라우드 모델과 웹 검색",
+          "keywords": "기기 모델 Qwen GLM DeepSeek 네트워크 오프라인 다운로드 클라우드",
+          "body": "이 앱은 무료 GLM 클라우드 모드를 기본으로 사용해요. DeepSeek는 직접 선택한 경우에만 사용하며 제공업체 규정에 따라 요금이 부과돼요. 기기 내 Qwen 진입 기능은 일시 중지되었으며 다운로드한 파일은 유지돼요. 지식이 부족하면 공개 웹 자료를 자동으로 검색해요. 검색어에 채팅 기록이나 가족 기록 등 개인 정보를 보내지 않아요. 유료 모드로 자동 전환하지 않아요."
         },
         "ru": {
-          "title": "Локальная модель и сеть",
-          "keywords": "локальная модель Qwen сеть офлайн загрузка облако",
-          "body": "Откройте управление моделью в меню режима чата. Если локальных материалов недостаточно, открытые источники ищутся автоматически, без передачи истории чата или семейных записей. Загрузку модели нужно запускать отдельно; автоматического перехода к облачной модели нет."
+          "title": "Облачные модели и поиск в сети",
+          "keywords": "локальная модель Qwen GLM DeepSeek сеть офлайн загрузка облако",
+          "body": "По умолчанию приложение использует бесплатный облачный режим GLM. DeepSeek доступен только по вашему выбору и оплачивается по правилам поставщика. Вход в локальный Qwen приостановлен, загруженные файлы сохранены. При недостатке знаний приложение автоматически ищет открытые материалы в интернете. Поисковые запросы не содержат личных данных, включая историю чата и семейные записи. Автоматического перехода в платный режим нет."
         },
         "es": {
-          "title": "Modelo local y consultas de red",
-          "keywords": "modelo local Qwen red sin conexión descarga nube",
-          "body": "Abra la gestión del modelo desde el menú del modo de chat. Si faltan referencias locales, se buscan fuentes públicas automáticamente sin adjuntar el historial del chat ni los registros familiares. La descarga del modelo requiere una acción aparte; no se cambia automáticamente a la inferencia en la nube."
+          "title": "Modelos en la nube y búsquedas web",
+          "keywords": "modelo local Qwen GLM DeepSeek red sin conexión descarga nube",
+          "body": "La aplicación usa por defecto el modo gratuito de GLM en la nube. DeepSeek solo se usa si lo eliges y se factura según las condiciones del proveedor. El acceso local a Qwen está pausado; se conservan los archivos descargados. Si faltan conocimientos, se buscan fuentes públicas en la web automáticamente. Las consultas no envían datos privados, como el historial del chat o los registros familiares. La aplicación nunca cambia automáticamente a un modo de pago."
         },
         "fr": {
-          "title": "Modèle local et requêtes réseau",
-          "keywords": "modèle local Qwen réseau hors ligne téléchargement cloud",
-          "body": "Ouvrez la gestion du modèle depuis le menu du mode du chat. Si les références locales sont insuffisantes, des sources publiques sont recherchées automatiquement, sans joindre l’historique du chat ni les données du foyer. Le téléchargement du modèle nécessite une action distincte ; aucun passage automatique à l’inférence cloud n’a lieu."
+          "title": "Modèles cloud et recherche web",
+          "keywords": "modèle local Qwen GLM DeepSeek réseau hors ligne téléchargement cloud",
+          "body": "L’application utilise par défaut le mode cloud GLM gratuit. DeepSeek est utilisé uniquement si vous le choisissez, avec une facturation selon les conditions du fournisseur. L’accès local à Qwen est suspendu ; les fichiers téléchargés sont conservés. Si les connaissances sont insuffisantes, des sources publiques sur le web sont recherchées automatiquement. Les requêtes ne transmettent aucune donnée privée, comme l’historique du chat ou les données du foyer. Aucun passage automatique à un mode payant n’a lieu."
         },
         "de": {
-          "title": "Lokales Modell und Netzwerkabfragen",
-          "keywords": "lokales Modell Qwen Netzwerk offline Download Cloud",
-          "body": "Öffne die Modellverwaltung im Chatmodus. Reichen lokale Quellen nicht aus, werden öffentliche Quellen automatisch gesucht, ohne Chatverlauf oder Haushaltsdaten anzuhängen. Der Modelldownload muss separat gestartet werden; die Inferenz wechselt nicht automatisch in die Cloud."
+          "title": "Cloudmodelle und Websuche",
+          "keywords": "lokales Modell Qwen GLM DeepSeek Netzwerk offline Download Cloud",
+          "body": "Die App verwendet standardmäßig den kostenlosen GLM-Cloudmodus. DeepSeek wird nur auf deine ausdrückliche Auswahl genutzt und nach den Bedingungen des Anbieters abgerechnet. Der lokale Zugang zu Qwen ist pausiert; heruntergeladene Dateien bleiben erhalten. Bei Wissenslücken sucht die App automatisch in öffentlichen Webquellen. Suchanfragen senden keine privaten Daten wie Chatverlauf oder Haushaltsdaten. Die App wechselt nie automatisch in einen kostenpflichtigen Modus."
         },
         "pt-BR": {
-          "title": "Modelo local e consultas de rede",
-          "keywords": "modelo local Qwen rede offline download nuvem",
-          "body": "Abra o gerenciamento do modelo pelo menu do modo de chat. Se as referências locais forem insuficientes, fontes públicas serão buscadas automaticamente, sem anexar o histórico do chat ou registros familiares. O download do modelo exige uma ação separada; não há mudança automática para inferência na nuvem."
+          "title": "Modelos na nuvem e buscas na web",
+          "keywords": "modelo local Qwen GLM DeepSeek rede offline download nuvem",
+          "body": "O aplicativo usa por padrão o modo gratuito do GLM na nuvem. O DeepSeek só é usado se você o escolher, com cobrança conforme as regras do provedor. O acesso local ao Qwen está pausado; os arquivos baixados são mantidos. Se faltar conhecimento, o aplicativo busca automaticamente fontes públicas na web. As consultas não enviam dados privados, como histórico do chat ou registros familiares. O aplicativo nunca muda automaticamente para um modo pago."
         }
       }
     },
