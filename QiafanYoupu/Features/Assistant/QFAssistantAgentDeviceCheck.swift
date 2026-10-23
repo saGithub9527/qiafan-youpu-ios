@@ -120,6 +120,52 @@ enum QFAssistantAgentDeviceCheck {
   }
   static func startIfRequested(app: QFAppSession) {
     let arguments = ProcessInfo.processInfo.arguments
+    if !started, arguments.contains("-QFVerifyFreeDietRetrieval") {
+      started = true
+      task = Task {
+        defer { task = nil }
+        let index = arguments.firstIndex(of: "-QFCheckRun")
+        let run = index.flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil } ?? "invalid"
+        var result: [String: Any] = ["runID": run, "status": "IN_PROGRESS", "provider": "GLM_FREE",
+          "paidCalls": 0, "businessWrites": 0, "conversationWrites": 0]
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+          .appendingPathComponent("assistant-free-diet-check.json")
+        func save() {
+          if let data = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) {
+            try? data.write(to: url, options: .atomic)
+          }
+        }
+        save()
+        do {
+          guard UUID(uuidString: run) != nil else { throw CancellationError() }
+          for _ in 0..<20 {
+            if app.user != nil { break }
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+          }
+          guard app.user != nil else { throw NSError(domain: "FreeDietCheckRequiresSession", code: 1) }
+          let binding = QFAssistantAgent.scope(app), began = Date()
+          var streamed = ""
+          // Fixed public question only; no weekly-proposal creation or chat storage.
+          let response = try await app.assistantStream(text: "帮我制定减肥计划", history: [], imageData: nil,
+            mimeType: "image/jpeg", provider: .glmFree) { event in
+              if case .delta(let text) = event { streamed += text }
+            }
+          guard QFAssistantAgent.scope(app) == binding else { throw CancellationError() }
+          result["elapsedSeconds"] = Date().timeIntervalSince(began)
+          result["answer"] = response.answer; result["streamMatches"] = streamed == response.answer
+          result["sourceCount"] = response.sources?.count ?? 0
+          result["sourceURLs"] = (response.sources ?? []).compactMap(\.url)
+          guard streamed == response.answer, !response.answer.isEmpty, response.sources?.isEmpty == false else {
+            throw NSError(domain: "FreeDietCheckNeedsSourcedAnswer", code: 2)
+          }
+          result["status"] = "SOURCED_ANSWER_RECEIVED"
+        } catch {
+          result["status"] = "FAILED"; result["error"] = (error as NSError).localizedDescription
+        }
+        save()
+      }
+      return
+    }
     if !started, arguments.contains("-QFVerifyAssistantTabNavigation") {
       started = true
       task = Task {
