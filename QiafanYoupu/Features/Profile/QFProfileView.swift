@@ -266,7 +266,7 @@ final class QFProfileViewController: QFPageViewController {
         detail: signedIn ? "" : app.text("登录后设置", "Sign in to set"))
       configureMenuButton(
         membership, destination: .membership, symbol: "crown",
-        detail: app.text("尚未开放", "Coming later"))
+        detail: app.text("查看权益", "View benefits"))
     }
     renderedOwner = user?.userId
     renderedSignedIn = signedIn
