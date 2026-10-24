@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A8F5A2B6E77644D790001001 /* QFAssistantConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F5A2B6E77644D790001002 /* QFAssistantConversationStore.swift */; };
 		007514E2FCE587C31D9712C9 /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 795ECE56F395DDBFD8485C31 /* JXSegmentedView */; };
 		025AA2CDF05BA636010304E0 /* QFAssistantNetworkPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9C993E48F45BAF1A698A2E /* QFAssistantNetworkPreference.swift */; };
 		02D070EEC5D9749D570D5689 /* QFManualPlanDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EBF2BAF07AAF1ECD91F6B56 /* QFManualPlanDraft.swift */; };
@@ -29,6 +28,7 @@
 		1891C4F2B8CC9850BCABF807 /* QFMovePlanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AEB39A556B05EB30A148AE /* QFMovePlanViewController.swift */; };
 		190860C7E3EC79826769E137 /* QFNetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B540BF5EC41A3666F02E8EB6 /* QFNetworkingTests.swift */; };
 		1B9D2F44A10409DE0CB7C224 /* QFRecipeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569D91404B817364694DC16B /* QFRecipeHomeView.swift */; };
+		1CE6C2F621A2BE553B3EF196 /* QFMealLivePushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2852CC53BC0B93A3CB84006 /* QFMealLivePushService.swift */; };
 		1DECD49926791CCC092D88CC /* QFReceiptInventoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AACA6FC4BB85867C4C9BB3E /* QFReceiptInventoryViewController.swift */; };
 		1F270002E726776AC43470E4 /* QFVideoPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4BC7442355EA231EC0C938B /* QFVideoPreviewView.swift */; };
 		201DB77EBE23E43CE6E523B7 /* QFInventoryReceiveViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0C4D039583345EED5605A2 /* QFInventoryReceiveViewController.swift */; };
@@ -52,6 +52,7 @@
 		384F5F7813418D1EA663324D /* QFLocalModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C00B3557F2D052F7422F7C5 /* QFLocalModelStore.swift */; };
 		3979F5957244230D9F0A93D5 /* MBProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = BC309D25D39DF6B4EF8ABDE2 /* MBProgressHUD */; };
 		3C4D8D6BAFC066581A5EC061 /* QFConsentStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */; };
+		3D1EA6AC19EB2BE1AA600855 /* QFMealSurfaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4282DA6602D94534401139CD /* QFMealSurfaceModel.swift */; };
 		3DD2BE367AEF6D97ECC8E327 /* QFInterestPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF9F142F50E5AE03CE030695 /* QFInterestPreferencesView.swift */; };
 		3E9C6244B8EE298710212629 /* CrashReporter in Frameworks */ = {isa = PBXBuildFile; productRef = AEB76EFB73E676435E37C3E6 /* CrashReporter */; };
 		3F99638AFBDCC56CA041C97E /* QFContentCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017311C6C4D30D3E222CF37D /* QFContentCacheTests.swift */; };
@@ -87,9 +88,12 @@
 		63DDA9FF32CF8F5699DDDEB6 /* QFProfileContentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FC5B00FC31857FC0A3F1DD /* QFProfileContentModels.swift */; };
 		63F52E6D2B2510A93788BE05 /* QFLaunchPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371B893915D16815276BBA05 /* QFLaunchPolicyTests.swift */; };
 		66B25D2418BF4B3BF594CCA1 /* QFRequestLogStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4295B6824E289E6EB699E87F /* QFRequestLogStoreTests.swift */; };
+		679A38E6DE903A19CD76F0F1 /* QFAssistantConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E7549250C5C845294709618 /* QFAssistantConversationStore.swift */; };
 		67C68802E22C02BB7FE6D58B /* QFPurchasesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651C00C682DAE4B1DFC1EDF /* QFPurchasesView.swift */; };
+		6A6C324906BB6A22F1B7D597 /* QFMealSurfaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4282DA6602D94534401139CD /* QFMealSurfaceModel.swift */; };
 		6A9CEBE3D5A2CE9A59105F8F /* QFDiagnosticsAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436ABDE7A489EBB541FD4113 /* QFDiagnosticsAccess.swift */; };
 		6E93AC8141F45F2BD0E8FC00 /* QFCookingDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B98CF802EC34ECA7EE299C /* QFCookingDraftTests.swift */; };
+		6F5315C3B8B70C6D3A909893 /* QFMealSurfaceDeviceCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CB73A0ABA42C9DEC4C79C0 /* QFMealSurfaceDeviceCheck.swift */; };
 		6F66CBCA34AE983E0711BD04 /* QFNextMealReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F3E389254986E99BC72FAE /* QFNextMealReminder.swift */; };
 		71E640A8B598543045D3DA25 /* QFBackfillCookingDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA4264D94BC4F9E4FF6E1F44 /* QFBackfillCookingDraft.swift */; };
 		737844307152C44FFBAE88CB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0360983817DE3285C4513DB /* Localizable.strings */; };
@@ -115,20 +119,26 @@
 		913E036CB66F5BD05F409D34 /* QFFilamentRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E820EFDA1FD3FC060F8A01CC /* QFFilamentRendererTests.swift */; };
 		913EA84F3D594929952347A0 /* QFPublicProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD43A7583F7D6231ADE192AC /* QFPublicProfileEditorView.swift */; };
 		91916FEF4BCE64538C870239 /* QFPurchaseCostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121858807412623A2CD60937 /* QFPurchaseCostTests.swift */; };
+		942CDBAA10BD617CCCD2778B /* QFMealLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C2814A4D52851C69C2AC5D4 /* QFMealLiveActivity.swift */; };
 		961BF005926DC00E17BA354E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9BC6AC2815F387FE14BC0574 /* InfoPlist.strings */; };
 		981D2EB9F8F507C7A5AB95BD /* QFContentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B6547FF021E20269B4B723 /* QFContentDetailView.swift */; };
 		99E6C023EAA4230019A3F005 /* GTSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 5A9672BD1F130ACFCE7D865F /* GTSDK */; };
 		9A7E47ED60207FEAE25994F8 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A7E28331FA1ABBF934A1F92B /* libsqlite3.tbd */; };
+		9C476DD2E26835D45BF66907 /* QFMealWidgetSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B931ADBD133A4D6089B4C41 /* QFMealWidgetSupport.swift */; };
 		9D3B66A1C205C74EDFF7EF78 /* QFBarcodePurchase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61FB13D0A1F88033704DBFAD /* QFBarcodePurchase.swift */; };
 		9E03A730FABDC1E39223CD0E /* QFPurchaseReceiptModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09FB643639017DADB8CF102 /* QFPurchaseReceiptModels.swift */; };
 		A0CF6EF0A7EB38715CE2029F /* QFManualPlanDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815ED6A3F30229207DD02B11 /* QFManualPlanDraftTests.swift */; };
 		A4C37F51911F6BE3D9162E0D /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 97B33A08F10D1CA841D23C11 /* Alamofire */; };
 		A9A37330DF73E7214F7F3ED6 /* QFCookingRecordDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596A00FC10D5E2EBB219DDCC /* QFCookingRecordDetailViewController.swift */; };
+		ABAEDADCAA1FFD0D5B3796F4 /* QiafanYoupuWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2518F1D086EAF8FD8B589EEA /* QiafanYoupuWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		ABC261246D1119D24DF0A02A /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AE1FFBD1C1754CD6A3AC912 /* libz.tbd */; };
 		AC815DC6576B6AEEFEC970C8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F937914249EC04CF2292349 /* InfoPlist.strings */; };
+		ADA251B30F65A9662AA923A3 /* QFNextMealWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643756F90E5DFFCBBF96B200 /* QFNextMealWidget.swift */; };
+		B0A37D364973DE45B76035D5 /* QiafanYoupuWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7A480C0A5B4B4A2AFE5C98 /* QiafanYoupuWidgetsBundle.swift */; };
 		B12BDB35D6B710E94C641956 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5EB5751DFE628E3CFEE86111 /* InfoPlist.strings */; };
 		B14DCD095E3FFBFE86EEECB5 /* QFAssistantModelAssetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E33034E9D9AB21EB702DD3 /* QFAssistantModelAssetTests.swift */; };
 		B5C3B36ED20803FB8E8C5943 /* QFInventoryInlineDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7E0A6895EEF526251DB1AA /* QFInventoryInlineDraft.swift */; };
+		B5E022222C6C61D8BC8AD880 /* QFMealDisplayProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C19E61315B62B246FE11664 /* QFMealDisplayProbe.swift */; };
 		B7CAFD3A27014187C927520F /* QFCompleteMealViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762773313F37015FBCBA69E8 /* QFCompleteMealViewController.swift */; };
 		B9D58A9FE7CDE87FF61B44EF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6435C5055C7DA34536D0E2C1 /* Assets.xcassets */; };
 		B9EF98F2B3E80D30F1314210 /* QFNativeInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871E7E948BB61251CF1FD05A /* QFNativeInteraction.swift */; };
@@ -146,6 +156,7 @@
 		C7AF05087A70D84F2EE0C3B3 /* QFContributionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A956E5595151628B026B18D /* QFContributionsView.swift */; };
 		C7E344E719D333EE73E2DFE4 /* QFAssistantAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759C7EB855880752F643A219 /* QFAssistantAgent.swift */; };
 		CAE05D8BCC77314910F26CC9 /* QFContentListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FC09DA4DB3C5D3C0C58F9D /* QFContentListsView.swift */; };
+		CB55FC384488177C2471450D /* QFHomeMealCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116030094CEB2F3A0DE062F /* QFHomeMealCard.swift */; };
 		CE6CDCD6882F805EEF44DB93 /* QFCookingUsageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 553A882D708F25B9487175D6 /* QFCookingUsageViewController.swift */; };
 		CEE1FD50DE79F703A054A80E /* QFProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */; };
 		CF43089842DE8E742CA93444 /* QFMealAdjustment.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54452CF41A4D732E44224C4 /* QFMealAdjustment.swift */; };
@@ -166,10 +177,12 @@
 		E5E386AF802417CA1B7C9BEB /* FilamentFixtures in Resources */ = {isa = PBXBuildFile; fileRef = D7EA9F5FDFEDE291BF551C8E /* FilamentFixtures */; };
 		E67EBC4F70F9358A687D0F0C /* QFPreparationExpenseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A3AE6E13D167E59A3991D1 /* QFPreparationExpenseModels.swift */; };
 		EADFEC673EC25ADE8286D84B /* QFAssistantBusinessTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 623652862028121F882EA25D /* QFAssistantBusinessTools.swift */; };
+		ED4A6AC2BA084BDD12C79E86 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 56E84A6F8DC386BA38CF3D12 /* Localizable.strings */; };
 		EE921995EB26A135BE903BB3 /* QFLocalMediaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 516E0620AABC1ABB8CA320AE /* QFLocalMediaStore.swift */; };
 		EF85C91AEAFAADF21DD33FB4 /* MJRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = D985A38F270CE81EB1E5A80B /* MJRefresh */; };
 		EF8BC0D76558038020F192A8 /* QFCrashArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */; };
 		F151F219D9139FC1A9825032 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 802CBECCB074A38DE425AD54 /* SnapKit */; };
+		F348425F58DFA84A2B0DCF77 /* QFMealSurfaceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BD55828E9AAF1B5AF1B6B1 /* QFMealSurfaceCoordinator.swift */; };
 		F4671FD20F0906C5E031D149 /* QFFilamentBridge in Frameworks */ = {isa = PBXBuildFile; productRef = D4AB12C67EE01BACCCBBB374 /* QFFilamentBridge */; };
 		F48F41E39CAB4081DE259B17 /* QFOnDeviceInference.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE49B6F516EB03D13A0BDEA /* QFOnDeviceInference.swift */; };
 		F4EBE07DC21645389A8CDCCD /* QFProductBarcodeDeviceCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879595D7344DA9BE7029C589 /* QFProductBarcodeDeviceCheck.swift */; };
@@ -197,10 +210,30 @@
 			remoteGlobalIDString = 7D302759091938810CDCAB5E;
 			remoteInfo = QiafanYoupu;
 		};
+		5A8A8EFFED5E958ECC261676 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 535D2801515DE3BF2846CB83 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 722F5E259C57EB8DFE0BAED0;
+			remoteInfo = QiafanYoupuWidgets;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		2ADFDF534207BAF37F948346 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				ABAEDADCAA1FFD0D5B3796F4 /* QiafanYoupuWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		A8F5A2B6E77644D790001002 /* QFAssistantConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantConversationStore.swift; sourceTree = "<group>"; };
 		012EB0BECF377C21EE5439E4 /* QFBarcodeProductLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFBarcodeProductLookup.swift; sourceTree = "<group>"; };
 		017311C6C4D30D3E222CF37D /* QFContentCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFContentCacheTests.swift; sourceTree = "<group>"; };
 		07FC09DA4DB3C5D3C0C58F9D /* QFContentListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFContentListsView.swift; sourceTree = "<group>"; };
@@ -208,6 +241,7 @@
 		0C00B3557F2D052F7422F7C5 /* QFLocalModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLocalModelStore.swift; sourceTree = "<group>"; };
 		0D0C4D039583345EED5605A2 /* QFInventoryReceiveViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFInventoryReceiveViewController.swift; sourceTree = "<group>"; };
 		0D88D7814793C72C44352488 /* QFAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAPIModels.swift; sourceTree = "<group>"; };
+		10C2BC69EB60A21A5A21E2B2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		121858807412623A2CD60937 /* QFPurchaseCostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFPurchaseCostTests.swift; sourceTree = "<group>"; };
 		1444A52A62F4605865A1986A /* QFWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFWelcomeView.swift; sourceTree = "<group>"; };
 		14E6DF6D35CDB628005979DF /* qwen-local-model.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "qwen-local-model.json"; sourceTree = "<group>"; };
@@ -217,14 +251,19 @@
 		199372BB33EFE37BE8139659 /* QiafanYoupuUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QiafanYoupuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B5237229FE4C2CB3E6B59C8 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		1C0666A40E63DD9ABFC7117E /* QFRecipeHomeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRecipeHomeModels.swift; sourceTree = "<group>"; };
+		1C2814A4D52851C69C2AC5D4 /* QFMealLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealLiveActivity.swift; sourceTree = "<group>"; };
 		1EEA004A741FAB5B3AA63377 /* QFLocalDeploymentCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLocalDeploymentCheck.swift; sourceTree = "<group>"; };
+		2518F1D086EAF8FD8B589EEA /* QiafanYoupuWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = QiafanYoupuWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		254DAC419FC3F24B4B83A201 /* QFGetuiPushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFGetuiPushService.swift; sourceTree = "<group>"; };
+		25F6DF560B0E27E894679EFC /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		2704CD4D9654FCDDD9522E01 /* QiafanYoupuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiafanYoupuApp.swift; sourceTree = "<group>"; };
 		2751AC9264977371592CDA2C /* QFAccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAccountEditorView.swift; sourceTree = "<group>"; };
 		2A407FA387A5F46ABEEA30DD /* QFAssistantVoiceInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantVoiceInput.swift; sourceTree = "<group>"; };
 		2B02AF40F7090FAF14655EB6 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		2B5F7C2F2B7F8CE6AAD35971 /* QFPreparationExpensesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFPreparationExpensesViewController.swift; sourceTree = "<group>"; };
 		2BE4F401E56851D9CA4C5A13 /* QFRemoteImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRemoteImageTests.swift; sourceTree = "<group>"; };
+		2C301AE71426EFB30DCAAA95 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		2E7549250C5C845294709618 /* QFAssistantConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantConversationStore.swift; sourceTree = "<group>"; };
 		2F9E27D993A8CDF3A7D40F60 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		30FEABB632D194CA7D9108AA /* QFCreatePlanViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCreatePlanViewController.swift; sourceTree = "<group>"; };
 		32CD32D813A3CAC13EA556B6 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -236,20 +275,28 @@
 		3E9C993E48F45BAF1A698A2E /* QFAssistantNetworkPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantNetworkPreference.swift; sourceTree = "<group>"; };
 		3EFBB91545158C8C1348D85A /* QFIngredientDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientDiscoveryTests.swift; sourceTree = "<group>"; };
 		3F2079CF2AAF59D0AA421A4D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3FB3E2BED50425BF7C40390F /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		40BD55828E9AAF1B5AF1B6B1 /* QFMealSurfaceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealSurfaceCoordinator.swift; sourceTree = "<group>"; };
+		4116030094CEB2F3A0DE062F /* QFHomeMealCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFHomeMealCard.swift; sourceTree = "<group>"; };
 		41D98160AE56EE155F95B010 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		4282DA6602D94534401139CD /* QFMealSurfaceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealSurfaceModel.swift; sourceTree = "<group>"; };
 		4295B6824E289E6EB699E87F /* QFRequestLogStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogStoreTests.swift; sourceTree = "<group>"; };
 		436ABDE7A489EBB541FD4113 /* QFDiagnosticsAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFDiagnosticsAccess.swift; sourceTree = "<group>"; };
 		44CDD7B36BCEE536A5E616BA /* QFAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAPIClient.swift; sourceTree = "<group>"; };
 		456B618222AA4AB66EF8D10D /* QFSessionRaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSessionRaceTests.swift; sourceTree = "<group>"; };
+		45FE1407E312CB5114730A53 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4752FA4ADA9BAB73E80DDD4E /* QFCookingRecordDetailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCookingRecordDetailTests.swift; sourceTree = "<group>"; };
 		48C679F277A0F83BA11EE5CC /* QFSafetyNoticeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSafetyNoticeViewController.swift; sourceTree = "<group>"; };
+		49DCAE2D470C76C58A46361B /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4A81C3A50329A1006B2D640A /* QFRequestLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogStore.swift; sourceTree = "<group>"; };
 		4AE1FFBD1C1754CD6A3AC912 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCrashArchiveTests.swift; sourceTree = "<group>"; };
+		4C19E61315B62B246FE11664 /* QFMealDisplayProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealDisplayProbe.swift; sourceTree = "<group>"; };
 		4CDB78E35A4E7FDF76B96D3B /* QFPlanReminderExampleDeviceCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFPlanReminderExampleDeviceCheck.swift; sourceTree = "<group>"; };
 		4DAD83825890556D9232EBB3 /* QFAssistantStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantStream.swift; sourceTree = "<group>"; };
 		4EE21B2B8F3B3299FA678831 /* QFAssistantCapabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantCapabilityPolicy.swift; sourceTree = "<group>"; };
 		4F5E0C443399E9282FF9F67C /* ThirdPartyAcknowledgements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ThirdPartyAcknowledgements.txt; sourceTree = "<group>"; };
+		5059C8CA539A626E969C926E /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		516E0620AABC1ABB8CA320AE /* QFLocalMediaStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFLocalMediaStore.swift; sourceTree = "<group>"; };
 		52B6C856C8DF806F91E0C5D3 /* QFAssistantCharacterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantCharacterView.swift; sourceTree = "<group>"; };
 		531A81D89E3AA2A6C1EE559F /* QFSettingsPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSettingsPages.swift; sourceTree = "<group>"; };
@@ -268,16 +315,20 @@
 		61CED4CB0133C7A8282D7614 /* QFRequestLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRequestLogView.swift; sourceTree = "<group>"; };
 		61FB13D0A1F88033704DBFAD /* QFBarcodePurchase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFBarcodePurchase.swift; sourceTree = "<group>"; };
 		623652862028121F882EA25D /* QFAssistantBusinessTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantBusinessTools.swift; sourceTree = "<group>"; };
+		6247307D27353230E2C84B55 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		626F2AFE5660855913FDF6D5 /* QFRecipeInventoryBatchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRecipeInventoryBatchViewController.swift; sourceTree = "<group>"; };
 		631D9FD666874D6180B6AE84 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		6416027064432D4E36A8C448 /* Legal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Legal; path = QiafanYoupu/Resources/Legal; sourceTree = SOURCE_ROOT; };
 		6435C5055C7DA34536D0E2C1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		643756F90E5DFFCBBF96B200 /* QFNextMealWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFNextMealWidget.swift; sourceTree = "<group>"; };
 		65A3AE6E13D167E59A3991D1 /* QFPreparationExpenseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFPreparationExpenseModels.swift; sourceTree = "<group>"; };
 		67CD54E8017A32326BC8B625 /* QFKeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFKeychainStore.swift; sourceTree = "<group>"; };
 		6857C70B6A060023C897EFCB /* QFAppleAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAppleAuthorization.swift; sourceTree = "<group>"; };
 		68FC5B00FC31857FC0A3F1DD /* QFProfileContentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFProfileContentModels.swift; sourceTree = "<group>"; };
 		6AACA6FC4BB85867C4C9BB3E /* QFReceiptInventoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFReceiptInventoryViewController.swift; sourceTree = "<group>"; };
+		6B7A480C0A5B4B4A2AFE5C98 /* QiafanYoupuWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiafanYoupuWidgetsBundle.swift; sourceTree = "<group>"; };
 		71CCF79DF7AB2D4F40F4D5F8 /* QFAssistantAgentDeviceCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantAgentDeviceCheck.swift; sourceTree = "<group>"; };
+		72CB73A0ABA42C9DEC4C79C0 /* QFMealSurfaceDeviceCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealSurfaceDeviceCheck.swift; sourceTree = "<group>"; };
 		74CE074AD6FBB8FF2DDD3FED /* QFProductBarcodeScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFProductBarcodeScannerViewController.swift; sourceTree = "<group>"; };
 		75543C431471C9E87C1EC4C5 /* QFAssistantModelAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantModelAsset.swift; sourceTree = "<group>"; };
 		7564B41691A645B9BFB509DA /* QFIngredientCatalogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientCatalogViewController.swift; sourceTree = "<group>"; };
@@ -310,9 +361,11 @@
 		91E7423D360770883F28EAEB /* QFRemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRemoteImage.swift; sourceTree = "<group>"; };
 		9360E3E4EC529BCB7E86A1DA /* QFCookingHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCookingHistoryView.swift; sourceTree = "<group>"; };
 		9395F57B96597420B7A22907 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		94275C54D9E0ADBB38FD8E5B /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9443CD90C4656E7C1D9A28FC /* QFStockSpecificationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFStockSpecificationViewController.swift; sourceTree = "<group>"; };
 		946B0EA714EF94CE2E33BB39 /* QFRightsClaimsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRightsClaimsView.swift; sourceTree = "<group>"; };
 		970D68FD576A675AB3CAA4CA /* QFRecipeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRecipeDetailView.swift; sourceTree = "<group>"; };
+		9B931ADBD133A4D6089B4C41 /* QFMealWidgetSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealWidgetSupport.swift; sourceTree = "<group>"; };
 		9BC6AC2815F387FE14BC0574 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		9D8097D47FE02B9524595A29 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		A1B737891F4E3916E557B6CF /* QFSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSettingsView.swift; sourceTree = "<group>"; };
@@ -343,6 +396,7 @@
 		C197C1B36730418C5D9C659A /* QFMembershipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMembershipView.swift; sourceTree = "<group>"; };
 		C1DE3D5D6E448FB6146BF55A /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C259DD2F5EB76FFF3FBF6A7F /* QFIngredientCombinationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientCombinationsViewController.swift; sourceTree = "<group>"; };
+		C2852CC53BC0B93A3CB84006 /* QFMealLivePushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealLivePushService.swift; sourceTree = "<group>"; };
 		C294C1ACBAA41AF802A09CF6 /* QFBackfillCookingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFBackfillCookingViewController.swift; sourceTree = "<group>"; };
 		C3B2CC7B11821E17D9B53BBB /* QFRecipeDirections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFRecipeDirections.swift; sourceTree = "<group>"; };
 		C4CB1F7F29C06C19CBA483B9 /* QFContentCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFContentCache.swift; sourceTree = "<group>"; };
@@ -367,6 +421,7 @@
 		EE57584A37CDAE9FF62D71AF /* QFPurchaseAdjustmentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFPurchaseAdjustmentViewController.swift; sourceTree = "<group>"; };
 		F0E8DFEF8D19F1B1108775DA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4B98CF802EC34ECA7EE299C /* QFCookingDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCookingDraftTests.swift; sourceTree = "<group>"; };
+		F4F844460DFD56364271D374 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F567509199B4AD2DF37ACFDC /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		FA6FED632C8CEA583419E4C4 /* QFAssistantTextReveal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantTextReveal.swift; sourceTree = "<group>"; };
 		FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientView.swift; sourceTree = "<group>"; };
@@ -412,6 +467,8 @@
 				78A676AC817763AB04A997D4 /* QiafanYoupu */,
 				9883E5D78C5A06D55D8A9ACB /* QiafanYoupuTests */,
 				1D23D37D8FE4125D6C7B1A33 /* QiafanYoupuUITests */,
+				A4A3DAF64895508023636889 /* QiafanYoupuWidgets */,
+				BDEB955AE9D0A708E8B01BC7 /* Shared */,
 				538B23609626062332B89129 /* Frameworks */,
 				DD9BDF1E28281EFCDAE31C9C /* Products */,
 			);
@@ -420,6 +477,7 @@
 		177B460A5BFEDF193741F42C /* Recipe */ = {
 			isa = PBXGroup;
 			children = (
+				4116030094CEB2F3A0DE062F /* QFHomeMealCard.swift */,
 				970D68FD576A675AB3CAA4CA /* QFRecipeDetailView.swift */,
 				C3B2CC7B11821E17D9B53BBB /* QFRecipeDirections.swift */,
 				BB08B3266FA0A93331E83747 /* QFRecipeFilters.swift */,
@@ -543,6 +601,14 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		91EC4BD63FC5A6D29EA8303B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				56E84A6F8DC386BA38CF3D12 /* Localizable.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		9883E5D78C5A06D55D8A9ACB /* QiafanYoupuTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -578,6 +644,18 @@
 			path = Media;
 			sourceTree = "<group>";
 		};
+		A4A3DAF64895508023636889 /* QiafanYoupuWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				1C2814A4D52851C69C2AC5D4 /* QFMealLiveActivity.swift */,
+				9B931ADBD133A4D6089B4C41 /* QFMealWidgetSupport.swift */,
+				643756F90E5DFFCBBF96B200 /* QFNextMealWidget.swift */,
+				6B7A480C0A5B4B4A2AFE5C98 /* QiafanYoupuWidgetsBundle.swift */,
+				91EC4BD63FC5A6D29EA8303B /* Resources */,
+			);
+			path = QiafanYoupuWidgets;
+			sourceTree = "<group>";
+		};
 		B5F8A2F552D68A09416EC1FF /* AI */ = {
 			isa = PBXGroup;
 			children = (
@@ -600,8 +678,20 @@
 			isa = PBXGroup;
 			children = (
 				254DAC419FC3F24B4B83A201 /* QFGetuiPushService.swift */,
+				4C19E61315B62B246FE11664 /* QFMealDisplayProbe.swift */,
+				C2852CC53BC0B93A3CB84006 /* QFMealLivePushService.swift */,
+				40BD55828E9AAF1B5AF1B6B1 /* QFMealSurfaceCoordinator.swift */,
+				72CB73A0ABA42C9DEC4C79C0 /* QFMealSurfaceDeviceCheck.swift */,
 			);
 			path = Notifications;
+			sourceTree = "<group>";
+		};
+		BDEB955AE9D0A708E8B01BC7 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				4282DA6602D94534401139CD /* QFMealSurfaceModel.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		BEA77AEDE62DF8D271317997 /* App */ = {
@@ -618,12 +708,12 @@
 			children = (
 				759C7EB855880752F643A219 /* QFAssistantAgent.swift */,
 				EAD3C1E9130B368BFD2B619D /* QFAssistantAgentContract.swift */,
-				A8F5A2B6E77644D790001002 /* QFAssistantConversationStore.swift */,
 				71CCF79DF7AB2D4F40F4D5F8 /* QFAssistantAgentDeviceCheck.swift */,
 				623652862028121F882EA25D /* QFAssistantBusinessTools.swift */,
 				4EE21B2B8F3B3299FA678831 /* QFAssistantCapabilityPolicy.swift */,
 				52B6C856C8DF806F91E0C5D3 /* QFAssistantCharacterView.swift */,
 				BA7993DDB138FFC356D7F6DB /* QFAssistantChatUI.swift */,
+				2E7549250C5C845294709618 /* QFAssistantConversationStore.swift */,
 				84C4AB75286451D9DA001491 /* QFAssistantKnowledge.swift */,
 				75543C431471C9E87C1EC4C5 /* QFAssistantModelAsset.swift */,
 				3E9C993E48F45BAF1A698A2E /* QFAssistantNetworkPreference.swift */,
@@ -736,6 +826,7 @@
 				FDB9DD4AACAF3E281942FDFA /* QiafanYoupu.app */,
 				5E39877223896ABADF96DB8D /* QiafanYoupuTests.xctest */,
 				199372BB33EFE37BE8139659 /* QiafanYoupuUITests.xctest */,
+				2518F1D086EAF8FD8B589EEA /* QiafanYoupuWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -800,6 +891,24 @@
 			productReference = 199372BB33EFE37BE8139659 /* QiafanYoupuUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		722F5E259C57EB8DFE0BAED0 /* QiafanYoupuWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E2ADE8690AF0266765C90625 /* Build configuration list for PBXNativeTarget "QiafanYoupuWidgets" */;
+			buildPhases = (
+				507AAB50AAB5D1E866FECDE8 /* Sources */,
+				975B2E769F0BFE014AB7534E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QiafanYoupuWidgets;
+			packageProductDependencies = (
+			);
+			productName = QiafanYoupuWidgets;
+			productReference = 2518F1D086EAF8FD8B589EEA /* QiafanYoupuWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		7D302759091938810CDCAB5E /* QiafanYoupu */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D30C2293400A7F8530EEE5E2 /* Build configuration list for PBXNativeTarget "QiafanYoupu" */;
@@ -807,10 +916,12 @@
 				794C60BA58B40BEC8C5E2EA8 /* Sources */,
 				2AD4CC2A1540F1F8BCEFF9F5 /* Resources */,
 				0AD1DF7248F205F5D9A21195 /* Frameworks */,
+				2ADFDF534207BAF37F948346 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				7877DA63B5CB4069081BC08A /* PBXTargetDependency */,
 			);
 			name = QiafanYoupu;
 			packageProductDependencies = (
@@ -866,6 +977,10 @@
 						ProvisioningStyle = Automatic;
 						TestTargetID = 7D302759091938810CDCAB5E;
 					};
+					722F5E259C57EB8DFE0BAED0 = {
+						DevelopmentTeam = B654WGMW63;
+						ProvisioningStyle = Automatic;
+					};
 					7D302759091938810CDCAB5E = {
 						DevelopmentTeam = B654WGMW63;
 						ProvisioningStyle = Automatic;
@@ -916,6 +1031,7 @@
 			projectRoot = "";
 			targets = (
 				7D302759091938810CDCAB5E /* QiafanYoupu */,
+				722F5E259C57EB8DFE0BAED0 /* QiafanYoupuWidgets */,
 				A6C0A0D6F85314A4CEF3F10C /* QiafanYoupuTests */,
 				6FF88AF8A9CA386D492FF1AA /* QiafanYoupuUITests */,
 			);
@@ -956,6 +1072,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		975B2E769F0BFE014AB7534E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED4A6AC2BA084BDD12C79E86 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -967,6 +1091,18 @@
 				E08F8E4279EECC1439711D8F /* QFConnectedUITests.swift in Sources */,
 				D60173D33583682B528DC893 /* QFMainUITests.swift in Sources */,
 				25280A190A864957073D3749 /* QFReleaseWelcomeUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		507AAB50AAB5D1E866FECDE8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				942CDBAA10BD617CCCD2778B /* QFMealLiveActivity.swift in Sources */,
+				3D1EA6AC19EB2BE1AA600855 /* QFMealSurfaceModel.swift in Sources */,
+				9C476DD2E26835D45BF66907 /* QFMealWidgetSupport.swift in Sources */,
+				ADA251B30F65A9662AA923A3 /* QFNextMealWidget.swift in Sources */,
+				B0A37D364973DE45B76035D5 /* QiafanYoupuWidgetsBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1009,12 +1145,12 @@
 				86FD9CD7883CE7A479601E89 /* QFAppleAuthorization.swift in Sources */,
 				C7E344E719D333EE73E2DFE4 /* QFAssistantAgent.swift in Sources */,
 				63B17C2E805B48E358989DE6 /* QFAssistantAgentContract.swift in Sources */,
-				A8F5A2B6E77644D790001001 /* QFAssistantConversationStore.swift in Sources */,
 				33959D1AB232652F2F5F3501 /* QFAssistantAgentDeviceCheck.swift in Sources */,
 				EADFEC673EC25ADE8286D84B /* QFAssistantBusinessTools.swift in Sources */,
 				79CCC7337129B9628C2948CE /* QFAssistantCapabilityPolicy.swift in Sources */,
 				07A97ECD03CC4E854E67C869 /* QFAssistantCharacterView.swift in Sources */,
 				48D143C222FBA17260CA853D /* QFAssistantChatUI.swift in Sources */,
+				679A38E6DE903A19CD76F0F1 /* QFAssistantConversationStore.swift in Sources */,
 				8026958B5AF10D9515F58012 /* QFAssistantIngredientViewController.swift in Sources */,
 				FA1DF7F4379D89AE2AAD30F3 /* QFAssistantKnowledge.swift in Sources */,
 				FC555CDD5498AB132506A64B /* QFAssistantModelAsset.swift in Sources */,
@@ -1048,6 +1184,7 @@
 				6A9CEBE3D5A2CE9A59105F8F /* QFDiagnosticsAccess.swift in Sources */,
 				0C9FCEE5C3712E00D4F41854 /* QFDigitalAssistant.swift in Sources */,
 				DA3A33EF1E39A65C685F0908 /* QFGetuiPushService.swift in Sources */,
+				CB55FC384488177C2471450D /* QFHomeMealCard.swift in Sources */,
 				430228EB89E5CB5EFFE3762C /* QFIngredientCatalogViewController.swift in Sources */,
 				4D3E8249D1FD452967A62941 /* QFIngredientCombinationsViewController.swift in Sources */,
 				426E070AD835618AA12FDDC3 /* QFIngredientView.swift in Sources */,
@@ -1065,6 +1202,11 @@
 				02D070EEC5D9749D570D5689 /* QFManualPlanDraft.swift in Sources */,
 				8ADA6029824FC5F7E3C704CD /* QFMealActionsViewController.swift in Sources */,
 				CF43089842DE8E742CA93444 /* QFMealAdjustment.swift in Sources */,
+				B5E022222C6C61D8BC8AD880 /* QFMealDisplayProbe.swift in Sources */,
+				1CE6C2F621A2BE553B3EF196 /* QFMealLivePushService.swift in Sources */,
+				F348425F58DFA84A2B0DCF77 /* QFMealSurfaceCoordinator.swift in Sources */,
+				6F5315C3B8B70C6D3A909893 /* QFMealSurfaceDeviceCheck.swift in Sources */,
+				6A6C324906BB6A22F1B7D597 /* QFMealSurfaceModel.swift in Sources */,
 				C39B8ECD24FF431ED0F65B9C /* QFMembershipView.swift in Sources */,
 				1891C4F2B8CC9850BCABF807 /* QFMovePlanViewController.swift in Sources */,
 				B9EF98F2B3E80D30F1314210 /* QFNativeInteraction.swift in Sources */,
@@ -1129,9 +1271,31 @@
 			target = 7D302759091938810CDCAB5E /* QiafanYoupu */;
 			targetProxy = 4DEF708395B70030E9CA5FCE /* PBXContainerItemProxy */;
 		};
+		7877DA63B5CB4069081BC08A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 722F5E259C57EB8DFE0BAED0 /* QiafanYoupuWidgets */;
+			targetProxy = 5A8A8EFFED5E958ECC261676 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		56E84A6F8DC386BA38CF3D12 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				6247307D27353230E2C84B55 /* de */,
+				10C2BC69EB60A21A5A21E2B2 /* en */,
+				2C301AE71426EFB30DCAAA95 /* es */,
+				49DCAE2D470C76C58A46361B /* fr */,
+				45FE1407E312CB5114730A53 /* ja */,
+				94275C54D9E0ADBB38FD8E5B /* ko */,
+				5059C8CA539A626E969C926E /* pt-BR */,
+				F4F844460DFD56364271D374 /* ru */,
+				25F6DF560B0E27E894679EFC /* zh-Hans */,
+				3FB3E2BED50425BF7C40390F /* zh-Hant */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		F0360983817DE3285C4513DB /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1382,6 +1546,46 @@
 			};
 			name = Debug;
 		};
+		8277378E9CD4210FE98A7486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = QiafanYoupuWidgets/QiafanYoupuWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = QiafanYoupuWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.talka.qiafanyoupu.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C1ED0146A25E25CCCA9A8B29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = QiafanYoupuWidgets/QiafanYoupuWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = QiafanYoupuWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.talka.qiafanyoupu.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		CE4946895C43DB5AE5D0D840 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1434,6 +1638,15 @@
 			buildConfigurations = (
 				7E59213E6C5012988148E4C3 /* Debug */,
 				03468F284B36EBFB26848900 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E2ADE8690AF0266765C90625 /* Build configuration list for PBXNativeTarget "QiafanYoupuWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8277378E9CD4210FE98A7486 /* Debug */,
+				C1ED0146A25E25CCCA9A8B29 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

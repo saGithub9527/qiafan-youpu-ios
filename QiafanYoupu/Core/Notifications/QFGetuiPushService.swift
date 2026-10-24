@@ -359,17 +359,9 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate, @pre
     // A missing server setting is an unknown state. Do not interpret it as opt-out
     // and issue a second DELETE while a failed sign-out is being recovered.
     guard app.userSettings != nil else { return }
-    // One delivery owner per build. Local timers cover builds without Getui
-    // configuration; configured remote builds keep their existing APNs flow.
-    if QFGetuiConfiguration.load() == nil {
-      if storedRegistration()?.isActive == true { await unregisterDeviceIfPossible() }
-      guard !Task.isCancelled, storedRegistration()?.isActive != true else { return }
-      let center = UNUserNotificationCenter.current()
-      if center.delegate == nil || center.delegate === self { center.delegate = self }
-      await QFContentLoadingContext.$forceRefresh.withValue(true) {
-        await localMeals.refresh(app: app, enabled: app.userSettings?.planReminders == true && !isLocallyDisabled(scope: app.contentScope))
-      }
-    } else { localMeals.cancel() }
+    // Meal awareness is delivered through the fixed card, Widget and Live Activity.
+    // Remove legacy local alerts, including those scheduled by a previous build.
+    localMeals.cancel()
     guard remindersEnabled(app: app) else {
       await unregisterDeviceIfPossible()
       if sdkStarted { GeTuiSdk.setPushModeForOff(true) }

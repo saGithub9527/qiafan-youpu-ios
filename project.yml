@@ -75,10 +75,13 @@ targets:
         # Base.lproj anchors the eight app-owned translations as one Xcode
         # Localizable.strings variant group under Resources/Localization.
         excludes: ["**/*.md", "Info.plist", "*.entitlements", "Resources/Legal"]
+      - path: Shared
       - path: QiafanYoupu/Resources/Legal
         type: folder
         buildPhase: resources
     dependencies:
+      - target: QiafanYoupuWidgets
+        embed: true
       - package: QFSSE
       - package: QFLocalLLM
       - package: QFOrbRenderer
@@ -108,6 +111,7 @@ targets:
     entitlements:
       path: QiafanYoupu/QiafanYoupu.entitlements
       properties:
+        com.apple.security.application-groups: [group.com.talka.qiafanyoupu]
         com.apple.developer.kernel.extended-virtual-addressing: true
         com.apple.developer.applesignin: [Default]
         aps-environment: $(APS_ENVIRONMENT)
@@ -119,6 +123,10 @@ targets:
         QFGetuiAppID: $(QF_GETUI_APP_ID)
         QFGetuiAppKey: $(QF_GETUI_APP_KEY)
         QFGetuiAppSecret: $(QF_GETUI_APP_SECRET)
+        NSSupportsLiveActivities: true
+        CFBundleURLTypes:
+          - CFBundleURLName: com.talka.qiafanyoupu.meal-plan
+            CFBundleURLSchemes: [qiafanyoupu]
         GT_MinimumOSVersion: "15.0"
         NSCameraUsageDescription: 扫描食材商品包装上的条形码以填写采购明细。
         CFBundleDisplayName: 恰饭有谱
@@ -152,6 +160,25 @@ targets:
           APS_ENVIRONMENT: development
         Release:
           APS_ENVIRONMENT: production
+  QiafanYoupuWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Shared
+      - path: QiafanYoupuWidgets
+        excludes: [Info.plist, "*.entitlements"]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.talka.qiafanyoupu.widgets
+        INFOPLIST_FILE: QiafanYoupuWidgets/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+        SWIFT_EMIT_LOC_STRINGS: NO
+    entitlements:
+      path: QiafanYoupuWidgets/QiafanYoupuWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.talka.qiafanyoupu]
   QiafanYoupuTests:
     type: bundle.unit-test
     platform: iOS

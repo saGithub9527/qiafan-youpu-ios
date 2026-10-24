@@ -92,6 +92,7 @@ final class QFRecipeViewController: UIViewController, @preconcurrency JXSegmente
   private let segmentedDataSource = JXSegmentedTitleDataSource()
   private lazy var listContainer = JXSegmentedListContainerView(dataSource: self, type: .scrollView)
   private let filtersStack = UIStackView()
+  private lazy var nextMealCard = QFHomeMealCard(app: app)
   private let sectionTitle = QFTabUI.label("", size: 17, weight: .semibold)
   private var searchButton: UIButton!
   private var clearButton: UIButton!
@@ -120,6 +121,10 @@ final class QFRecipeViewController: UIViewController, @preconcurrency JXSegmente
     view.backgroundColor = QFUI.background
     view.accessibilityIdentifier = "recipe.home"
     buildChrome()
+    QFMealSurfaceCoordinator.shared.$document.combineLatest(QFMealSurfaceCoordinator.shared.$isLoading)
+      .receive(on: DispatchQueue.main).sink { [weak self] document, loading in
+        self?.nextMealCard.render(document, loading: loading)
+      }.store(in: &subscriptions)
     rebuildCategories([])
     loadOptions(countryID: nil)
 
@@ -159,6 +164,7 @@ final class QFRecipeViewController: UIViewController, @preconcurrency JXSegmente
       refreshLoadedLists(force: true)
     }
     appeared = true
+    QFMealSurfaceCoordinator.shared.refresh()
   }
 
   override func viewDidLayoutSubviews() {
@@ -238,6 +244,12 @@ final class QFRecipeViewController: UIViewController, @preconcurrency JXSegmente
       $0.height.equalTo(QFRecipeHomeLayout.filterHeight)
     }
 
+    chrome.addSubview(nextMealCard)
+    nextMealCard.snp.makeConstraints {
+      $0.top.equalTo(filtersStack.snp.bottom).offset(10)
+      $0.leading.trailing.equalToSuperview().inset(QFRecipeHomeLayout.pageHorizontalInset)
+    }
+
     clearButton = QFTabUI.button(
       app.text("清空筛选", "Clear filters"), size: 11.5, weight: .regular,
       color: QFUI.secondary
@@ -249,7 +261,7 @@ final class QFRecipeViewController: UIViewController, @preconcurrency JXSegmente
     section.alignment = .center
     chrome.addSubview(section)
     section.snp.makeConstraints {
-      $0.top.equalTo(filtersStack.snp.bottom).offset(3)
+      $0.top.equalTo(nextMealCard.snp.bottom).offset(3)
       $0.leading.trailing.equalToSuperview().inset(QFRecipeHomeLayout.pageHorizontalInset)
       $0.bottom.equalToSuperview()
       $0.height.equalTo(QFRecipeHomeLayout.sectionHeight)

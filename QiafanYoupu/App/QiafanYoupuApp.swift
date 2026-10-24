@@ -4,12 +4,29 @@ import UIKit
 import UserNotifications
 
 @main
+@MainActor
 final class QFAppDelegate: UIResponder, UIApplicationDelegate {
+  let session = QFAppSession()
+  private var sessionStartup: Task<Void, Never>?
+  func startSession() async {
+    if let sessionStartup { await sessionStartup.value; return }
+    let task = Task { [session] in await session.start() }
+    sessionStartup = task
+    await task.value
+  }
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
     QFGetuiPushService.shared.prepare(launchOptions: launchOptions)
+    if !QFRuntime.isUnitTest {
+      let consent = UserDefaults.standard.bool(forKey: QFLaunchPolicy.completedKey)
+      QFGetuiPushService.shared.bind(to: session, privacyConsentAccepted: consent)
+      QFMealSurfaceCoordinator.shared.bind(to: session, privacyConsentAccepted: consent)
+      QFMealLivePushService.shared.bind(app: session, privacyConsentAccepted: consent)
+      // ActivityKit can launch the app in the background without creating a scene.
+      Task { await startSession() }
+    }
     return true
   }
 
@@ -34,7 +51,7 @@ final class QFAppDelegate: UIResponder, UIApplicationDelegate {
 @MainActor
 final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
-  private let session = QFAppSession()
+  private var session: QFAppSession { (UIApplication.shared.delegate as! QFAppDelegate).session }
   private var startup: Task<Void, Never>?
   private var didScheduleCrashRecorder = false
   private var launchOptions: QFLaunchOptions?
@@ -49,13 +66,18 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
     let options = QFLaunchOptions()
     launchOptions = options
     QFGetuiPushService.shared.rememberSceneConnection(connectionOptions)
-    QFGetuiPushService.shared.bind(
-      to: session,
-      privacyConsentAccepted: UserDefaults.standard.bool(forKey: QFLaunchPolicy.completedKey))
+    if !QFRuntime.isUnitTest {
+      connectionOptions.urlContexts.forEach { QFMealSurfaceNavigation.shared.open($0.url) }
+    }
     configureTheme(on: window)
     window.rootViewController = QFRootViewController(
       app: session, options: options,
-      onPrivacyConsentAccepted: { QFGetuiPushService.shared.privacyConsentWasAccepted() })
+      onPrivacyConsentAccepted: { [weak self] in
+        guard let self else { return }
+        QFGetuiPushService.shared.privacyConsentWasAccepted()
+        QFMealSurfaceCoordinator.shared.privacyConsentWasAccepted()
+        QFMealLivePushService.shared.bind(app: self.session, privacyConsentAccepted: true)
+      })
     self.window = window
     keyboardDismissal.install(in: window)
     QFThemeManager.shared.onChange = { [weak self] _ in
@@ -64,14 +86,20 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
     window.makeKeyAndVisible()
     if !QFRuntime.isUnitTest {
       startup = Task { [session] in
-        await session.start()
+        if let delegate = UIApplication.shared.delegate as? QFAppDelegate { await delegate.startSession() }
         #if DEBUG
         QFAssistantAgentDeviceCheck.collectRecentFailureMetadataIfRequested(app: session)
         await QFAssistantAgentDeviceCheck.collectReminderStatusIfRequested(app: session)
+        await QFMealSurfaceDeviceCheck.collectIfRequested(app: session)
+        await QFMealDisplayProbe.runIfRequested(app: session)
         await QFProductBarcodeDeviceCheck.verifyLiveIfRequested(app: session)
         #endif
       }
     }
+  }
+
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    URLContexts.forEach { QFMealSurfaceNavigation.shared.open($0.url) }
   }
 
   func sceneDidBecomeActive(_ scene: UIScene) {
@@ -114,7 +142,12 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
       previewSignedIn: launchOptions?.previewSignedIn ?? false)
     window.rootViewController = QFRootViewController(
       app: session, options: options,
-      onPrivacyConsentAccepted: { QFGetuiPushService.shared.privacyConsentWasAccepted() })
+      onPrivacyConsentAccepted: { [weak self] in
+        guard let self else { return }
+        QFGetuiPushService.shared.privacyConsentWasAccepted()
+        QFMealSurfaceCoordinator.shared.privacyConsentWasAccepted()
+        QFMealLivePushService.shared.bind(app: self.session, privacyConsentAccepted: true)
+      })
     window.makeKeyAndVisible()
   }
 }
@@ -251,6 +284,7 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
   private let preparedCharacter: QFAssistantCharacterView?
   private var assistantOverlay: QFDigitalAssistantOverlay?
   private var subscriptions = Set<AnyCancellable>()
+  private var showingMealLogin = false
   init(app: QFAppSession, options: QFLaunchOptions, preparedCharacter: QFAssistantCharacterView? = nil) {
     self.app = app
     self.options = options
@@ -312,6 +346,12 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
           self.assistantOverlay?.presentConversation()
         }
       }.store(in: &subscriptions)
+    QFMealSurfaceNavigation.shared.$pending.receive(on: DispatchQueue.main).sink { [weak self] route in
+      if route != nil { self?.openPendingMealSurface() }
+    }.store(in: &subscriptions)
+    app.$user.dropFirst().receive(on: DispatchQueue.main).sink { [weak self] user in
+      if user != nil { self?.openPendingMealSurface() }
+    }.store(in: &subscriptions)
     app.$interfaceLanguage.dropFirst().removeDuplicates().receive(on: DispatchQueue.main).sink {
       [weak self] code in
       guard let self else { return }
@@ -331,6 +371,29 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
 
   func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
     assistantOverlay?.primaryPageChanged()
+  }
+
+  private func openPendingMealSurface() {
+    guard let route = QFMealSurfaceNavigation.shared.pending else { return }
+    if route.planID != nil && app.user == nil {
+      guard let navigation = selectedViewController as? UINavigationController else { return }
+      if showingMealLogin, navigation.viewControllers.contains(where: { $0 is QFLoginViewController }) { return }
+      showingMealLogin = true
+      let login = QFLoginViewController(app: app) { [weak self, weak navigation] in
+        self?.showingMealLogin = false
+        navigation?.popViewController(animated: false)
+        self?.openPendingMealSurface()
+      }
+      login.hidesBottomBarWhenPushed = true
+      navigation.pushViewController(login, animated: true)
+      return
+    }
+    QFMealSurfaceNavigation.shared.consume()
+    if let id = route.planID { openPlanReminder(plannedMealID: id) }
+    else if let index = QFTab.allCases.firstIndex(of: .plan) {
+      selectedIndex = index
+      (viewControllers?[index] as? UINavigationController)?.popToRootViewController(animated: false)
+    }
   }
 
   private func openPlanReminder(plannedMealID: String) {

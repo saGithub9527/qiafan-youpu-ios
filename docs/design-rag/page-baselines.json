@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-21",
+  "updatedAt": "2026-10-24",
   "sourceRoot": "../../../../../全球菜谱APP-设计档案/01-当前设计",
   "precedence": [
     "approved PNG and page interaction JSON",
@@ -9,6 +9,166 @@
     "implementation previews and Git history"
   ],
   "pages": [
+    {
+      "id": "recipe-home-r8",
+      "supersedes": "recipe-home-r7",
+      "productPage": "HOME-01",
+      "title": "菜谱首页 · 固定下一餐与分类列表",
+      "keywords": [
+        "首页",
+        "菜谱",
+        "推荐",
+        "顶部分类",
+        "Tab",
+        "左右滑动",
+        "筛选",
+        "列表",
+        "JXSegmentedView",
+        "下一餐",
+        "首页常驻",
+        "桌面小组件",
+        "实时活动",
+        "灵动岛"
+      ],
+      "sources": [
+        {
+          "path": "01-菜谱与筛选/01-菜谱-推荐.png",
+          "sha256": "0c3858ba705fd9a56cde1f64751bfe5712c270ce6bafb41312eb3ec013831c12"
+        },
+        {
+          "path": "01-菜谱与筛选/页面与交互.json",
+          "sha256": "db18dca6e896abf22da97145865e119474008b3f3ccd221604aea9cb27b1003b"
+        },
+        {
+          "path": "01-菜谱与筛选/交付说明.md",
+          "sha256": "5efcc2af5cdbea821e12f1bd10eaaf74bd5d130e2615cf899b875def894956bf"
+        },
+        {
+          "path": "01-菜谱与筛选/接口接入说明.md",
+          "sha256": "1a5bc8fb92f8162c97e76568a75ef54cc87cc5c9512482730168f45cb044d728"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/meal-surfaces-r1.md",
+          "sha256": "1d3e6ac61ca574e2f6b793e048635cdf2c113132012c91c324b5351dd8bbb6da"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "pageHorizontalInset": 20,
+        "categoryHeight": 44,
+        "categorySpacing": 8,
+        "categoryViewport": [
+          12,
+          49,
+          312,
+          44
+        ],
+        "categoryTextLeading": 20,
+        "fixedSearchRect": [
+          332,
+          49,
+          46,
+          44
+        ],
+        "filterRects": [
+          [
+            20,
+            105,
+            83,
+            47
+          ],
+          [
+            109,
+            105,
+            83,
+            47
+          ],
+          [
+            198,
+            105,
+            83,
+            47
+          ],
+          [
+            287,
+            105,
+            83,
+            47
+          ]
+        ],
+        "filterSpacing": 6,
+        "filterCornerRadius": 12,
+        "filterBorderWidth": 1,
+        "cardGap": 12,
+        "cardCornerRadius": 18,
+        "cardImageSize": 108,
+        "cardImageCornerRadius": 12,
+        "nextMealCard": {
+          "after": "filters",
+          "before": "recommendation heading",
+          "topGap": 10,
+          "horizontalInset": 20,
+          "height": "intrinsic content / Dynamic Type"
+        }
+      },
+      "interactionContract": [
+        "Top category taps and horizontal list paging stay bidirectionally synchronized.",
+        "The category strip scrolls directly by horizontal swipe and has no trailing arrow control.",
+        "Search, filters, and section heading remain fixed while category pages move horizontally.",
+        "Each category keeps independent vertical offset, pull-to-refresh state, and incremental pagination.",
+        "Navigation edge-pop wins over horizontal category paging at the leading screen edge.",
+        "Filter changes reload only the visible page immediately and mark other initialized pages stale.",
+        "Vertical lists use pull-to-refresh and automatic upward pagination; no manual next-page button.",
+        "A fixed next-meal card shows real scope data or an explicit empty state; tap opens the authenticated plan route."
+      ],
+      "approvedUserChanges": [
+        {
+          "date": "2026-09-16",
+          "change": "Remove the right-side category arrow and give its width back to the horizontally scrollable category strip."
+        },
+        {
+          "date": "2026-10-24",
+          "change": "User requests persistent meal information on both App home and iPhone Home Screen, plus Dynamic Island and Lock Screen Live Activities. Add a fixed card between filters and section heading."
+        }
+      ],
+      "allowedDynamicChanges": [
+        "localized text length",
+        "server-provided category names and order",
+        "recipe content, counts, loading, empty, and failure states",
+        "safe-area and Dynamic Type adaptation without changing information hierarchy"
+      ],
+      "explicitApprovalRequired": [
+        "page hierarchy",
+        "fixed versus scrolling region boundaries",
+        "filter count or order",
+        "card direction or geometry",
+        "navigation model",
+        "new product capability"
+      ],
+      "codeContract": {
+        "file": "../../QiafanYoupu/Features/Recipe/QFRecipeHomeModels.swift",
+        "enum": "QFRecipeHomeLayout",
+        "constants": {
+          "pageHorizontalInset": 20,
+          "categoryControlLeading": 12,
+          "categoryTopOffset": 5,
+          "categoryHeight": 44,
+          "categorySpacing": 8,
+          "filterTopGap": 12,
+          "filterHeight": 47,
+          "filterSpacing": 6,
+          "sectionHeight": 39,
+          "listTopGap": 1,
+          "cardMinimumHeight": 128,
+          "cardImageSize": 108,
+          "cardGap": 12,
+          "cardCornerRadius": 18
+        }
+      }
+    },
     {
       "id": "recipe-home-r7",
       "supersedes": "recipe-home-r6",

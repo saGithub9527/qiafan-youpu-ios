@@ -508,6 +508,61 @@ final class QFSessionRaceTests: XCTestCase {
     XCTAssertNil(restarted.user)
   }
 
+  @MainActor
+  func testLateSettingsReadCannotReenableRemindersAfterUserTurnsThemOff() async throws {
+    let readArrived = expectation(description: "Older settings read is pending")
+    router.setHandler { request in
+      if self.handleCommon(request) { return }
+      if request.request.url!.path.hasSuffix("me/settings") {
+        if request.request.httpMethod == "PUT" {
+          request.respond(self.envelope(["theme": "classic", "planReminders": false, "workAndContributionUpdates": true]))
+        } else { readArrived.fulfill() }
+      } else { request.fail(URLError(.unsupportedURL)) }
+    }
+    let session = makeSession()
+    await session.start(); try await session.login(agreementAccepted: true)
+    let pending = Task { try await session.loadUserSettings() }
+    await fulfillment(of: [readArrived], timeout: 3)
+    let old = try XCTUnwrap(router.matching("me/settings").first)
+    _ = try await session.updateUserSettings(.init(theme: "classic", interfaceLanguage: "zh-Hans", planReminders: false, workAndContributionUpdates: true))
+    old.respond(envelope(["theme": "classic", "planReminders": true, "workAndContributionUpdates": true]))
+    do { let result = try await pending.value; XCTAssertFalse(result.planReminders) }
+    catch { XCTAssertTrue(error is CancellationError || (error as? URLError)?.code == .cancelled) }
+    XCTAssertEqual(session.userSettings?.planReminders, false)
+  }
+
+  @MainActor
+  func testColdStartNilUserIsNotConfirmedLogoutUntilRestorationEnds() async throws {
+    let configArrived = expectation(description: "Configuration read has started")
+    router.setHandler { _ in configArrived.fulfill() }
+    let session = makeSession()
+    XCTAssertTrue(session.sessionRestorationUnconfirmed)
+    let start = Task { await session.start() }
+    await fulfillment(of: [configArrived], timeout: 3)
+    XCTAssertFalse(session.sessionRestorationCompleted)
+    XCTAssertTrue(session.sessionRestorationUnconfirmed)
+    _ = handleCommon(try XCTUnwrap(router.matching("app/config").first))
+    await start.value
+    XCTAssertTrue(session.sessionRestorationCompleted)
+    XCTAssertFalse(session.sessionRestorationUnconfirmed)
+  }
+
+  @MainActor
+  func testTemporaryRestoreFailureDoesNotBecomeConfirmedLogout() async throws {
+    router.setHandler { request in
+      if self.handleCommon(request) { return }
+      request.fail(URLError(.networkConnectionLost))
+    }
+    let original = makeSession()
+    await original.start(); try await original.login(agreementAccepted: true)
+    let restored = makeSession()
+    await restored.start()
+    XCTAssertNil(restored.user)
+    XCTAssertTrue(restored.sessionRestorationCompleted)
+    XCTAssertTrue(restored.sessionRestorationUnconfirmed)
+    XCTAssertNotNil(try QFKeychainStore(service: service).read("current"))
+  }
+
   private func assertTransportFailure(_ task: Task<Void, Error>) async {
     do {
       try await task.value

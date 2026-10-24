@@ -119,7 +119,8 @@ final class QFAccountDeletionViewController: QFProfileContentController {
   private func submit() {
     let landing = navigationController?.viewControllers.first
     execute(label: app.text("正在注销账号", "Deleting account")) { [self] in
-      await QFGetuiPushService.shared.unregisterBeforeSignOut()
+      await QFMealLivePushService.shared.unregisterBeforeSignOut()
+          await QFGetuiPushService.shared.unregisterBeforeSignOut()
       do {
         let outcome = try await app.deleteAccount()
         let notice: String
@@ -143,9 +144,11 @@ final class QFAccountDeletionViewController: QFProfileContentController {
         UIAccessibility.post(notification: .announcement, argument: notice)
       } catch let error as QFAPIError where error.code == 40302 {
         QFGetuiPushService.shared.signOutDidFail()
+        QFMealLivePushService.shared.signOutDidFail()
         message(app.text("请先退出并重新登录，再注销账号。", "Sign out and sign in again before deleting this account."), error: true)
       } catch {
         QFGetuiPushService.shared.signOutDidFail()
+        QFMealLivePushService.shared.signOutDidFail()
         message(app.text("注销结果尚未确认，请在此页重试。", "Deletion is not confirmed. Retry from this page."), error: true)
       }
     }

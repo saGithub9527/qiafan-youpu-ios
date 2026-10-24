@@ -243,9 +243,11 @@
           await app.loadConfiguration()
           message = app.configurationError
         case .logout:
+          await QFMealLivePushService.shared.unregisterBeforeSignOut()
           await QFGetuiPushService.shared.unregisterBeforeSignOut()
           do { try await app.logout() } catch {
             QFGetuiPushService.shared.signOutDidFail()
+        QFMealLivePushService.shared.signOutDidFail()
             message = QFProfileContentController.errorText(error, app: app)
           }
         }

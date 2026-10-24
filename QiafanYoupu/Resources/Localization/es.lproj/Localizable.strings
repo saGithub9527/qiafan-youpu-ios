@@ -1474,3 +1474,20 @@
 "，有做菜记录" = ", tiene historial de cocina";
 "，没有记录" = ", sin historial";
 "：" = ":";
+
+"下一餐" = "Próxima comida";
+"查看这一餐的计划" = "Ver el plan de esta comida";
+"打开计划核对食材" = "Abre el plan para revisar los ingredientes";
+"需要：" = "Necesitas: ";
+"需要补购：" = "Por comprar: ";
+"家里已有：" = "En casa: ";
+"登录后查看下一餐" = "Inicia sesión para ver tu próxima comida";
+"计划、库存和餐前准备会同步显示在这里" = "Aquí verás tu plan, existencias y preparación";
+"计划提醒已关闭" = "Los recordatorios están desactivados";
+"前往计划页面调整提醒设置" = "Configura los recordatorios en Plan";
+"接下来还没有安排用餐" = "Aún no hay comidas previstas";
+"去制定计划，提前准备好下一餐" = "Planifica una comida y prepara los ingredientes";
+"正在更新下一餐…" = "Actualizando tu próxima comida…";
+"下一餐暂未更新" = "Actualiza tu próxima comida";
+"打开计划查看最新安排" = "Abre Plan para ver los últimos cambios";
+"打开计划" = "Abrir Plan";

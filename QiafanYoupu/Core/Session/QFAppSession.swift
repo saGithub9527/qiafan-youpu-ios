@@ -118,6 +118,8 @@ final class QFAppSession: ObservableObject {
   @Published private(set) var configuration: QFServerConfig?
   @Published private(set) var configurationError: String?
   @Published private(set) var loadingConfiguration = false
+  @Published private(set) var sessionRestorationCompleted = false
+  var sessionRestorationUnconfirmed: Bool { !sessionRestorationCompleted || (user == nil && saved != nil) }
   @Published private(set) var user: QFUserProfile?
   @Published private(set) var userSettings: QFUserSettings?
   @Published private(set) var isLoggingIn = false
@@ -210,6 +212,7 @@ final class QFAppSession: ObservableObject {
   func start() async {
     guard !started else { return }
     started = true
+    defer { sessionRestorationCompleted = true }
     do {
       if let data = try keychain.read("current") {
         let stored = try JSONDecoder().decode(QFSavedSession.self, from: data)

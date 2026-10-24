@@ -164,13 +164,10 @@ final class QFAlamofireTransportTests: XCTestCase {
     try await withConversation { _, chat, _, _ in
       let task = chat.debugBeginStreaming(text: "")
       defer { task.cancel() }
-      let url = FileManager.default.temporaryDirectory.appendingPathComponent("qf-capture-test-\(UUID()).m4a")
-      try Data([1]).write(to: url)
-      defer { try? FileManager.default.removeItem(at: url) }
-      let permissionToken = chat.debugOwnCaptureFile(url)
+      // Speech recognition now streams audio in memory; the permission token remains the lifecycle boundary.
+      let permissionToken = try XCTUnwrap(chat.debugBeginCapture())
       chat.debugOpenMemory()
       XCTAssertFalse(chat.debugCaptureIsCurrent(permissionToken), "Late permission/transcription callbacks must lose authority")
-      XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
       XCTAssertFalse(task.isCancelled, "Opening a feature must preserve a submitted generation")
       chat.presentedViewController?.dismiss(animated: false)
     }
@@ -181,13 +178,10 @@ final class QFAlamofireTransportTests: XCTestCase {
     try await withConversation { _, chat, _, _ in
       let task = chat.debugBeginStreaming(text: "")
       defer { task.cancel() }
-      let url = FileManager.default.temporaryDirectory.appendingPathComponent("qf-capture-test-\(UUID()).m4a")
-      try Data([1]).write(to: url)
-      defer { try? FileManager.default.removeItem(at: url) }
-      let permissionToken = chat.debugOwnCaptureFile(url)
+      // Speech recognition now streams audio in memory; the permission token remains the lifecycle boundary.
+      let permissionToken = try XCTUnwrap(chat.debugBeginCapture())
       chat.debugClose()
       XCTAssertFalse(chat.debugCaptureIsCurrent(permissionToken))
-      XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
       XCTAssertFalse(task.isCancelled)
     }
   }

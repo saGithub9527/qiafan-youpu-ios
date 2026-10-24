@@ -519,38 +519,8 @@ final class QFDigitalAssistantOverlay {
   }
 
   private func refreshMealReminderIfNeeded(force: Bool = false) {
-    guard let app, app.user != nil else { invalidateMealReminder(); return }
-    let binding = QFAssistantAgent.scope(app)
-    if force || mealReminderBinding != binding { invalidateMealReminder() }
-    guard QFLocalSettingsStore.current(scope: app.contentScope).planReminders else { invalidateMealReminder(); return }
-    guard showsRecipeHome, UIApplication.shared.applicationState == .active else { return }
-    if let loaded = mealReminderLoadedAt, Date().timeIntervalSince(loaded) < 60,
-      mealReminder == nil || (mealReminder?.scheduledAt ?? .distantPast) > Date() { return }
-    guard mealReminderTask == nil else { return }
-    mealReminderBinding = binding
-    let request = UUID(); mealReminderRequest = request
-    mealReminderTask = Task { [weak self] in
-      do { try await Task.sleep(nanoseconds: 150_000_000) } catch { return }
-      guard let self, !Task.isCancelled, self.mealReminderRequest == request else { return }
-      let snapshot = await self.mealReminderService.refresh(app: app)
-      guard !Task.isCancelled, self.mealReminderRequest == request,
-        QFAssistantAgent.scope(app) == binding else { return }
-      self.mealReminderTask = nil; self.mealReminderLoadedAt = Date(); self.mealReminder = snapshot
-      if let snapshot {
-        self.presentMealReminderIfPossible()
-        self.mealReminderTimer?.cancel()
-        self.mealReminderTimer = Task { [weak self] in
-          let delay = max(0.2, snapshot.scheduledAt.timeIntervalSinceNow + 0.2)
-          do { try await Task.sleep(nanoseconds: UInt64(min(delay, 172_800) * 1_000_000_000)) } catch { return }
-          self?.refreshMealReminderIfNeeded(force: true)
-        }
-      } else {
-        self.clearMealReminderPresentation()
-#if DEBUG
-        self.startDebugMessages()
-#endif
-      }
-    }
+    invalidateMealReminder()
+    QFMealSurfaceCoordinator.shared.refresh(force: force)
   }
 
   private func presentMealReminderIfPossible() {
@@ -2442,6 +2412,8 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     guard let id = activeMessageID, let index = messages.firstIndex(where: { $0.id == id }) else { return }
     messages[index].text = text; completeMessage(index: index)
   }
+  func debugBeginCapture() -> UUID? { voice.begin(draft: input.text ?? "") }
+  func debugCaptureIsCurrent(_ token: UUID) -> Bool { voice.isCurrent(token) }
   func debugOpenMemory() { openMemory() }
   func debugClose() { closeChat() }
   func debugEndScene() { endScene() }

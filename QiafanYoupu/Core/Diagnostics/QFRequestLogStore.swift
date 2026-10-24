@@ -258,6 +258,8 @@
     private static let truncation = "\n[内容已截断]"
 
     static func passwordSafeBody(_ request: URLRequest) -> Data? {
+      // APNs capability tokens must never enter the debug log's persistent request preview.
+      if request.url?.path.contains("/me/meal-surfaces/devices/") == true { return nil }
       if request.url?.path.hasSuffix("/me/assistant/knowledge/search") == true { return nil }
       guard request.url?.path.hasSuffix("/me/password") == true else { return request.httpBody }
       guard let body = request.httpBody,
