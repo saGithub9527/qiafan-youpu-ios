@@ -1,6 +1,7 @@
 import SnapKit
 import UIKit
 
+#if DEBUG
 @MainActor
 final class QFContributionEditorViewController: QFProfileContentController {
   private var draft: QFContributionDraft {
@@ -168,6 +169,8 @@ final class QFContributionEditorViewController: QFProfileContentController {
   }
 }
 
+#endif
+
 @MainActor
 final class QFContributionsViewController: QFProfileContentController {
   private var filter = "ALL"
@@ -177,7 +180,9 @@ final class QFContributionsViewController: QFProfileContentController {
   required init?(coder: NSCoder) { nil }
   override func viewDidLoad() {
     super.viewDidLoad()
+    #if DEBUG
     _ = addFooter(app.text("补充图片", "Contribute photo")) { [weak self] in self?.edit() }
+    #endif
     let tabs = categoryTabs([app.text("全部", "All"), app.text("审核中", "In review"), app.text("已采用", "Accepted"), app.text("未采用", "Not accepted")]) { [weak self] index in
       self?.filter = ["ALL", "PENDING", "ACCEPTED", "REJECTED"][index]
       self?.pagination = QFContentPagination()
@@ -190,6 +195,7 @@ final class QFContributionsViewController: QFProfileContentController {
     installList(results, controls: tabs)
     load()
   }
+  #if DEBUG
   private func edit(_ contribution: QFContribution? = nil) {
     let editor = QFContributionEditorViewController(
       app: app, targetType: contribution?.targetType, targetID: contribution?.targetId,
@@ -200,7 +206,12 @@ final class QFContributionsViewController: QFProfileContentController {
     }
     open(editor)
   }
+  #endif
   private func load(append: Bool = false) {
+    #if !DEBUG
+    // A device-local historical draft remains readable when the server is offline.
+    render()
+    #endif
     setReloadAction { [weak self] in self?.load() }
     let previous = pagination
     let requestedFilter = filter
@@ -218,6 +229,27 @@ final class QFContributionsViewController: QFProfileContentController {
     let app = app
     let pagination = pagination
     results.beginUpdatesForRows()
+    #if !DEBUG
+    if let saved = QFContentDraftStore.load(QFContributionDraft.self, app: app, kind: "contribution") {
+      let ownerScope = app.contentScope
+      results.row("history.local-contribution", value: saved) { [weak self] in
+        guard let self else { return UIView() }
+        let rows = QFTabUI.stack([QFContentUI.label(self.app.text("草稿", "Drafts"), size: 18, bold: true), QFContentUI.label(saved.targetTitle)], spacing: 10)
+        if let media = saved.mediaId { rows.addArrangedSubview(QFContentUI.thumbnail(media, app: self.app, height: 180)) }
+        rows.addArrangedSubview(QFContentUI.action(self.app.text("删除草稿", "Delete draft"), destructive: true) { [weak self] in
+          guard let self else { return }
+          self.confirm(self.app.text("删除这份本地草稿？", "Delete this local draft?"), detail: "", actionTitle: self.app.text("删除", "Delete"), destructive: true) { [weak self] in
+            guard let self, self.app.contentScope == ownerScope,
+              QFContentDraftStore.load(QFContributionDraft.self, app: self.app, kind: "contribution") == saved else { return }
+            QFLocalMediaStore.remove(saved.mediaId, scope: ownerScope)
+            QFContentDraftStore.remove(app: self.app, kind: "contribution")
+            self.load()
+          }
+        })
+        return QFTabUI.card(rows)
+      }
+    }
+    #endif
     results.row("static.1", version: "\(pagination.total)|\(filter)") {
       QFContentUI.label(
         app.format("共 %d 条贡献", "%d contributions", pagination.total), size: 14, bold: true)
@@ -248,9 +280,11 @@ final class QFContributionsViewController: QFProfileContentController {
               QFCatalogDetailViewController.make(
                 app: self.app, type: item.targetType, id: item.targetId))
           })
+        #if DEBUG
         if item.status == "REJECTED" || item.status == "WITHDRAWN" {
           rows.addArrangedSubview(QFContentUI.action(app.text("重新提交", "Resubmit")) { [weak self] in self?.edit(item) })
         }
+        #endif
         if ["PENDING", "ACCEPTED"].contains(item.status) && !item.withdrawalRequested {
           rows.addArrangedSubview(
             QFContentUI.action(item.status == "PENDING" ? app.text("撤回投稿", "Withdraw submission") : app.text("申请撤回", "Request withdrawal")) { [weak self] in

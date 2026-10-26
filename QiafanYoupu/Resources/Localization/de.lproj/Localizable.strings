@@ -1502,3 +1502,11 @@
 "菜谱、计划、手动入库、基础提醒和免费 GLM 继续按原有规则使用。" = "Rezepte, Pläne, manuelle Bestände, grundlegende Erinnerungen und das kostenlose GLM bleiben nach den bisherigen Regeln verfügbar.";
 "连续扫码与批量核对" = "Fortlaufendes Scannen und Stapelprüfung";
 "查看权益" = "Vorteile ansehen";
+
+"历史权益与余额" = "Frühere Vorteile und Guthaben";
+"当前版本不提供购买和积分消费。历史权益和余额仅供查看。" = "Käufe und das Ausgeben von Punkten sind in dieser Version nicht verfügbar. Frühere Vorteile und Guthaben können nur angezeigt werden.";
+"本版核心做饭工具免费使用。" = "Die grundlegenden Kochwerkzeuge sind in dieser Version kostenlos.";
+
+"历史聊天记录" = "Chatverlauf";
+"仅显示当前账号、家庭和语言的历史记录，不发送新请求。" = "Zeigt nur den Verlauf des aktuellen Kontos, Haushalts und der aktuellen Sprache. Es werden keine neuen Anfragen gesendet.";
+"没有此范围的聊天记录。" = "Für diesen Bereich gibt es keinen Chatverlauf.";

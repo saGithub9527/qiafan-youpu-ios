@@ -20,7 +20,13 @@ private struct QFMembershipWallet: Decodable {
 @MainActor
 final class QFMembershipViewController: QFProfileContentController {
   private var hasRendered = false
-  init(app: QFAppSession) { super.init(app: app, title: app.text("会员订阅", "Membership")) }
+  init(app: QFAppSession) {
+    #if DEBUG
+    super.init(app: app, title: app.text("会员订阅", "Membership"))
+    #else
+    super.init(app: app, title: app.text("历史权益与余额", "Past benefits and balance"))
+    #endif
+  }
   required init?(coder: NSCoder) { nil }
 
   override func viewDidLoad() {
@@ -67,7 +73,11 @@ final class QFMembershipViewController: QFProfileContentController {
   }
 
   private func render(_ status: QFMembershipStatus, wallet: QFMembershipWallet?) {
+    #if DEBUG
     let active = status.benefitsActive ?? status.activeSubscription
+    #else
+    let active = status.activeSubscription && status.entitlementSource == "APPLE"
+    #endif
     let version = [status.launchState, status.entitlementSource ?? "", status.expiresAt ?? "", String(active),
       (status.entitlements ?? []).joined(separator: ","), app.interfaceLanguage].joined(separator: "|")
     bodyStack.beginUpdates()
@@ -77,6 +87,7 @@ final class QFMembershipViewController: QFProfileContentController {
       symbol.snp.makeConstraints { $0.height.equalTo(56) }
       let heading: String
       let description: String
+      #if DEBUG
       if status.isTestAccess {
         heading = app.text("测试权益已开通", "Test benefits are active")
         description = app.text("此账号可使用全部已上线会员功能，无需购买。", "This account can use all released member features without a purchase.")
@@ -87,6 +98,10 @@ final class QFMembershipViewController: QFProfileContentController {
         heading = app.text("尚未开通会员", "No active membership")
         description = app.text("付费订阅尚未开放，基础功能可照常使用。", "Paid subscriptions are not open yet. Your existing basic features remain available.")
       }
+      #else
+      heading = active ? app.text("会员订阅已生效", "Membership active") : app.text("尚未开通会员", "No active membership")
+      description = app.text("当前版本不提供购买和积分消费。历史权益和余额仅供查看。", "Purchases and credit spending are unavailable in this version. Past benefits and balances are view-only.")
+      #endif
       let title = QFContentUI.label(heading, size: 23, bold: true); title.textAlignment = .center
       title.accessibilityIdentifier = "membership.status"
       let detail = QFContentUI.label(description, size: 15, color: QFUI.secondary); detail.textAlignment = .center
@@ -99,6 +114,7 @@ final class QFMembershipViewController: QFProfileContentController {
       }
       return QFTabUI.card(QFTabUI.stack(views, spacing: 16), padding: 24)
     }
+    #if DEBUG
     if active {
       bodyStack.row("benefits", version: version) { [self] in
         let known: [(String, String)] = [
@@ -114,18 +130,27 @@ final class QFMembershipViewController: QFProfileContentController {
         return QFTabUI.card(QFTabUI.stack(rows, spacing: 16), padding: 24)
       }
     }
+    #endif
     let walletVersion = String(wallet?.balanceUnits ?? -1) + ":" + String(wallet?.billingEnabled ?? false) + ":" + app.interfaceLanguage
     bodyStack.row("credits", version: walletVersion) { [self] in
       let title = QFContentUI.label(app.text("云端 AI 积分", "Cloud AI credits"), size: 18, bold: true)
       let value = QFContentUI.label(wallet.map { NumberFormatter.localizedString(from: NSNumber(value: $0.balanceUnits), number: .decimal) } ?? "—", size: 30, bold: true)
       value.accessibilityIdentifier = "membership.credits"
+      #if DEBUG
       let explanation = wallet == nil ? app.text("积分暂时无法读取，下拉可重试。", "Credits could not be loaded. Pull down to retry.") : wallet!.billingEnabled
         ? app.text("仅主动使用 DeepSeek 时消耗积分，免费 GLM 不扣积分。", "Credits are used only when you choose DeepSeek. Free GLM does not use credits.")
         : app.text("积分已记录，当前尚未启用积分扣费。", "Your credits are recorded. Credit billing is not enabled yet.")
+      #else
+      let explanation = wallet == nil ? app.text("积分暂时无法读取，下拉可重试。", "Credits could not be loaded. Pull down to retry.") : app.text("当前版本不提供购买和积分消费。历史权益和余额仅供查看。", "Purchases and credit spending are unavailable in this version. Past benefits and balances are view-only.")
+      #endif
       return QFTabUI.card(QFTabUI.stack([title, value, QFContentUI.label(explanation, size: 13, color: QFUI.secondary)], spacing: 12), padding: 24)
     }
     bodyStack.row("basic", version: app.interfaceLanguage) { [self] in
+      #if DEBUG
       QFTabUI.card(QFContentUI.label(app.text("菜谱、计划、手动入库、基础提醒和免费 GLM 继续按原有规则使用。", "Recipes, plans, manual inventory entry, basic reminders and free GLM continue under their existing rules."), size: 13, color: QFUI.secondary), padding: 24)
+      #else
+      QFTabUI.card(QFContentUI.label(app.text("本版核心做饭工具免费使用。", "Core cooking tools are free in this version."), size: 13, color: QFUI.secondary), padding: 24)
+      #endif
     }
     bodyStack.endUpdates()
   }

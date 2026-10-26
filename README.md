@@ -2,6 +2,8 @@
 
 Swift + UIKit + SnapKit；iOS 15 起，iPhone 竖屏及 iPad 横竖屏，Xcode 26.3 / Swift 5 语言模式。原 OC 实现保存在 Git 标签 `oc-uikit-baseline`。
 
+2026-10-26 免费1.0首发收敛正在实施：Release 保留核心做饭闭环，退出 AI 生成/模型下载、公开投稿/分发、自动识别/联网条码、Widget 和实时活动。Debug 研发能力保留。本人已有内容、聊天及权益按原权限只读/清理，不删除历史来代替功能退出。正式 API 尚待核实，完整 Release/签名/真机验收未通过；详见文末首发边界及项目产品规划目录。
+
 已接入启动配置、快速登录、原生 Apple 授权、会话刷新、退出、基本资料恢复和设置页；菜谱首页、搜索与详情，以及个人／家庭计划、备菜、库存、采购单、提醒、家庭管理、库存扣减任务和个人 AI 周计划均已调用服务端接口。个推客户端薄适配和设备登记调用已实现，十语隐私政策本地副本也已升级；真实个推参数、APNs 控制台配置、线上 H5/服务端协议激活、SPM 在线解析与真机推送链路仍未完成。因此当前是“客户端接口代码已接入，外部服务尚未完成端到端配置”，不能写成已可真实推送。[实现范围](docs/实现范围.md)、[个推接入记录](docs/getui-ios-integration-20260928.md)与[验证记录](docs/验证记录.md)分别记录边界和实测结果。
 
 ## 打开与运行
@@ -24,7 +26,7 @@ xcodebuild -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 
 `project.yml` 是工程配置来源，修改后执行 `xcodegen generate --spec project.yml`；提交工程、共享 scheme 和 SPM 的 `Package.resolved`。生成后的挂钩会移除两个本地包在导航中的重复 Folder 引用，保留 SwiftPM 依赖，避免 Xcode 26.3 的包加载冲突；可用 `python3 scripts/remove_duplicate_local_package_folders.py --check` 检查。
 
-## AI 问答
+## AI 问答（Debug 研发范围）
 
 聊天默认使用免费 GLM：文字由 `glm-4.7-flash` 处理，图片由 `glm-4.6v-flash` 处理；文字模型明确返回容量繁忙、且尚未接收流式响应时，可在同一请求期限内改用免费视觉模型回答文字。DeepSeek 由用户手动选择，保留原有额度规则；免费模式失败不会自动转为付费调用。免费服务有容量限制，不承诺固定响应时间。
 
@@ -141,3 +143,7 @@ xcodebuild test -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 同轮 Release 已排除聊天、服务商选择、模型下载/推理、语音及 AI 食材录入的22个实现源文件；启动不预热光球或模型，不创建悬浮聊天，通知不打开聊天。计划与食材的 AI 创建入口、生成/接受周计划及聊天/图像请求函数仅在 Debug 编译。普通作用域校验、下一餐日期投影、历史记录模型/存储字节与合法 GET/DELETE API 保留，未自动清除本机聊天、下载权重或服务端记忆。历史界面可达性仍须按 G08 逐项收尾，不能把编译清单核对当作最终二进制验收。
 
 Release 同时排除条码相机、商品联网查询和扫描设备探测实现；采购与备菜入口、旧草稿自动查询及手动查询重试仅在 Debug 编译。历史账单和扫描元数据继续按原权限读取/手动编辑。首发页面例外版本见 `docs/design-rag/contracts/first-release-core-r1.md` 及五个 `*-core-r1` 合同；原设计源和研发基线保留。
+
+Release 个人内容仅保留本人已有作品/本机草稿的读取与明确删除、贡献历史/撤回及本机贡献草稿的离线读取/删除，不提供新发布、编辑发布、补图或重新提交；菜谱详情不分发公开作品，收藏仅列菜谱。本机聊天历史静态显示原角色、时间、失败/停止状态、notice、来源和图片，不恢复任务、不触发存储清理。会员页只解释历史生产权益及余额，不承诺延期 AI 或销售能力。
+
+2026-10-26 定向构建：在本机 arm64 模拟器 SDK、Debug 配置、真实测试地址及 Release 编译条件/源文件排除下构建通过；未启动 App，不验证 Keychain 或真实登录，不能视为签名 Release 包。现有 QFNativeLlama 二进制没有 x86_64 模拟器切片，因此本机通用双架构构建在 x86_64 链接失败；此限制仍未修复，arm64 使用 `ARCHS=arm64 ONLY_ACTIVE_ARCH=YES`。最终归档须另检查实际分发载荷、权限及业务。

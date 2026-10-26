@@ -8,7 +8,7 @@ private struct QFSavedFavorite: Decodable { let saved: Bool }
 final class QFWorkDetailViewController: QFProfileContentController {
   private let workID: String
   private var favorite = false
-  private var favoriteButton: UIButton!
+  private var favoriteButton: UIButton?
   init(app: QFAppSession, workID: String) {
     self.workID = workID
     super.init(app: app, title: app.text("作品详情", "Post details"))
@@ -16,13 +16,15 @@ final class QFWorkDetailViewController: QFProfileContentController {
   required init?(coder: NSCoder) { nil }
   override func viewDidLoad() {
     super.viewDidLoad()
+    #if DEBUG
     favoriteButton = addFooter(app.text("收藏作品", "Save post"), primary: false) { [weak self] in self?.toggleFavorite() }
+    #endif
     load()
   }
   private func load() {
     setReloadAction { [weak self] in self?.load() }
     execute(reloadOnFailure: true) { [self] in
-      favoriteButton.isEnabled = false
+      favoriteButton?.isEnabled = false
       let work: QFUserWork = try await app.contentRequest(path: "works/\(workID)")
       bodyStack.beginUpdates()
       bodyStack.row("date", version: work.updatedAt + work.status + (work.reviewNote ?? "")) { [self] in
@@ -85,17 +87,20 @@ final class QFWorkDetailViewController: QFProfileContentController {
         }
       }
       bodyStack.endUpdates()
-      favoriteButton.isHidden = work.status != "PUBLISHED"
+      #if DEBUG
+      favoriteButton?.isHidden = work.status != "PUBLISHED"
       guard work.status == "PUBLISHED" else { return }
       let state: QFSavedFavorite = try await app.contentRequest(path: "me/favorites/WORK/\(workID)")
       favorite = state.saved
       updateFavorite()
-      favoriteButton.isEnabled = true
+      favoriteButton?.isEnabled = true
+      #endif
     }
   }
   private func updateFavorite() {
-    favoriteButton.setTitle(favorite ? app.text("已收藏 · 取消", "Saved · Remove") : app.text("收藏作品", "Save post"), for: .normal)
+    favoriteButton?.setTitle(favorite ? app.text("已收藏 · 取消", "Saved · Remove") : app.text("收藏作品", "Save post"), for: .normal)
   }
+  #if DEBUG
   private func toggleFavorite() {
     execute { [self] in
       try await app.contentMutation(
@@ -105,6 +110,7 @@ final class QFWorkDetailViewController: QFProfileContentController {
       onChanged?()
     }
   }
+  #endif
 }
 
 @MainActor
@@ -163,6 +169,7 @@ final class QFCatalogDetailViewController: QFProfileContentController {
         QFContentDetailUI.materialRows(item.materials, into: bodyStack, app: app)
         QFContentDetailUI.stepRows(item.steps, into: bodyStack, app: app)
       }
+      #if DEBUG
       if type == "RECIPE" {
         bodyStack.row("related.title") { [app] in QFContentUI.label(app.text("大家的作品", "Community posts"), size: 20, bold: true) }
         bodyStack.row("related") { [self] in
@@ -171,18 +178,22 @@ final class QFCatalogDetailViewController: QFProfileContentController {
           return relatedWorks
         }
       }
+      #endif
       bodyStack.endUpdates()
       if type == "RECIPE" {
         let state: QFSavedFavorite = try await app.contentRequest(
           path: "me/favorites/RECIPE/\(contentID)")
         favorite = state.saved
         updateFavorite()
+        #if DEBUG
         try await fetchRelatedWorks(reset: isRefreshingContent)
+        #endif
       }
     }
   }
 
   private func fetchRelatedWorks(append: Bool = false, reset: Bool = false) async throws {
+    #if DEBUG
     let previous = relatedPagination
     relatedPagination = try await previous.fetching(
       app: app, path: "catalog/RECIPE/\(contentID)/works", append: append, reset: reset,
@@ -208,6 +219,7 @@ final class QFCatalogDetailViewController: QFProfileContentController {
     }
     relatedWorks.endUpdates()
     setLoadMoreAction(relatedPagination.hasMore ? { [weak self] in self?.loadMoreWorks() } : nil)
+    #endif
   }
   private func loadMoreWorks() {
     execute(reloadOnFailure: true, loadingMore: true) { [self] in

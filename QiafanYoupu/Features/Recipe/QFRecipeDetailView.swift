@@ -231,12 +231,16 @@ final class QFHomeRecipeDetailViewController: UIViewController {
   }
 
   private func loadFirstRelated(force: Bool) async -> QFContentPage<QFUserWork>? {
+    #if DEBUG
     do {
       return try await QFContentLoadingContext.$forceRefresh.withValue(force) {
         try await app.publicContentRequest(
           path: "catalog/RECIPE/\(recipeID)/works", query: ["page": "0"])
       }
     } catch { return nil }
+    #else
+    return nil
+    #endif
   }
 
   private func loadPlans(force: Bool, householdID: String?) async -> [QFPlannedMeal]? {
@@ -390,6 +394,7 @@ final class QFHomeRecipeDetailViewController: UIViewController {
         }
       }
     }
+    #if DEBUG
     if materials != nil {
       body.row("related.title", version: language) { [app] in
         QFTabUI.label(app.text("大家的作品", "Community results"), size: 20, weight: .bold)
@@ -400,6 +405,7 @@ final class QFHomeRecipeDetailViewController: UIViewController {
         return relatedWorks
       }
     }
+    #endif
     body.endUpdates()
     updateEngagementControls(item)
   }
@@ -457,6 +463,7 @@ final class QFHomeRecipeDetailViewController: UIViewController {
   }
 
   private func renderRelated() {
+    #if DEBUG
     let language = app.interfaceLanguage
     relatedWorks.beginUpdates()
     for work in related {
@@ -492,18 +499,22 @@ final class QFHomeRecipeDetailViewController: UIViewController {
       }
     }
     relatedWorks.endUpdates()
+    #endif
   }
 
   @objc private func openRelated(_ gesture: UITapGestureRecognizer) {
+    #if DEBUG
     guard let index = gesture.view?.tag, related.indices.contains(index) else { return }
     let work = related[index]
     requireLogin { [weak self] in
       guard let self else { return }
       self.qfPush(QFWorkDetailViewController(app: self.app, workID: work.id))
     }
+    #endif
   }
 
   private func loadMoreRelated() {
+    #if DEBUG
     guard relatedHasMore, relatedTask == nil else { relatedFooter.endRefreshing(); return }
     let page = relatedNextPage
     relatedTask = Task { [weak self] in
@@ -526,13 +537,19 @@ final class QFHomeRecipeDetailViewController: UIViewController {
         self.relatedFooter.setTitle(self.app.text("加载失败，上拉重试", "Pull up to retry"), for: .idle)
       }
     }
+    #endif
   }
 
   private func updateRelatedFooter() {
+    #if DEBUG
     relatedFooter.resetNoMoreData()
     relatedFooter.isHidden = !relatedHasMore
     relatedFooter.isAutomaticallyRefresh = relatedHasMore
     relatedFooter.endRefreshing()
+    #else
+    relatedFooter.isHidden = true
+    relatedFooter.isAutomaticallyRefresh = false
+    #endif
   }
 
   private func updateEngagementControls(_ item: QFRecipeHomeItem) {

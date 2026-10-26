@@ -41,6 +41,16 @@ enum QFLocalMediaStore {
   }
   let reopened = QFAssistantConversationStore(scope:scope,defaults:defaults)
   precondition(reopened.load().count == 40)
+  defaults.set(["unopened-retained-image"], forKey:storageKey(scope) + ".images")
+  let beforeReadOnly = defaults.dictionaryRepresentation() as NSDictionary
+  precondition(reopened.readOnlyMessages().count == 40)
+  precondition(beforeReadOnly.isEqual(to:defaults.dictionaryRepresentation()), "history viewing must not write preferences or prune stored images")
+  for other in [QFAgentScope(account:"history-other-account",household:nil,language:"zh-Hans"),
+    QFAgentScope(account:scope.account,household:"history-other-household",language:"zh-Hans"),
+    QFAgentScope(account:scope.account,household:nil,language:"en")] {
+   precondition(QFAssistantConversationStore(scope:other,defaults:defaults).readOnlyMessages().isEmpty)
+  }
+  defaults.removeObject(forKey:storageKey(scope) + ".images")
   let restoredHistory = try reopened.history(reopened.load(), imageQuestion:"Image placeholder")
   precondition(restoredHistory == original,
     "reopening must not silently lose early constraints outside the visible forty messages")

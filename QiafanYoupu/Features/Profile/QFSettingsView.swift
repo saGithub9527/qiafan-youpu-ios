@@ -587,18 +587,24 @@ final class QFSettingsViewController: UIViewController {
         self?.logoutTask = nil
       }
       do {
+        #if DEBUG
         await QFMealLivePushService.shared.unregisterBeforeSignOut()
-          await QFGetuiPushService.shared.unregisterBeforeSignOut()
+        #endif
+        await QFGetuiPushService.shared.unregisterBeforeSignOut()
         try await app.logout()
         guard !Task.isCancelled else { return }
         self?.onClose()
       } catch is CancellationError {
         QFGetuiPushService.shared.signOutDidFail()
+        #if DEBUG
         QFMealLivePushService.shared.signOutDidFail()
+        #endif
         return
       } catch {
         QFGetuiPushService.shared.signOutDidFail()
+        #if DEBUG
         QFMealLivePushService.shared.signOutDidFail()
+        #endif
         self?.showMessage(
           title: app.text("退出失败", "Could not sign out"),
           message: QFProfileContentController.errorText(error, app: app))

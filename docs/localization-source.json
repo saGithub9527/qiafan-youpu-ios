@@ -673,6 +673,12 @@
         "Only reviewed content in the selected language is shown"
       ]
     },
+    "仅显示当前账号、家庭和语言的历史记录，不发送新请求。": {
+      "english": "Shows history for the current account, household, and language. No new requests are sent.",
+      "englishVariants": [
+        "Shows history for the current account, household, and language. No new requests are sent."
+      ]
+    },
     "仅显示部分记录，请打开来源查看完整内容。": {
       "english": "Only part of the records is shown. Open the source for the full content.",
       "englishVariants": [
@@ -1852,6 +1858,18 @@
       "english": "Historical inventory needs verification",
       "englishVariants": [
         "Historical inventory needs verification"
+      ]
+    },
+    "历史权益与余额": {
+      "english": "Past benefits and balance",
+      "englishVariants": [
+        "Past benefits and balance"
+      ]
+    },
+    "历史聊天记录": {
+      "english": "Chat history",
+      "englishVariants": [
+        "Chat history"
       ]
     },
     "原因：%@": {
@@ -3329,6 +3347,12 @@
       "english": "No active subscription",
       "englishVariants": [
         "No active subscription"
+      ]
+    },
+    "当前版本不提供购买和积分消费。历史权益和余额仅供查看。": {
+      "english": "Purchases and credit spending are unavailable in this version. Past benefits and balances are view-only.",
+      "englishVariants": [
+        "Purchases and credit spending are unavailable in this version. Past benefits and balances are view-only."
       ]
     },
     "当前环境的 HTTPS 接口地址尚未配置。": {
@@ -5039,6 +5063,12 @@
         "Cost of this cooking"
       ]
     },
+    "本版核心做饭工具免费使用。": {
+      "english": "Core cooking tools are free in this version.",
+      "englishVariants": [
+        "Core cooking tools are free in this version."
+      ]
+    },
     "本轮仅查询或准备草稿，未保存更改。数据可能仅含部分记录，请打开原页面核对。": {
       "english": "This turn only queried data or prepared a draft; no changes were saved. Results may be partial; open the original page to review.",
       "englishVariants": [
@@ -5679,6 +5709,12 @@
       "english": "No recipes match these filters",
       "englishVariants": [
         "No recipes match these filters"
+      ]
+    },
+    "没有此范围的聊天记录。": {
+      "english": "There is no chat history in this scope.",
+      "englishVariants": [
+        "There is no chat history in this scope."
       ]
     },
     "没有满足当前条件的可用菜谱。": {

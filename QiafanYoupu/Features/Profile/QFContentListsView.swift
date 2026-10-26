@@ -12,7 +12,9 @@ final class QFMyWorksViewController: QFProfileContentController {
   required init?(coder: NSCoder) { nil }
   override func viewDidLoad() {
     super.viewDidLoad()
+    #if DEBUG
     _ = addFooter(app.text("发布作品", "Publish post")) { [weak self] in self?.edit(nil) }
+    #endif
     let controls = QFTabUI.stack(
       [
         categoryTabs([app.text("已发布", "Published"), app.text("审核中", "In review"), app.text("未通过", "Not approved"), app.text("草稿", "Drafts")]) { [weak self] index in
@@ -28,6 +30,7 @@ final class QFMyWorksViewController: QFProfileContentController {
     installList(results, controls: controls)
     load()
   }
+  #if DEBUG
   private func edit(_ work: QFUserWork?, localDraft: QFStoredWorkDraft? = nil) {
     let controller = QFWorkEditorViewController(app: app, work: work, localDraft: localDraft)
     controller.onChanged = { [weak self] in
@@ -36,6 +39,28 @@ final class QFMyWorksViewController: QFProfileContentController {
     }
     open(controller)
   }
+  #else
+  private func viewLocalDraft(_ saved: QFStoredWorkDraft) {
+    let value = saved.value
+    let page = QFProfileContentController(app: app, title: app.text("草稿", "Drafts"))
+    page.loadViewIfNeeded()
+    page.bodyStack.addArrangedSubview(QFContentUI.label(value.title.isEmpty ? app.text("未命名草稿", "Untitled draft") : value.title, size: 23, bold: true))
+    if !value.body.isEmpty { page.bodyStack.addArrangedSubview(QFContentUI.label(value.body)) }
+    for id in value.photoIds { page.bodyStack.addArrangedSubview(QFContentUI.thumbnail(id, app: app, height: 240)) }
+    for material in value.materials {
+      page.bodyStack.addArrangedSubview(QFContentUI.label([material.name, material.amount, material.unit].filter { !$0.isEmpty }.joined(separator: " · ")))
+    }
+    for step in value.steps {
+      if !step.title.isEmpty { page.bodyStack.addArrangedSubview(QFContentUI.label(step.title, size: 17, bold: true)) }
+      page.bodyStack.addArrangedSubview(QFContentUI.label(step.body))
+    }
+    if let id = value.videoId {
+      let preview = QFVideoPreviewView(app: app); preview.load(id)
+      page.bodyStack.addArrangedSubview(preview)
+    }
+    open(page)
+  }
+  #endif
   private func load(append: Bool = false) {
     setReloadAction { [weak self] in self?.load() }
     if status == "LOCAL" {
@@ -90,18 +115,24 @@ final class QFMyWorksViewController: QFProfileContentController {
         let top = QFTabUI.stack(
           [image, QFTabUI.stack([title, meta], spacing: 8)], axis: .horizontal, spacing: 14)
         top.alignment = .center
-        let actions = QFTabUI.stack(
-          [
-            QFContentUI.action(status == "DRAFT" ? app.text("继续编辑", "Continue editing") : app.text("查看作品", "View post")) { [weak self] in
+        var actionViews: [UIView] = [
+            QFContentUI.action(app.text("查看作品", "View post")) { [weak self] in
               guard let self else { return }
+              #if DEBUG
               if work.status == "DRAFT" {
                 self.edit(work)
               } else {
                 self.open(QFWorkDetailViewController(app: self.app, workID: work.id))
               }
+              #else
+              self.open(QFWorkDetailViewController(app: self.app, workID: work.id))
+              #endif
             },
-            QFContentUI.action(app.text("编辑", "Edit")) { [weak self] in self?.edit(work) },
-            QFContentUI.action(app.text("删除", "Delete"), destructive: true) { [weak self] in
+        ]
+        #if DEBUG
+        actionViews.append(QFContentUI.action(app.text("编辑", "Edit")) { [weak self] in self?.edit(work) })
+        #endif
+        actionViews.append(QFContentUI.action(app.text("删除", "Delete"), destructive: true) { [weak self] in
               self?.confirm(
                 app.text("删除这篇作品？", "Delete this post?"), detail: app.text("删除后将不再展示，不会删除关联菜谱或做菜记录。", "It will no longer appear. Related recipes and cooking history are kept."), actionTitle: app.text("确认删除", "Delete"),
                 destructive: true
@@ -115,8 +146,8 @@ final class QFMyWorksViewController: QFProfileContentController {
                   DispatchQueue.main.async { self.load() }
                 }
               }
-            },
-          ], axis: .horizontal, spacing: 14)
+            })
+        let actions = QFTabUI.stack(actionViews, axis: .horizontal, spacing: 14)
         return QFTabUI.card(QFTabUI.stack([top, actions], spacing: 12))
       }
     }
@@ -138,9 +169,13 @@ final class QFMyWorksViewController: QFProfileContentController {
         let date = QFContentUI.label(String((draft.updatedAt ?? "").prefix(10)), size: 13, color: QFUI.secondary)
         let top = QFTabUI.stack([thumbnail, QFTabUI.stack([title, date], spacing: 8)], axis: .horizontal, spacing: 12)
         top.alignment = .center
-        let actions = QFTabUI.stack([
-          QFContentUI.action(self.app.text("继续编辑", "Continue editing")) { [weak self] in self?.edit(nil, localDraft: draft) },
-          QFContentUI.action(self.app.text("删除草稿", "Delete draft"), destructive: true) { [weak self] in
+        var actionViews: [UIView] = []
+        #if DEBUG
+        actionViews.append(QFContentUI.action(self.app.text("继续编辑", "Continue editing")) { [weak self] in self?.edit(nil, localDraft: draft) })
+        #else
+        actionViews.append(QFContentUI.action(self.app.text("查看作品", "View post")) { [weak self] in self?.viewLocalDraft(draft) })
+        #endif
+        actionViews.append(QFContentUI.action(self.app.text("删除草稿", "Delete draft"), destructive: true) { [weak self] in
             guard let self else { return }
             self.confirm(self.app.text("删除这份本地草稿？", "Delete this local draft?"), detail: self.app.text("草稿和未提交的图片、视频将从这台设备移除。", "The draft and its unsubmitted photos and video will be removed from this device."), actionTitle: self.app.text("删除", "Delete"), destructive: true) { [weak self] in
               guard let self else { return }
@@ -153,8 +188,8 @@ final class QFMyWorksViewController: QFProfileContentController {
               }
               self.load()
             }
-          }
-        ], axis: .horizontal, spacing: 18)
+          })
+        let actions = QFTabUI.stack(actionViews, axis: .horizontal, spacing: 18)
         return QFTabUI.card(QFTabUI.stack([top, actions], spacing: 12))
       }
     }
@@ -180,7 +215,12 @@ final class QFFavoritesViewController: QFProfileContentController {
   required init?(coder: NSCoder) { nil }
   override func viewDidLoad() {
     super.viewDidLoad()
-    let tabs = categoryTabs([app.text("菜谱", "Recipes"), app.text("用户作品", "Community posts")]) { [weak self] index in
+    #if DEBUG
+    let names = [app.text("菜谱", "Recipes"), app.text("用户作品", "Community posts")]
+    #else
+    let names = [app.text("菜谱", "Recipes")]
+    #endif
+    let tabs = categoryTabs(names) { [weak self] index in
       guard let self else { return }
       self.offsets[self.selected] = self.results.contentOffset
       self.selected = index
@@ -235,7 +275,11 @@ final class QFFavoritesViewController: QFProfileContentController {
     }
     if pagination.items.isEmpty {
       results.row("static.6", version: "\(pagination.total)|\(selected)") {
+        #if DEBUG
         QFTabUI.empty(app.text("暂无符合条件的收藏", "No matching saved items"), detail: app.text("清空搜索，或返回浏览菜谱与用户作品。", "Clear the search or browse recipes and community posts."))
+        #else
+        QFTabUI.empty(app.text("暂无符合条件的收藏", "No matching saved items"), detail: "")
+        #endif
       }
     }
     for item in pagination.items {

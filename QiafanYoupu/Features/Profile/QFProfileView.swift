@@ -143,6 +143,7 @@ final class QFProfileViewController: QFPageViewController {
     { label.text = value }
 
     QFTabUI.clear(featureCards)
+    #if DEBUG
     featureCards.addArrangedSubview(
       feature(
         .publishWork, subtitle: app.text("记录今天的拿手菜", "Share what you cooked today"),
@@ -153,6 +154,9 @@ final class QFProfileViewController: QFPageViewController {
         subtitle: app.text("为食材、菜谱补充实拍", "Add real photos to ingredients and recipes"),
         symbol: "photo.badge.plus", color: QFUI.success,
         background: QFUI.successBackground))
+    #else
+    featureCards.isHidden = true
+    #endif
     refreshProfile()
   }
 
@@ -370,15 +374,19 @@ final class QFProfileViewController: QFPageViewController {
     guard presentedViewController == nil else { return }
     let controller: QFProfileContentController
     switch destination {
+    #if DEBUG
     case .publishWork: controller = QFWorkEditorViewController(app: app)
     case .contributeImage: controller = QFContributionEditorViewController(app: app)
+    case .assistant: controller = QFAssistantIngredientViewController(app: app, householdID: app.planningHouseholdID)
+    #else
+    case .assistantHistory: controller = QFAssistantHistoryViewController(app: app)
+    #endif
     case .works: controller = QFMyWorksViewController(app: app)
     case .contributions: controller = QFContributionsViewController(app: app)
     case .favorites: controller = QFFavoritesViewController(app: app)
     case .cookingHistory: controller = QFCookingHistoryViewController(app: app)
     case .preferences: controller = QFInterestPreferencesViewController(app: app)
     case .membership: controller = QFMembershipViewController(app: app)
-    case .assistant: controller = QFAssistantIngredientViewController(app: app, householdID: app.planningHouseholdID)
     }
     controller.onChanged = { [weak self] in self?.loadContentSummary() }
     qfPush(controller)
@@ -489,28 +497,41 @@ final class QFProfileViewController: QFPageViewController {
 }
 
 private enum QFProfileDestination {
+  #if DEBUG
   case publishWork
   case contributeImage
+  case assistant
+  #else
+  case assistantHistory
+  #endif
   case works
   case contributions
   case favorites
   case cookingHistory
   case preferences
   case membership
-  case assistant
 
   @MainActor
   func title(app: QFAppSession) -> String {
     switch self {
+    #if DEBUG
     case .publishWork: return app.text("发布作品", "Publish post")
     case .contributeImage: return app.text("补充图片", "Contribute photos")
+    case .assistant: return app.text("AI 助手", "AI assistant")
+    #else
+    case .assistantHistory: return app.text("历史聊天记录", "Chat history")
+    #endif
     case .works: return app.text("我的作品", "My posts")
     case .contributions: return app.text("我的图片贡献", "My photo contributions")
     case .favorites: return app.text("我的收藏", "My favorites")
     case .cookingHistory: return app.text("做菜记录与统计", "Cooking history and stats")
     case .preferences: return app.text("兴趣偏好", "Interests and preferences")
-    case .membership: return app.text("会员订阅", "Membership")
-    case .assistant: return app.text("AI 助手", "AI assistant")
+    case .membership:
+      #if DEBUG
+      return app.text("会员订阅", "Membership")
+      #else
+      return app.text("历史权益与余额", "Past benefits and balance")
+      #endif
     }
   }
 }
@@ -518,11 +539,18 @@ private enum QFProfileDestination {
 private struct QFProfileMenuItem {
   let destination: QFProfileDestination
   let symbol: String
-  static let items = [
+  static var items: [QFProfileMenuItem] {
+    var items = [
     QFProfileMenuItem(destination: .works, symbol: "photo"),
     QFProfileMenuItem(destination: .contributions, symbol: "photo.badge.plus"),
     QFProfileMenuItem(destination: .favorites, symbol: "bookmark"),
     QFProfileMenuItem(destination: .cookingHistory, symbol: "calendar.badge.checkmark"),
-    QFProfileMenuItem(destination: .assistant, symbol: "sparkles"),
-  ]
+    ]
+    #if DEBUG
+    items.append(QFProfileMenuItem(destination: .assistant, symbol: "sparkles"))
+    #else
+    items.append(QFProfileMenuItem(destination: .assistantHistory, symbol: "clock.arrow.circlepath"))
+    #endif
+    return items
+  }
 }

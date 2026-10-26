@@ -7,6 +7,7 @@ struct QFStoredWorkDraft: Codable {
   var updatedAt: String?
 }
 
+#if DEBUG
 @MainActor
 final class QFWorkEditorViewController: QFProfileContentController {
   private var workID: String
@@ -318,3 +319,5 @@ final class QFWorkEditorViewController: QFProfileContentController {
       })
   }
 }
+
+#endif

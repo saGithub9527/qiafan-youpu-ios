@@ -10,6 +10,96 @@
   ],
   "pages": [
     {
+      "id": "profile-core-r1",
+      "title": "我的与本人历史 · 免费首发 Release",
+      "appliesToConfiguration": "Release",
+      "keywords": [
+        "我的",
+        "历史",
+        "作品",
+        "贡献",
+        "收藏",
+        "首发"
+      ],
+      "sources": [
+        {
+          "path": "06-我的/01-我的-首页.png",
+          "sha256": "8beb26a53ae71dc03fb1ca56f0ad0308988b2a5ebf2a70a159f48524f616a33e"
+        },
+        {
+          "path": "06-我的/12-我的图片贡献.png",
+          "sha256": "0fd5762526d4c047de63ba764a0c5c5b1e746b9ecb2f52009d94bfe2eab38bb7"
+        },
+        {
+          "path": "06-我的/13-我的收藏.png",
+          "sha256": "a9fd17d64fc8dde80e207f0eec96fea44bcfdda7f2fe4434dd43eec1bf9bcbbf"
+        },
+        {
+          "path": "06-我的/19-我的作品.png",
+          "sha256": "233388cdcefe2de0a21921dbd2b389d701183167cfe1e14b46052ef70b9262bd"
+        },
+        {
+          "path": "06-我的/页面行为说明.json",
+          "sha256": "18acf6c88bbfbe2a770957d0b8f39e4ef9c66415437957fbdb484a2b7407e1ef"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a"
+        }
+      ],
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "navigation": "existing headers and push/pop",
+        "content": "existing vertical cards, history is read-only"
+      },
+      "interactionContract": [
+        "First-release-core-r1 explicit scope exception: no publishing, resubmission or public works distribution.",
+        "Preserve authenticated own works/local drafts/contributions read/delete/withdraw.",
+        "Local historical drafts remain usable offline; no new private publishing capability."
+      ],
+      "approvedException": "2026-10-26 用户授权的免费首发范围与G08历史读取边界。"
+    },
+    {
+      "id": "membership-core-r1",
+      "productPage": "PROFILE-MEMBERSHIP",
+      "title": "历史权益与余额 · 免费首发 Release",
+      "keywords": [
+        "会员",
+        "订阅",
+        "权益",
+        "测试账号",
+        "积分",
+        "会员订阅"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/membership-r1.md",
+          "sha256": "f5ad903cf7b134b8e7f8e40c7fb3a1522b35464a24aec6d3cddd5793735d2a3d"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a"
+        }
+      ],
+      "layoutContract": {
+        "navigation": "existing QFProfileContentController",
+        "content": "vertical scroll and existing cards",
+        "symbolHeight": 56,
+        "cardPadding": 24,
+        "headingSize": 23
+      },
+      "interactionContract": [
+        "Release only: historical production benefits/balance, no purchase, test grants, deferred benefit list or free GLM promises.",
+        "Existing navigation, cards, loading/retry and account/language isolation remain."
+      ],
+      "supersedes": "membership-r1",
+      "appliesToConfiguration": "Release",
+      "approvedException": "2026-10-26 已授权首发取舍，仅保留历史读取并解释无购买/消费。"
+    },
+    {
       "id": "purchase-product-entry-core-r1",
       "productPage": "PLAN-11-12-13-14-15-20",
       "title": "采购商品名称编辑与条码录入 · 免费首发 Release",
@@ -70,7 +160,7 @@
         },
         {
           "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
-          "sha256": "2859c399621c37e97cc9db0dd32ce7693f70729ef03059b5fe3b6445285ed1b7"
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a"
         }
       ],
       "layoutContract": {
@@ -166,7 +256,7 @@
         },
         {
           "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
-          "sha256": "2859c399621c37e97cc9db0dd32ce7693f70729ef03059b5fe3b6445285ed1b7"
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a"
         }
       ],
       "layoutContract": {
@@ -249,7 +339,7 @@
         },
         {
           "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
-          "sha256": "2859c399621c37e97cc9db0dd32ce7693f70729ef03059b5fe3b6445285ed1b7"
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a"
         }
       ],
       "layoutContract": {
@@ -310,7 +400,7 @@
         },
         {
           "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
-          "sha256": "2859c399621c37e97cc9db0dd32ce7693f70729ef03059b5fe3b6445285ed1b7"
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a"
         }
       ],
       "layoutContract": {
@@ -384,7 +474,7 @@
         },
         {
           "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
-          "sha256": "2859c399621c37e97cc9db0dd32ce7693f70729ef03059b5fe3b6445285ed1b7"
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a"
         }
       ],
       "layoutContract": {

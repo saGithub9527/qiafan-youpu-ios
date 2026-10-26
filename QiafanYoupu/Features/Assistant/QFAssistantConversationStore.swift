@@ -63,6 +63,13 @@ final class QFAssistantConversationStore {
     // Reset boundary, records and the overflow guard cannot survive as separate partial writes.
     defaults.set(data, forKey: key + ".context")
   }
+  /// Historical viewing must not run chat retention, rewrite state, or resume a request.
+  func readOnlyMessages() -> [QFAssistantLocalMessage] {
+    guard persistent, let data = defaults.data(forKey: key),
+      let value = try? JSONDecoder().decode([QFAssistantLocalMessage].self, from: data) else { return [] }
+    return Array(value.filter { $0.role != "thinking" }.suffix(40))
+  }
+
   func load() -> [QFAssistantLocalMessage] {
     guard persistent else { return [] }
     guard let data = defaults.data(forKey: key),
