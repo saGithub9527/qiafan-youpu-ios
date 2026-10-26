@@ -218,10 +218,14 @@ final class QFSettingsViewController: UIViewController {
       section(
         title: app.text("外观与显示", "Appearance and language"),
         rows: [themeRow, languageRow]))
+    var notificationRows: [UIView] = [planReminderRow, reminderDetailRow]
+    #if DEBUG
+      notificationRows.append(progressRow)
+    #endif
     contentStack.addArrangedSubview(
       section(
         title: app.text("通知", "Notifications"),
-        rows: [planReminderRow, reminderDetailRow, progressRow]))
+        rows: notificationRows))
     contentStack.addArrangedSubview(
       section(
         title: app.text("账号与数据", "Account and data"),
