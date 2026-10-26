@@ -14,6 +14,26 @@ enum QFCreatePlanLayout {
 }
 
 @MainActor
+private final class QFCreatePlanSeparator: UIView {
+  private var heightConstraint: Constraint?
+  private var pixelHeight: CGFloat { 1 / max(traitCollection.displayScale, 1) }
+
+  override init(frame: CGRect) {
+    super.init(frame: frame)
+    backgroundColor = QFUI.border
+    snp.makeConstraints { heightConstraint = $0.height.equalTo(pixelHeight).constraint }
+  }
+
+  required init?(coder: NSCoder) { nil }
+
+  override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    super.traitCollectionDidChange(previousTraitCollection)
+    guard previousTraitCollection?.displayScale != traitCollection.displayScale else { return }
+    heightConstraint?.update(offset: pixelHeight)
+  }
+}
+
+@MainActor
 final class QFCreatePlanViewController: QFProfileContentController {
   private let householdID: String?
   private let householdName: String?
@@ -56,10 +76,8 @@ final class QFCreatePlanViewController: QFProfileContentController {
     saveButton = addFooter(app.text("保存计划", "Save plan")) { [weak self] in self?.submit() }
     saveButton.accessibilityIdentifier = "plan.create.save"
     footer.insertArrangedSubview(countLabel, at: 0)
-    let divider = UIView()
-    divider.backgroundColor = QFUI.border
+    let divider = QFCreatePlanSeparator(frame: .zero)
     footer.insertArrangedSubview(divider, at: 0)
-    divider.snp.makeConstraints { $0.height.equalTo(1 / UIScreen.main.scale) }
     render()
     // A language/scope change does not submit or discard this local draft.
     app.$interfaceLanguage.dropFirst().removeDuplicates().sink { [weak self] _ in
@@ -177,8 +195,7 @@ final class QFCreatePlanViewController: QFProfileContentController {
         } else {
           for (index, item) in items.enumerated() {
             if index > 0 {
-              let separator = UIView(); separator.backgroundColor = QFUI.border
-              separator.snp.makeConstraints { $0.height.equalTo(1 / UIScreen.main.scale) }
+              let separator = QFCreatePlanSeparator(frame: .zero)
               contents.addArrangedSubview(separator)
             }
             contents.addArrangedSubview(recipeRow(item, meal: meal))
