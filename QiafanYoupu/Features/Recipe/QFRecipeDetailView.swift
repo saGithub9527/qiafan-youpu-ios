@@ -337,9 +337,10 @@ final class QFHomeRecipeDetailViewController: UIViewController {
         body.row("materials.empty", version: language) { QFTabUI.empty(self.app.text("暂无材料信息", "No ingredient details"), detail: "") }
       } else {
         for (index, material) in materials.enumerated() {
-          body.row("material.\(index)", value: material) {
+          body.row("material.\(index)", value: [material.name, material.amount, material.unit, language]) { [app] in
             let name = QFTabUI.label(material.name, size: 15, lines: 0)
-            let amountText = [material.amount, material.unit].filter { !$0.isEmpty }.joined(separator: " ")
+            let unit = material.unit == "piece" ? app.text("个", "pc") : material.unit
+            let amountText = [material.amount, unit].filter { !$0.isEmpty }.joined(separator: " ")
             let amount = QFTabUI.label(amountText, size: 14, weight: .medium, color: QFUI.secondary, lines: 0)
             amount.textAlignment = .right
             let row = QFTabUI.stack([name, UIView(), amount], axis: .horizontal, spacing: 12)
