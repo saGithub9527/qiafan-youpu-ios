@@ -3,6 +3,13 @@ import Foundation
 /// Small, device-local conversation cache. It is deliberately capped and keyed by account;
 /// server memory is opt-in and is never inferred from this cache.
 final class QFAssistantConversationStore {
+  private static let namespace = "qf.assistant.conversation.v2."
+  private static let suffixes = ["", ".context", ".contextBoundary", ".nativeCapacity", ".images"]
+  // Serializes deletion with every write, including late callbacks from an old owner.
+  private static let mutationLock = NSRecursiveLock()
+  private static var epochs: [String: UUID] = [:]
+  private let account: String
+  private let epoch: UUID
   private let key: String
   private let persistent: Bool
   private let defaults: UserDefaults
@@ -24,10 +31,16 @@ final class QFAssistantConversationStore {
   private var contextUnavailable = false
   private(set) var nativeCapacityReached = false
   init(scope: QFAgentScope, persistent: Bool = true, defaults: UserDefaults = .standard) {
+    self.account = scope.account
+    Self.mutationLock.lock()
+    let currentEpoch = Self.epochs[scope.account] ?? UUID()
+    Self.epochs[scope.account] = currentEpoch
+    self.epoch = currentEpoch
+    Self.mutationLock.unlock()
     self.defaults = defaults
     self.persistent = persistent
     mediaScope = "assistant-chat|" + scope.cacheKey
-    key = "qf.assistant.conversation.v2.\(scope.cacheKey)"
+    key = Self.namespace + scope.cacheKey
     if persistent {
       // No context key is the first-upgrade case: retain the established visible-chat import.
       guard let stored = defaults.object(forKey: key + ".context") else { return }
@@ -47,6 +60,31 @@ final class QFAssistantConversationStore {
       } else { contextUnavailable = true }
     }
   }
+  private var current: Bool { Self.epochs[account] == epoch }
+
+  /// Call only after confirmed server deletion. Failed media scopes retain their keys for retry.
+  @discardableResult
+  static func purge(account: String, defaults: UserDefaults = .standard) -> Bool {
+    mutationLock.lock(); defer { mutationLock.unlock() }
+    epochs[account] = UUID() // Invalidate old instances before touching any preferences or files.
+    var cacheKeys = Set<String>()
+    for storedKey in defaults.dictionaryRepresentation().keys where storedKey.hasPrefix(namespace) {
+      let rest = String(storedKey.dropFirst(namespace.count))
+      let parts = rest.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
+      guard let encoded = parts.first, !encoded.isEmpty,
+        parts.count == 1 || suffixes.contains("." + String(parts[1])),
+        let bytes = Data(base64Encoded: String(encoded)),
+        let scope = try? JSONDecoder().decode(QFAgentScope.self, from: bytes), scope.account == account else { continue }
+      cacheKeys.insert(String(encoded))
+    }
+    var complete = true
+    for cacheKey in cacheKeys {
+      do { try QFLocalMediaStore.removeAll(scope: "assistant-chat|" + cacheKey) }
+      catch { complete = false; continue }
+      for suffix in suffixes { defaults.removeObject(forKey: namespace + cacheKey + suffix) }
+    }
+    return complete
+  }
   private static func valid(_ records: [ContextRecord]) -> Bool {
     Set(records.map(\.id)).count == records.count && records.allSatisfy { ["user", "assistant"].contains($0.role) }
   }
@@ -57,7 +95,8 @@ final class QFAssistantConversationStore {
     return messages.suffix(40).contains { $0.role != "thinking" }
   }
   private func persistContext() {
-    guard persistent, !contextUnavailable else { return }
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current, persistent, !contextUnavailable else { return }
     let snapshot = ContextSnapshot(records: contextRecords, boundary: contextBoundary, nativeCapacity: nativeCapacityReached)
     guard let data = try? JSONEncoder().encode(snapshot), data.count <= 1_048_576 else { contextUnavailable = true; return }
     // Reset boundary, records and the overflow guard cannot survive as separate partial writes.
@@ -65,13 +104,15 @@ final class QFAssistantConversationStore {
   }
   /// Historical viewing must not run chat retention, rewrite state, or resume a request.
   func readOnlyMessages() -> [QFAssistantLocalMessage] {
-    guard persistent, let data = defaults.data(forKey: key),
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current, persistent, let data = defaults.data(forKey: key),
       let value = try? JSONDecoder().decode([QFAssistantLocalMessage].self, from: data) else { return [] }
     return Array(value.filter { $0.role != "thinking" }.suffix(40))
   }
 
   func load() -> [QFAssistantLocalMessage] {
-    guard persistent else { return [] }
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current, persistent else { return [] }
     guard let data = defaults.data(forKey: key),
       let value = try? JSONDecoder().decode([QFAssistantLocalMessage].self, from: data)
     else { return [] }
@@ -89,6 +130,8 @@ final class QFAssistantConversationStore {
     }
   }
   func save(_ messages: [QFAssistantLocalMessage]) {
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current else { return }
     if !contextUnavailable {
       contextRecords = mergedContext(messages)
       persistContext()
@@ -109,7 +152,8 @@ final class QFAssistantConversationStore {
     return boundary.map { Array(messages.dropFirst($0 + 1)) } ?? messages
   }
   func knownSources(_ messages: [QFAssistantLocalMessage]) -> [QFAgentSource] {
-    guard !contextUnavailable else { return [] }
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current, !contextUnavailable else { return [] }
     return activeMessages(messages).last { $0.role == "assistant"
       && !["streaming", "stopped", "failed"].contains($0.state ?? "") }?.sources ?? []
   }
@@ -128,6 +172,8 @@ final class QFAssistantConversationStore {
     return records
   }
   func history(_ messages: [QFAssistantLocalMessage], imageQuestion: String) throws -> [QFAgentConversationContext.Turn] {
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current else { throw CancellationError() }
     guard !contextUnavailable else { throw QFAgentConversationContext.Invalid.schema }
     return mergedContext(messages).map {
       .init(role: $0.role, content: $0.text.isEmpty && $0.hasImage ? imageQuestion : $0.text)
@@ -135,22 +181,30 @@ final class QFAssistantConversationStore {
   }
   /// Remember a native overflow without changing visible chat or user preferences.
   func markNativeCapacityReached() {
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current else { return }
     nativeCapacityReached = true
     persistContext()
   }
   /// Invoked only after the user explicitly chooses a new context. Existing
   /// visible messages, media, model and other preferences are preserved.
   func beginNewContext(after messageID: UUID?) {
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current else { return }
     contextRecords = []; contextUnavailable = false; contextBoundary = messageID; nativeCapacityReached = false
     persistContext()
   }
   func saveImage(_ data: Data) throws -> String {
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current else { throw CancellationError() }
     let id = try QFLocalMediaStore.save(data, video: false, scope: mediaScope).id
     ownedImages.insert(id)
     if persistent { defaults.set(Array(ownedImages), forKey: key + ".images") }
     return id
   }
   func imageURL(_ id: String?) -> URL? {
+    Self.mutationLock.lock(); defer { Self.mutationLock.unlock() }
+    guard current else { return nil }
     guard let id else { return nil }; return try? QFLocalMediaStore.url(id, scope: mediaScope)
   }
 }

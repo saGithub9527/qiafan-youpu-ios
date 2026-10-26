@@ -7,6 +7,7 @@ import UIKit
 struct QFRemoteImageRequest: Hashable, Sendable {
   let url: URL
   let cacheKey: String
+  let accountScope: String
 
   init?(urlString: String?, environment: String, apiBaseURL: URL?, userID: String) {
     guard !environment.isEmpty, !userID.isEmpty,
@@ -14,6 +15,7 @@ struct QFRemoteImageRequest: Hashable, Sendable {
       let url = URL(string: urlString), Self.isAllowedURL(url)
     else { return nil }
     self.url = url
+    accountScope = environment + "." + (apiBaseURL?.absoluteString ?? "") + "." + userID
     let parts = [
       "qf-avatar-v1", environment, apiBaseURL?.absoluteString ?? "", userID, url.absoluteString,
     ]
@@ -34,6 +36,15 @@ struct QFRemoteImageRequest: Hashable, Sendable {
 @MainActor
 final class QFRemoteImageView: UIImageView {
   private var requestID = UUID()
+  private var requestScope: String?
+
+  fileprivate func invalidateDeletedAccount(_ account: String) {
+    guard requestScope == account else { return }
+    requestID = UUID(); requestScope = nil
+    kf.cancelDownloadTask()
+    kf.setImage(with: Optional<Source>.none, placeholder: nil)
+    image = nil
+  }
 
   func load(
     _ request: QFRemoteImageRequest?, placeholder: UIImage?, size: CGSize,
@@ -42,6 +53,7 @@ final class QFRemoteImageView: UIImageView {
   ) {
     let identifier = UUID()
     requestID = identifier
+    requestScope = request?.accountScope
     kf.cancelDownloadTask()
     image = placeholder
     contentMode = .scaleAspectFit
@@ -53,6 +65,9 @@ final class QFRemoteImageView: UIImageView {
     }
     let targetCache = cache ?? QFRemoteImagePipeline.cache
     let targetDownloader = downloader ?? QFRemoteImagePipeline.downloader
+    let epoch = QFRemoteImagePipeline.epoch(for: request.accountScope)
+    QFRemoteImagePipeline.track(self)
+    let processor = DownsamplingImageProcessor(size: size)
     let redirect = AnyRedirectHandler { _, _, newRequest, handler in
       guard let url = newRequest.url, QFRemoteImageRequest.isAllowedURL(url) else {
         handler(nil)
@@ -62,7 +77,7 @@ final class QFRemoteImageView: UIImageView {
     }
     let options: KingfisherOptionsInfo = [
       .targetCache(targetCache), .downloader(targetDownloader),
-      .processor(DownsamplingImageProcessor(size: size)),
+      .processor(processor),
       .scaleFactor(max(1, window?.screen.scale ?? traitCollection.displayScale)),
       .diskStoreWriteOptions([.atomic, .completeFileProtectionUntilFirstUserAuthentication]),
       .waitForCache, .redirectHandler(redirect),
@@ -71,6 +86,13 @@ final class QFRemoteImageView: UIImageView {
       with: KF.ImageResource(downloadURL: request.url, cacheKey: request.cacheKey),
       placeholder: placeholder, options: options
     ) { [weak self] result in
+      guard QFRemoteImagePipeline.epoch(for: request.accountScope) == epoch else {
+        // waitForCache makes this cleanup follow a late SDK write, even after the view is gone.
+        // The cache key includes this exact owner/environment; another account's entry is untouched.
+        targetCache.removeImage(forKey: request.cacheKey, processorIdentifier: processor.identifier,
+          completionHandler: nil)
+        return
+      }
       guard let self, self.requestID == identifier else { return }
       switch result {
       case .success:
@@ -88,6 +110,20 @@ final class QFRemoteImageView: UIImageView {
 }
 
 enum QFRemoteImagePipeline {
+  @MainActor private static var epochs: [String: UUID] = [:]
+  @MainActor private static let views = NSHashTable<QFRemoteImageView>.weakObjects()
+
+  @MainActor fileprivate static func epoch(for account: String) -> UUID {
+    if let value = epochs[account] { return value }
+    let value = UUID(); epochs[account] = value; return value
+  }
+  @MainActor fileprivate static func track(_ view: QFRemoteImageView) { views.add(view) }
+  @MainActor static func invalidateForDeletedAccount(account: String, cache targetCache: ImageCache? = nil) {
+    epochs[account] = UUID()
+    for view in views.allObjects { view.invalidateDeletedAccount(account) }
+    (targetCache ?? cache).clearMemoryCache()
+  }
+
   // One bounded cache for all namespaces avoids multiplying budgets for previously used accounts.
   static let memoryLimit = 8 * 1024 * 1024
   static let diskLimit: UInt = 32 * 1024 * 1024

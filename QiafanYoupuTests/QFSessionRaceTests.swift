@@ -439,6 +439,18 @@ final class QFSessionRaceTests: XCTestCase {
     await session.start()
     try await session.login(agreementAccepted: true)
     XCTAssertTrue(QFContentDraftStore.save(["note": "keep on failure"], app: session, kind: "erasure-test"))
+    let chatScope = QFAgentScope(account: session.contentScope,
+      household: "g09-erasure-\(UUID().uuidString)", language: "zh-Hant")
+    let chatKey = "qf.assistant.conversation.v2." + chatScope.cacheKey
+    let chatSuffixes = ["", ".context", ".contextBoundary", ".nativeCapacity", ".images"]
+    defer { for suffix in chatSuffixes { UserDefaults.standard.removeObject(forKey: chatKey + suffix) } }
+    let chat = QFAssistantConversationStore(scope: chatScope)
+    let message = QFAssistantLocalMessage(id: UUID(), role: "user", text: "keep on timeout", createdAt: Date())
+    chat.save([message])
+    chat.markNativeCapacityReached()
+    UserDefaults.standard.set(message.id.uuidString, forKey: chatKey + ".contextBoundary")
+    UserDefaults.standard.set(true, forKey: chatKey + ".nativeCapacity")
+    UserDefaults.standard.set([String](), forKey: chatKey + ".images")
     do {
       _ = try await session.deleteAccount()
       XCTFail("The first deletion response should be ambiguous")
@@ -449,6 +461,8 @@ final class QFSessionRaceTests: XCTestCase {
     XCTAssertNotNil(UserDefaults.standard.data(forKey: draftKey))
     XCTAssertNotNil(try QFKeychainStore(service: service).read("current"))
     XCTAssertNotNil(session.user)
+    XCTAssertEqual(chat.readOnlyMessages().map(\.id), [message.id])
+    for suffix in chatSuffixes { XCTAssertNotNil(UserDefaults.standard.object(forKey: chatKey + suffix)) }
     let outcome = try await session.deleteAccount()
     let second = try XCTUnwrap(router.matching("me/account").last)
     XCTAssertEqual(second.request.value(forHTTPHeaderField: "Idempotency-Key"), operationID)
@@ -461,6 +475,12 @@ final class QFSessionRaceTests: XCTestCase {
     XCTAssertNil(try QFKeychainStore(service: service).read("current"))
     XCTAssertNil(try QFKeychainStore(service: service).read("credential-test"))
     XCTAssertNil(session.user)
+    for suffix in chatSuffixes { XCTAssertNil(UserDefaults.standard.object(forKey: chatKey + suffix)) }
+    chat.save([message])
+    chat.markNativeCapacityReached()
+    chat.beginNewContext(after: nil)
+    XCTAssertTrue(chat.readOnlyMessages().isEmpty)
+    for suffix in chatSuffixes { XCTAssertNil(UserDefaults.standard.object(forKey: chatKey + suffix)) }
   }
 
   @MainActor

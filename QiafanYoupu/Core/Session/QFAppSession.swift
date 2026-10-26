@@ -984,7 +984,8 @@ final class QFAppSession: ObservableObject {
     }
     try checkGeneration(currentGeneration, allowDuringLogout: true)
     let scope = contentScope
-    var cleanupComplete = true
+    // Retire all old household/language writers before publishing the signed-out owner.
+    var cleanupComplete = QFAssistantConversationStore.purge(account: scope, defaults: defaults)
     defaults.removeObject(forKey: requestKey)
     contentCache.clearAccount(scope: scope)
     defaults.removeObject(forKey: "qf.settings.pending." + scope)
@@ -997,15 +998,17 @@ final class QFAppSession: ObservableObject {
       environment: environment, userID: owner.userId)
     QFContentDraftStore.removeAll(environment: environment, userID: owner.userId)
     do { try QFLocalMediaStore.removeAll(scope: scope) } catch { cleanupComplete = false }
+    do { try identity.forgetDeletedAccount(environment: environment) } catch { cleanupComplete = false }
+    do { try keychain.remove("current") } catch { cleanupComplete = false }
+    // No await until the old generation/owner is invalid, so queued callbacks cannot start another read.
+    finishSessionClear()
+    QFRemoteImagePipeline.invalidateForDeletedAccount(account: scope)
     await withCheckedContinuation { continuation in
       QFContentImageCache.shared.clearDiskCache { continuation.resume() }
     }
     await withCheckedContinuation { continuation in
       QFRemoteImagePipeline.cache.clearDiskCache { continuation.resume() }
     }
-    do { try identity.forgetDeletedAccount(environment: environment) } catch { cleanupComplete = false }
-    do { try keychain.remove("current") } catch { cleanupComplete = false }
-    finishSessionClear()
     return QFAccountDeletionOutcome(
       appleAuthorizationRevocation: result.appleAuthorizationRevocation,
       localCleanupComplete: cleanupComplete)
