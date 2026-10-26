@@ -159,6 +159,9 @@ targets:
           APS_ENVIRONMENT: production
           CODE_SIGN_ENTITLEMENTS: QiafanYoupu/QiafanYoupu.release.entitlements
           EXCLUDED_SOURCE_FILE_NAMES:
+            - QFProductBarcodeScannerViewController.swift
+            - QFProductBarcodeDeviceCheck.swift
+            - QFBarcodeProductLookup.swift
             - QFAssistantAgentDeviceCheck.swift
             - QFAssistantBusinessTools.swift
             - QFAssistantCapabilityPolicy.swift

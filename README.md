@@ -139,3 +139,5 @@ xcodebuild test -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 2026-10-26 首发范围收敛：默认 `xcodegen generate` 不再嵌入 Widget 扩展，Release 不编译实时活动登记/启动/更新，也不写入 App Group 展示快照，首页下一餐投影和只读计划路由保留。历史计划、库存与测试数据不清理。显式进行扩展研发时运行 `xcodegen generate --spec project.development.yml` 并使用 Debug；此工程的 Release 构建会被守卫拒绝。完成研发后运行默认命令恢复首发工程，提交默认生成结果。其他延期能力收尾仍在进行，不能据此认定完整 G08 已通过。
 
 同轮 Release 已排除聊天、服务商选择、模型下载/推理、语音及 AI 食材录入的22个实现源文件；启动不预热光球或模型，不创建悬浮聊天，通知不打开聊天。计划与食材的 AI 创建入口、生成/接受周计划及聊天/图像请求函数仅在 Debug 编译。普通作用域校验、下一餐日期投影、历史记录模型/存储字节与合法 GET/DELETE API 保留，未自动清除本机聊天、下载权重或服务端记忆。历史界面可达性仍须按 G08 逐项收尾，不能把编译清单核对当作最终二进制验收。
+
+Release 同时排除条码相机、商品联网查询和扫描设备探测实现；采购与备菜入口、旧草稿自动查询及手动查询重试仅在 Debug 编译。历史账单和扫描元数据继续按原权限读取/手动编辑。首发页面例外版本见 `docs/design-rag/contracts/first-release-core-r1.md` 及五个 `*-core-r1` 合同；原设计源和研发基线保留。

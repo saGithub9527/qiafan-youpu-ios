@@ -194,6 +194,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     }
     add.contentHorizontalAlignment = .leading; add.accessibilityIdentifier = "purchase.add"; add.isEnabled = draft.items.count < 40
     form.addArrangedSubview(add)
+    #if DEBUG
     if receipt == nil {
       let scan = QFTabUI.button(app.text("扫描商品条码", "Scan product barcode"), size: 15, color: QFUI.orange) { [weak self] in
         guard let self, self.draft.pending == nil, !self.submitting, self.draft.items.count < 40 else { return }
@@ -206,6 +207,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
       scan.accessibilityIdentifier = "purchase.scan-product"; scan.contentHorizontalAlignment = .leading
       scan.isEnabled = draft.items.count < 40; form.addArrangedSubview(scan)
     }
+    #endif
     // Historical receipts may already contain a discount or another currency.
     // Keep those values editable without adding them to a new four-field entry.
     if draft.discount != "0" || draft.currency != "CNY" {
@@ -261,6 +263,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     let values = QFTabUI.stack([labeled(app.text("购买数量", "Quantity bought"), count), labeled(app.text("购买价格", "Purchase price"), amount)], axis: .horizontal, spacing: 10)
     values.distribution = .fillEqually
     var rows: [UIView] = [heading]
+    #if DEBUG
     if line.scanBarcode != nil {
       let status = QFTabUI.label("", size: 13, color: QFUI.secondary, lines: 0)
       status.accessibilityIdentifier = "purchase.barcode-status." + line.id
@@ -272,6 +275,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
       updateBarcodeRow(line)
       rows.append(contentsOf: [status, retry, attribution])
     }
+    #endif
     rows.append(values)
     let body = QFTabUI.stack(rows, spacing: 14)
     return QFTabUI.card(body, padding: 15, border: true)
@@ -301,6 +305,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     }()
   }
   private func updateBarcodeRow(_ line: QFPurchaseReceiptLine) {
+    #if DEBUG
     guard let row = barcodeRows[line.id] else { return }
     if row.name?.isFirstResponder == false, row.name?.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true { row.name?.text = line.name }
     let state = line.scanLookupState.flatMap(QFBarcodeLookupState.init(rawValue:)) ?? .skipped
@@ -323,12 +328,16 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     row.retry?.isEnabled = productLookup == nil && draft.pending == nil && !submitting
       && (line.scanBarcodeSymbology != nil || line.scanBarcode?.count == 13)
     row.retry?.setTitle(lookupLineID == line.id ? app.text("查询中…", "Looking up…") : app.text("联网查询商品资料", "Look up product online"), for: .normal)
+    #endif
   }
   private func resumeInitialProductLookup() {
+    #if DEBUG
     guard visible, productLookup == nil, draft.pending == nil,
       let line = draft.items.first(where: { $0.scanLookupState == QFBarcodeLookupState.loading.rawValue }) else { return }
     retryProduct(line.id, initial: true)
+    #endif
   }
+  #if DEBUG
   private func retryProduct(_ id: String, initial: Bool = false) {
     guard productLookup == nil, receipt == nil, draft.pending == nil, !submitting,
       let line = draft.items.first(where: { $0.id == id }), let code = line.scanBarcode,
@@ -369,6 +378,7 @@ final class QFPurchaseReceiptViewController: QFProfileContentController {
     }
     for item in draft.items { updateBarcodeRow(item) }
   }
+  #endif
   private func chooseUnit(_ id: String) {
     view.endEditing(true)
     guard !units.isEmpty else { loadMetadata(); return }

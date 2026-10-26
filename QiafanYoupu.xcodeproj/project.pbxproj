@@ -1322,6 +1322,9 @@
 				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.release.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EXCLUDED_SOURCE_FILE_NAMES = (
+					QFProductBarcodeScannerViewController.swift,
+					QFProductBarcodeDeviceCheck.swift,
+					QFBarcodeProductLookup.swift,
 					QFAssistantAgentDeviceCheck.swift,
 					QFAssistantBusinessTools.swift,
 					QFAssistantCapabilityPolicy.swift,

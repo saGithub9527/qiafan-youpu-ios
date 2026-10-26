@@ -123,6 +123,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
         stack.addArrangedSubview(addButton)
       }
       scrollView.snp.remakeConstraints { $0.top.equalTo(header.snp.bottom); $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide) }
+      #if DEBUG
       let scan = QFTabUI.button("", background: QFUI.warningBackground) { [weak self] in self?.openReceiptScanner() }
       let label = QFTabUI.label(app.text("扫描商品条码", "Scan product barcode"), size: 16, weight: .semibold, lines: 0)
       label.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -131,6 +132,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       row.snp.makeConstraints { $0.edges.equalToSuperview().inset(16) }
       scan.snp.makeConstraints { $0.height.greaterThanOrEqualTo(76) }
       contentStack.addArrangedSubview(scan)
+      #endif
     }
     contentStack.addArrangedSubview(makeSearch())
     discovery = QFTabUI.stack([], axis: .horizontal, spacing: 12)
@@ -285,11 +287,13 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
 
   private func makeHeader() -> UIView {
     let heading = QFTabUI.stack([headingTitle, headingSubtitle], spacing: 6)
+    #if DEBUG
     scanButton.addAction(
       UIAction { [weak self] _ in self?.openReceiptScanner() }, for: .touchUpInside)
     scanButton.backgroundColor = QFUI.surface
     scanButton.layer.cornerRadius = 14
     scanButton.accessibilityIdentifier = "ingredient.scan"
+    #endif
     addButton.addAction(UIAction { [weak self] _ in self?.chooseIngredientForInventory() }, for: .touchUpInside)
     addButton.accessibilityIdentifier = "ingredient.add"
     addButton.contentEdgeInsets = .zero
@@ -297,7 +301,11 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       $0.width.equalTo(72)
       $0.height.equalTo(40)
     }
+    #if DEBUG
     let row = QFTabUI.stack([heading, scanButton, addButton], axis: .horizontal, spacing: 10)
+    #else
+    let row = QFTabUI.stack([heading, addButton], axis: .horizontal, spacing: 10)
+    #endif
     row.alignment = .center
     return row
   }
@@ -1516,12 +1524,14 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     return result
   }
 
+  #if DEBUG
   private func openReceiptScanner() {
     view.endEditing(true)
     let scanner = QFProductBarcodeScannerViewController(app: app, householdID: app.planningHouseholdID)
     scanner.onChanged = { [weak self] in self?.inventoryLoaded = false; self?.shoppingLoaded = false }
     qfPush(scanner)
   }
+  #endif
 
   private func unavailable(_ title: String) {
     view.endEditing(true)
