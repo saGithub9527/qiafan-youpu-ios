@@ -1075,6 +1075,8 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/scripts/validate_release_configuration.py",
+				"$(SRCROOT)/QiafanYoupu/Info.plist",
+				"$(SRCROOT)/Configuration/Info-CoreRelease.plist",
 			);
 			name = "Validate Release API configuration";
 			outputFileListPaths = (
@@ -1326,6 +1328,7 @@
 				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.release.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EXCLUDED_SOURCE_FILE_NAMES = (
+					InfoPlist.strings,
 					QFProductBarcodeScannerViewController.swift,
 					QFProductBarcodeDeviceCheck.swift,
 					QFBarcodeProductLookup.swift,
@@ -1353,7 +1356,7 @@
 					QFAssistantIngredientViewController.swift,
 				);
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = QiafanYoupu/Info.plist;
+				INFOPLIST_FILE = "Configuration/Info-CoreRelease.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "恰饭有谱";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

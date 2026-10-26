@@ -3,6 +3,8 @@ from pathlib import Path
 import subprocess
 import sys
 import unittest
+import plistlib
+import tempfile
 
 SCRIPT = Path(__file__).resolve().parents[1] / "validate_release_configuration.py"
 
@@ -65,6 +67,29 @@ class ReleaseConfigurationTests(unittest.TestCase):
                                      "QF_DEVELOPMENT_EXTENSIONS": "YES"})
         self.assertEqual(1, result.returncode)
         self.assertIn("development", result.stderr)
+
+    def test_release_metadata_keeps_retained_values_and_rejects_drift(self):
+        spec = importlib.util.spec_from_file_location("release_configuration", SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "QiafanYoupu").mkdir()
+            (root / "Configuration").mkdir()
+            source = {"CFBundleDisplayName": "Test", "CFBundleURLTypes": [{"CFBundleURLSchemes": ["test"]}],
+                      "NSCameraUsageDescription": "Debug camera"}
+            release = {key: value for key, value in source.items() if not key.startswith("NSCamera")}
+            (root / "QiafanYoupu/Info.plist").write_bytes(plistlib.dumps(source))
+            target = root / "Configuration/Info-CoreRelease.plist"
+            target.write_bytes(plistlib.dumps(release))
+            self.assertEqual([], module.validate_metadata(root))
+            target.write_bytes(plistlib.dumps(source))
+            self.assertTrue(module.validate_metadata(root))
+            release["CFBundleURLTypes"] = []
+            target.write_bytes(plistlib.dumps(release))
+            self.assertTrue(module.validate_metadata(root))
+            target.unlink()
+            self.assertTrue(module.validate_metadata(root))
 
 
 if __name__ == "__main__":

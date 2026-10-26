@@ -108,7 +108,7 @@ targets:
     preBuildScripts:
       - name: Validate Release API configuration
         script: /usr/bin/python3 "$SRCROOT/scripts/validate_release_configuration.py"
-        inputFiles: ["$(SRCROOT)/scripts/validate_release_configuration.py"]
+        inputFiles: ["$(SRCROOT)/scripts/validate_release_configuration.py", "$(SRCROOT)/QiafanYoupu/Info.plist", "$(SRCROOT)/Configuration/Info-CoreRelease.plist"]
         basedOnDependencyAnalysis: false
         showEnvVars: false
     info:
@@ -158,7 +158,9 @@ targets:
         Release:
           APS_ENVIRONMENT: production
           CODE_SIGN_ENTITLEMENTS: QiafanYoupu/QiafanYoupu.release.entitlements
+          INFOPLIST_FILE: Configuration/Info-CoreRelease.plist
           EXCLUDED_SOURCE_FILE_NAMES:
+            - InfoPlist.strings
             - QFProductBarcodeScannerViewController.swift
             - QFProductBarcodeDeviceCheck.swift
             - QFBarcodeProductLookup.swift
