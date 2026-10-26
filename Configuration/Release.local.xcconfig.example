@@ -1,0 +1,4 @@
+// Copy to Release.local.xcconfig after verifying the actual production host.
+// In xcconfig a literal // starts a comment; use the empty expansion below.
+// QF_API_BASE_URL = https:/$()/YOUR_VERIFIED_HOST/api/v1
+// This file deliberately contains no usable endpoint.

@@ -113,6 +113,10 @@ QiafanYoupu/
 
 ## 测试
 
+Release API 配置通过 `Configuration/Release.xcconfig` 读取，可复制同目录示例为不入库的 `Release.local.xcconfig`，填写已经核实的正式完整 HTTPS API 地址，或由构建参数传入。xcconfig 中的 `//` 是注释，按示例使用 `https:/$()/主机/api/v1`。默认刻意留空，不回退测试服。构建前的 `scripts/validate_release_configuration.py` 会拒绝空值、测试/本机地址、非 HTTPS、错误 API 路径或非 production 环境，且不打印配置值。该检查仅验证配置格式，不能代替正式服务、TLS、备案和候选包验收。
+
+定向校验：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts/tests/test_release_configuration.py`。Debug 联调仍使用原配置；Release 引导回归同样须显式提供有效环境。
+
 `QiafanYoupu` scheme 包含单元测试和普通 UI 回归；单元测试使用隔离 Keychain / URLProtocol，不访问真实账号。
 
 ```bash

@@ -1,0 +1,6 @@
+// Production endpoints are supplied locally or as explicit build settings.
+// Never inherit the Debug endpoint as a Release fallback.
+#include "Getui.xcconfig"
+QF_API_ENVIRONMENT = production
+QF_API_BASE_URL =
+#include? "Release.local.xcconfig"

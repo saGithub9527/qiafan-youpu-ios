@@ -62,7 +62,6 @@ settings:
       QF_API_ENVIRONMENT: test
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG"
     Release:
-      QF_API_BASE_URL: ""
       QF_API_ENVIRONMENT: production
       DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
@@ -107,7 +106,13 @@ targets:
         product: CrashReporter
     configFiles:
       Debug: Configuration/Getui.xcconfig
-      Release: Configuration/Getui.xcconfig
+      Release: Configuration/Release.xcconfig
+    preBuildScripts:
+      - name: Validate Release API configuration
+        script: /usr/bin/python3 "$SRCROOT/scripts/validate_release_configuration.py"
+        inputFiles: ["$(SRCROOT)/scripts/validate_release_configuration.py"]
+        basedOnDependencyAnalysis: false
+        showEnvVars: false
     entitlements:
       path: QiafanYoupu/QiafanYoupu.entitlements
       properties:
