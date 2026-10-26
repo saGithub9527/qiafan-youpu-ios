@@ -130,7 +130,6 @@
 		A0CF6EF0A7EB38715CE2029F /* QFManualPlanDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815ED6A3F30229207DD02B11 /* QFManualPlanDraftTests.swift */; };
 		A4C37F51911F6BE3D9162E0D /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 97B33A08F10D1CA841D23C11 /* Alamofire */; };
 		A9A37330DF73E7214F7F3ED6 /* QFCookingRecordDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596A00FC10D5E2EBB219DDCC /* QFCookingRecordDetailViewController.swift */; };
-		ABAEDADCAA1FFD0D5B3796F4 /* QiafanYoupuWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2518F1D086EAF8FD8B589EEA /* QiafanYoupuWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		ABC261246D1119D24DF0A02A /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AE1FFBD1C1754CD6A3AC912 /* libz.tbd */; };
 		AC815DC6576B6AEEFEC970C8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F937914249EC04CF2292349 /* InfoPlist.strings */; };
 		ADA251B30F65A9662AA923A3 /* QFNextMealWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643756F90E5DFFCBBF96B200 /* QFNextMealWidget.swift */; };
@@ -210,28 +209,7 @@
 			remoteGlobalIDString = 7D302759091938810CDCAB5E;
 			remoteInfo = QiafanYoupu;
 		};
-		5A8A8EFFED5E958ECC261676 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 535D2801515DE3BF2846CB83 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 722F5E259C57EB8DFE0BAED0;
-			remoteInfo = QiafanYoupuWidgets;
-		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		2ADFDF534207BAF37F948346 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				ABAEDADCAA1FFD0D5B3796F4 /* QiafanYoupuWidgets.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		012EB0BECF377C21EE5439E4 /* QFBarcodeProductLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFBarcodeProductLookup.swift; sourceTree = "<group>"; };
@@ -919,12 +897,10 @@
 				794C60BA58B40BEC8C5E2EA8 /* Sources */,
 				2AD4CC2A1540F1F8BCEFF9F5 /* Resources */,
 				0AD1DF7248F205F5D9A21195 /* Frameworks */,
-				2ADFDF534207BAF37F948346 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				7877DA63B5CB4069081BC08A /* PBXTargetDependency */,
 			);
 			name = QiafanYoupu;
 			packageProductDependencies = (
@@ -1298,11 +1274,6 @@
 			target = 7D302759091938810CDCAB5E /* QiafanYoupu */;
 			targetProxy = 4DEF708395B70030E9CA5FCE /* PBXContainerItemProxy */;
 		};
-		7877DA63B5CB4069081BC08A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 722F5E259C57EB8DFE0BAED0 /* QiafanYoupuWidgets */;
-			targetProxy = 5A8A8EFFED5E958ECC261676 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -1348,7 +1319,7 @@
 			buildSettings = {
 				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.release.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QiafanYoupu/Info.plist;

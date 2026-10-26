@@ -46,6 +46,8 @@ def main():
     errors = validate(os.environ.get("CONFIGURATION", "Release"),
                       os.environ.get("QF_API_ENVIRONMENT", ""),
                       os.environ.get("QF_API_BASE_URL", ""))
+    if os.environ.get("CONFIGURATION", "Release") != "Debug" and os.environ.get("QF_DEVELOPMENT_EXTENSIONS") == "YES":
+        errors.append("Release cannot use the development extension project; regenerate with project.yml.")
     for error in errors:
         print("error: " + error, file=sys.stderr)
     return 1 if errors else 0

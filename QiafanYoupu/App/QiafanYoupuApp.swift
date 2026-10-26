@@ -23,7 +23,9 @@ final class QFAppDelegate: UIResponder, UIApplicationDelegate {
       let consent = UserDefaults.standard.bool(forKey: QFLaunchPolicy.completedKey)
       QFGetuiPushService.shared.bind(to: session, privacyConsentAccepted: consent)
       QFMealSurfaceCoordinator.shared.bind(to: session, privacyConsentAccepted: consent)
+      #if DEBUG
       QFMealLivePushService.shared.bind(app: session, privacyConsentAccepted: consent)
+      #endif
       // ActivityKit can launch the app in the background without creating a scene.
       Task { await startSession() }
     }
@@ -76,7 +78,9 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let self else { return }
         QFGetuiPushService.shared.privacyConsentWasAccepted()
         QFMealSurfaceCoordinator.shared.privacyConsentWasAccepted()
+        #if DEBUG
         QFMealLivePushService.shared.bind(app: self.session, privacyConsentAccepted: true)
+        #endif
       })
     self.window = window
     keyboardDismissal.install(in: window)
@@ -147,7 +151,9 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let self else { return }
         QFGetuiPushService.shared.privacyConsentWasAccepted()
         QFMealSurfaceCoordinator.shared.privacyConsentWasAccepted()
+        #if DEBUG
         QFMealLivePushService.shared.bind(app: self.session, privacyConsentAccepted: true)
+        #endif
       })
     window.makeKeyAndVisible()
   }

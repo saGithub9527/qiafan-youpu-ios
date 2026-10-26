@@ -1,3 +1,4 @@
+#if DEBUG
 import ActivityKit
 import Combine
 import CryptoKit
@@ -431,3 +432,4 @@ final class QFMealLivePushService {
     value.range(of: "^[A-Za-z0-9-]{1,128}$", options: .regularExpression) != nil
   }
 }
+#endif

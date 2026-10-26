@@ -135,3 +135,5 @@ xcodebuild test -project QiafanYoupu.xcodeproj -scheme QiafanYoupu \
 2026-09-11 调整：协议复选框与整段文字垂直居中；快速/Apple 登录、配置重试、调试菜单的网络动作均显示对应按钮内 Loading，结束后恢复并防止重复点击。旧日志已保存的 `[REDACTED]` 不会自动还原，需使用更新后的 App 重新发起请求。
 
 当前悬浮助手已改为离线动态光球，保留原聊天入口；接入与验收记录见 [光球接入](docs/assistant-light-orb-20261014.md)。
+
+2026-10-26 首发范围收敛：默认 `xcodegen generate` 不再嵌入 Widget 扩展，Release 不编译实时活动登记/启动/更新，也不写入 App Group 展示快照，首页下一餐投影和只读计划路由保留。历史计划、库存与测试数据不清理。显式进行扩展研发时运行 `xcodegen generate --spec project.development.yml` 并使用 Debug；此工程的 Release 构建会被守卫拒绝。完成研发后运行默认命令恢复首发工程，提交默认生成结果。其他延期能力收尾仍在进行，不能据此认定完整 G08 已通过。

@@ -1,9 +1,11 @@
+#if DEBUG
 import ActivityKit
+import WidgetKit
+#endif
 import Combine
 import CryptoKit
 import Foundation
 import UIKit
-import WidgetKit
 
 extension Notification.Name {
   static let qfOpenMealSurface = Notification.Name("qf.open-meal-surface")
@@ -23,7 +25,9 @@ final class QFMealSurfaceCoordinator: ObservableObject {
   private var scopeKey = ""
   private var lastRefresh: Date = .distantPast
   private var lastPersisted: QFMealSurfaceDocument?
+  #if DEBUG
   private var activityObservers: [String: Task<Void, Never>] = [:]
+  #endif
   private var foregroundTimer: Timer?
   private(set) var cacheAvailable = false
 
@@ -109,8 +113,10 @@ final class QFMealSurfaceCoordinator: ObservableObject {
         if app.userSettings?.planReminders == false { self.disableImmediately(); return }
         self.lastRefresh = Date(); self.isLoading = false
         self.persist(next)
+        #if DEBUG
         await QFMealLivePushService.shared.synchronize(document: next)
         await self.updateActivities(next, app: app, request: request)
+        #endif
       } catch {
         guard self.current(app, scope, request) else { return }
         self.isLoading = false; self.lastRefresh = Date()
@@ -194,8 +200,11 @@ final class QFMealSurfaceCoordinator: ObservableObject {
   private enum Invalid: Error { case snapshot }
 
   private func persist(_ next: QFMealSurfaceDocument) {
+    #if DEBUG
     let previous = lastPersisted
+    #endif
     document = next
+    #if DEBUG
     // Coalesce identical refreshes, but keep the 24-hour cache lease fresh on genuine server reads.
     guard previous?.scopeKey != next.scopeKey || previous?.language != next.language || previous?.status != next.status
       || previous?.entries != next.entries || next.updatedAt.timeIntervalSince(previous?.updatedAt ?? .distantPast) >= 900 else { return }
@@ -210,6 +219,10 @@ final class QFMealSurfaceCoordinator: ObservableObject {
       lastPersisted = next
       WidgetCenter.shared.reloadTimelines(ofKind: QFMealSurfaceConfiguration.widgetKind)
     } catch { cacheAvailable = false }
+    #else
+    // The first release keeps only the in-app projection, without sharing a snapshot.
+    lastPersisted = next
+    #endif
   }
 
   private func disableImmediately() {
@@ -218,10 +231,13 @@ final class QFMealSurfaceCoordinator: ObservableObject {
     let disabled = QFMealSurfaceDocument(scopeKey: binding(app), language: app.interfaceLanguage,
       updatedAt: Date(), status: .disabled, entries: [])
     persist(disabled); clearActivities()
+    #if DEBUG
     Task { await QFMealLivePushService.shared.synchronize(document: disabled) }
+    #endif
   }
 
   private func clearActivities(keepingScope: String? = nil) {
+    #if DEBUG
     activityObservers.values.forEach { $0.cancel() }; activityObservers.removeAll()
     guard #available(iOS 16.1, *) else { return }
     let captured = Activity<QFMealActivityAttributes>.activities.filter {
@@ -231,8 +247,10 @@ final class QFMealSurfaceCoordinator: ObservableObject {
       return $0.attributes.scopeKey != keepingScope
     }
     Task { for activity in captured { await activity.end(using: nil, dismissalPolicy: .immediate) } }
+    #endif
   }
 
+  #if DEBUG
   private func updateActivities(_ next: QFMealSurfaceDocument, app: QFAppSession, request: UUID) async {
     guard #available(iOS 16.1, *) else { return }
     guard app.userSettings?.planReminders != false, ActivityAuthorizationInfo().areActivitiesEnabled, next.status == .ready,
@@ -269,6 +287,7 @@ final class QFMealSurfaceCoordinator: ObservableObject {
       // System denial, foreground restrictions or the activity budget do not erase the home/widget data.
     }
   }
+  #endif
 }
 
 

@@ -1,0 +1,13 @@
+# Explicit development-only extension harness. The default project is the release scope.
+include: project.yml
+settings:
+  base:
+    QF_DEVELOPMENT_EXTENSIONS: YES
+targets:
+  QiafanYoupu:
+    dependencies:
+      - target: QiafanYoupuWidgets
+        embed: true
+    info:
+      properties:
+        NSSupportsLiveActivities: true

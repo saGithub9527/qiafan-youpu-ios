@@ -56,6 +56,16 @@ class ReleaseConfigurationTests(unittest.TestCase):
         self.assertIn("error:", result.stderr)
         self.assertNotIn("do-not-log", result.stderr + result.stdout)
 
+    def test_development_extension_project_cannot_be_archived_as_release(self):
+        import os
+        result = subprocess.run([sys.executable, str(SCRIPT)], capture_output=True, text=True,
+                                env={**os.environ, "CONFIGURATION": "Release",
+                                     "QF_API_ENVIRONMENT": "production",
+                                     "QF_API_BASE_URL": "https://api.qiafan.cn/api/v1",
+                                     "QF_DEVELOPMENT_EXTENSIONS": "YES"})
+        self.assertEqual(1, result.returncode)
+        self.assertIn("development", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

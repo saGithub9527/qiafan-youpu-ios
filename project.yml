@@ -79,8 +79,6 @@ targets:
         type: folder
         buildPhase: resources
     dependencies:
-      - target: QiafanYoupuWidgets
-        embed: true
       - package: QFSSE
       - package: QFLocalLLM
       - package: QFOrbRenderer
@@ -113,13 +111,6 @@ targets:
         inputFiles: ["$(SRCROOT)/scripts/validate_release_configuration.py"]
         basedOnDependencyAnalysis: false
         showEnvVars: false
-    entitlements:
-      path: QiafanYoupu/QiafanYoupu.entitlements
-      properties:
-        com.apple.security.application-groups: [group.com.talka.qiafanyoupu]
-        com.apple.developer.kernel.extended-virtual-addressing: true
-        com.apple.developer.applesignin: [Default]
-        aps-environment: $(APS_ENVIRONMENT)
     info:
       path: QiafanYoupu/Info.plist
       properties:
@@ -128,7 +119,7 @@ targets:
         QFGetuiAppID: $(QF_GETUI_APP_ID)
         QFGetuiAppKey: $(QF_GETUI_APP_KEY)
         QFGetuiAppSecret: $(QF_GETUI_APP_SECRET)
-        NSSupportsLiveActivities: true
+        NSSupportsLiveActivities: false
         CFBundleURLTypes:
           - CFBundleURLName: com.talka.qiafanyoupu.meal-plan
             CFBundleURLSchemes: [qiafanyoupu]
@@ -163,8 +154,10 @@ targets:
       configs:
         Debug:
           APS_ENVIRONMENT: development
+          CODE_SIGN_ENTITLEMENTS: QiafanYoupu/QiafanYoupu.entitlements
         Release:
           APS_ENVIRONMENT: production
+          CODE_SIGN_ENTITLEMENTS: QiafanYoupu/QiafanYoupu.release.entitlements
   QiafanYoupuWidgets:
     type: app-extension
     platform: iOS

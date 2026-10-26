@@ -36,7 +36,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>扫描食材商品包装上的条形码以填写采购明细。</string>
 	<key>NSSupportsLiveActivities</key>
-	<true/>
+	<false/>
 	<key>QFAPIBaseURL</key>
 	<string>$(QF_API_BASE_URL)</string>
 	<key>QFAPIEnvironment</key>
