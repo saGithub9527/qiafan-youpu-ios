@@ -385,8 +385,12 @@ final class QFGetuiPushService: NSObject, @preconcurrency GeTuiSdkDelegate, @pre
 
   private func remindersEnabled(app: QFAppSession) -> Bool {
     let planEnabled = !isLocallyDisabled(scope: app.contentScope) && app.userSettings?.planReminders == true
+    #if DEBUG
     let assistantEnabled = UserDefaults.standard.bool(forKey: Self.assistantEnabledPrefix + app.contentScope)
     return planEnabled || assistantEnabled
+    #else
+    return planEnabled
+    #endif
   }
 
   @discardableResult

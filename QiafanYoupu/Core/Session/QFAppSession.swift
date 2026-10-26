@@ -601,6 +601,7 @@ final class QFAppSession: ObservableObject {
     return value
   }
 
+  #if DEBUG
   func assistantVisionPreview(imageData: Data, mimeType: String, text: String) async throws -> QFAssistantPreview {
     let currentGeneration = generation
     let language = interfaceLanguage
@@ -671,6 +672,8 @@ final class QFAppSession: ObservableObject {
     }
     try check(); return result
   }
+
+  #endif
 
   private func performContentRequest<Value: Decodable>(
     path: String, method: String, body: Data?,

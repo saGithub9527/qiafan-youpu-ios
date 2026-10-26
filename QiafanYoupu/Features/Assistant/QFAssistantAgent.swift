@@ -15,6 +15,7 @@ enum QFAssistantAgent {
     .init(account: app.contentScope, household: app.planningHouseholdID, language: app.interfaceLanguage)
   }
 
+  #if DEBUG
   static func weeklyPlan(text: String, cloud: Bool, requestID: UUID, app: QFAppSession, provider: QFAssistantProvider = .glmFree,
     progress: @escaping (String) -> Void) async throws -> Response? {
     guard QFAssistantWeeklyPlanIntent.matches(text) else { return nil }
@@ -414,4 +415,5 @@ enum QFAssistantAgent {
     }
     return ""
   }
+  #endif
 }

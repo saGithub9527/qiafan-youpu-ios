@@ -1321,6 +1321,30 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.release.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					QFAssistantAgentDeviceCheck.swift,
+					QFAssistantBusinessTools.swift,
+					QFAssistantCapabilityPolicy.swift,
+					QFAssistantCharacterView.swift,
+					QFAssistantChatUI.swift,
+					QFAssistantKnowledge.swift,
+					QFAssistantModelAsset.swift,
+					QFAssistantNetworkPreference.swift,
+					QFAssistantQuestionAnalysis.swift,
+					QFAssistantReadRenderer.swift,
+					QFAssistantTextReveal.swift,
+					QFAssistantVoiceInput.swift,
+					QFDigitalAssistant.swift,
+					QFLocalDeploymentCheck.swift,
+					QFLocalModelStore.swift,
+					QFLocalModelViewController.swift,
+					QFNextMealReminder.swift,
+					QFOnDeviceInference.swift,
+					QFPlanReminderExampleDeviceCheck.swift,
+					QFAssistantStream.swift,
+					QFAssistantStreamRecovery.swift,
+					QFAssistantIngredientViewController.swift,
+				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QiafanYoupu/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "恰饭有谱";

@@ -222,7 +222,9 @@ private final class QFRootViewController: UIViewController {
   private let options: QFLaunchOptions
   private let onPrivacyConsentAccepted: () -> Void
   private var current: UIViewController?
+  #if DEBUG
   private var preparedCharacter: QFAssistantCharacterView?
+  #endif
 
   init(
     app: QFAppSession, options: QFLaunchOptions,
@@ -238,6 +240,7 @@ private final class QFRootViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = QFUI.background
+    #if DEBUG
     if !QFRuntime.isUnitTest {
       _ = QFLocalModelStore.shared
       let character = QFAssistantCharacterView()
@@ -249,6 +252,7 @@ private final class QFRootViewController: UIViewController {
       view.layoutIfNeeded()
       preparedCharacter = character
     }
+    #endif
     if options.showWelcome {
       install(
         QFWelcomeViewController(app: app) { [weak self] in
@@ -262,8 +266,12 @@ private final class QFRootViewController: UIViewController {
   }
 
   private func showTabs() {
+    #if DEBUG
     install(QFMainTabViewController(app: app, options: options, preparedCharacter: preparedCharacter))
     preparedCharacter = nil
+    #else
+    install(QFMainTabViewController(app: app, options: options))
+    #endif
   }
 
   private func install(_ controller: UIViewController) {
@@ -288,25 +296,38 @@ private final class QFRootViewController: UIViewController {
 private final class QFMainTabViewController: UITabBarController, UITabBarControllerDelegate {
   private let app: QFAppSession
   private let options: QFLaunchOptions
-  private let preparedCharacter: QFAssistantCharacterView?
+  #if DEBUG
+  private var preparedCharacter: QFAssistantCharacterView?
   private var assistantOverlay: QFDigitalAssistantOverlay?
+  #endif
   private var subscriptions = Set<AnyCancellable>()
   private var showingMealLogin = false
-  init(app: QFAppSession, options: QFLaunchOptions, preparedCharacter: QFAssistantCharacterView? = nil) {
+  init(app: QFAppSession, options: QFLaunchOptions) {
     self.app = app
     self.options = options
-    self.preparedCharacter = preparedCharacter
     super.init(nibName: nil, bundle: nil)
   }
+  #if DEBUG
+  convenience init(app: QFAppSession, options: QFLaunchOptions, preparedCharacter: QFAssistantCharacterView?) {
+    self.init(app: app, options: options)
+    self.preparedCharacter = preparedCharacter
+  }
+  #endif
   required init?(coder: NSCoder) { nil }
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     hostDidAppear()
   }
-  func hostDidAppear() { assistantOverlay?.hostDidAppear() }
+  func hostDidAppear() {
+    #if DEBUG
+    assistantOverlay?.hostDidAppear()
+    #endif
+  }
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
+    #if DEBUG
     assistantOverlay?.ensureOnTop()
+    #endif
   }
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -340,17 +361,21 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
     tabBar.unselectedItemTintColor = QFUI.secondary
     QFDiagnosticsPresenter.attach(to: self, app: app, bottomInset: 76)
     delegate = self
+    #if DEBUG
     let assistant = QFDigitalAssistantOverlay(app: app, character: preparedCharacter)
     assistant.onOpenMealReminder = { [weak self] id in self?.openPlanReminder(plannedMealID: id) }
     assistant.attach(to: self)
     assistantOverlay = assistant
+    #endif
     NotificationCenter.default.publisher(for: .qfDidReceiveRemoteNotification)
       .receive(on: DispatchQueue.main).sink { [weak self] notification in
         guard let self else { return }
         if let plannedMealID = QFRemoteNotificationRoute.plannedMealID(from: notification) {
           self.openPlanReminder(plannedMealID: plannedMealID)
         } else if QFRemoteNotificationRoute.isAssistantNudge(from: notification) {
+          #if DEBUG
           self.assistantOverlay?.presentConversation()
+          #endif
         }
       }.store(in: &subscriptions)
     QFMealSurfaceNavigation.shared.$pending.receive(on: DispatchQueue.main).sink { [weak self] route in
@@ -372,12 +397,16 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
           (controller as? UINavigationController)?.popToRootViewController(animated: false)
         }
       }
+      #if DEBUG
       self.assistantOverlay?.refreshLanguage()
+      #endif
     }.store(in: &subscriptions)
   }
 
   func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+    #if DEBUG
     assistantOverlay?.primaryPageChanged()
+    #endif
   }
 
   private func openPendingMealSurface() {

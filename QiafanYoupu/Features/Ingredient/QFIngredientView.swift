@@ -1139,8 +1139,10 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       case .catalog: self.chooseCatalogIngredientForInventory()
       case .custom: self.promptCustomIngredient()
       case .recipe: self.chooseRecipeForInventory()
+      #if DEBUG
       case .assistant:
         self.qfPush(QFAssistantIngredientViewController(app: self.app, householdID: self.app.planningHouseholdID))
+      #endif
       }
     }
     present(sheet, animated: true)
@@ -1936,7 +1938,12 @@ private final class QFInventoryAdjustmentViewController: QFProfileContentControl
 
 @MainActor
 private final class QFInventoryAddIngredientSheet: UIViewController {
-  enum Choice { case catalog, custom, recipe, assistant }
+  enum Choice {
+    case catalog, custom, recipe
+    #if DEBUG
+    case assistant
+    #endif
+  }
 
   private let app: QFAppSession
   private let selection: (Choice) -> Void
@@ -1973,12 +1980,15 @@ private final class QFInventoryAddIngredientSheet: UIViewController {
     let header = QFTabUI.stack([title, UIView(), close], axis: .horizontal, spacing: 8)
     header.alignment = .center
 
-    let rows = QFTabUI.stack([
+    var choices = [
       row(title: app.text("从食材库选择", "Choose from catalog"), id: "catalog") { [weak self] in self?.choose(.catalog) },
       row(title: app.text("自定义食材名称", "Use a custom ingredient name"), id: "custom") { [weak self] in self?.choose(.custom) },
       row(title: app.text("按菜谱添加食材", "Add ingredients from a recipe"), id: "recipe") { [weak self] in self?.choose(.recipe) },
-      row(title: app.text("让 AI 生成添加草稿", "Ask AI to make an add draft"), id: "assistant") { [weak self] in self?.choose(.assistant) },
-    ], spacing: 8)
+    ]
+    #if DEBUG
+    choices.append(row(title: app.text("让 AI 生成添加草稿", "Ask AI to make an add draft"), id: "assistant") { [weak self] in self?.choose(.assistant) })
+    #endif
+    let rows = QFTabUI.stack(choices, spacing: 8)
 
     let cancel = QFTabUI.button(app.text("取消", "Cancel"), size: 15, color: QFUI.secondary) { [weak self] in
       self?.dismiss(animated: true)

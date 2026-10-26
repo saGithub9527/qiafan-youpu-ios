@@ -19,7 +19,9 @@ final class QFAPIClient {
   private let identity: QFDeviceIdentity
   private let transport: Alamofire.Session
   private let mediaTransport: Alamofire.Session
+  #if DEBUG
   private lazy var assistantTransport = Self.makeTransport(configuration: .ephemeral, requestTimeout: 45, resourceTimeout: 240, waitsForConnectivity: true)
+  #endif
   var accessToken: String?
   var interfaceLanguage = "zh-Hans"
   #if DEBUG
@@ -84,6 +86,7 @@ final class QFAPIClient {
       path: path, method: method, body: body, operationID: operationID, query: query)
   }
 
+  #if DEBUG
   func assistantStream(body: Data, contentType: String, operationID: UUID,
     onEvent: @escaping (QFAssistantStreamEvent) throws -> Void) async throws -> QFAssistantStreamResult {
     var request = try makeRequest(path: "me/assistant/chat/stream", method: "POST", body: body, operationID: operationID)
@@ -91,6 +94,7 @@ final class QFAPIClient {
     request.setValue(contentType, forHTTPHeaderField: "Content-Type")
     return try await QFAssistantStreamRun(language: interfaceLanguage, onEvent: onEvent).start(transport: assistantTransport, request: request)
   }
+  #endif
 
   /// Uploads a bounded assistant attachment without putting binary data into the
   /// JSON request logger. The server decides whether the provider can process it.

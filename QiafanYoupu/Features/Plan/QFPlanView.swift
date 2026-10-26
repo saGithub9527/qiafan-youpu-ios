@@ -558,6 +558,7 @@ final class QFPlanViewController: QFPageViewController {
     sheet.addAction(UIAlertAction(title: app.text("手动添加菜谱", "Add recipe manually"), style: .default) {
       [weak self] _ in self?.chooseRecipeForPlan()
     })
+    #if DEBUG
     sheet.addAction(UIAlertAction(title: app.text("AI 生成周计划", "Generate weekly plan with AI"), style: .default) {
       [weak self] _ in
       guard let self else { return }
@@ -566,6 +567,7 @@ final class QFPlanViewController: QFPageViewController {
           self?.loadPlan(force: true)
         })
     })
+    #endif
     sheet.addAction(UIAlertAction(title: app.text("取消", "Cancel"), style: .cancel))
     if let popover = sheet.popoverPresentationController {
       popover.sourceView = createButton
@@ -929,6 +931,7 @@ final class QFPreparationViewController: QFProfileContentController {
   }
 }
 
+#if DEBUG
 @MainActor
 private final class QFWeeklyPlanViewController: QFProfileContentController {
   private let initialDate: Date
@@ -1593,3 +1596,5 @@ private final class QFWeeklyPlanEditorViewController: QFProfileContentController
     return formatter
   }()
 }
+
+#endif

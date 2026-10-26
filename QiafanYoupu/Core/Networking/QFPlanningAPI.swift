@@ -636,16 +636,20 @@ struct QFAssistantPreview: Decodable, Equatable {
 
 @MainActor
 extension QFAppSession {
+  #if DEBUG
   func assistantPreview(text: String) async throws -> QFAssistantPreview {
     try await contentRequest(path: "me/assistant/preview", method: "POST",
       body: try planningBody(QFAssistantPreviewRequest(text: text, allowCloud: true)))
   }
+  #endif
   func assistantMemories(page: Int = 1) async throws -> QFAssistantMemoryPage {
     try await contentRequest(path: "me/assistant/memories", query: ["page": String(max(1, page))])
   }
+  #if DEBUG
   func saveAssistantMemory(_ draft: QFAssistantMemoryDraft) async throws -> QFAssistantMemory {
     try await contentRequest(path: "me/assistant/memories", method: "POST", body: try planningBody(draft))
   }
+  #endif
   func deleteAssistantMemory(_ id: String) async throws {
     try await contentMutation(path: "me/assistant/memories/\(id)", method: "DELETE")
   }
@@ -656,6 +660,7 @@ extension QFAppSession {
   func assistantNotificationSettings() async throws -> QFAssistantNotificationSettings {
     try await contentRequest(path: "me/assistant/notifications")
   }
+  #if DEBUG
   func saveAssistantNotificationSettings(_ draft: QFAssistantNotificationSettingsDraft) async throws -> QFAssistantNotificationSettings {
     try await contentRequest(path: "me/assistant/notifications", method: "PUT", body: try planningBody(draft))
   }
@@ -663,6 +668,7 @@ extension QFAppSession {
     try await contentMutation(path: "me/assistant/notifications/activity", method: "POST",
       body: try planningBody(["assistantInteraction": assistantInteraction]))
   }
+  #endif
   func households() async throws -> [QFHousehold] {
     try await contentRequest(path: "me/households")
   }
@@ -954,12 +960,14 @@ extension QFAppSession {
     try await contentMutation(path: "me/push-devices/\(deviceID)", method: "DELETE")
   }
 
+  #if DEBUG
   func createWeeklyPlanProposal(
     _ draft: QFWeeklyPlanProposalDraft
   ) async throws -> QFWeeklyPlanProposal {
     try await contentRequest(
       path: "me/weekly-plan-proposals", method: "POST", body: try planningBody(draft))
   }
+  #endif
 
   func weeklyPlanProposals(
     householdID: String? = nil, page: Int = 0
@@ -973,6 +981,7 @@ extension QFAppSession {
     try await contentRequest(path: "me/weekly-plan-proposals/\(id)")
   }
 
+  #if DEBUG
   func acceptWeeklyPlanProposal(
     _ id: String, expectedRevision: Int, mode: String = "REPLACE", createShoppingList: Bool = false
   ) async throws -> QFWeeklyPlanProposal {
@@ -980,6 +989,7 @@ extension QFAppSession {
       path: "me/weekly-plan-proposals/\(id)/accept", method: "POST",
       body: try planningBody(QFWeeklyPlanAcceptDraft(expectedRevision: expectedRevision, mode: mode, createShoppingList: createShoppingList)))
   }
+  #endif
 
   func cancelWeeklyPlanProposal(_ id: String, expectedRevision: Int) async throws {
     try await contentMutation(
