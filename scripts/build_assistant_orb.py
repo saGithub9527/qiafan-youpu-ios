@@ -30,5 +30,9 @@ manifest["files"] = {
 }
 manifest["runtimeBytes"] = sum(p.stat().st_size for p in runtime.iterdir())
 manifest["sourceSHA256"] = hashlib.sha256((PACKAGE / "WebSource/orb.js").read_bytes()).hexdigest()
+manifest["sourceFiles"] = {
+    str(p.relative_to(PACKAGE)): hashlib.sha256(p.read_bytes()).hexdigest()
+    for p in [PACKAGE / "WebSource/orb.js", PACKAGE / "WebSource/breathing.mjs"]
+}
 manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 print(f"Offline runtime: {manifest['runtimeBytes']} bytes")

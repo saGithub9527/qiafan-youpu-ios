@@ -21,13 +21,23 @@
       ],
       "format": "esm"
     },
+    "Packages/QFOrbRenderer/WebSource/breathing.mjs": {
+      "bytes": 1507,
+      "imports": [],
+      "format": "esm"
+    },
     "Packages/QFOrbRenderer/WebSource/orb.js": {
-      "bytes": 14686,
+      "bytes": 14294,
       "imports": [
         {
           "path": "Packages/QFOrbRenderer/WebSource/vendor/three.module.js",
           "kind": "import-statement",
           "original": "./vendor/three.module.js"
+        },
+        {
+          "path": "Packages/QFOrbRenderer/WebSource/breathing.mjs",
+          "kind": "import-statement",
+          "original": "./breathing.mjs"
         }
       ],
       "format": "esm"
@@ -45,11 +55,14 @@
         "Packages/QFOrbRenderer/WebSource/vendor/three.module.js": {
           "bytesInOutput": 354998
         },
+        "Packages/QFOrbRenderer/WebSource/breathing.mjs": {
+          "bytesInOutput": 457
+        },
         "Packages/QFOrbRenderer/WebSource/orb.js": {
-          "bytesInOutput": 9850
+          "bytesInOutput": 9704
         }
       },
-      "bytes": 544830
+      "bytes": 545141
     }
   }
 }

@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.js';
+import {orbBreathingAt} from './breathing.mjs';
 
 const embedded = document.body.dataset.qfEmbedded === 'true';
 function notifyNative(kind) {
@@ -169,34 +170,27 @@ function tick(stamp) {
   time+=delta*mode.speed; elapsed+=delta; pulseAge+=delta;
   // A slow cycle contracts once, then brightens once as it opens again.
   // The light peak follows the contraction rather than forming a double beat.
-  const heartPhase=(elapsed%3.4)/3.4;
-  const contractDistance=heartPhase-.26-Math.round(heartPhase-.26);
-  const lightDistance=heartPhase-.59-Math.round(heartPhase-.59);
-  const contraction=Math.exp(-Math.pow(contractDistance/.17,2));
-  const heartbeat=Math.exp(-Math.pow(lightDistance/.16,2));
-  uniforms.uHeartbeat.value=heartbeat;
   uniforms.uTime.value=time;
   uniforms.uEnergy.value=THREE.MathUtils.lerp(uniforms.uEnergy.value,mode.energy,.08);
   uniforms.uPrimary.value.lerp(mode.primaryColor,.045);
   uniforms.uSecondary.value.lerp(mode.secondaryColor,.045);
   uniforms.uPulse.value=Math.exp(-pulseAge*2.6)*(1.+Math.sin(pulseAge*7.)*.18);
+  const breathing=orbBreathingAt(elapsed,uniforms.uPulse.value);
+  uniforms.uHeartbeat.value=breathing.heartbeat;
   rotation.x=THREE.MathUtils.lerp(rotation.x,rotation.targetX,.07);
   rotation.y=THREE.MathUtils.lerp(rotation.y,rotation.targetY,.07);
   // A visible but quiet 48-second turn, independent of the heartbeat or noise.
   // Rotating the actual mesh gives the light threads depth, not a flat spin.
   orb.rotation.set(rotation.x,rotation.y+elapsed*(Math.PI*2/48),Math.sin(elapsed*(Math.PI*2/80))*.025);
-  const breath=1.-contraction*.065+heartbeat*.025+uniforms.uPulse.value*.045;
-  orb.scale.setScalar(breath); halo.scale.setScalar(breath+heartbeat*.03);
-  heartbeatRing.scale.setScalar(breath);
-  heartbeatRing.material.opacity=.10+heartbeat*.12;
+  orb.scale.setScalar(breathing.orbScale); halo.scale.setScalar(breathing.haloScale);
+  heartbeatRing.scale.setScalar(breathing.orbScale);
+  heartbeatRing.material.opacity=breathing.heartbeatOpacity;
   heartbeatRing.material.color.copy(uniforms.uPrimary.value);
-  const diffusionPhase=THREE.MathUtils.clamp((heartPhase-.34)/.66,0,1);
-  const diffusionEase=diffusionPhase*diffusionPhase*(3-2*diffusionPhase);
-  diffusionRing.visible=heartPhase>.34;
-  diffusionRing.scale.setScalar(breath*(1.+diffusionEase*.55));
-  diffusionRing.material.opacity=.18*Math.sin(Math.PI*diffusionPhase)*Math.pow(1.-diffusionPhase,.8);
+  diffusionRing.visible=breathing.diffusionOpacity>0;
+  diffusionRing.scale.setScalar(breathing.diffusionScale);
+  diffusionRing.material.opacity=breathing.diffusionOpacity;
   diffusionRing.material.color.copy(uniforms.uPrimary.value);
-  if(heartbeatDot){heartbeatDot.style.opacity=String(.35+heartbeat*.65);heartbeatDot.style.transform=`scale(${.9+heartbeat*.35})`;}
+  if(heartbeatDot){heartbeatDot.style.opacity=String(breathing.dotOpacity);heartbeatDot.style.transform=`scale(${breathing.dotScale})`;}
   particles.rotation.y=-elapsed*(Math.PI*2/80);
   for (const wave of waves.children) {
     const age=pulseAge-wave.userData.delay;
