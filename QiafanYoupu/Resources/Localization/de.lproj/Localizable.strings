@@ -1511,3 +1511,4 @@
 "仅显示当前账号、家庭和语言的历史记录，不发送新请求。" = "Zeigt nur den Verlauf des aktuellen Kontos, Haushalts und der aktuellen Sprache. Es werden keine neuen Anfragen gesendet.";
 "没有此范围的聊天记录。" = "Für diesen Bereich gibt es keinen Chatverlauf.";
 "个" = "Stk.";
+"%d 步" = "Schritte: %d";

@@ -31,7 +31,11 @@ final class QFHomeRecipeDetailViewController: UIViewController {
   private var relatedHasMore = false
   private var relatedFooter: MJRefreshAutoNormalFooter!
   private var loadedLanguage = ""
+  private var directionsExpanded = false
   private var subscriptions = Set<AnyCancellable>()
+#if DEBUG
+  private var debugUsesLoadedFixture = false
+#endif
 
   init(
     app: QFAppSession, initial: QFRecipeHomeItem,
@@ -61,8 +65,17 @@ final class QFHomeRecipeDetailViewController: UIViewController {
     view.backgroundColor = QFUI.background
     view.accessibilityIdentifier = "recipe.detail"
     buildLayout()
+#if DEBUG
+    if debugUsesLoadedFixture {
+      renderDetail()
+    } else {
+      renderInitial()
+      load(force: false)
+    }
+#else
     renderInitial()
     load(force: false)
+#endif
     app.$interfaceLanguage.dropFirst().removeDuplicates().receive(on: DispatchQueue.main).sink {
       [weak self] _ in
       DispatchQueue.main.async { self?.applyLanguage() }
@@ -108,13 +121,45 @@ final class QFHomeRecipeDetailViewController: UIViewController {
     scrollView.refreshControl = refresh
     view.addSubview(scrollView)
     let footer = QFTabUI.stack([favoriteButton, planButton], axis: .horizontal, spacing: 12)
-    footer.distribution = .fillEqually
+    footer.distribution = .fill
+    favoriteButton.setContentHuggingPriority(UILayoutPriority(999), for: .horizontal)
+    favoriteButton.snp.makeConstraints { $0.width.greaterThanOrEqualTo(96) }
+    planButton.snp.makeConstraints {
+      $0.width.greaterThanOrEqualTo(44)
+      $0.width.greaterThanOrEqualTo(96).priority(999)
+      $0.width.greaterThanOrEqualTo(favoriteButton.snp.width).priority(998)
+    }
+    for (button, titleColor) in [(favoriteButton, QFUI.text), (planButton, QFUI.onPrimary)] {
+      // Configuration lets UIKit measure wrapped titles at the assigned width;
+      // legacy UIButton sizing only reserves a single line's height.
+      var configuration = UIButton.Configuration.plain()
+      configuration.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 14, bottom: 10, trailing: 14)
+      configuration.titleAlignment = .center
+      configuration.titleLineBreakMode = .byWordWrapping
+      configuration.imagePadding = 0
+      configuration.baseForegroundColor = titleColor
+      configuration.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 16)
+      configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { [weak button] incoming in
+        var attributes = incoming
+        attributes.font = UIFontMetrics(forTextStyle: .body).scaledFont(
+          for: .systemFont(ofSize: 16, weight: .semibold), compatibleWith: button?.traitCollection)
+        return attributes
+      }
+      if button === favoriteButton {
+        configuration.imageColorTransformer = UIConfigurationColorTransformer { [weak button] color in
+          button?.isEnabled == true ? QFUI.primary : color
+        }
+      }
+      button.configuration = configuration
+      button.titleLabel?.adjustsFontForContentSizeCategory = true
+      button.snp.makeConstraints { $0.height.greaterThanOrEqualTo(48) }
+    }
     footer.backgroundColor = QFUI.background
     view.addSubview(footer)
     footer.snp.makeConstraints {
       $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
       $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(12)
-      $0.height.equalTo(52)
+      $0.height.greaterThanOrEqualTo(48)
     }
     scrollView.snp.makeConstraints {
       $0.top.equalTo(header.snp.bottom)
@@ -280,6 +325,17 @@ final class QFHomeRecipeDetailViewController: UIViewController {
   }
 
 #if DEBUG
+  /// Test-only data injection before view loading. It exercises the real page
+  /// renderer without starting content requests, sign-in, or device-ID storage.
+  func debugInstallLoadedRecipeFixture(_ fixture: QFRecipeHomeDetail, plans: [QFPlannedMeal] = []) {
+    precondition(!isViewLoaded && fixture.id == recipeID)
+    detail = fixture
+    initial = fixture.listItem
+    loadedLanguage = fixture.contentLanguage ?? app.interfaceLanguage
+    plannedMeals = plans
+    debugUsesLoadedFixture = true
+  }
+
   /// Inspect the loaded recipe and rendered recipe text, excluding community
   /// posts whose pagination is independent. Never writes or changes UI state.
   func debugRecipeSnapshot() throws -> (data: Data, texts: [String], materials: Int, steps: Int)? {
@@ -332,20 +388,24 @@ final class QFHomeRecipeDetailViewController: UIViewController {
       }
     }
     if contentAvailable != false, let materials {
-      body.row("materials.title", version: language) { QFTabUI.label(self.app.text("所需材料", "Ingredients"), size: 20, weight: .bold) }
       if materials.isEmpty {
+        body.row("materials.title", version: language) { QFTabUI.label(self.app.text("所需材料", "Ingredients"), size: 20, weight: .bold) }
         body.row("materials.empty", version: language) { QFTabUI.empty(self.app.text("暂无材料信息", "No ingredient details"), detail: "") }
       } else {
-        for (index, material) in materials.enumerated() {
-          body.row("material.\(index)", value: [material.name, material.amount, material.unit, language]) { [app] in
+        let values = [language] + materials.flatMap { [$0.name, $0.amount, $0.unit] }
+        body.row("materials", value: values) { [app] in
+          let heading = QFTabUI.label(app.text("所需材料", "Ingredients"), size: 20, weight: .bold)
+          let rows = materials.map { material -> UIView in
             let name = QFTabUI.label(material.name, size: 15, lines: 0)
             let unit = material.unit == "piece" ? app.text("个", "pc") : material.unit
             let amountText = [material.amount, unit].filter { !$0.isEmpty }.joined(separator: " ")
             let amount = QFTabUI.label(amountText, size: 14, weight: .medium, color: QFUI.secondary, lines: 0)
             amount.textAlignment = .right
+            amount.setContentCompressionResistancePriority(.required, for: .horizontal)
             let row = QFTabUI.stack([name, UIView(), amount], axis: .horizontal, spacing: 12)
-            return QFTabUI.card(row, padding: 14, background: QFUI.surface)
+            return row
           }
+          return QFTabUI.card(QFTabUI.stack([heading] + rows, spacing: 12), padding: 16)
         }
       }
     }
@@ -360,8 +420,36 @@ final class QFHomeRecipeDetailViewController: UIViewController {
         }
       }
       let visibleSteps = projection.actions.map { QFWorkStep(title: $0.title, body: $0.body) }.compactMap(Self.visibleStep)
-      if !visibleSteps.isEmpty {
-        body.row("steps.title", version: language) { QFTabUI.label(self.app.text("做法步骤", "Directions"), size: 20, weight: .bold) }
+      if !visibleSteps.isEmpty, !directionsExpanded {
+        let values = [language] + visibleSteps.flatMap { [$0.title, $0.body] }
+        body.row("steps.entry", value: values) { [weak self] in
+          guard let self else { return UIView() }
+          let entry = QFTabUI.button("", background: QFUI.surface) { [weak self] in
+            self?.expandDirections()
+          }
+          entry.accessibilityIdentifier = "recipe.detail.directions.expand"
+          let title = QFTabUI.label(self.app.text("做法步骤", "Directions"), size: 18, weight: .bold, lines: 0)
+          let count = self.app.format("%d 步", "Steps: %d", visibleSteps.count)
+          let countLabel = QFTabUI.label(count, size: 12, color: QFUI.primary)
+          countLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+          let chevron = QFTabUI.symbol("chevron.right", size: 14, color: QFUI.primary)
+          let header = QFTabUI.stack([title, UIView(), countLabel, chevron], axis: .horizontal, spacing: 8)
+          header.alignment = .center
+          let summary = QFTabUI.label(visibleSteps.map(\.title).filter { !$0.isEmpty }.joined(separator: " · "), size: 12, color: QFUI.secondary, lines: 0)
+          summary.isHidden = summary.text?.isEmpty != false
+          let content = QFTabUI.stack([header, summary], spacing: 8)
+          content.isUserInteractionEnabled = false
+          entry.addSubview(content)
+          content.snp.makeConstraints { $0.edges.equalToSuperview().inset(14) }
+          entry.accessibilityLabel = "\(title.text ?? ""), \(count)"
+          return entry
+        }
+      } else if !visibleSteps.isEmpty {
+        body.row("steps.title", version: language) {
+          let title = QFTabUI.label(self.app.text("做法步骤", "Directions"), size: 20, weight: .bold)
+          title.accessibilityIdentifier = "recipe.detail.directions.title"
+          return title
+        }
         for (index, step) in visibleSteps.enumerated() {
           body.row("step.\(index)", value: step) {
             let number = QFTabUI.label("\(index + 1)", size: 14, weight: .bold, color: QFUI.onPrimary)
@@ -409,6 +497,20 @@ final class QFHomeRecipeDetailViewController: UIViewController {
     #endif
     body.endUpdates()
     updateEngagementControls(item)
+  }
+
+  private func expandDirections() {
+    guard !directionsExpanded else { return }
+    directionsExpanded = true
+    renderDetailOrInitial()
+    view.layoutIfNeeded()
+    guard let title = body.arrangedSubviews.first(where: {
+      $0.accessibilityIdentifier == "recipe.detail.directions.title"
+    }) else { return }
+    let rect = title.convert(title.bounds, to: scrollView)
+    scrollView.scrollRectToVisible(
+      CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: scrollView.bounds.height),
+      animated: !UIAccessibility.isReduceMotionEnabled)
   }
 
   private static func visibleStep(_ step: QFWorkStep) -> QFWorkStep? {
@@ -570,6 +672,10 @@ final class QFHomeRecipeDetailViewController: UIViewController {
       UIImage(systemName: planned ? "checkmark.circle.fill" : "calendar.badge.plus"),
       for: .normal)
     planButton.tintColor = planned ? QFUI.primary : QFUI.onPrimary
+    var planConfiguration = planButton.configuration
+    planConfiguration?.baseForegroundColor = planned ? QFUI.primary : QFUI.onPrimary
+    planButton.configuration = planConfiguration
+    // The shared button factory also installs a legacy normal-state title color.
     planButton.setTitleColor(planned ? QFUI.primary : QFUI.onPrimary, for: .normal)
     planButton.backgroundColor = planned ? QFUI.tint : QFUI.primary
     planButton.layer.borderWidth = planned ? 1 : 0
