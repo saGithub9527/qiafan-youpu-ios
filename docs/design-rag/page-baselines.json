@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-26",
+  "updatedAt": "2026-10-28",
   "sourceRoot": "../../../../../全球菜谱APP-设计档案/01-当前设计",
   "precedence": [
     "approved PNG and page interaction JSON",
@@ -596,6 +596,138 @@
       },
       "appliesToConfiguration": "Release",
       "approvedException": "2026-10-26 用户授权产品经理首发取舍，免费核心工具；本例外仅适用Release，按first-release-core-r1.md退出延期入口，不重排其他几何合同。"
+    },
+    {
+      "id": "recipe-detail-core-r1",
+      "productPage": "RECIPE-DETAIL / profile-v2 official-recipe-detail",
+      "title": "官方菜谱详情·当前设计来源与源码映射·免费首发 Release",
+      "keywords": [
+        "菜谱详情",
+        "官方菜谱详情",
+        "收藏",
+        "加入计划",
+        "材料",
+        "做法展开",
+        "返回",
+        "Duo",
+        "detail-r6",
+        "official-recipe-detail",
+        "profile-v2"
+      ],
+      "sources": [
+        {
+          "path": "01-菜谱与筛选/03-官方菜谱详情.png",
+          "sha256": "2ccc793c8c5a27543a0bef5f7199012e476a0d085db9d90b2592c91f9c0cdf43",
+          "role": "current PNG"
+        },
+        {
+          "path": "01-菜谱与筛选/03-官方菜谱详情.psd",
+          "sha256": "c3fe14bb9ca79f86416f01cad5361039fc4a6d212826555746a93ad319df6a8d",
+          "role": "same-version editable PSD"
+        },
+        {
+          "path": "06-我的/页面行为说明.json",
+          "sha256": "18acf6c88bbfbe2a770957d0b8f39e4ef9c66415437957fbdb484a2b7407e1ef",
+          "role": "current official-recipe-detail behavior"
+        },
+        {
+          "path": "06-我的/设计说明.md",
+          "sha256": "454a9671c292a594d13d35dc554e1a1ab6f5373b2d57d4ea595064f0d71d2538",
+          "role": "same-version delivery notes"
+        },
+        {
+          "path": "../先看这里.md",
+          "sha256": "908ec5dbbf9d48283a9370ab44bf37e5459eac7c23a9354a591df4598c638bd5",
+          "role": "archive version selection"
+        },
+        {
+          "path": "../当前设计索引与校验.json",
+          "sha256": "4b064c526e8dc3e5b6aef2b6674bc4404c2ebb62fd8b0b6a3dfa36ce9cba5bff",
+          "role": "archive provenance"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/first-release-core-r1.md",
+          "sha256": "3acee1882cdcab89aa6e6349faba8edafdfc88152e797dbe3dd9d6fb835f711a",
+          "role": "existing Release scope exception"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/recipe-detail-core-r1.md",
+          "sha256": "8b0cffbf8a9f40a582abf5fdd991f1bf55624cecd715186e03a48d214b2d75bc",
+          "role": "source-to-code mapping and explicit limits"
+        }
+      ],
+      "canonicalSpec": {
+        "source": "06-我的/页面行为说明.json",
+        "selector": {
+          "id": "official-recipe-detail"
+        },
+        "legacyContext": "revision-6/detail-r6 is not current detail authority; archive selects profile-v2 PNG/PSD."
+      },
+      "layoutContract": {
+        "canvas": [
+          390,
+          844
+        ],
+        "scrollContent": [
+          20,
+          104,
+          350,
+          625
+        ],
+        "fixedFooter": [
+          0,
+          744,
+          390,
+          100
+        ],
+        "favoriteActionRect": [
+          20,
+          760,
+          96,
+          48
+        ],
+        "planActionRect": [
+          128,
+          760,
+          242,
+          48
+        ],
+        "fixed": [
+          "back and centered navigation title",
+          "favorite and add-to-plan footer"
+        ],
+        "scrolling": [
+          "cover",
+          "official recipe identity and facts",
+          "materials",
+          "directions"
+        ],
+        "tabBarVisible": false,
+        "referenceCoordinatesAreNotDeviceInsets": true
+      },
+      "interactionContract": [
+        "Return to original route preserving list/search/filter context.",
+        "Favorite identity is the recipe ID, separate from same-name user work.",
+        "Directions initially show an entry; expand full text in this same recipe and preserve fixed footer.",
+        "Add to plan opens date/meal/quantity confirmation; detail does not consume inventory or complete cooking.",
+        "Release excludes public related-work request/display under existing first-release-core-r1 exception.",
+        "Static source/hash checks are not native Duo or visual acceptance."
+      ],
+      "appliesToConfiguration": "Release",
+      "approvedException": "Existing first-release-core-r1 only removes deferred public-work content; it does not approve changes to other geometry or navigation.",
+      "implementationConformance": {
+        "status": "PARTIAL_MAPPING_STATIC_DIFFERENCES_PENDING",
+        "fullPageAccepted": false,
+        "nativeDuoAccepted": false,
+        "storeScreenshotEligible": false,
+        "recordedDifferences": [
+          "equal-width/52pt footer versus96/242 reference widths and48pt height",
+          "all steps rendered instead of initial expand entry",
+          "per-material cards versus shared material card"
+        ],
+        "mapping": "contracts/recipe-detail-core-r1.md"
+      },
+      "verificationBoundary": "This entry has no codeContract because current code declares no matching CGFloat layout enum. Standard verify checks source hashes only; generic success wording must not be interpreted as geometry acceptance."
     },
     {
       "id": "recipe-home-r8",
