@@ -164,6 +164,7 @@
 		D12A1D6850DC9BBDA65A550F /* QFRemoteImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE4F401E56851D9CA4C5A13 /* QFRemoteImageTests.swift */; };
 		D47CB21662867CB6FA41D49E /* QFPlanRecipePickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88598F8DE8FEFB8CF2C7ECAD /* QFPlanRecipePickerViewController.swift */; };
 		D5A61B58081C0CF3CCAF6D59 /* QFRemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E7423D360770883F28EAEB /* QFRemoteImage.swift */; };
+		D5DAD31C7DC87F43D68DAA97 /* QFHouseholdInvitationClipboardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF50B2DBD1BF1ACE3F56DA /* QFHouseholdInvitationClipboardTests.swift */; };
 		D60173D33583682B528DC893 /* QFMainUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D5B35D1107913F7F4F86C0 /* QFMainUITests.swift */; };
 		D6A525EA9A7475C9655DEEE3 /* QFAvatarCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E9030BA6A6ECCE0E6E58385 /* QFAvatarCropView.swift */; };
 		D6E0DB1046A459E6196766D9 /* QFPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1909E468D9C1F14FC5EEF336 /* QFPlanView.swift */; };
@@ -407,6 +408,7 @@
 		F0E8DFEF8D19F1B1108775DA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4B98CF802EC34ECA7EE299C /* QFCookingDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFCookingDraftTests.swift; sourceTree = "<group>"; };
 		F4F844460DFD56364271D374 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F4FF50B2DBD1BF1ACE3F56DA /* QFHouseholdInvitationClipboardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFHouseholdInvitationClipboardTests.swift; sourceTree = "<group>"; };
 		F567509199B4AD2DF37ACFDC /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		FA6FED632C8CEA583419E4C4 /* QFAssistantTextReveal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFAssistantTextReveal.swift; sourceTree = "<group>"; };
 		FDA72DE39A15818AE93DB7BC /* QFIngredientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFIngredientView.swift; sourceTree = "<group>"; };
@@ -606,6 +608,7 @@
 				4752FA4ADA9BAB73E80DDD4E /* QFCookingRecordDetailTests.swift */,
 				4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */,
 				E820EFDA1FD3FC060F8A01CC /* QFFilamentRendererTests.swift */,
+				F4FF50B2DBD1BF1ACE3F56DA /* QFHouseholdInvitationClipboardTests.swift */,
 				3EFBB91545158C8C1348D85A /* QFIngredientDiscoveryTests.swift */,
 				371B893915D16815276BBA05 /* QFLaunchPolicyTests.swift */,
 				393C36F80F38D71CA06108A9 /* QFLayoutAdapterTests.swift */,
@@ -1133,6 +1136,7 @@
 				291CD80A54F67E174E65C21B /* QFCookingRecordDetailTests.swift in Sources */,
 				EF8BC0D76558038020F192A8 /* QFCrashArchiveTests.swift in Sources */,
 				913E036CB66F5BD05F409D34 /* QFFilamentRendererTests.swift in Sources */,
+				D5DAD31C7DC87F43D68DAA97 /* QFHouseholdInvitationClipboardTests.swift in Sources */,
 				74A0C07E1AAD23A614DCE1FF /* QFIngredientDiscoveryTests.swift in Sources */,
 				63F52E6D2B2510A93788BE05 /* QFLaunchPolicyTests.swift in Sources */,
 				DA94DEAD3CC234005D6E2564 /* QFLayoutAdapterTests.swift in Sources */,
