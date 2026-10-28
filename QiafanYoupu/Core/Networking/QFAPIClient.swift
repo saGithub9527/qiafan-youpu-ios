@@ -23,7 +23,7 @@ final class QFAPIClient {
   private lazy var assistantTransport = Self.makeTransport(configuration: .ephemeral, requestTimeout: 45, resourceTimeout: 240, waitsForConnectivity: true)
   #endif
   var accessToken: String?
-  var interfaceLanguage = "zh-Hans"
+  var interfaceLanguage = "en"
   #if DEBUG
     var recordsRequests = true
     var requestLogStore: QFRequestLogStore?

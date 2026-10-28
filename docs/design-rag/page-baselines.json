@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-28",
+  "updatedAt": "2026-10-29T01:39:16.755127+08:00",
   "sourceRoot": "../../../../../全球菜谱APP-设计档案/01-当前设计",
   "precedence": [
     "approved PNG and page interaction JSON",
@@ -9,6 +9,48 @@
     "implementation previews and Git history"
   ],
   "pages": [
+    {
+      "id": "overseas-subscription-r1",
+      "productPage": "APP-ENTRY-ASSISTANT-MEMBERSHIP",
+      "title": "海外订阅入口、可拖动浮球、主动语音与默认英语",
+      "keywords": [
+        "AI圆球",
+        "浮球拖动",
+        "主动语音",
+        "300秒",
+        "默认英语",
+        "入口订阅",
+        "StoreKit",
+        "海外订阅"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/overseas-subscription-r1.md",
+          "sha256": "c8605bbc8a50e43473685134fbe553652183a96db1d32fb2456fc3dc96676d8d"
+        }
+      ],
+      "layoutContract": {
+        "nativeStack": "UIKit + SnapKit",
+        "orbNormalSize": [
+          92,
+          112
+        ],
+        "firstTrailingInset": 14,
+        "firstBottomInset": 126,
+        "existingBusinessPages": "unchanged fixed/scrolling geometry",
+        "bubble": "safe visible region; wrap and accessible full text"
+      },
+      "interactionContract": [
+        "Native drag and tap are distinct; retain scene-relative placement through safe-area/keyboard/window changes.",
+        "Actual foreground proactive speech waits300 seconds and cancels old account/language/access work.",
+        "No preference defaults en; saved ten-language preferences remain.",
+        "Verified same-account subscription gates business; legal/support/restore/manage/account/deletion rights stay reachable.",
+        "TEST is not Apple payment; unknown is not unsubscribed; no hidden review skip.",
+        "Confirmed USD9.99/month and USD99.99/year; all supported storefronts excludingCN/HK/MO/TW; match App/product territory lists."
+      ],
+      "supersedes": "Conflicting assistant/membership/default-language portions of first-release-core-r1 and historicalG24 CN+US goal only.",
+      "approvedException": "Direct human product turn01a18335-19d6-7cd3-84d6-09ac301b1116 and price/territory reply turn01a18344-43f8-7271-94e5-789ff71bd165 independently read; implementation choices delegated to development."
+    },
     {
       "id": "profile-core-r1",
       "title": "我的与本人历史 · 免费首发 Release",

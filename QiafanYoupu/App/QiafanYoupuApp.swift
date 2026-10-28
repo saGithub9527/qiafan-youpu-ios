@@ -109,6 +109,8 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
 
   func sceneDidBecomeActive(_ scene: UIScene) {
     QFGetuiPushService.shared.applicationDidBecomeActive()
+    // Do not start StoreKit before the consent/account flow has activated it.
+    session.membership.foreground()
     #if DEBUG
     if ProcessInfo.processInfo.arguments.contains("-QFPrepareLocalModel") { _ = QFLocalModelStore.shared }
     if !QFRuntime.isUnitTest {
@@ -222,17 +224,13 @@ private final class QFRootViewController: UIViewController {
   private let options: QFLaunchOptions
   private let onPrivacyConsentAccepted: () -> Void
   private var current: UIViewController?
-  #if DEBUG
-  private var preparedCharacter: QFAssistantCharacterView?
-  #endif
+  private var consentAccepted = false
+  private var accountScope: String?
+  private weak var accessCover: QFMembershipViewController?
+  private var subscriptions = Set<AnyCancellable>()
 
-  init(
-    app: QFAppSession, options: QFLaunchOptions,
-    onPrivacyConsentAccepted: @escaping () -> Void
-  ) {
-    self.app = app
-    self.options = options
-    self.onPrivacyConsentAccepted = onPrivacyConsentAccepted
+  init(app: QFAppSession, options: QFLaunchOptions, onPrivacyConsentAccepted: @escaping () -> Void) {
+    self.app = app; self.options = options; self.onPrivacyConsentAccepted = onPrivacyConsentAccepted
     super.init(nibName: nil, bundle: nil)
   }
   required init?(coder: NSCoder) { nil }
@@ -240,55 +238,126 @@ private final class QFRootViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = QFUI.background
-    #if DEBUG
-    if !QFRuntime.isUnitTest {
-      _ = QFLocalModelStore.shared
-      let character = QFAssistantCharacterView()
-      character.isHidden = true
-      view.addSubview(character)
-      character.snp.makeConstraints {
-        $0.leading.top.equalToSuperview(); $0.width.equalTo(92); $0.height.equalTo(112)
-      }
-      view.layoutIfNeeded()
-      preparedCharacter = character
-    }
-    #endif
+    app.$user.receive(on: DispatchQueue.main).sink { [weak self] _ in self?.route() }.store(in: &subscriptions)
+    app.$sessionRestorationCompleted.receive(on: DispatchQueue.main).sink { [weak self] _ in self?.route() }.store(in: &subscriptions)
+    app.membership.$accessRevision.receive(on: DispatchQueue.main).sink { [weak self] _ in self?.route() }.store(in: &subscriptions)
     if options.showWelcome {
-      install(
-        QFWelcomeViewController(app: app) { [weak self] in
-          UserDefaults.standard.set(true, forKey: QFLaunchPolicy.completedKey)
-          self?.onPrivacyConsentAccepted()
-          self?.showTabs()
-        })
-    } else {
-      showTabs()
+      install(QFWelcomeViewController(app: app) { [weak self] in
+        guard let self else { return }
+        UserDefaults.standard.set(true, forKey: QFLaunchPolicy.completedKey)
+        self.consentAccepted = true; self.onPrivacyConsentAccepted(); self.route()
+      })
+    } else { consentAccepted = true; route() }
+  }
+
+  override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); route() }
+
+  private func route() {
+    guard consentAccepted else { return }
+    if app.user == nil {
+      app.membership.resetIfBound()
+      accountScope = nil
+      if app.sessionRestorationUnconfirmed {
+        if !(current is QFEntrySessionViewController) { install(QFEntrySessionViewController(app: app)) }
+      } else if !(current is QFLoginViewController) {
+        current?.dismiss(animated: false)
+        install(QFLoginViewController(app: app) { [weak self] in self?.route() })
+      }
+      return
+    }
+    if let accountScope, accountScope != app.contentScope {
+      current?.dismiss(animated: false); current = removeCurrent()
+    }
+    accountScope = app.contentScope
+    app.membership.activate()
+    (current as? QFMainTabViewController)?.membershipAccessChanged()
+    if app.membership.hasBusinessAccess {
+      if let accessCover {
+        accessCover.dismiss(animated: false)
+        self.accessCover = nil
+      }
+      if !(current is QFMainTabViewController) { install(QFMainTabViewController(app: app, options: options)) }
+    } else if current is QFMainTabViewController {
+      // Cover the existing navigation/form stack so a subscription expiry does not
+      // discard an unsaved form. Server gates and route guards remain authoritative.
+      guard accessCover == nil, view.window != nil else { return }
+      let cover = QFMembershipViewController(app: app, entryGate: true)
+      cover.isModalInPresentation = true
+      var presenter = current!
+      while let presented = presenter.presentedViewController { presenter = presented }
+      accessCover = cover
+      presenter.present(cover, animated: false)
+    } else if !(current is QFMembershipViewController) {
+      install(QFMembershipViewController(app: app, entryGate: true))
     }
   }
 
-  private func showTabs() {
-    #if DEBUG
-    install(QFMainTabViewController(app: app, options: options, preparedCharacter: preparedCharacter))
-    preparedCharacter = nil
-    #else
-    install(QFMainTabViewController(app: app, options: options))
-    #endif
+  @discardableResult private func removeCurrent() -> UIViewController? {
+    guard let current else { return nil }
+    current.willMove(toParent: nil); current.view.removeFromSuperview(); current.removeFromParent()
+    return nil
   }
-
   private func install(_ controller: UIViewController) {
-    if let current {
-      current.willMove(toParent: nil)
-      current.view.removeFromSuperview()
-      current.removeFromParent()
-    }
-    addChild(controller)
-    view.addSubview(controller.view)
+    current?.dismiss(animated: false)
+    _ = removeCurrent()
+    addChild(controller); view.addSubview(controller.view)
     controller.view.snp.makeConstraints { $0.edges.equalToSuperview() }
-    controller.didMove(toParent: self)
-    current = controller
-    // The welcome flow replaces its child after the root controller is already visible, so
-    // UIKit may not send a fresh viewDidAppear to the new tab controller. Trigger the same
-    // post-first-frame hook explicitly; the overlay keeps an idempotent one-greeting gate.
+    controller.didMove(toParent: self); current = controller
     (controller as? QFMainTabViewController)?.hostDidAppear()
+  }
+}
+
+@MainActor
+private final class QFEntrySessionViewController: UIViewController {
+  private let app: QFAppSession
+  private var operation: Task<Void, Never>?
+  init(app: QFAppSession) { self.app = app; super.init(nibName: nil, bundle: nil) }
+  required init?(coder: NSCoder) { nil }
+  deinit { operation?.cancel() }
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = QFUI.background
+    let label = QFSettingsPageUI.label(app.text("正在恢复登录", "Restoring sign-in"), size: 20)
+    label.textAlignment = .center
+    let retry = UIButton(type: .system)
+    retry.setTitle(app.text("重试", "Retry"), for: .normal)
+    retry.snp.makeConstraints { $0.height.greaterThanOrEqualTo(44) }
+    retry.addAction(UIAction { [weak self] _ in
+      guard let self, self.operation == nil else { return }
+      self.operation = Task { [weak self] in
+        defer { self?.operation = nil }
+        do { try await self?.app.restoreUser() }
+        catch { guard let self else { return }; QFOperationHUD.toast(self.app.text("操作失败，请重试。", "Operation failed. Please try again."), in: self.view) }
+      }
+    }, for: .touchUpInside)
+    let stack = QFTabUI.stack([label, retry], spacing: 20)
+    let help = UIButton(type: .system)
+    help.setTitle(app.text("帮助与反馈", "Help and feedback"), for: .normal)
+    help.snp.makeConstraints { $0.height.greaterThanOrEqualTo(44) }
+    help.addAction(UIAction { [weak self] _ in
+      guard let self, self.presentedViewController == nil else { return }
+      let navigation = UINavigationController(rootViewController: QFHelpFeedbackViewController(app: self.app))
+      navigation.setNavigationBarHidden(true, animated: false)
+      self.present(navigation, animated: true)
+    }, for: .touchUpInside)
+    stack.addArrangedSubview(help)
+    for privacy in [false, true] {
+      let button = UIButton(type: .system)
+      button.setTitle(privacy ? app.text("隐私政策", "Privacy policy") : app.text("用户协议", "Terms of service"), for: .normal)
+      button.snp.makeConstraints { $0.height.greaterThanOrEqualTo(44) }
+      button.addAction(UIAction { [weak self] _ in
+        guard let self, self.presentedViewController == nil else { return }
+        let page = QFLocalLegalViewController(document: privacy ? "privacy-policy" : "user-agreement",
+          title: privacy ? self.app.text("隐私政策", "Privacy policy") : self.app.text("用户协议", "Terms of service"),
+          language: self.app.interfaceLanguage)
+        let navigation = UINavigationController(rootViewController: page)
+        navigation.setNavigationBarHidden(true, animated: false)
+        self.present(navigation, animated: true)
+      }, for: .touchUpInside)
+      stack.addArrangedSubview(button)
+    }
+    view.addSubview(stack)
+    stack.snp.makeConstraints { $0.center.equalTo(view.safeAreaLayoutGuide); $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(24) }
   }
 }
 
@@ -296,10 +365,8 @@ private final class QFRootViewController: UIViewController {
 private final class QFMainTabViewController: UITabBarController, UITabBarControllerDelegate {
   private let app: QFAppSession
   private let options: QFLaunchOptions
-  #if DEBUG
   private var preparedCharacter: QFAssistantCharacterView?
   private var assistantOverlay: QFDigitalAssistantOverlay?
-  #endif
   private var subscriptions = Set<AnyCancellable>()
   private var showingMealLogin = false
   init(app: QFAppSession, options: QFLaunchOptions) {
@@ -319,15 +386,11 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
     hostDidAppear()
   }
   func hostDidAppear() {
-    #if DEBUG
     assistantOverlay?.hostDidAppear()
-    #endif
   }
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    #if DEBUG
     assistantOverlay?.ensureOnTop()
-    #endif
   }
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -361,21 +424,18 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
     tabBar.unselectedItemTintColor = QFUI.secondary
     QFDiagnosticsPresenter.attach(to: self, app: app, bottomInset: 76)
     delegate = self
-    #if DEBUG
-    let assistant = QFDigitalAssistantOverlay(app: app, character: preparedCharacter)
+    let assistant = QFDigitalAssistantOverlay(app: app, character: preparedCharacter,
+      hasBusinessAccess: { [weak app] in app?.membership.hasOrbSpeech == true })
     assistant.onOpenMealReminder = { [weak self] id in self?.openPlanReminder(plannedMealID: id) }
     assistant.attach(to: self)
     assistantOverlay = assistant
-    #endif
     NotificationCenter.default.publisher(for: .qfDidReceiveRemoteNotification)
       .receive(on: DispatchQueue.main).sink { [weak self] notification in
         guard let self else { return }
         if let plannedMealID = QFRemoteNotificationRoute.plannedMealID(from: notification) {
           self.openPlanReminder(plannedMealID: plannedMealID)
         } else if QFRemoteNotificationRoute.isAssistantNudge(from: notification) {
-          #if DEBUG
           self.assistantOverlay?.presentConversation()
-          #endif
         }
       }.store(in: &subscriptions)
     QFMealSurfaceNavigation.shared.$pending.receive(on: DispatchQueue.main).sink { [weak self] route in
@@ -397,19 +457,18 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
           (controller as? UINavigationController)?.popToRootViewController(animated: false)
         }
       }
-      #if DEBUG
       self.assistantOverlay?.refreshLanguage()
-      #endif
     }.store(in: &subscriptions)
   }
 
   func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-    #if DEBUG
     assistantOverlay?.primaryPageChanged()
-    #endif
   }
 
+  func membershipAccessChanged() { assistantOverlay?.businessAccessDidChange() }
+
   private func openPendingMealSurface() {
+    guard app.membership.hasBusinessAccess else { return }
     guard let route = QFMealSurfaceNavigation.shared.pending else { return }
     if route.planID != nil && app.user == nil {
       guard let navigation = selectedViewController as? UINavigationController else { return }
@@ -433,6 +492,7 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
   }
 
   private func openPlanReminder(plannedMealID: String) {
+    guard app.membership.hasBusinessAccess else { return }
     guard app.user != nil else {
       QFOperationHUD.toast(
         app.text("请先登录后查看这条计划提醒。", "Sign in to view this plan reminder."), in: view)

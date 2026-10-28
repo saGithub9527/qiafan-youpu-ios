@@ -18,7 +18,6 @@
 "AI 生成周计划" = "Generate weekly plan with AI";
 "下拉刷新可获取最新状态" = "Pull down to refresh the latest status.";
 "仅在已有计划时发送" = "Sent only when a meal is planned";
-"仅推荐至少使用一种现有食材的菜谱" = "Each recipe must use at least one ingredient in stock.";
 "仅查看" = "Viewer";
 "优先使用现有库存" = "Prioritize current inventory";
 "例如：冰箱冷藏" = "For example: refrigerator";
@@ -81,7 +80,6 @@
 "时区" = "Timezone";
 "最长烹饪时间需为 1–1440 分钟。" = "Maximum cooking time must be 1–1440 minutes.";
 "有效期至：%@" = "Expires: %@";
-"来自食材库" = "From ingredient catalog";
 "标注到期日期" = "Add expiry date";
 "校正" = "Correct";
 "校正时可输入负数" = "A correction may be negative";
@@ -156,10 +154,7 @@
 "采购单操作" = "Shopping list actions";
 "金额" = "Amount";
 "预算币种" = "Budget currency";
-"食材已添加" = "Ingredient added";
 "餐次" = "Meals";
-"%d 种已加载食材临近标注日期" = "%d loaded ingredients are near their marked dates";
-"%d 种已加载食材临近标注日期，查看" = "%d loaded ingredients are near their marked dates. View";
 "保存数量" = "Save quantity";
 "单一数量" = "Exact quantity";
 "原始用量：%@" = "Original amount: %@";
@@ -209,7 +204,6 @@
 "需要处理" = "Needs attention";
 "请先登录后查看这条计划提醒。" = "Sign in to view this plan reminder.";
 "未能打开这条计划提醒。" = "Could not open this plan reminder.";
-"清空本餐计划" = "Clear this meal plan";
 "记录已保存，但库存扣减任务尚未创建。请点“查看库存扣减状态”重试。" = "The record was saved, but inventory deduction has not started. Tap View inventory deduction status to retry.";
 "入库 %@" = "Added %@";
 "入库日期未知" = "Date added unknown";
@@ -272,15 +266,40 @@
 "你的饮食助手还在等你，打开看看今天的安排。" = "Your diet assistant is ready when you are. Open the app to review today's plan.";
 
 "允许云端处理？" = "Allow cloud processing?";
-"发送的文字或图片会传给云端助手生成建议。你可以在发送前取消，库存、作品和菜谱不会被自动修改。" = "Your text or image will be sent to the cloud assistant for suggestions. You can cancel before sending; inventory, works and recipes are never changed automatically.";
 "同意并发送" = "Agree and send";
 "搜索单位名称或符号" = "Search unit name or symbol";
 "单位列表尚未加载，请稍后重试。" = "The unit list is still loading. Try again shortly.";
 
 
-"饮食助手形象" = "Diet assistant character";
-
-
 "开启新对话？" = "Start a new conversation?";
 "当前对话已达上下文容量，本轮尚未发送。开启新对话会保留现有聊天记录，从这条消息开始新的上下文；请重新说明过敏等重要要求。" = "This conversation has reached its context capacity; nothing was sent. Starting a new conversation keeps existing chat and begins a new context with this message. Restate important requirements such as allergies.";
 "开启并发送" = "Start and send";
+"主动语音（每5分钟）" = "Proactive speech (every 5 minutes)";
+"%@／年" = "%@ per year";
+"%@／月" = "%@ per month";
+"Apple 批准后会自动确认权益，无需再次购买。" = "Your access will be confirmed after Apple approves the purchase. You do not need to buy again.";
+"历史余额仅供查看，不属于当前订阅权益。" = "Past balances are view-only and are not part of the current subscription.";
+"年付" = "Yearly";
+"恢复购买" = "Restore purchases";
+"操作失败，请重试。" = "Operation failed. Please try again.";
+"月付" = "Monthly";
+"月付和年付包含相同权益。" = "Monthly and yearly plans include the same benefits.";
+"核心做饭工具、账号云端同步、基础家庭协作和圆球主动语音。" = "Core cooking tools, account cloud sync, basic household collaboration and proactive orb speech.";
+"正在恢复登录" = "Restoring sign-in";
+"正在核对当前账号和 Apple 购买记录。" = "Verifying your current account and Apple purchases.";
+"正在检查订阅" = "Checking subscription";
+"管理订阅" = "Manage subscriptions";
+"订阅产品暂不可用" = "Subscription products are unavailable";
+"订阅后进入恰饭有谱" = "Subscribe to enter Qiafan Youpu";
+"订阅已绑定其他账号" = "Subscription linked to another account";
+"订阅条款与隐私链接尚未就绪，暂不可购买。" = "Subscription terms and privacy links are not ready. Purchases are unavailable.";
+"订阅状态尚未确认" = "Subscription not yet confirmed";
+"请切换到原恰饭有谱账号或联系支持，不要重复购买。" = "Switch to your original Qiafan Youpu account or contact support. Do not purchase again.";
+"请稍后重试，已有订阅可通过恢复购买核对。" = "Try again later. You can verify an existing subscription by restoring purchases.";
+"请重试检查或恢复购买。确认前不会要求你再次购买。" = "Retry verification or restore purchases. You will not be asked to buy again before verification.";
+"购买等待批准" = "Purchase awaiting approval";
+"费用由 Apple 账号支付，订阅自动续期，除非在当前周期结束前取消。可在 Apple 订阅设置中管理或取消。" = "Payment is charged to your Apple Account. The subscription renews automatically unless cancelled before the current period ends. Manage or cancel in Apple Subscriptions.";
+"退出失败，请重试。" = "Sign out failed. Please try again.";
+"重新检查" = "Check again";
+"本次订阅包含做饭工具和主动语音，云端问答暂不可用。" = "Your subscription includes cooking tools and proactive speech. Cloud chat is currently unavailable.";
+"管理主动语音并查看餐次提醒" = "Manage proactive speech and view meal reminders";

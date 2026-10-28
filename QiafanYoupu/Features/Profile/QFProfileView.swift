@@ -372,7 +372,7 @@ final class QFProfileViewController: QFPageViewController {
       return
     }
     guard presentedViewController == nil else { return }
-    let controller: QFProfileContentController
+    let controller: UIViewController
     switch destination {
     #if DEBUG
     case .publishWork: controller = QFWorkEditorViewController(app: app)
@@ -388,7 +388,7 @@ final class QFProfileViewController: QFPageViewController {
     case .preferences: controller = QFInterestPreferencesViewController(app: app)
     case .membership: controller = QFMembershipViewController(app: app)
     }
-    controller.onChanged = { [weak self] in self?.loadContentSummary() }
+    (controller as? QFProfileContentController)?.onChanged = { [weak self] in self?.loadContentSummary() }
     qfPush(controller)
   }
 
@@ -527,11 +527,7 @@ private enum QFProfileDestination {
     case .cookingHistory: return app.text("做菜记录与统计", "Cooking history and stats")
     case .preferences: return app.text("兴趣偏好", "Interests and preferences")
     case .membership:
-      #if DEBUG
       return app.text("会员订阅", "Membership")
-      #else
-      return app.text("历史权益与余额", "Past benefits and balance")
-      #endif
     }
   }
 }

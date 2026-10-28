@@ -60,6 +60,29 @@
     }
 
     @MainActor
+    func testAppleMembershipSecretsNeverReachPersistentDiagnostics() throws {
+      for path in ["/api/v1/me/membership/apple/purchase-context", "/api/v1/me/membership/apple/transactions"] {
+        let store = QFRequestLogStore(directoryURL: directoryURL)
+        var request = URLRequest(url: try XCTUnwrap(URL(string: "https://example.invalid" + path)))
+        request.httpMethod = "POST"
+        request.setValue("Bearer apple-bearer-secret", forHTTPHeaderField: "Authorization")
+        request.httpBody = Data(#"{"signedTransactionInfo":"apple-jws-secret"}"#.utf8)
+        let id = store.begin(request: request)
+        let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        store.finish(id: id, response: response,
+          data: Data(#"{"appAccountToken":"apple-account-secret"}"#.utf8), error: nil)
+        let restored = QFRequestLogStore(directoryURL: directoryURL)
+        let entry = try XCTUnwrap(restored.entry(id: id))
+        let encoded = String(decoding: try JSONEncoder().encode(entry), as: UTF8.self)
+        for secret in ["apple-bearer-secret", "apple-jws-secret", "apple-account-secret"] {
+          XCTAssertFalse(encoded.contains(secret))
+        }
+        XCTAssertEqual(entry.statusCode, 200)
+        XCTAssertEqual(entry.method, "POST")
+      }
+    }
+
+    @MainActor
     func testTransportFailureIsRecordedAndSurvivesReload() throws {
       let store = QFRequestLogStore(directoryURL: directoryURL)
       let id = store.begin(request: makeRequest(path: "timeout"))

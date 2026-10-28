@@ -40,7 +40,7 @@ enum QFLocalSettingsStore {
 
   static func current(defaults: UserDefaults = .standard, scope: String? = nil) -> QFUserSettings {
     let fallback = Persisted(
-      schemaVersion: 1, interfaceLanguage: "zh-Hans", planReminders: true,
+      schemaVersion: 1, interfaceLanguage: "en", planReminders: true,
       workAndContributionUpdates: true)
     let persisted =
       defaults.data(forKey: scope.map { key + "." + $0 } ?? key)
@@ -96,6 +96,7 @@ final class QFSettingsViewController: UIViewController {
   private var themeRow: QFSettingsActionRow!
   private var languageRow: QFSettingsActionRow!
   private var planReminderRow: QFSettingsSwitchRow!
+  private var proactiveSpeechRow: QFSettingsSwitchRow!
   private var reminderDetailRow: QFSettingsActionRow!
   private var progressRow: QFSettingsSwitchRow!
   private var householdRow: QFSettingsActionRow!
@@ -225,6 +226,9 @@ final class QFSettingsViewController: UIViewController {
       title: app.text("界面语言", "App language"), detail: QFInterfaceLanguage.normalized(
         preferences.interfaceLanguage).autonym)
     planReminderRow = QFSettingsSwitchRow(title: app.text("计划提醒", "Plan reminders"))
+    proactiveSpeechRow = QFSettingsSwitchRow(
+      title: app.text("主动语音（每5分钟）", "Proactive speech (every 5 minutes)"))
+    proactiveSpeechRow.accessibilityIdentifier = "settings.proactive-speech"
     reminderDetailRow = QFSettingsActionRow(
       title: app.text("提醒时间与时区", "Reminder times and timezone"),
       subtitle: app.text("设置每餐提醒", "Set reminders for each meal"))
@@ -239,7 +243,7 @@ final class QFSettingsViewController: UIViewController {
       section(
         title: app.text("外观与显示", "Appearance and language"),
         rows: [themeRow, languageRow]))
-    var notificationRows: [UIView] = [planReminderRow, reminderDetailRow]
+    var notificationRows: [UIView] = [planReminderRow, reminderDetailRow, proactiveSpeechRow]
     #if DEBUG
       notificationRows.append(progressRow)
     #endif
@@ -334,6 +338,10 @@ final class QFSettingsViewController: UIViewController {
     progressRow.onChange = { [weak self] enabled in
       self?.replacePreferences(workAndContributionUpdates: enabled)
     }
+    proactiveSpeechRow.onChange = { [weak self] enabled in
+      guard let self else { return }
+      QFProactiveSpeechPreferences.setEnabled(enabled, scope: self.app.contentScope)
+    }
     cacheRow.action = { [weak self] in self?.confirmClearCache() }
     logoutButton.addAction(UIAction { [weak self] _ in self?.confirmLogout() }, for: .touchUpInside)
   }
@@ -343,6 +351,7 @@ final class QFSettingsViewController: UIViewController {
       language: QFInterfaceLanguage.normalized(app.interfaceLanguage))
     languageRow.detail = QFInterfaceLanguage.normalized(preferences.interfaceLanguage).autonym
     planReminderRow.setOn(preferences.planReminders, animated: false)
+    proactiveSpeechRow.setOn(QFProactiveSpeechPreferences.isEnabled(scope: app.contentScope), animated: false)
     progressRow.setOn(preferences.workAndContributionUpdates, animated: false)
     renderAccountState()
   }
@@ -645,7 +654,7 @@ final class QFSettingsViewController: UIViewController {
 }
 
 @MainActor
-private final class QFAccountPrivacyViewController: UIViewController {
+final class QFAccountPrivacyViewController: UIViewController {
   private let app: QFAppSession
   private let initialProfile: QFUserProfile
   private let onSessionExpired: () -> Void

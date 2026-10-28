@@ -74,7 +74,7 @@ struct QFUserSettings: Codable, Equatable {
     theme = try values.decode(String.self, forKey: .theme)
     // Language is device-local. This default only keeps older/newer settings payloads compatible;
     // callers always merge the current local language before presenting settings.
-    interfaceLanguage = try values.decodeIfPresent(String.self, forKey: .interfaceLanguage) ?? "zh-Hans"
+    interfaceLanguage = try values.decodeIfPresent(String.self, forKey: .interfaceLanguage) ?? "en"
     planReminders = try values.decode(Bool.self, forKey: .planReminders)
     workAndContributionUpdates = try values.decode(Bool.self, forKey: .workAndContributionUpdates)
   }

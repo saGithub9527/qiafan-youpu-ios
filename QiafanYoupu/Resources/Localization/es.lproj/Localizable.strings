@@ -189,7 +189,6 @@
 "修改已保存" = "Cambios guardados";
 "修改记录" = "Editar registro";
 "偏好文本会发送给 AI 服务用于生成计划，请勿填写联系方式等个人信息。" = "El texto de preferencias se envía al servicio de IA para generar el plan. No incluyas datos de contacto ni otra información personal.";
-"做完一道菜，可以记录作品，留住这次的心得。" = "Después de cocinar, guarda el resultado y lo que aprendiste.";
 "做完后可以发布你的成果" = "Compartir lo que haces";
 "做法步骤" = "Pasos de preparación";
 "做菜使用" = "Usado para cocinar";
@@ -408,7 +407,6 @@
 "存草稿" = "Guardar borrador";
 "安全与使用须知" = "Aviso de seguridad y uso";
 "安排一周菜单并整理需要的食材" = "Planifica un menú semanal y organiza los ingredientes que necesitas";
-"安排一周菜单，可以先从明天的一顿饭开始。" = "El menú semanal puede empezar por una sola comida para mañana.";
 "安排一周菜单，整理所需食材，" = "Planifica un menú semanal e ingredientes";
 "完善公开资料，帮助你的收藏和作品更容易识别。" = "Completa tu perfil público para que tus elementos y publicaciones guardadas sean más fáciles de reconocer.";
 "完成 %d 道" = "Completados: %1$d";
@@ -572,10 +570,7 @@
 "恢复这条记录仍占用的库存，并更新做菜统计。" = "Se devolverá a las existencias el consumo vigente de este registro y se actualizarán las estadísticas.";
 "恰饭有谱" = "Qiafan Youpu";
 "惊讶" = "Sorpresa";
-"想做一道番茄炒蛋吗？我们可以先在菜谱中查找。" = "¿Te apetecen tomates con huevos? Podemos buscar una receta primero.";
 "想做点什么？" = "¿Te gusta cocinar hoy?";
-"想换个口味？去菜谱页看看今天想做哪道菜。" = "¿Quieres probar otro sabor? Busca qué cocinar hoy en la página de recetas.";
-"想聊聊今天的心情，或一起安排晚餐？点我就可以开始。" = "¿Quieres hablar de tu día o planear la cena juntos? Tócame para empezar.";
 "感兴趣的国家" = "Países de interés";
 "感谢你的反馈，我们会认真处理。" = "Gracias. Revisaremos tus comentarios.";
 "成功 · %d" = "Exitoso · %1$d";
@@ -616,7 +611,6 @@
 "找到今天想尝试的那一味。" = "para encontrar lo que deseas hoy.";
 "把世界风味，" = "Traer sabores del mundo";
 "把家里的食材用起来" = "Aprovecha al máximo lo que tienes";
-"把常用食材整理一下，下一顿饭会更好安排。" = "Organizar los ingredientes habituales facilita planear la próxima comida.";
 "把每一天，做得有滋有味。" = "y haz que cada día sea delicioso.";
 "投稿会先进入审核，不会直接替换条目图片。" = "Las contribuciones se revisan antes de que puedan reemplazar una foto de artículo.";
 "投诉与申诉记录" = "Quejas y apelaciones";
@@ -963,7 +957,6 @@
 "清空筛选" = "Borrar filtros";
 "清除条目" = "Borrar elemento";
 "温暖、明快" = "Cálido y brillante";
-"炒菜前先备好食材和调味料，做起来会更从容。" = "Prepara los ingredientes y condimentos antes de cocinar para empezar con calma.";
 "点击查看计划与备菜" = "Toca para ver el plan y la preparación";
 "点击重新加载" = "Toca para volver a cargar";
 "烹饪与设备安全" = "Seguridad en la cocina y de los electrodomésticos";
@@ -1016,7 +1009,6 @@
 "相册" = "Fotos";
 "省份或地区" = "Estado o región";
 "省份或地区最多 32 个字。" = "Estado o región debe tener 32 caracteres o menos.";
-"看看备菜页，能帮你区分家里已有和待采购的食材。" = "La página de preparación separa los ingredientes de casa de los que hay que comprar.";
 "知识检索" = "Búsqueda de conocimientos";
 "知道了" = "Aceptar";
 "确定" = "Aplicar";
@@ -1485,27 +1477,11 @@
 "打开计划" = "Abrir Plan";
 
 // Membership benefits
-"DeepSeek 积分使用" = "Usar créditos de DeepSeek";
 "云端 AI 积分" = "Créditos de IA en la nube";
-"仅主动使用 DeepSeek 时消耗积分，免费 GLM 不扣积分。" = "Los créditos se usan solo cuando eliges DeepSeek. El GLM gratuito no consume créditos.";
-"付费订阅尚未开放，基础功能可照常使用。" = "Las suscripciones de pago aún no están disponibles. Las funciones básicas siguen disponibles.";
-"商品条码联网查询" = "Consulta de productos por código de barras en línea";
-"尚未开通会员" = "Sin membresía activa";
-"已开通权益" = "Ventajas activas";
 "当前权益已由服务器确认。" = "El servidor ha confirmado tus ventajas actuales.";
-"有效期至 %@" = "Válido hasta %@";
-"权益暂时无法读取，下拉可重试。" = "No se pudieron cargar las ventajas. Desliza hacia abajo para reintentar.";
-"此账号可使用全部已上线会员功能，无需购买。" = "Esta cuenta puede usar todas las funciones de membresía publicadas sin comprar.";
-"测试权益已开通" = "Ventajas de prueba activas";
-"积分已记录，当前尚未启用积分扣费。" = "Tus créditos están registrados. El cobro con créditos aún no está activado.";
-"积分暂时无法读取，下拉可重试。" = "No se pudieron cargar los créditos. Desliza hacia abajo para reintentar.";
-"菜谱、计划、手动入库、基础提醒和免费 GLM 继续按原有规则使用。" = "Las recetas, los planes, el inventario manual, los recordatorios básicos y el GLM gratuito mantienen sus reglas actuales.";
-"连续扫码与批量核对" = "Escaneo continuo y revisión por lotes";
 "查看权益" = "Ver ventajas";
 
 "历史权益与余额" = "Ventajas anteriores y saldo";
-"当前版本不提供购买和积分消费。历史权益和余额仅供查看。" = "Esta versión no permite compras ni gastar créditos. Las ventajas anteriores y los saldos solo se pueden consultar.";
-"本版核心做饭工具免费使用。" = "Las herramientas básicas de cocina son gratuitas en esta versión.";
 
 "历史聊天记录" = "Historial de chat";
 "仅显示当前账号、家庭和语言的历史记录，不发送新请求。" = "Muestra el historial de la cuenta, el hogar y el idioma actuales. No se envían solicitudes nuevas.";
@@ -1513,3 +1489,32 @@
 "个" = "ud.";
 "%d 步" = "Pasos: %d";
 "无法复制此邀请，请重新创建邀请。" = "No se puede copiar esta invitación. Crea una nueva.";
+"主动语音（每5分钟）" = "Voz proactiva (cada 5 minutos)";
+"%@／年" = "%@ al año";
+"%@／月" = "%@ al mes";
+"Apple 批准后会自动确认权益，无需再次购买。" = "El acceso se confirmará cuando Apple apruebe la compra. No es necesario volver a comprar.";
+"历史余额仅供查看，不属于当前订阅权益。" = "Los saldos anteriores son de solo lectura y no forman parte de la suscripción actual.";
+"年付" = "Anual";
+"恢复购买" = "Restaurar compras";
+"操作失败，请重试。" = "La operación falló. Inténtalo de nuevo.";
+"月付" = "Mensual";
+"月付和年付包含相同权益。" = "Los planes mensual y anual incluyen los mismos beneficios.";
+"核心做饭工具、账号云端同步、基础家庭协作和圆球主动语音。" = "Herramientas básicas de cocina, sincronización en la nube, colaboración familiar básica y avisos de voz del orbe.";
+"正在恢复登录" = "Restaurando el inicio de sesión";
+"正在核对当前账号和 Apple 购买记录。" = "Verificando tu cuenta actual y las compras de Apple.";
+"正在检查订阅" = "Verificando la suscripción";
+"管理订阅" = "Gestionar suscripciones";
+"订阅产品暂不可用" = "Las suscripciones no están disponibles";
+"订阅后进入恰饭有谱" = "Suscríbete para entrar en Qiafan Youpu";
+"订阅已绑定其他账号" = "Suscripción vinculada a otra cuenta";
+"订阅条款与隐私链接尚未就绪，暂不可购买。" = "Los enlaces a las condiciones y la privacidad aún no están listos. Las compras no están disponibles.";
+"订阅状态尚未确认" = "Suscripción aún no confirmada";
+"请切换到原恰饭有谱账号或联系支持，不要重复购买。" = "Cambia a tu cuenta original de Qiafan Youpu o contacta con soporte. No vuelvas a comprar.";
+"请稍后重试，已有订阅可通过恢复购买核对。" = "Inténtalo más tarde. Puedes verificar una suscripción existente restaurando las compras.";
+"请重试检查或恢复购买。确认前不会要求你再次购买。" = "Reintenta la verificación o restaura las compras. No se te pedirá comprar de nuevo antes de verificar.";
+"购买等待批准" = "Compra pendiente de aprobación";
+"费用由 Apple 账号支付，订阅自动续期，除非在当前周期结束前取消。可在 Apple 订阅设置中管理或取消。" = "El pago se carga a tu cuenta de Apple. La suscripción se renueva automáticamente salvo que se cancele antes del fin del periodo actual. Gestiona o cancela en Suscripciones de Apple.";
+"退出失败，请重试。" = "No se pudo cerrar la sesión. Inténtalo de nuevo.";
+"重新检查" = "Verificar de nuevo";
+"本次订阅包含做饭工具和主动语音，云端问答暂不可用。" = "La suscripción incluye herramientas de cocina y avisos de voz. El chat en la nube no está disponible actualmente.";
+"管理主动语音并查看餐次提醒" = "Gestionar avisos de voz y ver recordatorios de comidas";

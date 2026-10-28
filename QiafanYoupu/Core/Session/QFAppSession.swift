@@ -153,6 +153,10 @@ final class QFAppSession: ObservableObject {
   private var isLoggingOut = false
   private var started = false
   private var generation = 0
+  lazy var membership = QFStoreKitCoordinator(app: self)
+  var membershipBinding: QFMembershipBinding {
+    QFMembershipBinding(scope: contentScope, generation: generation)
+  }
 
   var planningHouseholdID: String? { planningScope.householdId }
 
@@ -333,6 +337,7 @@ final class QFAppSession: ObservableObject {
     guard !Task.isCancelled else { throw CancellationError() }
     try persist(result.session, user: result.user)
     generation += 1
+    membership.reset()
     cancelRefreshTask()
     restorePlanningScope(userID: result.user.userId)
     user = result.user
@@ -692,12 +697,18 @@ final class QFAppSession: ObservableObject {
     let token = api.accessToken
     let result: Value
     do {
-      result = try await api.send(path: path, method: method, body: body, operationID: operationID, query: query)
-    } catch let error as QFAPIError where error.code == 40100 {
+      do {
+        result = try await api.send(path: path, method: method, body: body, operationID: operationID, query: query)
+      } catch let error as QFAPIError where error.code == 40100 {
+        try checkGeneration(currentGeneration)
+        if token == api.accessToken { try await refresh() }
+        try checkGeneration(currentGeneration)
+        result = try await api.send(path: path, method: method, body: body, operationID: operationID, query: query)
+      }
+    } catch let error as QFAPIError where error.code == 40303 {
       try checkGeneration(currentGeneration)
-      if token == api.accessToken { try await refresh() }
-      try checkGeneration(currentGeneration)
-      result = try await api.send(path: path, method: method, body: body, operationID: operationID, query: query)
+      membership.rejectBusinessAccess()
+      throw error
     }
     try checkGeneration(currentGeneration)
     return result
@@ -719,16 +730,20 @@ final class QFAppSession: ObservableObject {
     try checkGeneration(currentGeneration)
     let token = api.accessToken
     do {
-      try await api.sendEmpty(
-        path: path, method: method, body: body, operationID: operationID, query: query)
-    } catch let error
-      as QFAPIError where error.code == 40100
-    {
+      do {
+        try await api.sendEmpty(
+          path: path, method: method, body: body, operationID: operationID, query: query)
+      } catch let error as QFAPIError where error.code == 40100 {
+        try checkGeneration(currentGeneration)
+        if token == api.accessToken { try await refresh() }
+        try checkGeneration(currentGeneration)
+        try await api.sendEmpty(
+          path: path, method: method, body: body, operationID: operationID, query: query)
+      }
+    } catch let error as QFAPIError where error.code == 40303 {
       try checkGeneration(currentGeneration)
-      if token == api.accessToken { try await refresh() }
-      try checkGeneration(currentGeneration)
-      try await api.sendEmpty(
-        path: path, method: method, body: body, operationID: operationID, query: query)
+      membership.rejectBusinessAccess()
+      throw error
     }
     try checkGeneration(currentGeneration)
     contentCache.didWrite((), scope: contentScope, path: path)
@@ -992,6 +1007,7 @@ final class QFAppSession: ObservableObject {
     defaults.removeObject(forKey: "qfyp.user.settings.v1." + scope)
     defaults.removeObject(forKey: "qf.assistant.cloud-consent." + scope)
     defaults.removeObject(forKey: "qf.assistant.local-network." + scope)
+    QFProactiveSpeechPreferences.forget(scope: scope, defaults: defaults)
     defaults.removeObject(forKey: "qf.planning.scope.v1.\(environment).\(owner.userId)")
     defaults.removeObject(forKey: "qfyp.getui.local-disabled." + scope)
     QFGetuiPushService.shared.forgetDeletedAccount(
@@ -1049,6 +1065,7 @@ final class QFAppSession: ObservableObject {
   }
 
   private func finishSessionClear() {
+    membership.reset()
     contentCache.clearMemory()
     clearContentMediaCache()
     QFContentImageCache.shared.clearMemoryCache()

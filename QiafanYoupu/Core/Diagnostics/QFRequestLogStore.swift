@@ -108,7 +108,7 @@
         finishedAt: nil,
         method: request.httpMethod ?? "GET",
         url: request.url?.absoluteString ?? "[URL 不可用]",
-        requestHeaders: request.allHTTPHeaderFields ?? [:],
+        requestHeaders: QFRequestLogPreview.headers(request),
         requestBody: request.httpBodyStream != nil
           ? QFRequestLogPreview.bounded("[流式请求体未读取]", limit: maxBodyBytes)
           : QFRequestLogPreview.body(
@@ -144,14 +144,17 @@
         } ?? [:]
       entry.responseHeaders = responseHeaders
       entry.responseBody = QFRequestLogPreview.body(
-        data,
+        QFRequestLogPreview.isAppleMembership(URL(string: entry.url)) ? nil : data,
         contentType: response?.value(forHTTPHeaderField: "Content-Type"),
         limit: maxBodyBytes
       )
       if let error {
         let failure = error as NSError
+        let description = QFRequestLogPreview.isAppleMembership(URL(string: entry.url))
+          ? "\(failure.domain)，错误码 \(failure.code)"
+          : "\(failure.domain)，错误码 \(failure.code)：\(failure.localizedDescription)"
         entry.errorDescription = QFRequestLogPreview.bounded(
-          "\(failure.domain)，错误码 \(failure.code)：\(failure.localizedDescription)",
+          description,
           limit: maxBodyBytes)
       }
       persist(entry, file: file)
@@ -257,7 +260,17 @@
   private enum QFRequestLogPreview {
     private static let truncation = "\n[内容已截断]"
 
+    static func isAppleMembership(_ url: URL?) -> Bool {
+      url?.path.contains("/me/membership/apple/") == true
+    }
+
+    static func headers(_ request: URLRequest) -> [String: String] {
+      guard isAppleMembership(request.url) else { return request.allHTTPHeaderFields ?? [:] }
+      return (request.allHTTPHeaderFields ?? [:]).mapValues { _ in "[StoreKit omitted]" }
+    }
+
     static func passwordSafeBody(_ request: URLRequest) -> Data? {
+      if isAppleMembership(request.url) { return nil }
       // APNs capability tokens must never enter the debug log's persistent request preview.
       if request.url?.path.contains("/me/meal-surfaces/devices/") == true { return nil }
       if request.url?.path.hasSuffix("/me/assistant/knowledge/search") == true { return nil }
