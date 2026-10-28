@@ -1512,3 +1512,4 @@
 "没有此范围的聊天记录。" = "Aucun historique de discussion dans ce périmètre.";
 "个" = "pce";
 "%d 步" = "Étapes : %d";
+"无法复制此邀请，请重新创建邀请。" = "Impossible de copier cette invitation. Créez-en une nouvelle.";

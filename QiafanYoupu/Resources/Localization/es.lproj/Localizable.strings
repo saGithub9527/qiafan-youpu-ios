@@ -1512,3 +1512,4 @@
 "没有此范围的聊天记录。" = "No hay historial de chat en este ámbito.";
 "个" = "ud.";
 "%d 步" = "Pasos: %d";
+"无法复制此邀请，请重新创建邀请。" = "No se puede copiar esta invitación. Crea una nueva.";

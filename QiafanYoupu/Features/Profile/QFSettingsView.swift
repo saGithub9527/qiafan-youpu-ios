@@ -3,6 +3,7 @@ import Combine
 import Kingfisher
 import SafariServices
 import SnapKit
+import UniformTypeIdentifiers
 import UIKit
 
 enum QFLocalSettingsStore {
@@ -2226,8 +2227,23 @@ private final class QFHouseholdDetailViewController: QFProfileContentController 
       preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: app.text("关闭", "Close"), style: .cancel))
     alert.addAction(UIAlertAction(title: app.text("复制口令", "Copy token"), style: .default) { [weak self] _ in
-      UIPasteboard.general.string = token
-      if let self { self.message(self.app.text("口令已复制", "Token copied")) }
+      guard let self else { return }
+      let formatter = ISO8601DateFormatter()
+      formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+      var expiresAt = formatter.date(from: invitation.expiresAt)
+      if expiresAt == nil {
+        formatter.formatOptions = [.withInternetDateTime]
+        expiresAt = formatter.date(from: invitation.expiresAt)
+      }
+      guard let expiresAt, expiresAt > Date() else {
+        self.message(self.app.text(
+          "无法复制此邀请，请重新创建邀请。",
+          "Unable to copy this invitation. Create a new invitation."), error: true)
+        return
+      }
+      UIPasteboard.general.setItems(
+        [[UTType.utf8PlainText.identifier: token]], options: [.expirationDate: expiresAt])
+      self.message(self.app.text("口令已复制", "Token copied"))
     })
     alert.addAction(UIAlertAction(title: app.text("撤销邀请", "Revoke invitation"), style: .destructive) {
       [weak self] _ in self?.confirmRevokeInvitation(invitation)

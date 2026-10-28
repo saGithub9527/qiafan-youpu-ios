@@ -1512,3 +1512,4 @@
 "没有此范围的聊天记录。" = "Não há histórico de conversas neste contexto.";
 "个" = "un.";
 "%d 步" = "Etapas: %d";
+"无法复制此邀请，请重新创建邀请。" = "Não foi possível copiar este convite. Crie um novo convite.";

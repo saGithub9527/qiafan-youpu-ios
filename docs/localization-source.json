@@ -4460,6 +4460,12 @@
         "Unable to save draft. Try again."
       ]
     },
+    "无法复制此邀请，请重新创建邀请。": {
+      "english": "Unable to copy this invitation. Create a new invitation.",
+      "englishVariants": [
+        "Unable to copy this invitation. Create a new invitation."
+      ]
+    },
     "无法开始录音": {
       "english": "Could not start recording",
       "englishVariants": [
