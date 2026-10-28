@@ -87,6 +87,49 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
   private var categoryButtons: [Int: UIButton] = [:]
   private var compact = false
   private var categorySwipe: QFCategorySwipeBinding?
+#if DEBUG
+  private var debugUsesReadFreeLayoutFixture = false
+  typealias DebugInventoryPageReader = @MainActor (
+    _ page: Int, _ category: String?, _ query: String, _ expiry: String?, _ householdID: String?
+  ) async throws -> QFContentPage<QFInventoryLot>
+  private var debugInventoryPageReader: DebugInventoryPageReader?
+
+  /// Layout-only fixture: no session, draft, unit or inventory reads are started.
+  func debugUseReadFreeLayoutFixture() {
+    precondition(!isViewLoaded)
+    debugUsesReadFreeLayoutFixture = true
+  }
+
+  /// Page-level fixture only; authentication, HTTP transport and writes are not simulated.
+  func debugInstallLoadedInventoryFixture(
+    _ page0: QFContentPage<QFInventoryLot>, units: [QFMeasurementUnit] = [],
+    readPage: @escaping DebugInventoryPageReader
+  ) {
+    debugUseReadFreeLayoutFixture()
+    inventoryItems = page0.items
+    inventoryTotal = page0.total
+    nearExpiryCount = page0.nearExpiryIngredientCount ?? 0
+    expiredCount = page0.expiredIngredientCount ?? 0
+    inventoryUnits = units
+    inventoryLoaded = true
+    inventoryNextPage = 1
+    inventoryHasMore = !page0.items.isEmpty && page0.items.count < page0.total
+    debugInventoryPageReader = readPage
+  }
+
+  func debugInventoryLayoutSnapshot() -> (
+    items: [QFInventoryLot], nextPage: Int, total: Int, loading: Bool, hasMore: Bool
+  ) {
+    (inventoryItems, inventoryNextPage, inventoryTotal, loading, inventoryHasMore)
+  }
+#endif
+
+  private var hasInventoryReadContext: Bool {
+#if DEBUG
+    if !shopping && debugInventoryPageReader != nil { return true }
+#endif
+    return app.user != nil
+  }
 
   deinit {
     requestTask?.cancel()
@@ -175,6 +218,9 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     categorySwipe = QFCategorySwipeBinding(
       control: segment, in: list,
       backGesture: navigationController?.interactivePopGestureRecognizer)
+#if DEBUG
+    if debugUsesReadFreeLayoutFixture { return }
+#endif
     inventoryEdit = QFContentDraftStore.load(QFInventoryInlineDraft.self, app: app, kind: inventoryDraftKey)
     bindSessionChanges()
     loadInventoryUnits()
@@ -202,7 +248,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    let next = view.bounds.width < 360
+    let next = scrollView.bounds.width < 360
     guard next != compact else { return }
     compact = next
     discovery.axis = compact ? .vertical : .horizontal
@@ -369,7 +415,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       }
     }
     let titleLabel = QFTabUI.label(title, size: 16, weight: .semibold, lines: 2)
-    let heading = QFTabUI.stack([titleLabel, UIView(), icon], axis: .horizontal, spacing: 4)
+    let heading = QFTabUI.stack([titleLabel, icon], axis: .horizontal, spacing: 8)
     heading.alignment = .top
     let body = QFTabUI.stack(
       [heading, QFTabUI.label(subtitle, size: 11, color: accent, lines: 0)], spacing: 4)
@@ -456,7 +502,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       if !inventoryLoaded { renderCurrent() }
     }
     updateLoadMoreFooter()
-    guard app.user != nil else {
+    guard hasInventoryReadContext else {
       inventoryItems = []
       inventoryTotal = 0
       inventoryHasMore = false
@@ -479,8 +525,8 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       do {
         let response: QFContentPage<QFInventoryLot> = try await
           QFContentLoadingContext.$forceRefresh.withValue(force || self.refreshControl.isRefreshing) {
-            try await self.app.inventoryLots(
-              householdID: householdID, category: category, query: query, page: page, expiry: expiry, groupByProduct: true)
+            try await self.readInventoryPage(
+              householdID: householdID, category: category, query: query, page: page, expiry: expiry)
           }
         try Task.checkCancellation()
         guard self.requestID == id, !self.shopping,
@@ -527,6 +573,20 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
         }
       }
     }
+  }
+
+  private func readInventoryPage(
+    householdID: String?, category: String?, query: String, page: Int, expiry: String?
+  ) async throws -> QFContentPage<QFInventoryLot> {
+#if DEBUG
+    if debugUsesReadFreeLayoutFixture {
+      guard let reader = debugInventoryPageReader else { throw URLError(.unsupportedURL) }
+      return try await reader(page, category, query, expiry, householdID)
+    }
+#endif
+    return try await app.inventoryLots(
+      householdID: householdID, category: category, query: query, page: page, expiry: expiry,
+      groupByProduct: true)
   }
 
   private func loadMoreInventory() {
@@ -627,7 +687,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
     segment.isEnabled = inventoryMutation == nil
     categoryButtons.values.forEach { $0.isEnabled = inventoryEdit == nil }
     contentStack.arrangedSubviews.first { $0.accessibilityIdentifier == "ingredient.list.heading" }?.isHidden = preparationDates != nil && !shopping
-    guard app.user != nil else {
+    guard hasInventoryReadContext else {
       renderEmpty(
         title: localized("登录后管理食材和采购单"),
         detail: localized("登录后的数据会在不同设备间同步"), identity: "signed-out")
