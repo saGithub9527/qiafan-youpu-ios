@@ -125,10 +125,10 @@ class QFProfileContentController: QFPageViewController, QFNavigationBackHandling
     footer.backgroundColor = QFUI.background
     view.addSubview(footer)
     footer.snp.makeConstraints {
-      $0.centerX.equalToSuperview()
-      $0.leading.greaterThanOrEqualToSuperview().offset(20)
-      $0.trailing.lessThanOrEqualToSuperview().inset(20)
-      $0.width.equalToSuperview().offset(-40).priority(999)
+      $0.centerX.equalTo(view.safeAreaLayoutGuide.snp.centerX)
+      $0.leading.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.leading).offset(20)
+      $0.trailing.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.trailing).inset(20)
+      $0.width.equalTo(view.safeAreaLayoutGuide.snp.width).offset(-40).priority(999)
       $0.width.lessThanOrEqualTo(620)
       $0.bottom.equalTo(view.keyboardLayoutGuide.snp.top).offset(-12)
       emptyFooterHeight = $0.height.equalTo(0).constraint

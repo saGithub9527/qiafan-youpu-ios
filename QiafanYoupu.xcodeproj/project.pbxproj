@@ -187,6 +187,7 @@
 		F48F41E39CAB4081DE259B17 /* QFOnDeviceInference.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE49B6F516EB03D13A0BDEA /* QFOnDeviceInference.swift */; };
 		F4EBE07DC21645389A8CDCCD /* QFProductBarcodeDeviceCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879595D7344DA9BE7029C589 /* QFProductBarcodeDeviceCheck.swift */; };
 		F5B645F979984C45DC28D463 /* QFAppSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA340B1BE67BEFDA1468C /* QFAppSession.swift */; };
+		F7910A4408D84BCA684706D0 /* QFContentSafeAreaLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1179F86DA32C98E8522F35 /* QFContentSafeAreaLayoutTests.swift */; };
 		F9753D87C88713AEF99790A6 /* QFPurchaseReceiptViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8782B88603169DEFD71448 /* QFPurchaseReceiptViewController.swift */; };
 		FA1DF7F4379D89AE2AAD30F3 /* QFAssistantKnowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4AB75286451D9DA001491 /* QFAssistantKnowledge.swift */; };
 		FC555CDD5498AB132506A64B /* QFAssistantModelAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75543C431471C9E87C1EC4C5 /* QFAssistantModelAsset.swift */; };
@@ -348,6 +349,7 @@
 		9B931ADBD133A4D6089B4C41 /* QFMealWidgetSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFMealWidgetSupport.swift; sourceTree = "<group>"; };
 		9BC6AC2815F387FE14BC0574 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		9D8097D47FE02B9524595A29 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		9E1179F86DA32C98E8522F35 /* QFContentSafeAreaLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFContentSafeAreaLayoutTests.swift; sourceTree = "<group>"; };
 		A1B737891F4E3916E557B6CF /* QFSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFSettingsView.swift; sourceTree = "<group>"; };
 		A280FC7723DF9BE173CE91C4 /* QFProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFProfileView.swift; sourceTree = "<group>"; };
 		A4BC7442355EA231EC0C938B /* QFVideoPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QFVideoPreviewView.swift; sourceTree = "<group>"; };
@@ -597,6 +599,7 @@
 				B9E33034E9D9AB21EB702DD3 /* QFAssistantModelAssetTests.swift */,
 				9158EDFAD384C04A9F7C4C0B /* QFConsentStoreTests.swift */,
 				017311C6C4D30D3E222CF37D /* QFContentCacheTests.swift */,
+				9E1179F86DA32C98E8522F35 /* QFContentSafeAreaLayoutTests.swift */,
 				F4B98CF802EC34ECA7EE299C /* QFCookingDraftTests.swift */,
 				4752FA4ADA9BAB73E80DDD4E /* QFCookingRecordDetailTests.swift */,
 				4B24D19414A485BDCB4EC047 /* QFCrashArchiveTests.swift */,
@@ -1122,6 +1125,7 @@
 				B14DCD095E3FFBFE86EEECB5 /* QFAssistantModelAssetTests.swift in Sources */,
 				3C4D8D6BAFC066581A5EC061 /* QFConsentStoreTests.swift in Sources */,
 				3F99638AFBDCC56CA041C97E /* QFContentCacheTests.swift in Sources */,
+				F7910A4408D84BCA684706D0 /* QFContentSafeAreaLayoutTests.swift in Sources */,
 				6E93AC8141F45F2BD0E8FC00 /* QFCookingDraftTests.swift in Sources */,
 				291CD80A54F67E174E65C21B /* QFCookingRecordDetailTests.swift in Sources */,
 				EF8BC0D76558038020F192A8 /* QFCrashArchiveTests.swift in Sources */,
