@@ -559,14 +559,16 @@ final class QFPlanViewController: QFPageViewController {
       [weak self] _ in self?.chooseRecipeForPlan()
     })
     #if DEBUG
-    sheet.addAction(UIAlertAction(title: app.text("AI 生成周计划", "Generate weekly plan with AI"), style: .default) {
-      [weak self] _ in
-      guard let self else { return }
-      self.qfPush(
-        QFWeeklyPlanViewController(app: self.app, initialDate: self.selectedDate) { [weak self] in
-          self?.loadPlan(force: true)
-        })
-    })
+    if QFAIAvailability.isEnabled {
+      sheet.addAction(UIAlertAction(title: app.text("AI 生成周计划", "Generate weekly plan with AI"), style: .default) {
+        [weak self] _ in
+        guard let self else { return }
+        self.qfPush(
+          QFWeeklyPlanViewController(app: self.app, initialDate: self.selectedDate) { [weak self] in
+            self?.loadPlan(force: true)
+          })
+      })
+    }
     #endif
     sheet.addAction(UIAlertAction(title: app.text("取消", "Cancel"), style: .cancel))
     if let popover = sheet.popoverPresentationController {

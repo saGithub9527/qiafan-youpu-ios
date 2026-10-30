@@ -243,7 +243,8 @@ final class QFSettingsViewController: UIViewController {
       section(
         title: app.text("外观与显示", "Appearance and language"),
         rows: [themeRow, languageRow]))
-    var notificationRows: [UIView] = [planReminderRow, reminderDetailRow, proactiveSpeechRow]
+    var notificationRows: [UIView] = [planReminderRow, reminderDetailRow]
+    if QFAIAvailability.isEnabled { notificationRows.append(proactiveSpeechRow) }
     #if DEBUG
       notificationRows.append(progressRow)
     #endif
@@ -1753,8 +1754,8 @@ private final class QFHouseholdsViewController: QFProfileContentController {
     let sheet = UIAlertController(
       title: app.text("计划使用范围", "Planning scope"),
       message: app.text(
-        "计划、库存、采购单、提醒和 AI 周计划会使用同一范围。",
-        "Plans, inventory, shopping lists, reminders, and AI weekly plans use the same scope."),
+        "计划、库存、采购单和提醒会使用同一范围。",
+        "Plans, inventory, shopping lists, and reminders use the same scope."),
       preferredStyle: .actionSheet)
     sheet.addAction(UIAlertAction(title: app.text("个人", "Personal"), style: .default) {
       [weak self] _ in self?.selectPlanningScope(id: nil, name: nil)

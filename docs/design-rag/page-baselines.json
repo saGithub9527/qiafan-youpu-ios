@@ -3402,6 +3402,39 @@
         }
       },
       "supersedes": "assistant-chat-r7"
+    },
+    {
+      "id": "overseas-subscription-r2",
+      "productPage": "APP-ENTRY-ASSISTANT-MEMBERSHIP",
+      "title": "进入 App 订阅解锁与 AI 暂停",
+      "keywords": [
+        "订阅",
+        "2.99",
+        "AI屏蔽",
+        "会员",
+        "进入APP",
+        "恢复购买"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/overseas-subscription-r2.md",
+          "sha256": "a758ce21a02320050ab4a2e87fc15eda43c6fbaf71d875b063835f05bef5e392"
+        }
+      ],
+      "layoutContract": {
+        "nativeStack": "UIKit + SnapKit",
+        "existingBusinessPages": "unchanged",
+        "entryGate": "full-screen; no business skip",
+        "assistantUI": "hidden in Debug and Release"
+      },
+      "interactionContract": [
+        "Privacy/login precede same-account server-verified subscription gate.",
+        "US monthly2.99; StoreKit localized prices; preserve separately approved annual29.99 and restore.",
+        "Unknown is not unsubscribed; restore/manage/legal/support/account deletion remain accessible.",
+        "AI suspended without deleting model/chat/preferences/drafts; ordinary meal reminders preserved."
+      ],
+      "supersedes": "overseas-subscription-r1 AI visibility and listed benefits; monthly price clarified by current user.",
+      "approvedException": "User current chat:先把AI相关的内容屏蔽; US$2.99/月 confirmed."
     }
   ]
 }

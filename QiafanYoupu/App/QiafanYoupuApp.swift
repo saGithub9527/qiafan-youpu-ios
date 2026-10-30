@@ -112,11 +112,13 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
     // Do not start StoreKit before the consent/account flow has activated it.
     session.membership.foreground()
     #if DEBUG
-    if ProcessInfo.processInfo.arguments.contains("-QFPrepareLocalModel") { _ = QFLocalModelStore.shared }
-    if !QFRuntime.isUnitTest {
-      QFLocalDeploymentCheck.startIfRequested(); QFAssistantAgentDeviceCheck.startIfRequested(app: session)
-      QFProductBarcodeDeviceCheck.startIfRequested()
+    if QFAIAvailability.isEnabled {
+      if ProcessInfo.processInfo.arguments.contains("-QFPrepareLocalModel") { _ = QFLocalModelStore.shared }
+      if !QFRuntime.isUnitTest {
+        QFLocalDeploymentCheck.startIfRequested(); QFAssistantAgentDeviceCheck.startIfRequested(app: session)
+      }
     }
+    if !QFRuntime.isUnitTest { QFProductBarcodeDeviceCheck.startIfRequested() }
     #endif
     guard !QFRuntime.isUnitTest, !didScheduleCrashRecorder else { return }
     didScheduleCrashRecorder = true
@@ -282,6 +284,7 @@ private final class QFRootViewController: UIViewController {
       // discard an unsaved form. Server gates and route guards remain authoritative.
       guard accessCover == nil, view.window != nil else { return }
       let cover = QFMembershipViewController(app: app, entryGate: true)
+      cover.modalPresentationStyle = .fullScreen
       cover.isModalInPresentation = true
       var presenter = current!
       while let presented = presenter.presentedViewController { presenter = presented }
@@ -424,11 +427,13 @@ private final class QFMainTabViewController: UITabBarController, UITabBarControl
     tabBar.unselectedItemTintColor = QFUI.secondary
     QFDiagnosticsPresenter.attach(to: self, app: app, bottomInset: 76)
     delegate = self
-    let assistant = QFDigitalAssistantOverlay(app: app, character: preparedCharacter,
-      hasBusinessAccess: { [weak app] in app?.membership.hasOrbSpeech == true })
-    assistant.onOpenMealReminder = { [weak self] id in self?.openPlanReminder(plannedMealID: id) }
-    assistant.attach(to: self)
-    assistantOverlay = assistant
+    if QFAIAvailability.isEnabled {
+      let assistant = QFDigitalAssistantOverlay(app: app, character: preparedCharacter,
+        hasBusinessAccess: { [weak app] in app?.membership.hasOrbSpeech == true })
+      assistant.onOpenMealReminder = { [weak self] id in self?.openPlanReminder(plannedMealID: id) }
+      assistant.attach(to: self)
+      assistantOverlay = assistant
+    }
     NotificationCenter.default.publisher(for: .qfDidReceiveRemoteNotification)
       .receive(on: DispatchQueue.main).sink { [weak self] notification in
         guard let self else { return }

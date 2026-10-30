@@ -554,6 +554,7 @@ final class QFAppSession: ObservableObject {
   func publicContentRequest<Value: Decodable>(
     path: String, query: [String: String] = [:]
   ) async throws -> Value {
+    guard QFAIAvailability.permitsRequest(path: path, method: "GET") else { throw CancellationError() }
     let scope = contentScope
     let language = interfaceLanguage
     api.interfaceLanguage = language
@@ -579,6 +580,7 @@ final class QFAppSession: ObservableObject {
     path: String, method: String = "GET", body: Data? = nil,
     query: [String: String] = [:], operationID: UUID? = nil
   ) async throws -> Value {
+    guard QFAIAvailability.permitsRequest(path: path, method: method) else { throw CancellationError() }
     let scope = contentScope
     let language = interfaceLanguage
     api.interfaceLanguage = language
@@ -608,6 +610,7 @@ final class QFAppSession: ObservableObject {
 
   #if DEBUG
   func assistantVisionPreview(imageData: Data, mimeType: String, text: String) async throws -> QFAssistantPreview {
+    guard QFAIAvailability.isEnabled else { throw CancellationError() }
     let currentGeneration = generation
     let language = interfaceLanguage
     api.interfaceLanguage = language
@@ -645,6 +648,7 @@ final class QFAppSession: ObservableObject {
   func assistantStream(text: String, history: [QFOnDeviceInference.Turn], imageData: Data?, mimeType: String,
     allowWebSearch: Bool = true, provider: QFAssistantProvider? = nil, providerRegion authorizedRegion: String? = nil,
     onEvent: @escaping (QFAssistantStreamEvent) -> Void) async throws -> QFAssistantStreamResult {
+    guard QFAIAvailability.isEnabled else { throw CancellationError() }
     let provider = provider ?? defaultAssistantProvider
     let providerRegion = provider == .gemini ? authorizedRegion : nil
     guard provider.matchesProcessingRegion(authorized: providerRegion, configured: configuration?.assistantCapabilities?.chatProviderRegions?[provider.rawValue]),

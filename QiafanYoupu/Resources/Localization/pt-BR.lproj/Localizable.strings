@@ -1136,7 +1136,6 @@
 "解散家庭" = "Dissolver família";
 "解散这个家庭？" = "Dissolver esta família?";
 "计划" = "Plano";
-"计划、库存、采购单、提醒和 AI 周计划会使用同一范围。" = "Planos, estoque, listas de compras, lembretes e planos semanais de IA usarão o mesmo escopo.";
 "计划份数" = "Porções";
 "计划使用范围" = "Escopo do planejamento";
 "计划内容尚未生成" = "O conteúdo do plano ainda não está pronto";
@@ -1501,7 +1500,6 @@
 "操作失败，请重试。" = "A operação falhou. Tente novamente.";
 "月付" = "Mensal";
 "月付和年付包含相同权益。" = "Os planos mensal e anual incluem os mesmos benefícios.";
-"核心做饭工具、账号云端同步、基础家庭协作和圆球主动语音。" = "Ferramentas essenciais de cozinha, sincronização da conta na nuvem, colaboração familiar básica e avisos de voz da esfera.";
 "正在恢复登录" = "Restaurando o acesso";
 "正在核对当前账号和 Apple 购买记录。" = "Verificando sua conta atual e as compras da Apple.";
 "正在检查订阅" = "Verificando a assinatura";
@@ -1520,3 +1518,7 @@
 "重新检查" = "Verificar novamente";
 "本次订阅包含做饭工具和主动语音，云端问答暂不可用。" = "Sua assinatura inclui ferramentas de cozinha e avisos de voz. O chat na nuvem está indisponível no momento.";
 "管理主动语音并查看餐次提醒" = "Gerenciar avisos de voz e ver lembretes de refeições";
+
+"计划、库存、采购单和提醒会使用同一范围。" = "Os planos, o estoque, as listas de compras e os lembretes usam o mesmo escopo.";
+
+"菜谱、饮食计划、食材库存、账号云端同步和基础家庭协作。" = "Receitas, planos de refeições, estoque de ingredientes, sincronização da conta na nuvem e compartilhamento básico com a família.";

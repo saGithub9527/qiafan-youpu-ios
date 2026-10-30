@@ -104,7 +104,7 @@ final class QFMembershipViewController: UIViewController {
       title, QFSettingsPageUI.label(detail, size: 15, color: QFUI.secondary)
     ], spacing: 12), padding: 24))
     stack.addArrangedSubview(QFTabUI.card(QFSettingsPageUI.label(
-      app.text("核心做饭工具、账号云端同步、基础家庭协作和圆球主动语音。", "Core cooking tools, account cloud sync, basic household collaboration and proactive orb speech."),
+      app.text("菜谱、饮食计划、食材库存、账号云端同步和基础家庭协作。", "Recipes, meal plans, ingredient inventory, account cloud sync and basic household collaboration."),
       size: 15), padding: 24))
     if !membership.hasBusinessAccess {
       for product in membership.products {
@@ -141,8 +141,10 @@ final class QFMembershipViewController: UIViewController {
       guard let self, let user = self.app.user else { return }
       self.open(QFAccountPrivacyViewController(app: self.app, initialProfile: user, onSessionExpired: {}))
     }
-    addButton(app.text("历史权益与余额", "Past benefits and balance"), id: "membership.history") { [weak self] in
-      guard let self else { return }; self.open(QFMembershipHistoryViewController(app: self.app))
+    if QFAIAvailability.isEnabled {
+      addButton(app.text("历史权益与余额", "Past benefits and balance"), id: "membership.history") { [weak self] in
+        guard let self else { return }; self.open(QFMembershipHistoryViewController(app: self.app))
+      }
     }
     if entryGate {
       addButton(app.text("退出登录", "Sign out"), id: "membership.sign-out") { [weak self] in self?.leave() }

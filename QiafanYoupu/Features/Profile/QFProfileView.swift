@@ -377,9 +377,13 @@ final class QFProfileViewController: QFPageViewController {
     #if DEBUG
     case .publishWork: controller = QFWorkEditorViewController(app: app)
     case .contributeImage: controller = QFContributionEditorViewController(app: app)
-    case .assistant: controller = QFAssistantIngredientViewController(app: app, householdID: app.planningHouseholdID)
+    case .assistant:
+      guard QFAIAvailability.isEnabled else { return }
+      controller = QFAssistantIngredientViewController(app: app, householdID: app.planningHouseholdID)
     #else
-    case .assistantHistory: controller = QFAssistantHistoryViewController(app: app)
+    case .assistantHistory:
+      guard QFAIAvailability.isEnabled else { return }
+      controller = QFAssistantHistoryViewController(app: app)
     #endif
     case .works: controller = QFMyWorksViewController(app: app)
     case .contributions: controller = QFContributionsViewController(app: app)
@@ -542,11 +546,13 @@ private struct QFProfileMenuItem {
     QFProfileMenuItem(destination: .favorites, symbol: "bookmark"),
     QFProfileMenuItem(destination: .cookingHistory, symbol: "calendar.badge.checkmark"),
     ]
-    #if DEBUG
-    items.append(QFProfileMenuItem(destination: .assistant, symbol: "sparkles"))
-    #else
-    items.append(QFProfileMenuItem(destination: .assistantHistory, symbol: "clock.arrow.circlepath"))
-    #endif
+    if QFAIAvailability.isEnabled {
+      #if DEBUG
+      items.append(QFProfileMenuItem(destination: .assistant, symbol: "sparkles"))
+      #else
+      items.append(QFProfileMenuItem(destination: .assistantHistory, symbol: "clock.arrow.circlepath"))
+      #endif
+    }
     return items
   }
 }

@@ -1,5 +1,22 @@
 import Foundation
 
+/// Product pause applies to Debug and Release; retained data is not removed.
+enum QFAIAvailability {
+  static let isEnabled = false
+
+  static func permitsRequest(path: String, method: String) -> Bool {
+    if isEnabled || method == "DELETE" { return true }
+    let path = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+    if path == "me/weekly-plan-proposals" || path.hasPrefix("me/weekly-plan-proposals/") {
+      return method == "GET" // Existing plans remain readable; no new AI work.
+    }
+    if path == "me/assistant" || path.hasPrefix("me/assistant/") {
+      return method == "GET" && ["me/assistant/credits", "me/assistant/memories", "me/assistant/notifications"].contains(path)
+    }
+    return true
+  }
+}
+
 enum QFLaunchPolicy {
   /// Changing this key makes an existing installation review the materially updated privacy
   /// policy before an SDK with a new remote recipient can start.

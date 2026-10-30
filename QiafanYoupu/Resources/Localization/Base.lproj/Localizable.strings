@@ -195,7 +195,6 @@
 "正在重试扣减" = "Retrying deduction";
 "等待扣减" = "Waiting for deduction";
 "等待自动重试" = "Waiting for automatic retry";
-"计划、库存、采购单、提醒和 AI 周计划会使用同一范围。" = "Plans, inventory, shopping lists, reminders, and AI weekly plans will use the same scope.";
 "计划使用范围" = "Planning scope";
 "计划范围已更新" = "Planning scope updated";
 "还没有库存变动" = "No inventory changes yet";
@@ -284,7 +283,6 @@
 "操作失败，请重试。" = "Operation failed. Please try again.";
 "月付" = "Monthly";
 "月付和年付包含相同权益。" = "Monthly and yearly plans include the same benefits.";
-"核心做饭工具、账号云端同步、基础家庭协作和圆球主动语音。" = "Core cooking tools, account cloud sync, basic household collaboration and proactive orb speech.";
 "正在恢复登录" = "Restoring sign-in";
 "正在核对当前账号和 Apple 购买记录。" = "Verifying your current account and Apple purchases.";
 "正在检查订阅" = "Checking subscription";
@@ -303,3 +301,7 @@
 "重新检查" = "Check again";
 "本次订阅包含做饭工具和主动语音，云端问答暂不可用。" = "Your subscription includes cooking tools and proactive speech. Cloud chat is currently unavailable.";
 "管理主动语音并查看餐次提醒" = "Manage proactive speech and view meal reminders";
+
+"计划、库存、采购单和提醒会使用同一范围。" = "Plans, inventory, shopping lists, and reminders use the same scope.";
+
+"菜谱、饮食计划、食材库存、账号云端同步和基础家庭协作。" = "Recipes, meal plans, ingredient inventory, account cloud sync and basic household collaboration.";

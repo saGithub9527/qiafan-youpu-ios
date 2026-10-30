@@ -5381,12 +5381,6 @@
         "Review plan draft (not saved)"
       ]
     },
-    "核心做饭工具、账号云端同步、基础家庭协作和圆球主动语音。": {
-      "english": "Core cooking tools, account cloud sync, basic household collaboration and proactive orb speech.",
-      "englishVariants": [
-        "Core cooking tools, account cloud sync, basic household collaboration and proactive orb speech."
-      ]
-    },
     "案件 %@：%@": {
       "english": "Case %@: %@",
       "englishVariants": [
@@ -6967,6 +6961,12 @@
         "Recipes"
       ]
     },
+    "菜谱、饮食计划、食材库存、账号云端同步和基础家庭协作。": {
+      "english": "Recipes, meal plans, ingredient inventory, account cloud sync and basic household collaboration.",
+      "englishVariants": [
+        "Recipes, meal plans, ingredient inventory, account cloud sync and basic household collaboration."
+      ]
+    },
     "菜谱与烹饪": {
       "english": "Recipes and cooking",
       "englishVariants": [
@@ -7113,10 +7113,10 @@
         "Plan"
       ]
     },
-    "计划、库存、采购单、提醒和 AI 周计划会使用同一范围。": {
-      "english": "Plans, inventory, shopping lists, reminders, and AI weekly plans use the same scope.",
+    "计划、库存、采购单和提醒会使用同一范围。": {
+      "english": "Plans, inventory, shopping lists, and reminders use the same scope.",
       "englishVariants": [
-        "Plans, inventory, shopping lists, reminders, and AI weekly plans use the same scope."
+        "Plans, inventory, shopping lists, and reminders use the same scope."
       ]
     },
     "计划、库存和餐前准备会同步显示在这里": {

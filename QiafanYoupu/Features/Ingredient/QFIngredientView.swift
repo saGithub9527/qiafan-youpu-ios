@@ -1209,6 +1209,7 @@ final class QFIngredientViewController: QFPageViewController, UITextFieldDelegat
       case .recipe: self.chooseRecipeForInventory()
       #if DEBUG
       case .assistant:
+        guard QFAIAvailability.isEnabled else { return }
         self.qfPush(QFAssistantIngredientViewController(app: self.app, householdID: self.app.planningHouseholdID))
       #endif
       }
@@ -2056,7 +2057,9 @@ private final class QFInventoryAddIngredientSheet: UIViewController {
       row(title: app.text("按菜谱添加食材", "Add ingredients from a recipe"), id: "recipe") { [weak self] in self?.choose(.recipe) },
     ]
     #if DEBUG
-    choices.append(row(title: app.text("让 AI 生成添加草稿", "Ask AI to make an add draft"), id: "assistant") { [weak self] in self?.choose(.assistant) })
+    if QFAIAvailability.isEnabled {
+      choices.append(row(title: app.text("让 AI 生成添加草稿", "Ask AI to make an add draft"), id: "assistant") { [weak self] in self?.choose(.assistant) })
+    }
     #endif
     let rows = QFTabUI.stack(choices, spacing: 8)
 
