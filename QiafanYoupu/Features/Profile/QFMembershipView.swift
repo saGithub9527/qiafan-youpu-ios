@@ -106,13 +106,19 @@ final class QFMembershipViewController: UIViewController {
     stack.addArrangedSubview(QFTabUI.card(QFSettingsPageUI.label(
       app.text("菜谱、饮食计划、食材库存、账号云端同步和基础家庭协作。", "Recipes, meal plans, ingredient inventory, account cloud sync and basic household collaboration."),
       size: 15), padding: 24))
-    if !membership.hasBusinessAccess {
-      for product in membership.products {
-        let monthly = product.subscription?.subscriptionPeriod.unit == .month
-        let period = monthly ? app.text("月付", "Monthly") : app.text("年付", "Yearly")
-        let price = monthly
-          ? app.format("%@／月", "%@ per month", product.displayPrice)
-          : app.format("%@／年", "%@ per year", product.displayPrice)
+    // An unlocked account must still be able to inspect the real subscription
+    // catalog. Access controls purchasing, not visibility of prices and terms.
+    for product in membership.products {
+      let monthly = product.subscription?.subscriptionPeriod.unit == .month
+      let period = monthly ? app.text("月付", "Monthly") : app.text("年付", "Yearly")
+      let price = monthly
+        ? app.format("%@／月", "%@ per month", product.displayPrice)
+        : app.format("%@／年", "%@ per year", product.displayPrice)
+      if membership.hasBusinessAccess {
+        let card = QFTabUI.card(QFSettingsPageUI.label(period + " · " + price, size: 16), padding: 24)
+        card.accessibilityIdentifier = "membership.plan." + product.id
+        stack.addArrangedSubview(card)
+      } else {
         let button = makeButton(period + " · " + price, id: "membership.buy." + product.id) { [weak self] in
           self?.app.membership.purchase(product)
         }
@@ -120,14 +126,22 @@ final class QFMembershipViewController: UIViewController {
         button.alpha = button.isEnabled ? 1 : 0.45
         stack.addArrangedSubview(button)
       }
+    }
+    if membership.products.isEmpty && !membership.isBusy {
       stack.addArrangedSubview(QFSettingsPageUI.label(
-        app.text("费用由 Apple 账号支付，订阅自动续期，除非在当前周期结束前取消。可在 Apple 订阅设置中管理或取消。", "Payment is charged to your Apple Account. The subscription renews automatically unless cancelled before the current period ends. Manage or cancel in Apple Subscriptions."),
+        app.text("订阅产品暂不可用", "Subscription products are unavailable"),
         size: 13, color: QFUI.secondary, style: .footnote))
-      if !legalURLsAvailable {
-        stack.addArrangedSubview(QFSettingsPageUI.label(
-          app.text("订阅条款与隐私链接尚未就绪，暂不可购买。", "Subscription terms and privacy links are not ready. Purchases are unavailable."),
-          size: 13, color: QFUI.secondary, style: .footnote))
-      }
+    }
+    stack.addArrangedSubview(QFSettingsPageUI.label(
+      app.text("月付和年付包含相同权益。", "Monthly and yearly plans include the same benefits."),
+      size: 13, color: QFUI.secondary, style: .footnote))
+    stack.addArrangedSubview(QFSettingsPageUI.label(
+      app.text("费用由 Apple 账号支付，订阅自动续期，除非在当前周期结束前取消。可在 Apple 订阅设置中管理或取消。", "Payment is charged to your Apple Account. The subscription renews automatically unless cancelled before the current period ends. Manage or cancel in Apple Subscriptions."),
+      size: 13, color: QFUI.secondary, style: .footnote))
+    if !legalURLsAvailable {
+      stack.addArrangedSubview(QFSettingsPageUI.label(
+        app.text("订阅条款与隐私链接尚未就绪，暂不可购买。", "Subscription terms and privacy links are not ready. Purchases are unavailable."),
+        size: 13, color: QFUI.secondary, style: .footnote))
     }
     addButton(app.text("重新检查", "Check again"), id: "membership.retry") { [weak self] in self?.app.membership.refresh() }
     addButton(app.text("恢复购买", "Restore purchases"), id: "membership.restore") { [weak self] in self?.app.membership.restore() }
