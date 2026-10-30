@@ -16,7 +16,7 @@ enum QFAssistantAgent {
   }
 
   #if DEBUG
-  static func weeklyPlan(text: String, cloud: Bool, requestID: UUID, app: QFAppSession, provider: QFAssistantProvider = .glmFree,
+  static func weeklyPlan(text: String, cloud: Bool, requestID: UUID, app: QFAppSession, provider: QFAssistantProvider = .glmFree, providerRegion: String? = nil,
     progress: @escaping (String) -> Void) async throws -> Response? {
     guard QFAssistantWeeklyPlanIntent.matches(text) else { return nil }
     if QFAssistantWeeklyPlanIntent.requiresSettings(text) {
@@ -43,7 +43,7 @@ enum QFAssistantAgent {
       progress("knowledge")
       let reference: Response
       if cloud {
-        let result = try await app.assistantStream(text: query, history: [], imageData: nil, mimeType: "image/jpeg", provider: provider) { event in
+        let result = try await app.assistantStream(text: query, history: [], imageData: nil, mimeType: "image/jpeg", provider: provider, providerRegion: providerRegion) { event in
           if case .status(let stage) = event { progress(stage) }
         }
         reference = .init(answer: result.answer, sources: result.sources ?? [], actions: [], notice: result.notice ?? "", nativeInferenceUsed: false)

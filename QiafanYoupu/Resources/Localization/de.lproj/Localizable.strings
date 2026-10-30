@@ -210,7 +210,9 @@
 "先补记当天实际做菜信息。" = "Füge zuerst hinzu, was du an diesem Tag gekocht hast.";
 "先选择食材" = "Zuerst Zutaten wählen";
 "克" = "g";
-"免费文字问答，默认使用。" = "Kostenloser Textchat, standardmäßig ausgewählt.";
+"免费文字问答，可手动选择。" = "Kostenloser Textchat, optional auswählbar.";
+"文字和图片问答，使用云端额度或积分。" = "Text- und Bildchat mit Cloud-Kontingent oder Guthaben.";
+"云端处理区域已变化，请重新确认后发送。" = "Die Cloud-Verarbeitungsregion hat sich geändert. Bitte bestätige sie vor dem Senden erneut.";
 "入库" = "Zugang";
 "入库 %@" = "Hinzugefügt am %@";
 "入库、使用和调整会显示在这里。" = "Zugänge, Verbrauch und Anpassungen werden hier angezeigt.";

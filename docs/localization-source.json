@@ -108,6 +108,18 @@
         "More actions for %@"
       ]
     },
+    "%@／年": {
+      "english": "%@ per year",
+      "englishVariants": [
+        "%@ per year"
+      ]
+    },
+    "%@／月": {
+      "english": "%@ per month",
+      "englishVariants": [
+        "%@ per month"
+      ]
+    },
     "%d / %d 道": {
       "english": "%d / %d dishes",
       "englishVariants": [
@@ -312,6 +324,12 @@
         "Generate weekly plan with AI"
       ]
     },
+    "Apple 批准后会自动确认权益，无需再次购买。": {
+      "english": "Your access will be confirmed after Apple approves the purchase. You do not need to buy again.",
+      "englishVariants": [
+        "Your access will be confirmed after Apple approves the purchase. You do not need to buy again."
+      ]
+    },
     "Apple 授权已失效，请重新授权": {
       "english": "Apple authorization has expired. Please authorize again.",
       "englishVariants": [
@@ -364,12 +382,6 @@
       "english": "Requests made by the app in Debug mode appear here.",
       "englishVariants": [
         "Requests made by the app in Debug mode appear here."
-      ]
-    },
-    "DeepSeek 积分使用": {
-      "english": "Use DeepSeek credits",
-      "englishVariants": [
-        "Use DeepSeek credits"
       ]
     },
     "GLM · 免费": {
@@ -631,6 +643,12 @@
         "Add real photos to ingredients and recipes"
       ]
     },
+    "主动语音（每5分钟）": {
+      "english": "Proactive speech (every 5 minutes)",
+      "englishVariants": [
+        "Proactive speech (every 5 minutes)"
+      ]
+    },
     "主题设置": {
       "english": "Appearance",
       "englishVariants": [
@@ -667,6 +685,12 @@
         "Cloud assistant reminders"
       ]
     },
+    "云端处理区域已变化，请重新确认后发送。": {
+      "english": "The cloud processing region changed. Confirm it again before sending.",
+      "englishVariants": [
+        "The cloud processing region changed. Confirm it again before sending."
+      ]
+    },
     "云端已就绪，剩余 %d 积分。": {
       "english": "Cloud ready; %d credits remaining.",
       "englishVariants": [
@@ -683,12 +707,6 @@
       "english": "Cloud reminder settings are still loading.",
       "englishVariants": [
         "Cloud reminder settings are still loading."
-      ]
-    },
-    "仅主动使用 DeepSeek 时消耗积分，免费 GLM 不扣积分。": {
-      "english": "Credits are used only when you choose DeepSeek. Free GLM does not use credits.",
-      "englishVariants": [
-        "Credits are used only when you choose DeepSeek. Free GLM does not use credits."
       ]
     },
     "仅使用本机通知，不会把库存或对话内容放进通知。": {
@@ -786,12 +804,6 @@
       "englishVariants": [
         "Choose from catalog",
         "Choose from ingredients"
-      ]
-    },
-    "付费订阅尚未开放，基础功能可照常使用。": {
-      "english": "Paid subscriptions are not open yet. Your existing basic features remain available.",
-      "englishVariants": [
-        "Paid subscriptions are not open yet. Your existing basic features remain available."
       ]
     },
     "以下是饮食安排建议，本轮尚未加入日历计划。": {
@@ -1215,12 +1227,6 @@
         "Preference text is sent to the AI service to generate the plan. Do not include contact or other personal information."
       ]
     },
-    "做完一道菜，可以记录作品，留住这次的心得。": {
-      "english": "After cooking, save your result and what you learned.",
-      "englishVariants": [
-        "After cooking, save your result and what you learned."
-      ]
-    },
     "做完后可以发布你的成果": {
       "english": "Share what you make",
       "englishVariants": [
@@ -1354,10 +1360,10 @@
         "Free image understanding; also answers when the text model is busy."
       ]
     },
-    "免费文字问答，默认使用。": {
-      "english": "Free text chat, selected by default.",
+    "免费文字问答，可手动选择。": {
+      "english": "Free text chat, available as an option.",
       "englishVariants": [
-        "Free text chat, selected by default."
+        "Free text chat, available as an option."
       ]
     },
     "入库": {
@@ -1896,6 +1902,12 @@
         "Prepare soon: %@. Open the app to check preparation and stock."
       ]
     },
+    "历史余额仅供查看，不属于当前订阅权益。": {
+      "english": "Past balances are view-only and are not part of the current subscription.",
+      "englishVariants": [
+        "Past balances are view-only and are not part of the current subscription."
+      ]
+    },
     "历史库存依据待确认": {
       "english": "Historical inventory needs verification",
       "englishVariants": [
@@ -2240,12 +2252,6 @@
         "Product name"
       ]
     },
-    "商品条码联网查询": {
-      "english": "Online product barcode lookup",
-      "englishVariants": [
-        "Online product barcode lookup"
-      ]
-    },
     "商品查询失败，请检查网络后重试。": {
       "english": "Product lookup failed. Check your connection and retry.",
       "englishVariants": [
@@ -2567,12 +2573,6 @@
         "Plan a weekly menu and organize the ingredients you need"
       ]
     },
-    "安排一周菜单，可以先从明天的一顿饭开始。": {
-      "english": "Planning a week of meals can start with just one meal tomorrow.",
-      "englishVariants": [
-        "Planning a week of meals can start with just one meal tomorrow."
-      ]
-    },
     "安排一周菜单，整理所需食材，": {
       "english": "Plan a weekly menu and ingredients",
       "englishVariants": [
@@ -2765,12 +2765,6 @@
         "A puppy chef holding a spatula beside a pot of vegetables"
       ]
     },
-    "尚未开通会员": {
-      "english": "No active membership",
-      "englishVariants": [
-        "No active membership"
-      ]
-    },
     "尚未提交生成请求。": {
       "english": "The generation request has not been submitted.",
       "englishVariants": [
@@ -2944,12 +2938,6 @@
       "english": "%d attempts",
       "englishVariants": [
         "%d attempts"
-      ]
-    },
-    "已开通权益": {
-      "english": "Active benefits",
-      "englishVariants": [
-        "Active benefits"
       ]
     },
     "已归档": {
@@ -3192,6 +3180,12 @@
         "Frequently asked questions"
       ]
     },
+    "年付": {
+      "english": "Yearly",
+      "englishVariants": [
+        "Yearly"
+      ]
+    },
     "库存": {
       "english": "Inventory",
       "englishVariants": [
@@ -3403,12 +3397,6 @@
         "Your current benefits are confirmed by the server."
       ]
     },
-    "当前版本不提供购买和积分消费。历史权益和余额仅供查看。": {
-      "english": "Purchases and credit spending are unavailable in this version. Past benefits and balances are view-only.",
-      "englishVariants": [
-        "Purchases and credit spending are unavailable in this version. Past benefits and balances are view-only."
-      ]
-    },
     "当前环境的 HTTPS 接口地址尚未配置。": {
       "english": "The HTTPS API address is not configured for this environment.",
       "englishVariants": [
@@ -3567,6 +3555,12 @@
         "Restore this plan"
       ]
     },
+    "恢复购买": {
+      "english": "Restore purchases",
+      "englishVariants": [
+        "Restore purchases"
+      ]
+    },
     "恢复这条记录仍占用的库存，并更新做菜统计。": {
       "english": "Restore the stock still used by this record and update cooking statistics.",
       "englishVariants": [
@@ -3585,28 +3579,10 @@
         "Surprised"
       ]
     },
-    "想做一道番茄炒蛋吗？我们可以先在菜谱中查找。": {
-      "english": "Feel like tomato and eggs? We can look for a recipe first.",
-      "englishVariants": [
-        "Feel like tomato and eggs? We can look for a recipe first."
-      ]
-    },
     "想做点什么？": {
       "english": "like to cook today?",
       "englishVariants": [
         "like to cook today?"
-      ]
-    },
-    "想换个口味？去菜谱页看看今天想做哪道菜。": {
-      "english": "Want something different? Explore recipes for what to cook today.",
-      "englishVariants": [
-        "Want something different? Explore recipes for what to cook today."
-      ]
-    },
-    "想聊聊今天的心情，或一起安排晚餐？点我就可以开始。": {
-      "english": "Want to talk about your day or plan dinner together? Tap me to start.",
-      "englishVariants": [
-        "Want to talk about your day or plan dinner together? Tap me to start."
       ]
     },
     "感兴趣的国家": {
@@ -3868,12 +3844,6 @@
       "english": "Make the most of what you have",
       "englishVariants": [
         "Make the most of what you have"
-      ]
-    },
-    "把常用食材整理一下，下一顿饭会更好安排。": {
-      "english": "Organizing your usual ingredients can make the next meal easier to plan.",
-      "englishVariants": [
-        "Organizing your usual ingredients can make the next meal easier to plan."
       ]
     },
     "把每一天，做得有滋有味。": {
@@ -4302,6 +4272,12 @@
         "Play video"
       ]
     },
+    "操作失败，请重试。": {
+      "english": "Operation failed. Please try again.",
+      "englishVariants": [
+        "Operation failed. Please try again."
+      ]
+    },
     "操作过于频繁，请稍后再试。": {
       "english": "Too many attempts. Please try again later.",
       "englishVariants": [
@@ -4422,6 +4398,12 @@
       "english": "The file is too large. Photos can be up to 8 MB and videos up to 20 MB.",
       "englishVariants": [
         "The file is too large. Photos can be up to 8 MB and videos up to 20 MB."
+      ]
+    },
+    "文字和图片问答，使用云端额度或积分。": {
+      "english": "Text and image chat using cloud allowance or credits.",
+      "englishVariants": [
+        "Text and image chat using cloud allowance or credits."
       ]
     },
     "文字输入模式": {
@@ -4816,6 +4798,18 @@
         "Maximum cooking time must be 1–1440 minutes."
       ]
     },
+    "月付": {
+      "english": "Monthly",
+      "englishVariants": [
+        "Monthly"
+      ]
+    },
+    "月付和年付包含相同权益。": {
+      "english": "Monthly and yearly plans include the same benefits.",
+      "englishVariants": [
+        "Monthly and yearly plans include the same benefits."
+      ]
+    },
     "月历": {
       "english": "Calendar",
       "englishVariants": [
@@ -4845,12 +4839,6 @@
       "englishVariants": [
         "Expiry",
         "Expiry date"
-      ]
-    },
-    "有效期至 %@": {
-      "english": "Valid until %@",
-      "englishVariants": [
-        "Valid until %@"
       ]
     },
     "有效期至：%@": {
@@ -5147,10 +5135,10 @@
         "Cost of this cooking"
       ]
     },
-    "本版核心做饭工具免费使用。": {
-      "english": "Core cooking tools are free in this version.",
+    "本次订阅包含做饭工具和主动语音，云端问答暂不可用。": {
+      "english": "Your subscription includes cooking tools and proactive speech. Cloud chat is currently unavailable.",
       "englishVariants": [
-        "Core cooking tools are free in this version."
+        "Your subscription includes cooking tools and proactive speech. Cloud chat is currently unavailable."
       ]
     },
     "本轮仅查询或准备草稿，未保存更改。数据可能仅含部分记录，请打开原页面核对。": {
@@ -5181,12 +5169,6 @@
       "english": "Rights complaint or appeal",
       "englishVariants": [
         "Rights complaint or appeal"
-      ]
-    },
-    "权益暂时无法读取，下拉可重试。": {
-      "english": "Benefits could not be loaded. Pull down to retry.",
-      "englishVariants": [
-        "Benefits could not be loaded. Pull down to retry."
       ]
     },
     "材料名称": {
@@ -5399,6 +5381,12 @@
         "Review plan draft (not saved)"
       ]
     },
+    "核心做饭工具、账号云端同步、基础家庭协作和圆球主动语音。": {
+      "english": "Core cooking tools, account cloud sync, basic household collaboration and proactive orb speech.",
+      "englishVariants": [
+        "Core cooking tools, account cloud sync, basic household collaboration and proactive orb speech."
+      ]
+    },
     "案件 %@：%@": {
       "english": "Case %@: %@",
       "englishVariants": [
@@ -5489,6 +5477,12 @@
         "Thinking"
       ]
     },
+    "正在恢复登录": {
+      "english": "Restoring sign-in",
+      "englishVariants": [
+        "Restoring sign-in"
+      ]
+    },
     "正在扣减": {
       "english": "Processing",
       "englishVariants": [
@@ -5531,10 +5525,22 @@
         "Looking up the product name…"
       ]
     },
+    "正在核对当前账号和 Apple 购买记录。": {
+      "english": "Verifying your current account and Apple purchases.",
+      "englishVariants": [
+        "Verifying your current account and Apple purchases."
+      ]
+    },
     "正在检查云端额度…": {
       "english": "Checking cloud credits…",
       "englishVariants": [
         "Checking cloud credits…"
+      ]
+    },
+    "正在检查订阅": {
+      "english": "Checking subscription",
+      "englishVariants": [
+        "Checking subscription"
       ]
     },
     "正在注销账号": {
@@ -5667,12 +5673,6 @@
       "english": "On-device speech recognition is unavailable. Please type your message.",
       "englishVariants": [
         "On-device speech recognition is unavailable. Please type your message."
-      ]
-    },
-    "此账号可使用全部已上线会员功能，无需购买。": {
-      "english": "This account can use all released member features without a purchase.",
-      "englishVariants": [
-        "This account can use all released member features without a purchase."
       ]
     },
     "步骤": {
@@ -5879,12 +5879,6 @@
         "Delete account"
       ]
     },
-    "测试权益已开通": {
-      "english": "Test benefits are active",
-      "englishVariants": [
-        "Test benefits are active"
-      ]
-    },
     "消耗": {
       "english": "Use",
       "englishVariants": [
@@ -6022,12 +6016,6 @@
       "english": "Warm and bright",
       "englishVariants": [
         "Warm and bright"
-      ]
-    },
-    "炒菜前先备好食材和调味料，做起来会更从容。": {
-      "english": "Prepare the ingredients and seasonings before cooking for a calmer start.",
-      "englishVariants": [
-        "Prepare the ingredients and seasonings before cooking for a calmer start."
       ]
     },
     "点击查看计划与备菜": {
@@ -6352,12 +6340,6 @@
         "State or region must be 32 characters or fewer."
       ]
     },
-    "看看备菜页，能帮你区分家里已有和待采购的食材。": {
-      "english": "The preparation page helps separate ingredients at home from those to buy.",
-      "englishVariants": [
-        "The preparation page helps separate ingredients at home from those to buy."
-      ]
-    },
     "知识检索": {
       "english": "Knowledge retrieval",
       "englishVariants": [
@@ -6460,18 +6442,6 @@
       "english": "Confirm shopping list",
       "englishVariants": [
         "Confirm shopping list"
-      ]
-    },
-    "积分已记录，当前尚未启用积分扣费。": {
-      "english": "Your credits are recorded. Credit billing is not enabled yet.",
-      "englishVariants": [
-        "Your credits are recorded. Credit billing is not enabled yet."
-      ]
-    },
-    "积分暂时无法读取，下拉可重试。": {
-      "english": "Credits could not be loaded. Pull down to retry.",
-      "englishVariants": [
-        "Credits could not be loaded. Pull down to retry."
       ]
     },
     "移出": {
@@ -6612,6 +6582,12 @@
         "Filters are still loading"
       ]
     },
+    "管理主动语音并查看餐次提醒": {
+      "english": "Manage proactive speech and view meal reminders",
+      "englishVariants": [
+        "Manage proactive speech and view meal reminders"
+      ]
+    },
     "管理员": {
       "english": "Admin",
       "englishVariants": [
@@ -6622,6 +6598,12 @@
       "english": "Manage members and invitations",
       "englishVariants": [
         "Manage members and invitations"
+      ]
+    },
+    "管理订阅": {
+      "english": "Manage subscriptions",
+      "englishVariants": [
+        "Manage subscriptions"
       ]
     },
     "系统权限": {
@@ -6985,12 +6967,6 @@
         "Recipes"
       ]
     },
-    "菜谱、计划、手动入库、基础提醒和免费 GLM 继续按原有规则使用。": {
-      "english": "Recipes, plans, manual inventory entry, basic reminders and free GLM continue under their existing rules.",
-      "englishVariants": [
-        "Recipes, plans, manual inventory entry, basic reminders and free GLM continue under their existing rules."
-      ]
-    },
     "菜谱与烹饪": {
       "english": "Recipes and cooking",
       "englishVariants": [
@@ -7219,6 +7195,36 @@
       "english": "Unit",
       "englishVariants": [
         "Unit"
+      ]
+    },
+    "订阅产品暂不可用": {
+      "english": "Subscription products are unavailable",
+      "englishVariants": [
+        "Subscription products are unavailable"
+      ]
+    },
+    "订阅后进入恰饭有谱": {
+      "english": "Subscribe to enter Qiafan Youpu",
+      "englishVariants": [
+        "Subscribe to enter Qiafan Youpu"
+      ]
+    },
+    "订阅已绑定其他账号": {
+      "english": "Subscription linked to another account",
+      "englishVariants": [
+        "Subscription linked to another account"
+      ]
+    },
+    "订阅条款与隐私链接尚未就绪，暂不可购买。": {
+      "english": "Subscription terms and privacy links are not ready. Purchases are unavailable.",
+      "englishVariants": [
+        "Subscription terms and privacy links are not ready. Purchases are unavailable."
+      ]
+    },
+    "订阅状态尚未确认": {
+      "english": "Subscription not yet confirmed",
+      "englishVariants": [
+        "Subscription not yet confirmed"
       ]
     },
     "让 AI 生成添加草稿": {
@@ -7581,6 +7587,12 @@
         "Read and agree to the Terms of Service and Privacy Policy first."
       ]
     },
+    "请切换到原恰饭有谱账号或联系支持，不要重复购买。": {
+      "english": "Switch to your original Qiafan Youpu account or contact support. Do not purchase again.",
+      "englishVariants": [
+        "Switch to your original Qiafan Youpu account or contact support. Do not purchase again."
+      ]
+    },
     "请勿恶意抓取、干扰服务或滥用内容，\n具体使用规则以用户协议为准。": {
       "english": "Do not scrape, disrupt, or misuse the service.\nSee the Terms of Service for full rules.",
       "englishVariants": [
@@ -7815,6 +7827,12 @@
         "Confirm the original quantity, purchase date, currency and amount."
       ]
     },
+    "请稍后重试，已有订阅可通过恢复购买核对。": {
+      "english": "Try again later. You can verify an existing subscription by restoring purchases.",
+      "englishVariants": [
+        "Try again later. You can verify an existing subscription by restoring purchases."
+      ]
+    },
     "请至少选择一个餐次。": {
       "english": "Choose at least one meal.",
       "englishVariants": [
@@ -7945,6 +7963,12 @@
       "english": "Sign in again before changing account security settings.",
       "englishVariants": [
         "Sign in again before changing account security settings."
+      ]
+    },
+    "请重试检查或恢复购买。确认前不会要求你再次购买。": {
+      "english": "Retry verification or restore purchases. You will not be asked to buy again before verification.",
+      "englishVariants": [
+        "Retry verification or restore purchases. You will not be asked to buy again before verification."
       ]
     },
     "读取失败，点击重试": {
@@ -8134,10 +8158,22 @@
         "Purchase date"
       ]
     },
+    "购买等待批准": {
+      "english": "Purchase awaiting approval",
+      "englishVariants": [
+        "Purchase awaiting approval"
+      ]
+    },
     "购买食材": {
       "english": "Purchased ingredients",
       "englishVariants": [
         "Purchased ingredients"
+      ]
+    },
+    "费用由 Apple 账号支付，订阅自动续期，除非在当前周期结束前取消。可在 Apple 订阅设置中管理或取消。": {
+      "english": "Payment is charged to your Apple Account. The subscription renews automatically unless cancelled before the current period ends. Manage or cancel in Apple Subscriptions.",
+      "englishVariants": [
+        "Payment is charged to your Apple Account. The subscription renews automatically unless cancelled before the current period ends. Manage or cancel in Apple Subscriptions."
       ]
     },
     "资料尚未修改": {
@@ -8393,16 +8429,16 @@
         "The connection ended. Received content was kept. Retry manually."
       ]
     },
-    "连续扫码与批量核对": {
-      "english": "Continuous scanning and batch review",
-      "englishVariants": [
-        "Continuous scanning and batch review"
-      ]
-    },
     "退出失败": {
       "english": "Could not sign out",
       "englishVariants": [
         "Could not sign out"
+      ]
+    },
+    "退出失败，请重试。": {
+      "english": "Sign out failed. Please try again.",
+      "englishVariants": [
+        "Sign out failed. Please try again."
       ]
     },
     "退出家庭": {
@@ -8715,6 +8751,12 @@
       "english": "Resubmit",
       "englishVariants": [
         "Resubmit"
+      ]
+    },
+    "重新检查": {
+      "english": "Check again",
+      "englishVariants": [
+        "Check again"
       ]
     },
     "重新生成": {

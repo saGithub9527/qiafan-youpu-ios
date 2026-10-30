@@ -18,6 +18,8 @@ struct QFServerConfig: Codable, Equatable {
   struct AssistantCapabilities: Codable, Equatable {
     let chatWebConsent: Bool
     var chatProviders: [String]? = nil
+    var defaultChatProvider: String? = nil
+    var chatProviderRegions: [String: String]? = nil
   }
 
   struct LoginMethods: Codable, Equatable {

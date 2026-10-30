@@ -135,7 +135,17 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   weak var tabNavigationHost: UITabBarController?
   var onCharacterIntent: ((QFAssistantCharacterIntent) -> Void)?
 
-  private var cloudConsentKey: String { selectedProvider.consentKey(scope: app.contentScope) }
+  private var cloudConsentKey: String { selectedProvider.consentKey(scope: app.contentScope,
+    processingRegion: app.configuration?.assistantCapabilities?.chatProviderRegions?[selectedProvider.rawValue]) }
+  private func providerAvailable(_ provider: QFAssistantProvider) -> Bool {
+    provider.available(in: app.configuration?.assistantCapabilities?.chatProviders,
+      processingRegion: app.configuration?.assistantCapabilities?.chatProviderRegions?[provider.rawValue])
+  }
+  private var selectedProviderLabel: String {
+    guard selectedProvider == .gemini,
+      let region = app.configuration?.assistantCapabilities?.chatProviderRegions?[selectedProvider.rawValue] else { return selectedProvider.displayName }
+    return selectedProvider.displayName + " · " + region.uppercased()
+  }
 
   init(app: QFAppSession, applicationState: (@MainActor () -> UIApplication.State)? = nil, persistConversation: Bool = true) {
     self.app = app
@@ -146,6 +156,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     conversationStore = store
     messages = store.load()
     super.init(nibName: nil, bundle: nil)
+    selectedProvider = app.defaultAssistantProvider
   }
   required init?(coder: NSCoder) { nil }
   deinit {
@@ -210,7 +221,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     refreshImagePreview()
     conversationStore = QFAssistantConversationStore(scope: QFAssistantAgent.scope(app), persistent: persistConversation)
     conversationBinding = QFAssistantAgent.scope(app)
-    messages = conversationStore.load(); selectedProvider = .glmFree; expandedProcess.removeAll(); manuallyExpandedProcess.removeAll(); scrollFollow.jumpToLatest()
+    messages = conversationStore.load(); selectedProvider = app.defaultAssistantProvider; expandedProcess.removeAll(); manuallyExpandedProcess.removeAll(); scrollFollow.jumpToLatest()
     refreshLocalizedControls(); renderMessages()
   }
 
@@ -1097,18 +1108,20 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   }
 
   private func refreshModeButton() {
-    modeButton.setTitle(selectedProvider == .glmFree ? "GLM  ▾" : "DeepSeek  ▾", for: .normal)
+    modeButton.setTitle(selectedProvider.displayName + "  ▾", for: .normal)
     modeButton.setTitleColor(QFUI.primary, for: .normal)
     modeButton.backgroundColor = QFUI.primary.withAlphaComponent(0.10)
     modeButton.accessibilityLabel = app.text("切换 AI 模式", "Switch AI mode")
-    modeButton.accessibilityValue = selectedProvider == .glmFree ? app.text("GLM · 免费", "GLM · Free") : "DeepSeek"
+    modeButton.accessibilityValue = selectedProvider == .glmFree ? app.text("GLM · 免费", "GLM · Free") : selectedProviderLabel
   }
 
   @objc private func toggleMode() {
     stopCapture()
     let menu = UIAlertController(title: app.text("切换 AI 模式", "Switch AI mode"), message: nil, preferredStyle: .actionSheet)
-    menu.addAction(UIAlertAction(title: app.text("GLM · 免费", "GLM · Free"), style: .default) { [weak self] _ in self?.selectMode(provider: .glmFree) })
-    menu.addAction(UIAlertAction(title: "DeepSeek", style: .default) { [weak self] _ in self?.selectMode(provider: .deepSeek) })
+    for provider in [QFAssistantProvider.gemini, .glmFree, .deepSeek] where providerAvailable(provider) {
+      let title = provider == .glmFree ? app.text("GLM · 免费", "GLM · Free") : provider.displayName
+      menu.addAction(UIAlertAction(title: title, style: .default) { [weak self] _ in self?.selectMode(provider: provider) })
+    }
     menu.addAction(UIAlertAction(title: app.text("模型管理", "Manage model"), style: .default) { [weak self] _ in
       guard let self else { return }
       let navigation = UINavigationController(rootViewController: QFLocalModelViewController(app: self.app))
@@ -1122,11 +1135,11 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
 
   private func selectMode(provider: QFAssistantProvider) {
     guard activeMessageID == nil else { return }
-    stopCapture(); selectedProvider = provider; refreshModeButton()
-    guard provider.available(in: app.configuration?.assistantCapabilities?.chatProviders) else {
+    guard providerAvailable(provider) else {
       QFOperationHUD.toast(app.text("所选模型暂不可用，请稍后重试。", "The selected model is unavailable. Please try again later."), in: view)
       return
     }
+    stopCapture(); selectedProvider = provider; refreshModeButton()
     guard provider.requiresCredits else {
       QFOperationHUD.toast(app.text("已切换到免费 GLM。", "Free GLM selected."), in: view)
       return
@@ -1156,7 +1169,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     if activeMessageID != nil { cancelRequest(); return }
     guard !voice.isBusy else { return }
     guard conversationBinding == QFAssistantAgent.scope(app) else { reloadConversationScope(); return }
-    guard selectedProvider.available(in: app.configuration?.assistantCapabilities?.chatProviders) else {
+    guard providerAvailable(selectedProvider) else {
       QFOperationHUD.toast(app.text("所选模型暂不可用，请稍后重试。", "The selected model is unavailable. Please try again later."), in: view)
       return
     }
@@ -1167,11 +1180,12 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     let consentBinding = conversationBinding, consentKey = cloudConsentKey, consentProvider = selectedProvider
     let confirm = UIAlertController(
       title: app.text("允许云端处理？", "Allow cloud processing?"),
-      message: app.format("本轮文字、图片、对话上下文及经授权读取的相关计划或库存会交给 %@ 处理。保存或修改仍需你确认。", "Your text, images, conversation context and relevant plans or inventory read with permission will be processed by %@. Saving or changing data still requires your confirmation.", selectedProvider == .glmFree ? "GLM" : "DeepSeek"),
+      message: app.format("本轮文字、图片、对话上下文及经授权读取的相关计划或库存会交给 %@ 处理。保存或修改仍需你确认。", "Your text, images, conversation context and relevant plans or inventory read with permission will be processed by %@. Saving or changing data still requires your confirmation.", selectedProviderLabel),
       preferredStyle: .alert)
     confirm.addAction(UIAlertAction(title: app.text("取消", "Cancel"), style: .cancel))
     confirm.addAction(UIAlertAction(title: app.text("同意并发送", "Agree and send"), style: .default) { [weak self] _ in
-      guard let self, self.selectedProvider == consentProvider, self.conversationBinding == consentBinding, QFAssistantAgent.scope(self.app) == consentBinding else { return }
+      guard let self, self.selectedProvider == consentProvider, self.cloudConsentKey == consentKey,
+        self.conversationBinding == consentBinding, QFAssistantAgent.scope(self.app) == consentBinding else { return }
       UserDefaults.standard.set(true, forKey: consentKey)
       self.sendMessageAfterSend(cloud: true)
     })
@@ -1179,6 +1193,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
   }
 
   private func sendMessageAfterSend(cloud: Bool) {
+    if cloud && !UserDefaults.standard.bool(forKey: cloudConsentKey) { sendMessage(); return }
     let value = input.text.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !voice.isBusy else { return }
     guard !value.isEmpty || selectedImage != nil else { return }
@@ -1233,6 +1248,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
     refreshImagePreview()
     requestTask?.cancel(); let generation = UUID(); requestGeneration = generation
     let binding = conversationBinding, id = UUID(), provider = selectedProvider
+    let providerRegion = app.configuration?.assistantCapabilities?.chatProviderRegions?[provider.rawValue], consentKey = cloudConsentKey
     activeMessageID = id; scrollFollow.jumpToLatest()
     messages.append(.init(id: id, role: "assistant", text: "", createdAt: Date(), state: "streaming",
       process: [.init(stage: "preparing", state: "running")], retryText: imageData == nil ? value : nil,
@@ -1247,7 +1263,10 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
         return self.messages.firstIndex(where: { $0.id == id })
       }
       do {
-        if imageData == nil, let plan = try await QFAssistantAgent.weeklyPlan(text: question, cloud: cloud, requestID: id, app: self.app, provider: provider,
+        if cloud && (self.cloudConsentKey != consentKey || !UserDefaults.standard.bool(forKey: consentKey)) {
+          throw QFAPIError(code: 40000, message: self.app.text("云端处理区域已变化，请重新确认后发送。", "The cloud processing region changed. Confirm it again before sending."))
+        }
+        if imageData == nil, let plan = try await QFAssistantAgent.weeklyPlan(text: question, cloud: cloud, requestID: id, app: self.app, provider: provider, providerRegion: providerRegion,
           progress: { [weak self] stage in guard let self, let index = currentIndex() else { return }; self.setProcess(stage: stage, index: index) }) {
           guard let index = currentIndex() else { return }
           self.messages[index].text = plan.answer; self.messages[index].sources = plan.sources
@@ -1261,7 +1280,7 @@ final class QFDigitalAssistantConversationViewController: UIViewController,
           self.messages[index].notice = help.notice
           self.completeMessage(index: index)
         } else if cloud {
-          let response = try await self.app.assistantStream(text: question, history: history, imageData: imageData, mimeType: mimeType, provider: provider) { [weak self] event in
+          let response = try await self.app.assistantStream(text: question, history: history, imageData: imageData, mimeType: mimeType, provider: provider, providerRegion: providerRegion) { [weak self] event in
             guard let self, let index = currentIndex() else { return }
             switch event {
             case .status(let stage): self.setProcess(stage: stage, index: index)

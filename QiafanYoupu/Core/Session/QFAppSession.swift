@@ -637,10 +637,21 @@ final class QFAppSession: ObservableObject {
     return result
   }
 
+  var defaultAssistantProvider: QFAssistantProvider {
+    QFAssistantProvider.preferred(defaultProvider: configuration?.assistantCapabilities?.defaultChatProvider,
+      availableProviders: configuration?.assistantCapabilities?.chatProviders, regions: configuration?.assistantCapabilities?.chatProviderRegions)
+  }
+
   func assistantStream(text: String, history: [QFOnDeviceInference.Turn], imageData: Data?, mimeType: String,
-    allowWebSearch: Bool = true, provider: QFAssistantProvider = .glmFree,
+    allowWebSearch: Bool = true, provider: QFAssistantProvider? = nil, providerRegion authorizedRegion: String? = nil,
     onEvent: @escaping (QFAssistantStreamEvent) -> Void) async throws -> QFAssistantStreamResult {
-    guard provider.available(in: configuration?.assistantCapabilities?.chatProviders) else {
+    let provider = provider ?? defaultAssistantProvider
+    let providerRegion = provider == .gemini ? authorizedRegion : nil
+    guard provider.matchesProcessingRegion(authorized: providerRegion, configured: configuration?.assistantCapabilities?.chatProviderRegions?[provider.rawValue]),
+      provider != .gemini || UserDefaults.standard.bool(forKey: provider.consentKey(scope: contentScope, processingRegion: providerRegion)) else {
+      throw QFAPIError(code: 40000, message: self.text("云端处理区域已变化，请重新确认后发送。", "The cloud processing region changed. Confirm it again before sending."))
+    }
+    guard provider.available(in: configuration?.assistantCapabilities?.chatProviders, processingRegion: providerRegion) else {
       throw QFAPIError(code: 50300, message: self.text("所选模型暂不可用，请稍后重试。", "The selected model is unavailable. Please try again later."))
     }
     let currentGeneration = generation, binding = QFAssistantAgent.scope(self)
@@ -656,12 +667,15 @@ final class QFAppSession: ObservableObject {
     }).map { QFOnDeviceInference.Turn(role: $0.role, content: $0.content) }
     let payload = QFAssistantChatRequest(text: text, allowCloud: true,
       allowWeb: configuration?.assistantCapabilities?.chatWebConsent == true ? allowWeb : nil, history: turns,
-      householdId: binding.household, timeZone: TimeZone.current.identifier, provider: provider.rawValue)
+      householdId: binding.household, timeZone: TimeZone.current.identifier, provider: provider.rawValue,
+      providerRegion: provider == .gemini ? providerRegion : nil)
     let (body, type) = try payload.encoded(imageData: imageData, mimeType: mimeType)
     let operationID = UUID(), token = api.accessToken
     func check() throws {
       try Task.checkCancellation(); try checkGeneration(currentGeneration)
       guard QFAssistantAgent.scope(self) == binding,
+        provider.matchesProcessingRegion(authorized: providerRegion, configured: configuration?.assistantCapabilities?.chatProviderRegions?[provider.rawValue]),
+        provider != .gemini || UserDefaults.standard.bool(forKey: provider.consentKey(scope: contentScope, processingRegion: providerRegion)),
         QFLocalModelViewController.networkEnabled(self) == networkEnabled else { throw CancellationError() }
     }
     let handler: (QFAssistantStreamEvent) throws -> Void = { event in

@@ -6,9 +6,28 @@ import QFSSE
 enum QFAssistantProvider: String, CaseIterable {
   case glmFree = "GLM_FREE"
   case deepSeek = "DEEPSEEK"
-  var requiresCredits: Bool { self == .deepSeek }
-  func available(in providers: [String]?) -> Bool { providers?.contains(rawValue) == true }
-  func consentKey(scope: String) -> String { "qf.assistant.cloud-consent." + rawValue + "." + scope }
+  case gemini = "GEMINI"
+  var requiresCredits: Bool { self != .glmFree }
+  var displayName: String {
+    switch self { case .glmFree: return "GLM"; case .deepSeek: return "DeepSeek"; case .gemini: return "Gemini" }
+  }
+  func available(in providers: [String]?, processingRegion: String? = nil) -> Bool {
+    providers?.contains(rawValue) == true && (self != .gemini || ["us", "eu"].contains(processingRegion ?? ""))
+  }
+  func matchesProcessingRegion(authorized: String?, configured: String?) -> Bool {
+    self != .gemini || (["us", "eu"].contains(authorized ?? "") && authorized == configured)
+  }
+  static func preferred(defaultProvider: String?, availableProviders: [String]?, regions: [String: String]?) -> Self {
+    if defaultProvider == Self.gemini.rawValue,
+      Self.gemini.available(in: availableProviders, processingRegion: regions?[Self.gemini.rawValue]) { return .gemini }
+    // Legacy/free configuration never silently promotes a paid model.
+    return .glmFree
+  }
+  func consentKey(scope: String, processingRegion: String? = nil) -> String {
+    let approvedRegion = processingRegion.flatMap { ["us", "eu"].contains($0) ? $0 : nil } ?? "unconfigured"
+    let region = self == .gemini ? "." + approvedRegion : ""
+    return "qf.assistant.cloud-consent." + rawValue + region + "." + scope
+  }
 }
 
 /// Capture once per operation so reconnects keep the original family and timezone.
@@ -20,6 +39,7 @@ struct QFAssistantChatRequest: Encodable {
   let householdId: String?
   let timeZone: String
   var provider: String? = nil
+  var providerRegion: String? = nil
 
   func encoded(imageData: Data?, mimeType: String) throws -> (body: Data, contentType: String) {
     guard let imageData else { return (try JSONEncoder().encode(self), "application/json") }
@@ -34,6 +54,7 @@ struct QFAssistantChatRequest: Encodable {
     if let householdId { form.append(Data(householdId.utf8), withName: "householdId") }
     form.append(Data(timeZone.utf8), withName: "timeZone")
     if let provider { form.append(Data(provider.utf8), withName: "provider") }
+    if let providerRegion { form.append(Data(providerRegion.utf8), withName: "providerRegion") }
     form.append(imageData, withName: "image", fileName: mimeType == "image/png" ? "image.png" : "image.jpg", mimeType: mimeType)
     return (try form.encode(), form.contentType)
   }
