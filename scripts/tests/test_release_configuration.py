@@ -23,6 +23,25 @@ class ReleaseConfigurationTests(unittest.TestCase):
     def test_debug_keeps_development_working(self):
         self.assertEqual([], self.check("Debug", "test", ""))
 
+    def test_testflight_has_an_exact_test_backend_and_does_not_relax_release(self):
+        approved = "https://test-api.yzsalingo.com/api/v1"
+        self.assertEqual([], self.check("TestFlight", "test", approved))
+        self.assertTrue(self.check("Release", "test", approved))
+        self.assertTrue(self.check("TestFlight", "production", approved))
+        for url in ["", "https://api.qiafan.cn/api/v1", approved + "?x=1",
+                    approved.replace("https:", "http:")]:
+            self.assertTrue(self.check("TestFlight", "test", url))
+
+    def test_testflight_rejects_debug_diagnostics(self):
+        import os
+        result = subprocess.run([sys.executable, str(SCRIPT)], capture_output=True, text=True,
+                                env={**os.environ, "CONFIGURATION": "TestFlight",
+                                     "QF_API_ENVIRONMENT": "test",
+                                     "QF_API_BASE_URL": "https://test-api.yzsalingo.com/api/v1",
+                                     "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG"})
+        self.assertEqual(1, result.returncode)
+        self.assertIn("DEBUG", result.stderr)
+
     def test_release_accepts_https_production_api_format(self):
         for url in ["https://api.qiafan.cn/api/v1", "https://api.qiafan.cn:443/api/v1/"]:
             with self.subTest(url=url):

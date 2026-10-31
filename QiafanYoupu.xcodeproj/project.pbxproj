@@ -1524,6 +1524,91 @@
 			};
 			name = Debug;
 		};
+		1638BD6057BC4B2B6E5BD680 /* TestFlight */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CFD89A9B4F44B95346D6ADB0 /* Getui.xcconfig */;
+			buildSettings = {
+				APS_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = QiafanYoupu/QiafanYoupu.release.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					InfoPlist.strings,
+					QFProductBarcodeScannerViewController.swift,
+					QFProductBarcodeDeviceCheck.swift,
+					QFBarcodeProductLookup.swift,
+					QFAssistantAgentDeviceCheck.swift,
+					QFAssistantBusinessTools.swift,
+					QFAssistantCapabilityPolicy.swift,
+					QFAssistantChatUI.swift,
+					QFAssistantKnowledge.swift,
+					QFAssistantModelAsset.swift,
+					QFAssistantNetworkPreference.swift,
+					QFAssistantQuestionAnalysis.swift,
+					QFAssistantReadRenderer.swift,
+					QFAssistantTextReveal.swift,
+					QFAssistantVoiceInput.swift,
+					QFDigitalAssistant.swift,
+					QFLocalDeploymentCheck.swift,
+					QFLocalModelStore.swift,
+					QFLocalModelViewController.swift,
+					QFOnDeviceInference.swift,
+					QFPlanReminderExampleDeviceCheck.swift,
+					QFAssistantStream.swift,
+					QFAssistantStreamRecovery.swift,
+					QFAssistantIngredientViewController.swift,
+				);
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Configuration/Info-CoreRelease.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "恰饭有谱";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = "$(inherited) -ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = com.talka.qiafanyoupu;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = TestFlight;
+		};
+		2CBBBBF03EC9458B19D48175 /* TestFlight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.talka.qiafanyoupu.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/QiafanYoupu.app/QiafanYoupu";
+			};
+			name = TestFlight;
+		};
+		3739D1FE90F7FA1F35DAEA74 /* TestFlight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = QiafanYoupuWidgets/QiafanYoupuWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = QiafanYoupuWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.talka.qiafanyoupu.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = TestFlight;
+		};
 		3B0A38123EA8535FCFAF626D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1540,6 +1625,71 @@
 				TEST_TARGET_NAME = QiafanYoupu;
 			};
 			name = Release;
+		};
+		690E63E30A2183E3A8F8B79D /* TestFlight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = B654WGMW63;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				QF_API_BASE_URL = "https://test-api.yzsalingo.com/api/v1";
+				QF_API_ENVIRONMENT = test;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = TestFlight;
 		};
 		7D228B568E759EE870095245 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -1691,6 +1841,23 @@
 			};
 			name = Release;
 		};
+		C3D4094D3B37D4169E94FE8A /* TestFlight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.talka.qiafanyoupu.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = QiafanYoupu;
+			};
+			name = TestFlight;
+		};
 		CE4946895C43DB5AE5D0D840 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1716,6 +1883,7 @@
 			buildConfigurations = (
 				0A9ACCDAA4E1978C4728D854 /* Debug */,
 				3B0A38123EA8535FCFAF626D /* Release */,
+				C3D4094D3B37D4169E94FE8A /* TestFlight */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -1725,6 +1893,7 @@
 			buildConfigurations = (
 				81A3FE20441665F714D12FFA /* Debug */,
 				03BCE26A06614B90B72C7650 /* Release */,
+				690E63E30A2183E3A8F8B79D /* TestFlight */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -1734,6 +1903,7 @@
 			buildConfigurations = (
 				CE4946895C43DB5AE5D0D840 /* Debug */,
 				7D228B568E759EE870095245 /* Release */,
+				2CBBBBF03EC9458B19D48175 /* TestFlight */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -1743,6 +1913,7 @@
 			buildConfigurations = (
 				7E59213E6C5012988148E4C3 /* Debug */,
 				03468F284B36EBFB26848900 /* Release */,
+				1638BD6057BC4B2B6E5BD680 /* TestFlight */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -1752,6 +1923,7 @@
 			buildConfigurations = (
 				8277378E9CD4210FE98A7486 /* Debug */,
 				C1ED0146A25E25CCCA9A8B29 /* Release */,
+				3739D1FE90F7FA1F35DAEA74 /* TestFlight */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

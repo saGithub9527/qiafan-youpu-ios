@@ -1,4 +1,8 @@
 name: QiafanYoupu
+configs:
+  Debug: debug
+  Release: release
+  TestFlight: release
 options:
   bundleIdPrefix: com.talka
   deploymentTarget:
@@ -61,10 +65,14 @@ settings:
       QF_API_BASE_URL: "https://test-api.yzsalingo.com/api/v1"
       QF_API_ENVIRONMENT: test
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG"
-    Release:
+    Release: &releaseBuildSettings
       QF_API_ENVIRONMENT: production
       DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
+    TestFlight:
+      <<: *releaseBuildSettings
+      QF_API_ENVIRONMENT: test
+      QF_API_BASE_URL: "https://test-api.yzsalingo.com/api/v1"
 targets:
   QiafanYoupu:
     type: application
@@ -105,6 +113,7 @@ targets:
     configFiles:
       Debug: Configuration/Getui.xcconfig
       Release: Configuration/Release.xcconfig
+      TestFlight: Configuration/Getui.xcconfig
     preBuildScripts:
       - name: Validate Release API configuration
         script: /usr/bin/python3 "$SRCROOT/scripts/validate_release_configuration.py"
@@ -155,7 +164,7 @@ targets:
         Debug:
           APS_ENVIRONMENT: development
           CODE_SIGN_ENTITLEMENTS: QiafanYoupu/QiafanYoupu.entitlements
-        Release:
+        Release: &releaseAppSettings
           APS_ENVIRONMENT: production
           CODE_SIGN_ENTITLEMENTS: QiafanYoupu/QiafanYoupu.release.entitlements
           INFOPLIST_FILE: Configuration/Info-CoreRelease.plist
@@ -184,6 +193,8 @@ targets:
             - QFAssistantStream.swift
             - QFAssistantStreamRecovery.swift
             - QFAssistantIngredientViewController.swift
+        TestFlight:
+          <<: *releaseAppSettings
   QiafanYoupuWidgets:
     type: app-extension
     platform: iOS
@@ -253,6 +264,15 @@ schemes:
         - QiafanYoupuUITests
     run:
       config: Release
+
+  QiafanYoupu-TestFlight:
+    build:
+      targets:
+        QiafanYoupu: all
+    run:
+      config: TestFlight
+    archive:
+      config: TestFlight
 
   QiafanYoupu-LiveTests:
     build:

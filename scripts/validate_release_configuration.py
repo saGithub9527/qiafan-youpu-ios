@@ -11,6 +11,12 @@ from urllib.parse import urlsplit
 def validate(configuration, environment, raw_url):
     if configuration == "Debug":
         return []
+    # Explicit beta configuration: optimized Release sources, fixed test backend.
+    # The ordinary Release configuration still requires a production endpoint.
+    if configuration == "TestFlight":
+        if environment == "test" and raw_url == "https://test-api.yzsalingo.com/api/v1":
+            return []
+        return ["TestFlight requires the approved test HTTPS endpoint and test environment."]
     errors = []
     if environment != "production":
         errors.append("Release requires QF_API_ENVIRONMENT=production.")
@@ -65,6 +71,8 @@ def main():
     errors = validate(os.environ.get("CONFIGURATION", "Release"),
                       os.environ.get("QF_API_ENVIRONMENT", ""),
                       os.environ.get("QF_API_BASE_URL", ""))
+    if os.environ.get("CONFIGURATION") == "TestFlight" and "DEBUG" in os.environ.get("SWIFT_ACTIVE_COMPILATION_CONDITIONS", "").split():
+        errors.append("TestFlight cannot include DEBUG-only tools or diagnostics.")
     if os.environ.get("CONFIGURATION", "Release") != "Debug" and os.environ.get("QF_DEVELOPMENT_EXTENSIONS") == "YES":
         errors.append("Release cannot use the development extension project; regenerate with project.yml.")
     if os.environ.get("CONFIGURATION", "Release") != "Debug":
