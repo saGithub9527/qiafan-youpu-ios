@@ -18,6 +18,9 @@ final class QFAppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    // A development-only StoreKit check uses its own session and never binds the
+    // installed user's push token, widgets, account, or transaction listener.
+    if QFRuntime.isSandboxSubscriptionCheck { return true }
     QFGetuiPushService.shared.prepare(launchOptions: launchOptions)
     if !QFRuntime.isUnitTest {
       let consent = UserDefaults.standard.bool(forKey: QFLaunchPolicy.completedKey)
@@ -65,6 +68,14 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
   ) {
     guard let windowScene = scene as? UIWindowScene else { return }
     let window = UIWindow(windowScene: windowScene)
+    #if DEBUG
+    if QFRuntime.isSandboxSubscriptionCheck {
+      configureTheme(on: window)
+      self.window = window
+      QFMembershipSandboxCheck.install(in: window)
+      return
+    }
+    #endif
     let options = QFLaunchOptions()
     launchOptions = options
     QFGetuiPushService.shared.rememberSceneConnection(connectionOptions)
@@ -104,10 +115,12 @@ final class QFSceneDelegate: UIResponder, UIWindowSceneDelegate {
   }
 
   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard !QFRuntime.isSandboxSubscriptionCheck else { return }
     URLContexts.forEach { QFMealSurfaceNavigation.shared.open($0.url) }
   }
 
   func sceneDidBecomeActive(_ scene: UIScene) {
+    guard !QFRuntime.isSandboxSubscriptionCheck else { return }
     QFGetuiPushService.shared.applicationDidBecomeActive()
     // Do not start StoreKit before the consent/account flow has activated it.
     session.membership.foreground()
@@ -710,6 +723,13 @@ private final class QFTabButton: UIButton {
 }
 
 enum QFRuntime {
+  static var isSandboxSubscriptionCheck: Bool {
+    #if DEBUG
+      ProcessInfo.processInfo.arguments.contains("-QFSandboxSubscriptionCheck")
+    #else
+      false
+    #endif
+  }
   static var isUnitTest: Bool {
     #if DEBUG
       ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil

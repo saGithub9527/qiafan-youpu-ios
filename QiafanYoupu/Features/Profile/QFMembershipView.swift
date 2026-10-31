@@ -325,4 +325,141 @@ enum QFMembershipDeviceCheck {
     }
   }
 }
+
+/// Explicit development-device diagnostic, not a product login or entitlement bypass.
+/// A short-lived, privately copied request selects an ordinary test account. The
+/// real StoreKit coordinator and server still verify every purchase and restore.
+@MainActor
+enum QFMembershipSandboxCheck {
+  private struct Request: Decodable {
+    let runID: UUID
+    let action: String
+    let account: String
+    let password: String
+    let expectedUserID: String
+    let validUntil: Date
+  }
+  private enum Failure: Error { case invalidRequest, wrongAccount, timeout, notSandbox, notReady }
+  private static var task: Task<Void, Never>?
+
+  static func install(in window: UIWindow) {
+    guard task == nil else { return }
+    let loading = UIViewController()
+    loading.view.backgroundColor = QFUI.background
+    let spinner = UIActivityIndicatorView(style: .large)
+    loading.view.addSubview(spinner)
+    spinner.snp.makeConstraints { $0.center.equalToSuperview() }
+    spinner.startAnimating()
+    window.rootViewController = loading
+    window.makeKeyAndVisible()
+    task = Task { await run(in: window) }
+  }
+
+  private static func run(in window: UIWindow) async {
+    let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    let input = documents.appendingPathComponent("membership-sandbox-request.json")
+    let output = documents.appendingPathComponent("membership-sandbox-result.json")
+    var result: [String: Any] = ["stage": "STARTING", "modelCalls": 0, "businessWrites": 0]
+    func write(_ stage: String) {
+      result["stage"] = stage
+      result["updatedAt"] = ISO8601DateFormatter().string(from: Date())
+      if let data = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) {
+        try? data.write(to: output, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+      }
+    }
+    let original = QFKeychainStore(service: "com.talka.qiafanyoupu.session.\(QFAPIEnvironment.current.name)")
+    var originalBytes: Data?
+    do {
+      guard QFRuntime.isSandboxSubscriptionCheck,
+        QFAPIEnvironment.current.baseURL?.scheme == "https",
+        QFAPIEnvironment.current.baseURL?.host == "test-api.yzsalingo.com",
+        Bundle.main.bundleIdentifier == "com.talka.qiafanyoupu" else { throw Failure.invalidRequest }
+      originalBytes = try original.read("current")
+      let bytes = try Data(contentsOf: input)
+      guard bytes.count < 8192 else { throw Failure.invalidRequest }
+      let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+      let request = try decoder.decode(Request.self, from: bytes)
+      guard request.validUntil > Date(), request.validUntil.timeIntervalSinceNow <= 1800,
+        ["purchase", "restore", "read"].contains(request.action),
+        request.account.hasPrefix("qf_purchase_"), !request.expectedUserID.isEmpty else {
+        throw Failure.invalidRequest
+      }
+      // Remove only this one-use diagnostic credential file, never user files.
+      try FileManager.default.removeItem(at: input)
+      result["runID"] = request.runID.uuidString.lowercased()
+      result["action"] = request.action
+      write("SIGNING_IN_ISOLATED_ACCOUNT")
+      let identity = QFDeviceIdentity(service: "com.talka.qiafanyoupu.sandbox-check.device")
+      let api = QFAPIClient(identity: identity); api.recordsRequests = false
+      let app = QFAppSession(api: api, identity: identity,
+        keychain: QFKeychainStore(service: "com.talka.qiafanyoupu.sandbox-check.session"))
+      await app.start()
+      if app.user?.userId != request.expectedUserID {
+        try await app.login(account: request.account, password: request.password, agreementAccepted: true)
+      }
+      guard app.user?.userId == request.expectedUserID,
+        app.user?.boundAccount == request.account else { throw Failure.wrongAccount }
+      result["isolatedAccountMatched"] = true
+      let page = QFMembershipViewController(app: app, entryGate: true)
+      window.rootViewController = page
+      page.loadViewIfNeeded()
+      app.membership.activate()
+      try await waitForIdle(app, seconds: 45)
+      result["catalog"] = app.membership.products.map { ["id": $0.id, "displayPrice": $0.displayPrice] }
+      result["accessBefore"] = app.membership.hasBusinessAccess
+      guard !app.membership.hasProvidedAccess else { throw Failure.wrongAccount }
+      if request.action == "purchase" {
+        guard app.membership.canPurchase,
+          let product = app.membership.products.first(where: { $0.id == "com.talka.qiafanyoupu.core.monthly" })
+        else { throw Failure.notReady }
+        // Development-signed build; the operator confirms the system Sandbox sheet.
+        write("AWAITING_APPLE_SANDBOX_CONFIRMATION")
+        app.membership.purchase(product)
+        try await waitForIdle(app, seconds: 180)
+      } else if request.action == "restore" {
+        write("RESTORING_FROM_APPLE")
+        app.membership.restore()
+        try await waitForIdle(app, seconds: 90)
+      }
+      result["issue"] = app.membership.issue.map { String(describing: $0) } ?? "NONE"
+      result["hasBusinessAccess"] = app.membership.hasBusinessAccess
+      let status: QFMembershipStatus = try await app.api.send(path: "me/membership")
+      result["serverAccessState"] = status.accessState ?? "UNKNOWN"
+      result["serverAccessSource"] = status.accessSource ?? "NONE"
+      result["appleEnvironment"] = status.appleEnvironment ?? "NONE"
+      result["serverActiveSubscription"] = status.activeSubscription
+      result["serverRevision"] = status.revision as Any? ?? NSNull()
+      var transactions: [[String: Any]] = []
+      for await verification in Transaction.currentEntitlements {
+        if case .verified(let transaction) = verification {
+          if #available(iOS 16.0, *) {
+            guard transaction.environment == .sandbox else { throw Failure.notSandbox }
+          }
+          transactions.append(["id": String(transaction.id), "originalID": String(transaction.originalID),
+            "productID": transaction.productID, "verified": true])
+        }
+      }
+      result["verifiedAppleTransactions"] = transactions
+      result["originalSessionUnchanged"] = try original.read("current") == originalBytes
+      let confirmed = app.membership.hasBusinessAccess && status.activeSubscription
+        && status.appleEnvironment == "SANDBOX" && status.complimentaryAccess == nil
+        && !transactions.isEmpty && app.membership.issue == nil
+      write(confirmed ? "SERVER_AND_APPLE_CONFIRMED" : "NOT_CONFIRMED")
+    } catch {
+      result["errorType"] = String(describing: type(of: error))
+      result["errorCode"] = (error as? QFAPIError)?.code as Any? ?? NSNull()
+      if let error = error as? Failure { result["checkFailure"] = String(describing: error) }
+      result["originalSessionUnchanged"] = (try? original.read("current")) == originalBytes
+      write("CHECK_FAILED")
+    }
+  }
+
+  private static func waitForIdle(_ app: QFAppSession, seconds: TimeInterval) async throws {
+    let deadline = Date().addingTimeInterval(seconds)
+    while app.membership.isBusy {
+      guard Date() < deadline else { throw Failure.timeout }
+      try await Task.sleep(nanoseconds: 500_000_000)
+    }
+  }
+}
 #endif
