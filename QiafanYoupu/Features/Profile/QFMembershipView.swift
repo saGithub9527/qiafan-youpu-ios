@@ -272,13 +272,23 @@ enum QFMembershipDeviceCheck {
     var result: [String: Any] = ["runID": run.uuidString.lowercased(), "modelCalls": 0, "businessWrites": 0]
     do {
       let status: QFMembershipStatus = try await QFContentLoadingContext.$forceRefresh.withValue(true) { try await app.contentRequest(path: "me/membership") }
-      let wallet: QFMembershipWallet = try await QFContentLoadingContext.$forceRefresh.withValue(true) { try await app.contentRequest(path: "me/assistant/credits") }
       guard app.contentScope == scope else { return }
       result.merge(["status": "READ_ONLY_MEMBERSHIP_STATUS", "signedIn": app.user != nil,
         "benefitsActive": status.benefitsActive ?? false, "entitlementSource": status.entitlementSource ?? "NONE",
         "activeAppleSubscription": status.activeSubscription, "launchState": status.launchState,
         "entitlements": status.entitlements ?? [], "expiresAt": status.expiresAt as Any? ?? NSNull(),
-        "balanceUnits": wallet.balanceUnits, "billingEnabled": wallet.billingEnabled]) { _, new in new }
+        "providedAccess": status.complimentaryAccess != nil]) { _, new in new }
+      app.membership.activate()
+      let deadline = Date().addingTimeInterval(20)
+      while app.membership.isBusy, Date() < deadline {
+        try await Task.sleep(nanoseconds: 250_000_000)
+        guard app.contentScope == scope else { return }
+      }
+      result["hasBusinessAccess"] = app.membership.hasBusinessAccess
+      result["isComplimentaryOnly"] = app.membership.isComplimentaryOnly
+      result["canPurchase"] = app.membership.canPurchase
+      result["catalog"] = app.membership.products.map { ["id": $0.id, "displayPrice": $0.displayPrice] }
+      result["subscriptionIssue"] = app.membership.issue.map { String(describing: $0) } ?? "NONE"
     } catch {
       result["status"] = "READ_FAILED"; result["errorType"] = String(describing: type(of: error))
       result["errorCode"] = (error as? QFAPIError)?.code as Any? ?? NSNull()
@@ -304,7 +314,8 @@ enum QFMembershipDeviceCheck {
         }
         result["membershipPageOpened"] = navigation.topViewController === page
         result["v2StatusRendered"] = label(page.view, id: "membership.status") != nil
-        result["walletRendered"] = label(page.view, id: "membership.credits")?.text == NumberFormatter.localizedString(from: NSNumber(value: result["balanceUnits"] as? Int64 ?? -1), number: .decimal)
+        result["subscriptionStatusText"] = label(page.view, id: "membership.status")?.text
+        result["visibleCatalogCount"] = app.membership.products.count
       }
     }
     let file = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
