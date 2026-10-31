@@ -339,7 +339,7 @@ enum QFMembershipSandboxCheck {
     let expectedUserID: String
     let validUntil: Date
   }
-  private enum Failure: Error { case invalidRequest, wrongAccount, timeout, notSandbox, notReady }
+  private enum Failure: Error { case invalidRequest, wrongAccount, timeout, notSandbox, notReady, foregroundUnavailable }
   private static var task: Task<Void, Never>?
 
   static func install(in window: UIWindow) {
@@ -393,6 +393,15 @@ enum QFMembershipSandboxCheck {
       let api = QFAPIClient(identity: identity); api.recordsRequests = false
       let app = QFAppSession(api: api, identity: identity,
         keychain: QFKeychainStore(service: "com.talka.qiafanyoupu.sandbox-check.session"))
+      app.membership.purchaseDiagnostic = { event in
+        result["purchaseSDKStage"] = event
+        result["applicationState"] = UIApplication.shared.applicationState.rawValue
+        result["sceneState"] = window.windowScene?.activationState.rawValue
+        result["isKeyWindow"] = window.isKeyWindow
+        result["windowHidden"] = window.isHidden
+        result["rootAttached"] = window.rootViewController?.viewIfLoaded?.window === window
+        write(event)
+      }
       await app.start()
       if app.user?.userId != request.expectedUserID {
         try await app.login(account: request.account, password: request.password, agreementAccepted: true)
@@ -407,8 +416,14 @@ enum QFMembershipSandboxCheck {
       try await waitForIdle(app, seconds: 45)
       result["catalog"] = app.membership.products.map { ["id": $0.id, "displayPrice": $0.displayPrice] }
       result["accessBefore"] = app.membership.hasBusinessAccess
+      result["canMakePayments"] = AppStore.canMakePayments
+      if let storefront = await Storefront.current {
+        result["storefrontCountry"] = storefront.countryCode
+      }
       guard !app.membership.hasProvidedAccess else { throw Failure.wrongAccount }
       if request.action == "purchase" {
+        write("WAITING_FOR_ACTIVE_FOREGROUND")
+        try await waitForForeground(window: window, page: page)
         guard app.membership.canPurchase,
           let product = app.membership.products.first(where: { $0.id == "com.talka.qiafanyoupu.core.monthly" })
         else { throw Failure.notReady }
@@ -417,6 +432,8 @@ enum QFMembershipSandboxCheck {
         app.membership.purchase(product)
         try await waitForIdle(app, seconds: 180)
       } else if request.action == "restore" {
+        write("WAITING_FOR_ACTIVE_FOREGROUND")
+        try await waitForForeground(window: window, page: page)
         write("RESTORING_FROM_APPLE")
         app.membership.restore()
         try await waitForIdle(app, seconds: 90)
@@ -451,6 +468,16 @@ enum QFMembershipSandboxCheck {
       if let error = error as? Failure { result["checkFailure"] = String(describing: error) }
       result["originalSessionUnchanged"] = (try? original.read("current")) == originalBytes
       write("CHECK_FAILED")
+    }
+  }
+
+  private static func waitForForeground(window: UIWindow, page: UIViewController) async throws {
+    let deadline = Date().addingTimeInterval(45)
+    while UIApplication.shared.applicationState != .active
+      || window.windowScene?.activationState != .foregroundActive
+      || !window.isKeyWindow || window.isHidden || page.viewIfLoaded?.window !== window {
+      guard Date() < deadline else { throw Failure.foregroundUnavailable }
+      try await Task.sleep(nanoseconds: 250_000_000)
     }
   }
 

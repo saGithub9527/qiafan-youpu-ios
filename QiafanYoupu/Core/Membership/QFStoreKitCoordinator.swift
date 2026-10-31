@@ -12,6 +12,9 @@ final class QFStoreKitCoordinator: ObservableObject {
   @Published private(set) var isBusy = false
   @Published private(set) var issue: Issue?
   @Published private(set) var accessRevision = 0
+  #if DEBUG
+  var purchaseDiagnostic: ((String) -> Void)?
+  #endif
 
   private weak var app: QFAppSession?
   private var binding: QFMembershipBinding?
@@ -115,10 +118,19 @@ final class QFStoreKitCoordinator: ObservableObject {
   func purchase(_ product: Product) {
     guard canPurchase, let binding, let context,
       products.contains(where: { $0.id == product.id }) else { return }
+    #if DEBUG
+    purchaseDiagnostic?("PURCHASE_ENQUEUED")
+    #endif
     enqueue { coordinator in
       try coordinator.check(binding)
       // This token comes from the signed-in service account, never a client-generated UUID.
+      #if DEBUG
+      coordinator.purchaseDiagnostic?("STOREKIT_PURCHASE_ENTERED")
+      #endif
       let result = try await product.purchase(options: [.appAccountToken(context.appAccountToken)])
+      #if DEBUG
+      coordinator.purchaseDiagnostic?("STOREKIT_PURCHASE_RETURNED")
+      #endif
       try coordinator.check(binding)
       switch result {
       case .success(let verification):
@@ -155,6 +167,10 @@ final class QFStoreKitCoordinator: ObservableObject {
       catch is CancellationError { }
       catch {
         guard self.binding == expected else { return }
+        #if DEBUG
+        let failure = error as NSError
+        self.purchaseDiagnostic?("ERROR_\(failure.domain)_\(failure.code)")
+        #endif
         self.handle(error)
       }
       guard self.operationID == id else { return }
