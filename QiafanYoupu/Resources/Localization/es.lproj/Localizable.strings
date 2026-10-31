@@ -1522,3 +1522,10 @@
 "计划、库存、采购单和提醒会使用同一范围。" = "Los planes, el inventario, las listas de compras y los recordatorios usan el mismo ámbito.";
 
 "菜谱、饮食计划、食材库存、账号云端同步和基础家庭协作。" = "Recetas, planes de comidas, inventario de ingredientes, sincronización de la cuenta en la nube y funciones básicas para el hogar.";
+
+"账号密码登录" = "Iniciar sesión con una cuenta";
+"账号密码登录暂未开放。" = "El inicio de sesión con cuenta aún no está disponible.";
+"请输入已绑定的账号和8–128位密码。" = "Introduce tu cuenta vinculada y una contraseña de 8 a 128 caracteres.";
+"账号或密码不正确，请重新输入。" = "La cuenta o la contraseña son incorrectas. Inténtalo de nuevo.";
+"已绑定的账号" = "Cuenta vinculada";
+"密码" = "Contraseña";

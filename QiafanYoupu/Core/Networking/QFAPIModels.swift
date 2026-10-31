@@ -25,6 +25,7 @@ struct QFServerConfig: Codable, Equatable {
   struct LoginMethods: Codable, Equatable {
     let quick: Bool
     let apple: Bool
+    var password: Bool? = nil
   }
   struct Agreements: Codable, Equatable {
     let userAgreement: String?
@@ -178,6 +179,11 @@ struct QFQuickLoginBody: Encodable {
 struct QFAppleLoginBody: Encodable {
   let authorizationCode: String
   let deviceCredential: String
+  let agreementAccepted: Bool
+}
+struct QFPasswordLoginBody: Encodable {
+  let account: String
+  let password: String
   let agreementAccepted: Bool
 }
 struct QFRefreshBody: Encodable { let refreshToken: String }

@@ -5,7 +5,7 @@ import UIKit
 
 @MainActor
 final class QFLoginViewController: UIViewController {
-  private enum LoginMethod { case quick, apple }
+  private enum LoginMethod { case quick, apple, password }
   private let app: QFAppSession
   private let onClose: () -> Void
   private lazy var appleAuthorization = QFAppleAuthorization(app: app)
@@ -22,6 +22,11 @@ final class QFLoginViewController: UIViewController {
     authorizationButtonType: .signIn,
     authorizationButtonStyle: QFThemeManager.shared.current == .dark ? .white : .black)
   private let appleStatusRow = UIView()
+  private lazy var passwordButton = QFAuthLoadingButton(app.text("账号密码登录", "Sign in with account"),
+    background: QFUI.surface, textColor: QFUI.green, size: 17)
+  private let passwordFields = UIStackView()
+  private let accountField = UITextField()
+  private let passwordField = UITextField()
   private let appleSpinner = UIActivityIndicatorView(style: .medium)
   private let appleStatus = UILabel()
   private lazy var retryButton = QFAuthLoadingButton(app.text("重试加载启动配置", "Retry loading configuration"), background: .clear, textColor: QFUI.green, size: 14)
@@ -133,7 +138,7 @@ final class QFLoginViewController: UIViewController {
     scroll.snp.makeConstraints {
       $0.top.equalTo(closeButton.snp.bottom).offset(12)
       $0.leading.trailing.equalToSuperview()
-      $0.bottom.equalToSuperview().inset(12)
+      $0.bottom.equalTo(view.keyboardLayoutGuide.snp.top).offset(-12)
     }
     stack.axis = .vertical
     stack.spacing = 0
@@ -157,6 +162,32 @@ final class QFLoginViewController: UIViewController {
     loginButtons.spacing = 16
     loginButtons.addArrangedSubview(quickButton)
     loginButtons.addArrangedSubview(appleButton)
+    passwordFields.axis = .vertical
+    passwordFields.spacing = 12
+    for field in [accountField, passwordField] {
+      field.borderStyle = .roundedRect
+      field.font = .preferredFont(forTextStyle: .body)
+      field.adjustsFontForContentSizeCategory = true
+      field.autocorrectionType = .no
+      field.autocapitalizationType = .none
+      field.spellCheckingType = .no
+      field.snp.makeConstraints { $0.height.greaterThanOrEqualTo(52) }
+      passwordFields.addArrangedSubview(field)
+    }
+    accountField.textContentType = .username
+    accountField.keyboardType = .asciiCapable
+    accountField.returnKeyType = .next
+    accountField.accessibilityIdentifier = "login.account"
+    passwordField.textContentType = .password
+    passwordField.isSecureTextEntry = true
+    passwordField.returnKeyType = .go
+    passwordField.accessibilityIdentifier = "login.password"
+    passwordFields.isHidden = true
+    loginButtons.addArrangedSubview(passwordFields)
+    loginButtons.addArrangedSubview(passwordButton)
+    passwordButton.snp.makeConstraints { $0.height.equalTo(52) }
+    passwordButton.accessibilityIdentifier = "login.password.submit"
+    scroll.keyboardDismissMode = .interactive
     quickButton.snp.makeConstraints { $0.height.equalTo(55) }
     appleButton.snp.makeConstraints { $0.height.equalTo(55) }
     appleButton.cornerRadius = 8
@@ -201,6 +232,9 @@ final class QFLoginViewController: UIViewController {
     }, for: .touchUpInside)
     quickButton.addAction(UIAction { [weak self] _ in self?.requestLogin(.quick) }, for: .touchUpInside)
     appleButton.addAction(UIAction { [weak self] _ in self?.requestLogin(.apple) }, for: .touchUpInside)
+    passwordButton.addAction(UIAction { [weak self] _ in self?.requestPasswordLogin() }, for: .touchUpInside)
+    accountField.addAction(UIAction { [weak self] _ in self?.passwordField.becomeFirstResponder() }, for: .editingDidEndOnExit)
+    passwordField.addAction(UIAction { [weak self] _ in self?.requestPasswordLogin() }, for: .editingDidEndOnExit)
     retryButton.addAction(UIAction { [weak self] _ in self?.retryConfiguration() }, for: .touchUpInside)
     agreement.onCheckedChange = { [weak self] checked in self?.setAgreement(checked) }
     agreement.onReadDocument = { [weak self] document in
@@ -226,6 +260,12 @@ final class QFLoginViewController: UIViewController {
   private func updateButtons() {
     guard isViewLoaded else { return }
     quickButton.setLoading(activeMethod == .quick)
+    passwordButton.setLoading(activeMethod == .password)
+    passwordButton.isHidden = app.configuration?.loginMethods.password != true
+    if passwordButton.isHidden { passwordFields.isHidden = true }
+    passwordButton.isEnabled = !interactionBlocked
+    accountField.isEnabled = !interactionBlocked
+    passwordField.isEnabled = !interactionBlocked
     retryButton.setLoading(retryingConfiguration)
     quickButton.isEnabled = !interactionBlocked
     appleButton.isEnabled = !interactionBlocked && app.loginAvailability(apple: true) == nil
@@ -313,6 +353,27 @@ final class QFLoginViewController: UIViewController {
     present(notice, animated: false)
   }
 
+  private func requestPasswordLogin() {
+    guard !closed, !interactionBlocked, presentedViewController == nil,
+          app.configuration?.loginMethods.password == true else { return }
+    if passwordFields.isHidden {
+      passwordFields.isHidden = false
+      view.layoutIfNeeded()
+      accountField.becomeFirstResponder()
+      scroll.scrollRectToVisible(passwordButton.convert(passwordButton.bounds, to: scroll), animated: true)
+      return
+    }
+    let account = (accountField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+    guard account.range(of: "^[A-Za-z0-9_]{1,64}$", options: .regularExpression) != nil,
+          !account.lowercased().hasPrefix("sys_"), let password = passwordField.text,
+          (8...128).contains(password.utf16.count) else {
+      showError(app.text("请输入已绑定的账号和8–128位密码。", "Enter your linked account and an 8–128 character password."))
+      return
+    }
+    view.endEditing(true)
+    requestLogin(.password)
+  }
+
   private func retryConfiguration() {
     guard !closed, !interactionBlocked else { return }
     retryingConfiguration = true
@@ -328,7 +389,7 @@ final class QFLoginViewController: UIViewController {
 
   private func beginLogin(_ method: LoginMethod) {
     guard !closed, agreementChecked, !interactionBlocked else { return }
-    if app.loginAvailability(apple: method == .apple) != nil {
+    if app.loginAvailability(apple: method == .apple, password: method == .password) != nil {
       showError(app.configurationError != nil ? app.text("登录信息加载失败，请重试", "Sign-in information failed to load. Please retry.")
         : (method == .apple ? app.text("Apple 登录暂不可用", "Sign in with Apple is unavailable") : app.text("暂时无法完成登录，请稍后重试。", "Sign in is temporarily unavailable. Please try again later.")))
       return
@@ -337,6 +398,8 @@ final class QFLoginViewController: UIViewController {
     authorizingApple = method == .apple
     updateButtons()
     let consent = agreementChecked
+    let account = method == .password ? accountField.text : nil
+    let password = method == .password ? passwordField.text : nil
     loginTask = Task { [weak self, app, appleAuthorization] in
       defer {
         self?.activeMethod = nil
@@ -349,9 +412,10 @@ final class QFLoginViewController: UIViewController {
         self?.authorizingApple = false
         self?.updateButtons()
         try Task.checkCancellation()
-        try await app.login(authorizationCode: code, agreementAccepted: consent)
+        try await app.login(authorizationCode: code, account: account, password: password, agreementAccepted: consent)
         try Task.checkCancellation()
         guard let self, !self.closed else { return }
+        self.passwordField.text = nil
         self.closed = true
         self.onClose()
       } catch is CancellationError {
@@ -362,6 +426,10 @@ final class QFLoginViewController: UIViewController {
         guard !Task.isCancelled else { return }
         if (error as? QFAPIError)?.code == 40301 { self?.setAgreement(false) }
         guard let self else { return }
+        if method == .password, (error as? QFAPIError)?.code == 40100 {
+          self.showError(app.text("账号或密码不正确，请重新输入。", "The account or password is incorrect. Please try again."))
+          return
+        }
         self.showError(QFLoginFailureMessage.message(
           for: error, authorizingApple: self.authorizingApple, appleLogin: method == .apple,
           app: app))
@@ -381,6 +449,11 @@ final class QFLoginViewController: UIViewController {
     brand.text = app.text("恰饭有谱", "Qiafan Youpu")
     tagline.text = app.text("收藏世界风味，记录每一餐", "Save flavors from around the world and remember every meal")
     quickButton.setTitle(app.text("快速登录", "Quick sign in"))
+    passwordButton.setTitle(app.text("账号密码登录", "Sign in with account"))
+    accountField.placeholder = app.text("已绑定的账号", "Linked account")
+    accountField.accessibilityLabel = accountField.placeholder
+    passwordField.placeholder = app.text("密码", "Password")
+    passwordField.accessibilityLabel = passwordField.placeholder
     retryButton.setTitle(app.text("重试加载启动配置", "Retry loading configuration"))
     closeButton.accessibilityLabel = app.text("关闭登录", "Close sign in")
   }

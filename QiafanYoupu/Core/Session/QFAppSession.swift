@@ -266,7 +266,7 @@ final class QFAppSession: ObservableObject {
     }
   }
 
-  func loginAvailability(apple: Bool) -> String? {
+  func loginAvailability(apple: Bool, password: Bool = false) -> String? {
     guard !isLoggingOut else { return text("正在退出登录，请稍候。", "Signing out. Please wait.") }
     guard !loadingConfiguration else { return text("正在获取启动配置，请稍候。", "Loading app configuration. Please wait.") }
     guard let configuration else {
@@ -277,6 +277,10 @@ final class QFAppSession: ObservableObject {
         "用户协议与隐私政策尚未配置，暂时无法登录。",
         "The Terms of Service and Privacy Policy are not configured, so sign-in is temporarily unavailable.")
     }
+    if password {
+      return configuration.loginMethods.password == true ? nil
+        : text("账号密码登录暂未开放。", "Account sign-in is not available yet.")
+    }
     guard apple ? configuration.loginMethods.apple : configuration.loginMethods.quick else {
       return apple
         ? text("Apple 登录暂未开放。", "Sign in with Apple is not available yet.")
@@ -285,11 +289,15 @@ final class QFAppSession: ObservableObject {
     return nil
   }
 
-  func login(authorizationCode: String? = nil, agreementAccepted: Bool) async throws {
+  func login(authorizationCode: String? = nil, account: String? = nil, password: String? = nil,
+             agreementAccepted: Bool) async throws {
     guard !isLoggingIn, !isLoggingOut else {
       throw QFAPIError(code: 40900, message: text("登录状态正在更新，请稍候。", "The sign-in state is updating. Please wait."))
     }
-    if let reason = loginAvailability(apple: authorizationCode != nil) {
+    guard (account == nil) == (password == nil), authorizationCode == nil || account == nil else {
+      throw QFAPIError(code: 40000, message: "Invalid sign-in method")
+    }
+    if let reason = loginAvailability(apple: authorizationCode != nil, password: account != nil) {
       throw QFAPIError(code: 50300, message: reason)
     }
     guard agreementAccepted else {
@@ -301,9 +309,12 @@ final class QFAppSession: ObservableObject {
     }
     isLoggingIn = true
     defer { isLoggingIn = false }
+    let loginEnvironment = api.environment.name
+    let loginGeneration = generation
     let credential: String
     do {
-      credential = try identity.credential(environment: api.environment.name)
+      // Password sign-in has its own server session; keep this installation's quick account intact.
+      credential = account == nil ? try identity.credential(environment: api.environment.name) : ""
     } catch QFCredentialError.invalidStoredCredential {
       throw QFAPIError(
         code: 40101,
@@ -320,7 +331,12 @@ final class QFAppSession: ObservableObject {
     let operationID = UUID()
     let body: Data
     let path: String
-    if let authorizationCode {
+    if let account, let password {
+      path = "auth/password/sessions"
+      body = try JSONEncoder().encode(QFPasswordLoginBody(
+        account: account.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+        password: password, agreementAccepted: true))
+    } else if let authorizationCode {
       path = "auth/apple/sessions"
       body = try JSONEncoder().encode(
         QFAppleLoginBody(
@@ -334,7 +350,8 @@ final class QFAppSession: ObservableObject {
     // One tap, one login request. There is no challenge call or automatic POST retry.
     let result: QFLoginResult = try await api.send(
       path: path, method: "POST", body: body, operationID: operationID)
-    guard !Task.isCancelled else { throw CancellationError() }
+    guard !Task.isCancelled, loginEnvironment == api.environment.name,
+          loginGeneration == generation else { throw CancellationError() }
     try persist(result.session, user: result.user)
     generation += 1
     membership.reset()
