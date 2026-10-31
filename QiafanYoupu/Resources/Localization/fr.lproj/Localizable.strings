@@ -1529,3 +1529,6 @@
 "账号或密码不正确，请重新输入。" = "Le compte ou le mot de passe est incorrect. Réessayez.";
 "已绑定的账号" = "Compte associé";
 "密码" = "Mot de passe";
+
+"已获赠使用权益" = "Accès offert activé";
+"当前账号已获赠使用权益，没有产生订阅扣费。你仍可查看下方订阅方案。" = "Ce compte bénéficie d’un accès offert, sans facturation d’abonnement. Vous pouvez consulter les formules ci-dessous.";

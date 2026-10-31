@@ -2729,6 +2729,12 @@
         "In stock"
       ]
     },
+    "密码": {
+      "english": "Password",
+      "englishVariants": [
+        "Password"
+      ]
+    },
     "对准食材包装上的条形码\n可连续添加，最后统一核对入库": {
       "english": "Point at the barcode on the food package\nAdd multiple items, then review them together",
       "englishVariants": [
@@ -3054,10 +3060,22 @@
         "Linked"
       ]
     },
+    "已绑定的账号": {
+      "english": "Linked account",
+      "englishVariants": [
+        "Linked account"
+      ]
+    },
     "已联网获取商品资料，请与包装核对。": {
       "english": "Product data retrieved online. Check it against the package.",
       "englishVariants": [
         "Product data retrieved online. Check it against the package."
+      ]
+    },
+    "已获赠使用权益": {
+      "english": "Complimentary access active",
+      "englishVariants": [
+        "Complimentary access active"
       ]
     },
     "已被新采购单替代": {
@@ -3425,6 +3443,12 @@
       "english": "Recipe ingredients are not available in this language yet.",
       "englishVariants": [
         "Recipe ingredients are not available in this language yet."
+      ]
+    },
+    "当前账号已获赠使用权益，没有产生订阅扣费。你仍可查看下方订阅方案。": {
+      "english": "This account has complimentary access and has not been charged for a subscription. You can still view the plans below.",
+      "englishVariants": [
+        "This account has complimentary access and has not been charged for a subscription. You can still view the plans below."
       ]
     },
     "当前账号无权执行此操作。": {
@@ -7875,6 +7899,12 @@
         "Enter a household name."
       ]
     },
+    "请输入已绑定的账号和8–128位密码。": {
+      "english": "Enter your linked account and an 8–128 character password.",
+      "englishVariants": [
+        "Enter your linked account and an 8–128 character password."
+      ]
+    },
     "请输入数量": {
       "english": "Enter quantity",
       "englishVariants": [
@@ -8097,6 +8127,18 @@
         "Account information"
       ]
     },
+    "账号密码登录": {
+      "english": "Sign in with account",
+      "englishVariants": [
+        "Sign in with account"
+      ]
+    },
+    "账号密码登录暂未开放。": {
+      "english": "Account sign-in is not available yet.",
+      "englishVariants": [
+        "Account sign-in is not available yet."
+      ]
+    },
     "账号已注销": {
       "english": "Account deleted",
       "englishVariants": [
@@ -8119,6 +8161,12 @@
       "english": "The account is already bound and cannot be bound again.",
       "englishVariants": [
         "The account is already bound and cannot be bound again."
+      ]
+    },
+    "账号或密码不正确，请重新输入。": {
+      "english": "The account or password is incorrect. Please try again.",
+      "englishVariants": [
+        "The account or password is incorrect. Please try again."
       ]
     },
     "账号绑定后不可修改。": {

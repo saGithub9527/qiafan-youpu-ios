@@ -23,8 +23,20 @@ struct QFMembershipStatus: Decodable, Equatable, Sendable {
   let accessEntitlements: [String]?
   /// Only transaction sync attaches this committed, transaction-specific receipt.
   let acceptedTransaction: QFAppleAcceptedTransaction?
+  /// Provided account access is independent of Apple payment history.
+  let complimentaryAccess: QFComplimentaryAccess?
 
   var isTestAccess: Bool { benefitsActive == true && entitlementSource == "TEST" }
+}
+
+struct QFComplimentaryAccess: Decodable, Equatable, Sendable {
+  let contractVersion: String
+  let source: String
+  let revision: Int64
+  let serverTime: String
+  let expiresAt: String
+  let leaseUntil: String
+  let entitlements: [String]
 }
 
 struct QFAppleAcceptedTransaction: Decodable, Equatable, Sendable {

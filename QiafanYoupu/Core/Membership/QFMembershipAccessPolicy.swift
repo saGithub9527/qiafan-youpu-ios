@@ -80,12 +80,36 @@ struct QFMembershipVerifiedSnapshot: Equatable {
 
   var hasOrbSpeech: Bool { status.accessEntitlements?.contains("ORB_PROACTIVE_SPEECH") == true }
 
-  private static func date(_ value: String?) -> Date? {
+  fileprivate static func date(_ value: String?) -> Date? {
     guard let value else { return nil }
     let formatter = ISO8601DateFormatter()
     formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
     if let date = formatter.date(from: value) { return date }
     formatter.formatOptions = [.withInternetDateTime]
     return formatter.date(from: value)
+  }
+}
+
+/// Authenticated, same-account in-memory lease. Never accepted as an Apple receipt.
+struct QFComplimentaryAccessSnapshot {
+  let binding: QFMembershipBinding
+  let receivedUptime: TimeInterval
+  let deadline: TimeInterval
+
+  init?(access: QFComplimentaryAccess?, binding: QFMembershipBinding,
+        receivedUptime: TimeInterval, requestDuration: TimeInterval) {
+    guard let access, access.contractVersion == "provided-access-v1", access.source == "PROVIDED",
+      access.revision >= 1, access.entitlements == ["CORE_COOKING"],
+      let now = QFMembershipVerifiedSnapshot.date(access.serverTime),
+      let expires = QFMembershipVerifiedSnapshot.date(access.expiresAt),
+      let lease = QFMembershipVerifiedSnapshot.date(access.leaseUntil), lease <= expires,
+      receivedUptime.isFinite, requestDuration.isFinite, requestDuration >= 0 else { return nil }
+    let remaining = min(60, lease.timeIntervalSince(now)) - requestDuration
+    guard remaining > 0 else { return nil }
+    self.binding = binding; self.receivedUptime = receivedUptime; self.deadline = receivedUptime + remaining
+  }
+
+  func allowsAccess(for binding: QFMembershipBinding, at uptime: TimeInterval, offline: Bool) -> Bool {
+    self.binding == binding && !offline && uptime.isFinite && uptime >= receivedUptime && uptime < deadline
   }
 }

@@ -1529,3 +1529,6 @@
 "账号或密码不正确，请重新输入。" = "La cuenta o la contraseña son incorrectas. Inténtalo de nuevo.";
 "已绑定的账号" = "Cuenta vinculada";
 "密码" = "Contraseña";
+
+"已获赠使用权益" = "Acceso gratuito activo";
+"当前账号已获赠使用权益，没有产生订阅扣费。你仍可查看下方订阅方案。" = "Esta cuenta tiene acceso gratuito y no se le ha cobrado una suscripción. Puedes consultar los planes a continuación.";

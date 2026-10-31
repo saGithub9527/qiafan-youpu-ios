@@ -4,6 +4,35 @@ import XCTest
 final class QFMembershipAccessPolicyTests: XCTestCase {
   private let binding = QFMembershipBinding(scope: "production/account-a", generation: 7)
 
+  func testProvidedAccessIsShortLivedAndCannotCrossAccountsOrWorkOffline() throws {
+    let access = QFComplimentaryAccess(contractVersion: "provided-access-v1", source: "PROVIDED", revision: 1,
+      serverTime: "2026-01-01T00:00:00Z", expiresAt: "2026-02-01T00:00:00Z",
+      leaseUntil: "2026-01-01T00:01:00Z", entitlements: ["CORE_COOKING"])
+    let snapshot = try XCTUnwrap(QFComplimentaryAccessSnapshot(access: access, binding: binding,
+      receivedUptime: 100, requestDuration: 3))
+    XCTAssertTrue(snapshot.allowsAccess(for: binding, at: 156.9, offline: false))
+    XCTAssertFalse(snapshot.allowsAccess(for: binding, at: 157, offline: false))
+    XCTAssertFalse(snapshot.allowsAccess(for: binding, at: 101, offline: true))
+    XCTAssertFalse(snapshot.allowsAccess(for: binding, at: 99, offline: false))
+    XCTAssertFalse(snapshot.allowsAccess(for: .init(scope: "production/account-b", generation: 7), at: 101, offline: false))
+    XCTAssertFalse(snapshot.allowsAccess(for: .init(scope: binding.scope, generation: 8), at: 101, offline: false))
+  }
+
+  func testProvidedAccessCannotBecomeAppleProofAndRejectsTestFlags() throws {
+    for source in ["TEST", "APPLE_PRODUCTION", "PROVIDED"] {
+      let access = QFComplimentaryAccess(contractVersion: "provided-access-v1", source: source, revision: 1,
+        serverTime: "2026-01-01T00:00:00Z", expiresAt: "2026-01-01T00:00:20Z",
+        leaseUntil: "2026-01-01T00:01:00Z", entitlements: ["CORE_COOKING"])
+      XCTAssertNil(QFComplimentaryAccessSnapshot(access: access, binding: binding, receivedUptime: 100, requestDuration: 0))
+    }
+    let providedOnly = try status(["accessState":"NONE", "accessSource":"NONE", "complimentaryAccess":[
+      "contractVersion":"provided-access-v1", "source":"PROVIDED", "revision":1,
+      "serverTime":"2026-01-01T00:00:00Z", "expiresAt":"2026-02-01T00:00:00Z",
+      "leaseUntil":"2026-01-01T00:01:00Z", "entitlements":["CORE_COOKING"]]])
+    XCTAssertNil(QFMembershipVerifiedSnapshot(status: providedOnly, binding: binding, receivedUptime: 100))
+    XCTAssertNotNil(QFComplimentaryAccessSnapshot(access: providedOnly.complimentaryAccess, binding: binding, receivedUptime: 100, requestDuration: 0))
+  }
+
   func testRevocationWithTheCurrentAccountTokenMatchesOnlyItsConfiguredProducts() {
     let token = UUID()
     let context = QFMembershipPurchaseContext(contractVersion: "core-subscription-v2",

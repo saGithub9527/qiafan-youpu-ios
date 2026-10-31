@@ -17,6 +17,7 @@ final class QFStoreKitCoordinator: ObservableObject {
   private var binding: QFMembershipBinding?
   private var context: QFMembershipPurchaseContext?
   private var snapshot: QFMembershipVerifiedSnapshot?
+  private var complimentary: QFComplimentaryAccessSnapshot?
   private var offline = false
   private var recoveredLocalTransactions = false
   private var pendingPurchase = false
@@ -33,11 +34,22 @@ final class QFStoreKitCoordinator: ObservableObject {
   deinit { listener?.cancel(); operation?.cancel(); expiry?.cancel() }
 
   var hasBusinessAccess: Bool {
-    guard let app, app.user != nil, let snapshot else { return false }
-    return snapshot.allowsAccess(for: app.membershipBinding,
-      at: QFMembershipMonotonicClock.now, offline: offline)
+    hasAppleAccess || hasProvidedAccess
   }
-  var hasOrbSpeech: Bool { hasBusinessAccess && snapshot?.hasOrbSpeech == true }
+  private var hasAppleAccess: Bool {
+    guard let app, app.user != nil else { return false }
+    return snapshot?.allowsAccess(for: app.membershipBinding,
+      at: QFMembershipMonotonicClock.now, offline: offline) == true
+  }
+  var hasProvidedAccess: Bool {
+    guard let app, app.user != nil else { return false }
+    return complimentary?.allowsAccess(for: app.membershipBinding,
+      at: QFMembershipMonotonicClock.now, offline: offline) == true
+  }
+  var isComplimentaryOnly: Bool {
+    hasProvidedAccess && !hasAppleAccess
+  }
+  var hasOrbSpeech: Bool { hasAppleAccess && snapshot?.hasOrbSpeech == true }
   var canPurchase: Bool {
     guard !isBusy, issue == nil, !pendingPurchase, recoveredLocalTransactions,
       context != nil, products.count == 2, !hasBusinessAccess else { return false }
@@ -74,7 +86,7 @@ final class QFStoreKitCoordinator: ObservableObject {
     listener?.cancel(); listener = nil
     operation?.cancel(); operation = nil; operationID = nil
     expiry?.cancel(); expiry = nil
-    binding = nil; context = nil; snapshot = nil; offline = false
+    binding = nil; context = nil; snapshot = nil; complimentary = nil; offline = false
     confirmedOriginalChains.removeAll()
     pendingUpdateKeys.removeAll()
     status = nil; products = []; recoveredLocalTransactions = false
@@ -89,8 +101,8 @@ final class QFStoreKitCoordinator: ObservableObject {
   }
 
   func foreground() {
-    if snapshot != nil, !hasBusinessAccess {
-      snapshot = nil; expiry?.cancel(); expiry = nil; accessRevision += 1
+    if (snapshot != nil || complimentary != nil), !hasBusinessAccess {
+      snapshot = nil; complimentary = nil; expiry?.cancel(); expiry = nil; accessRevision += 1
     }
     refresh()
   }
@@ -122,7 +134,7 @@ final class QFStoreKitCoordinator: ObservableObject {
   /// A direct business 403 is authoritative now; an old cached snapshot cannot override it.
   func rejectBusinessAccess() {
     accessEpoch += 1
-    snapshot = nil; recoveredLocalTransactions = false
+    snapshot = nil; complimentary = nil; recoveredLocalTransactions = false
     expiry?.cancel(); expiry = nil; issue = .unavailable; accessRevision += 1
     guard let expected = binding, !authorizationRefreshQueued else { return }
     authorizationRefreshQueued = true
@@ -180,7 +192,7 @@ final class QFStoreKitCoordinator: ObservableObject {
     if !processed.isEmpty || QFMembershipAccessPhase(status: initial) == .unknown {
       _ = try await readStatus(binding)
     }
-    guard QFMembershipAccessPhase(status: status) != .unknown else { throw Failure.unavailable }
+    guard QFMembershipAccessPhase(status: status) != .unknown || hasProvidedAccess else { throw Failure.unavailable }
     recoveredLocalTransactions = true
     // Closing new sales must not prevent a subscriber from recovering a paid chain.
     let purchaseContext: QFMembershipPurchaseContext
@@ -275,7 +287,7 @@ final class QFStoreKitCoordinator: ObservableObject {
     // This runs immediately in the updates listener, before waiting for a slow
     // purchase/restore operation. A foreign account's old transaction cannot do it.
     accessEpoch += 1
-    snapshot = nil; expiry?.cancel(); expiry = nil; accessRevision += 1
+    snapshot = nil; scheduleExpiry(); accessRevision += 1
   }
 
   private static func identity(_ transaction: Transaction) -> QFAppleTransactionIdentity {
@@ -295,15 +307,23 @@ final class QFStoreKitCoordinator: ObservableObject {
     status = value; offline = false
     snapshot = QFMembershipVerifiedSnapshot(status: value, binding: binding,
       receivedUptime: now, requestDuration: max(0, now - startedAt))
+    complimentary = QFComplimentaryAccessSnapshot(access: value.complimentaryAccess, binding: binding,
+      receivedUptime: now, requestDuration: max(0, now - startedAt))
     accessRevision += 1
     scheduleExpiry()
   }
 
   private func scheduleExpiry() {
     expiry?.cancel(); expiry = nil
-    guard let snapshot, let expected = binding else { return }
-    let deadline = offline ? (snapshot.offlineDeadline ?? snapshot.receivedUptime) : snapshot.onlineDeadline
-    let delay = max(0, deadline - QFMembershipMonotonicClock.now)
+    guard let expected = binding else { return }
+    var deadlines: [TimeInterval] = []
+    if let snapshot { deadlines.append(offline ? (snapshot.offlineDeadline ?? snapshot.receivedUptime) : snapshot.onlineDeadline) }
+    if !offline, let complimentary { deadlines.append(complimentary.deadline) }
+    guard let deadline = deadlines.max() else { return }
+    let remaining = max(0, deadline - QFMembershipMonotonicClock.now)
+    // Renew a provided lease before it ends; the business page must not flash
+    // a paywall on every successful minute-long review-account refresh.
+    let delay = hasProvidedAccess && !hasAppleAccess && remaining > 10 ? remaining - 5 : remaining
     guard delay > 0 else { return }
     expiry = Task { [weak self] in
       do { try await Task.sleep(nanoseconds: UInt64(min(900, delay) * 1_000_000_000)) }
@@ -324,6 +344,9 @@ final class QFStoreKitCoordinator: ObservableObject {
     // A server refusal/UNKNOWN never becomes permission to buy or to keep stale access.
     let transport = error is URLError
     offline = transport
+    if transport || [40100, 40300, 40301].contains((error as? QFAPIError)?.code ?? 0) {
+      complimentary = nil
+    }
     if !transport || snapshot?.allowsAccess(for: binding ?? QFMembershipBinding(scope: "", generation: -1),
       at: QFMembershipMonotonicClock.now, offline: true) != true { snapshot = nil }
     scheduleExpiry(); accessRevision += 1

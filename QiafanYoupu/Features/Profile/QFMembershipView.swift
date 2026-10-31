@@ -73,7 +73,10 @@ final class QFMembershipViewController: UIViewController {
     for child in stack.arrangedSubviews { stack.removeArrangedSubview(child); child.removeFromSuperview() }
     let heading: String
     let detail: String
-    if membership.hasBusinessAccess {
+    if membership.isComplimentaryOnly {
+      heading = app.text("已获赠使用权益", "Complimentary access active")
+      detail = app.text("当前账号已获赠使用权益，没有产生订阅扣费。你仍可查看下方订阅方案。", "This account has complimentary access and has not been charged for a subscription. You can still view the plans below.")
+    } else if membership.hasBusinessAccess {
       heading = app.text("会员订阅已生效", "Membership active")
       detail = app.text("当前权益已由服务器确认。", "Your current benefits are confirmed by the server.")
     } else if let issue = membership.issue {

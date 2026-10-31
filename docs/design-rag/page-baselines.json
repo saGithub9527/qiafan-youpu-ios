@@ -10,6 +10,58 @@
   ],
   "pages": [
     {
+      "id": "overseas-subscription-r5",
+      "productPage": "APP-ENTRY-ASSISTANT-MEMBERSHIP",
+      "title": "订阅审核账号的明确赠送访问权益",
+      "keywords": [
+        "订阅",
+        "2.99",
+        "AI屏蔽",
+        "会员",
+        "进入APP",
+        "恢复购买",
+        "审核账号",
+        "订阅内容",
+        "价格周期",
+        "账号密码",
+        "登录",
+        "赠送权益",
+        "账号权限"
+      ],
+      "sources": [
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/overseas-subscription-r3.md",
+          "sha256": "48026be598aa8d5a34edb518a1364ac340b71f0ef9ef65aed052f93d9f06b687"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/overseas-subscription-r4.md",
+          "sha256": "5e4577f1d149c3835d3dae9606da2acee3009a5e2adae7cc8f0c04b90b52afdc"
+        },
+        {
+          "path": "../../恰饭有谱/客户端/qiafan-youpu-ios/docs/design-rag/contracts/overseas-subscription-r5.md",
+          "sha256": "64f1b8ef154ca8c5c1a881eea572a10a014c1f76188782bc51ef6805d96629b3"
+        }
+      ],
+      "layoutContract": {
+        "nativeStack": "UIKit + SnapKit",
+        "existingBusinessPages": "unchanged",
+        "entryGate": "full-screen; no business skip",
+        "assistantUI": "hidden in Debug and Release"
+      },
+      "interactionContract": [
+        "Privacy/login precede same-account server-verified subscription gate.",
+        "US monthly2.99; StoreKit localized prices; preserve separately approved annual29.99 and restore.",
+        "Unknown is not unsubscribed; restore/manage/legal/support/account deletion remain accessible.",
+        "AI suspended without deleting model/chat/preferences/drafts; ordinary meal reminders preserved.",
+        "Membership entry, benefits, StoreKit prices/periods and renewal terms remain visible after access is granted.",
+        "Unlocked users inspect informational plan cards and manage/restore; separate non-subscribed identity exercises real sandbox purchase. No review-only switch.",
+        "Explicit server capability; normal account/password login, existing agreement, separate device slot, no account merge or entitlement bypass.",
+        "Account-provided access is disclosed separately from paid subscription; bounded 60-second same-account server lease, no offline permission; no duplicate purchase or fake receipt."
+      ],
+      "supersedes": "overseas-subscription-r4; adds explicit provided access without changing Apple receipt verification.",
+      "approvedException": "User 2026-10-31:保留US$2.99/月，提供已解锁审核账号，审核员还要能查看订阅内容。"
+    },
+    {
       "id": "overseas-subscription-r1",
       "productPage": "APP-ENTRY-ASSISTANT-MEMBERSHIP",
       "title": "海外订阅入口、可拖动浮球、主动语音与默认英语",
